@@ -1,5 +1,5 @@
 {
-  "name": "pimcore/pimcore",
+  "name": "nodeart/pimcore",
   "type": "library",
   "description": "Content & Product Management Framework (CMS/PIM/E-Commerce)",
   "keywords": [
@@ -174,7 +174,7 @@
     "symfony-tests-dir": "tests",
     "symfony-assets-install": "relative",
     "branch-alias": {
-      "dev-master": "7.0-dev"
+      "dev-master": "6.8.x-dev"
     }
   },
   "bin": ["bin/pimcore-install"]
