@@ -20,26 +20,15 @@ use Zend\Paginator\AdapterAggregateInterface;
 
 /**
  * @method Token[] load()
- * @method Token current()
  * @method int getTotalCount()
  * @method \Pimcore\Bundle\EcommerceFrameworkBundle\VoucherService\Token\Listing\Dao getDao()
  */
-class Listing extends \Pimcore\Model\Listing\AbstractListing implements AdapterInterface, AdapterAggregateInterface
+class Listing extends \Pimcore\Model\Listing\AbstractListing implements \Iterator, AdapterInterface, AdapterAggregateInterface
 {
-    /**
-     * @var Token[]|null
-     *
-     * @deprecated use getter/setter methods or $this->data
-     */
     public $tokens;
 
-    public function __construct()
-    {
-        $this->tokens = & $this->data;
-    }
-
     /**
-     * @param string $key
+     * @param  $key
      *
      * @return bool
      */
@@ -53,7 +42,7 @@ class Listing extends \Pimcore\Model\Listing\AbstractListing implements AdapterI
     }
 
     /**
-     * @param int|null $seriesId
+     * @param $seriesId
      * @param array $filter
      *
      * @throws \Exception
@@ -66,7 +55,7 @@ class Listing extends \Pimcore\Model\Listing\AbstractListing implements AdapterI
             throw new \Exception('Unable to load series tokens: no VoucherSeriesId given.', 100);
         }
 
-        if (count($filter)) {
+        if (sizeof($filter)) {
             if (!empty($filter['token'])) {
                 $this->addConditionParam('token LIKE ?', '%' . $filter['token'] . '%');
             }
@@ -120,7 +109,11 @@ class Listing extends \Pimcore\Model\Listing\AbstractListing implements AdapterI
      */
     public function getTokenList()
     {
-        return $this->getData();
+        if (empty($this->tokens)) {
+            $this->load();
+        }
+
+        return $this->tokens;
     }
 
     public static function getCodes($seriesId, $params)
@@ -212,8 +205,6 @@ class Listing extends \Pimcore\Model\Listing\AbstractListing implements AdapterI
     {
         $query = 'SELECT COUNT(t.id) FROM ' . \Pimcore\Bundle\EcommerceFrameworkBundle\VoucherService\Token\Dao::TABLE_NAME . ' as t
             INNER JOIN ' . \Pimcore\Bundle\EcommerceFrameworkBundle\VoucherService\Reservation\Dao::TABLE_NAME . ' as r ON t.token = r.token';
-        $params = [];
-
         if (isset($seriesId)) {
             $query .= ' WHERE voucherSeriesId = ?';
             $params[] = $seriesId;
@@ -228,7 +219,7 @@ class Listing extends \Pimcore\Model\Listing\AbstractListing implements AdapterI
     }
 
     /**
-     * @param int $length
+     * @param $length
      * @param null|string $seriesId
      *
      * @return null|string
@@ -302,10 +293,10 @@ class Listing extends \Pimcore\Model\Listing\AbstractListing implements AdapterI
             $queryParts[] = 't.timestamp < STR_TO_DATE(' . $param . ",'%Y-%m-%d')";
         }
 
-        if (count($queryParts) == 1) {
+        if (sizeof($queryParts) == 1) {
             $reservationsQuery = $reservationsQuery . ' AND ' . $queryParts[0];
             $tokensQuery = $tokensQuery . ' AND ' . $queryParts[0];
-        } elseif (count($queryParts) > 1) {
+        } elseif (sizeof($queryParts) > 1) {
             $reservationsQuery = $reservationsQuery . ' AND (' . implode(' AND ', $queryParts) . ')';
             $tokensQuery = $tokensQuery . ' AND (' . implode(' AND ', $queryParts) . ')';
         }
@@ -325,7 +316,7 @@ class Listing extends \Pimcore\Model\Listing\AbstractListing implements AdapterI
     }
 
     /**
-     * @param array|string $codes
+     * @param $codes
      *
      * @return bool
      */
@@ -349,19 +340,19 @@ class Listing extends \Pimcore\Model\Listing\AbstractListing implements AdapterI
     }
 
     /**
-     * @return array
+     * @return mixed
      */
     public function getTokens()
     {
-        return $this->getData();
+        return $this->tokens;
     }
 
     /**
-     * @param array $tokens
+     * @param mixed $tokens
      */
     public function setTokens($tokens)
     {
-        return $this->setData($tokens);
+        $this->tokens = $tokens;
     }
 
     /**
@@ -370,6 +361,64 @@ class Listing extends \Pimcore\Model\Listing\AbstractListing implements AdapterI
     public function getPaginatorAdapter()
     {
         return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function current()
+    {
+        $this->getTokens();
+        $var = current($this->tokens);
+
+        return $var;
+    }
+
+    /**
+     * @return mixed|void
+     */
+    public function next()
+    {
+        $this->getTokens();
+        $var = next($this->tokens);
+
+        return $var;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function key()
+    {
+        $this->getTOkens();
+        $var = key($this->tokens);
+
+        return $var;
+    }
+
+    /**
+     * @return bool
+     */
+    public function valid()
+    {
+        $this->getTokens();
+        $var = $this->current() !== false;
+
+        return $var;
+    }
+
+    /**
+     * (PHP 5 &gt;= 5.0.0)<br/>
+     * Rewind the Iterator to the first element
+     *
+     * @link http://php.net/manual/en/iterator.rewind.php
+     *
+     * @return void Any returned value is ignored.
+     */
+    public function rewind()
+    {
+        $this->getTokens();
+        reset($this->tokens);
     }
 
     /**

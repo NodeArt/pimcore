@@ -16,7 +16,6 @@ namespace Pimcore\Bundle\EcommerceFrameworkBundle\FilterService\FilterType\Findo
 
 use Pimcore\Bundle\EcommerceFrameworkBundle\IndexService\ProductList\ProductListInterface;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Model\AbstractFilterDefinitionType;
-use Pimcore\Model\DataObject\Fieldcollection\Data\FilterNumberRange;
 
 class NumberRange extends \Pimcore\Bundle\EcommerceFrameworkBundle\FilterService\FilterType\NumberRange
 {
@@ -25,15 +24,6 @@ class NumberRange extends \Pimcore\Bundle\EcommerceFrameworkBundle\FilterService
         //$productList->prepareGroupByValues($this->getField($filterDefinition), true);
     }
 
-    /**
-     * @param FilterNumberRange $filterDefinition
-     * @param ProductListInterface $productList
-     * @param array $currentFilter
-     *
-     * @return string
-     *
-     * @throws \Exception
-     */
     public function getFilterFrontend(AbstractFilterDefinitionType $filterDefinition, ProductListInterface $productList, $currentFilter)
     {
         $currentField = $this->getField($filterDefinition);
@@ -45,19 +35,19 @@ class NumberRange extends \Pimcore\Bundle\EcommerceFrameworkBundle\FilterService
                     'from' => $value['parameter']->min,
                     'to' => $value['parameter']->max,
                     'value' => $value['parameter']->min,
-                    'count' => 1,
+                    'count' => 1
                 ];
                 // add max
                 $values[] = [
                     'from' => $value['parameter']->min,
                     'to' => $value['parameter']->max,
                     'value' => $value['parameter']->max,
-                    'count' => 1,
+                    'count' => 1
                 ];
             } else {
                 $values[] = [
                     'value' => $value['value'],
-                    'count' => $value['count'],
+                    'count' => $value['count']
                 ];
             }
         }
@@ -69,23 +59,14 @@ class NumberRange extends \Pimcore\Bundle\EcommerceFrameworkBundle\FilterService
             'values' => $values,
             'definition' => $filterDefinition,
             'fieldname' => $this->getField($filterDefinition),
-            'resultCount' => $productList->count(),
+            'resultCount' => $productList->count()
         ]);
     }
 
-    /**
-     * @param FilterNumberRange $filterDefinition
-     * @param ProductListInterface $productList
-     * @param array $currentFilter
-     * @param array $params
-     * @param bool $isPrecondition
-     *
-     * @return array
-     */
     public function addCondition(AbstractFilterDefinitionType $filterDefinition, ProductListInterface $productList, $currentFilter, $params, $isPrecondition = false)
     {
         $field = $this->getField($filterDefinition);
-        $value = $params[$field] ?? null;
+        $value = $params[$field];
 
         if (empty($value)) {
             $value['from'] = $filterDefinition->getPreSelectFrom();

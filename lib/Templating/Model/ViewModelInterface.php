@@ -16,9 +16,6 @@ namespace Pimcore\Templating\Model;
 
 use Symfony\Component\HttpFoundation\ParameterBag;
 
-/**
- * @deprecated
- */
 interface ViewModelInterface extends \Countable, \IteratorAggregate, \ArrayAccess, \JsonSerializable
 {
     /**
@@ -32,7 +29,7 @@ interface ViewModelInterface extends \Countable, \IteratorAggregate, \ArrayAcces
      * @param string $key
      * @param mixed|null $default
      *
-     * @return mixed
+     * @return bool
      */
     public function get($key, $default = null);
 

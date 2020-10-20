@@ -19,14 +19,12 @@ namespace Pimcore\Model\DataObject\ClassDefinition\Data;
 use Pimcore\Model;
 use Pimcore\Model\DataObject\ClassDefinition\Data;
 
-class Input extends Data implements ResourcePersistenceAwareInterface, QueryResourcePersistenceAwareInterface, TypeDeclarationSupportInterface, EqualComparisonInterface
+class Input extends Data implements ResourcePersistenceAwareInterface, QueryResourcePersistenceAwareInterface
 {
-    use Model\DataObject\ClassDefinition\NullablePhpdocReturnTypeTrait;
     use Model\DataObject\ClassDefinition\Data\Extension\Text;
     use Model\DataObject\Traits\SimpleComparisonTrait;
     use Extension\ColumnType;
     use Extension\QueryColumnType;
-    use Model\DataObject\Traits\DefaultValueTrait;
 
     /**
      * Static type of this element
@@ -39,11 +37,6 @@ class Input extends Data implements ResourcePersistenceAwareInterface, QueryReso
      * @var int
      */
     public $width;
-
-    /**
-     * @var string|null
-     */
-    public $defaultValue;
 
     /**
      * Type for the column to query
@@ -112,15 +105,13 @@ class Input extends Data implements ResourcePersistenceAwareInterface, QueryReso
      * @see ResourcePersistenceAwareInterface::getDataForResource
      *
      * @param string $data
-     * @param null|Model\DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return string
      */
     public function getDataForResource($data, $object = null, $params = [])
     {
-        $data = $this->handleDefaultValue($data, $object, $params);
-
         return $data;
     }
 
@@ -128,7 +119,7 @@ class Input extends Data implements ResourcePersistenceAwareInterface, QueryReso
      * @see ResourcePersistenceAwareInterface::getDataFromResource
      *
      * @param string $data
-     * @param null|Model\DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return string
@@ -142,21 +133,21 @@ class Input extends Data implements ResourcePersistenceAwareInterface, QueryReso
      * @see QueryResourcePersistenceAwareInterface::getDataForQueryResource
      *
      * @param string $data
-     * @param null|Model\DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return string
      */
     public function getDataForQueryResource($data, $object = null, $params = [])
     {
-        return $this->getDataForResource($data, $object, $params);
+        return $data;
     }
 
     /**
      * @see Data::getDataForEditmode
      *
      * @param string $data
-     * @param null|Model\DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return string
@@ -170,7 +161,7 @@ class Input extends Data implements ResourcePersistenceAwareInterface, QueryReso
      * @see Data::getDataFromEditmode
      *
      * @param string $data
-     * @param null|Model\DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return string
@@ -185,7 +176,7 @@ class Input extends Data implements ResourcePersistenceAwareInterface, QueryReso
      * @param Model\DataObject\Concrete $object
      * @param mixed $params
      *
-     * @return string
+     * @return float
      */
     public function getDataFromGridEditor($data, $object = null, $params = [])
     {
@@ -201,7 +192,7 @@ class Input extends Data implements ResourcePersistenceAwareInterface, QueryReso
     }
 
     /**
-     * @param int|null $columnLength
+     * @param $columnLength
      *
      * @return $this
      */
@@ -298,48 +289,10 @@ class Input extends Data implements ResourcePersistenceAwareInterface, QueryReso
     }
 
     /**
-     * @param Model\DataObject\ClassDefinition\Data\Input $masterDefinition
+     * @param Model\DataObject\ClassDefinition\Data $masterDefinition
      */
     public function synchronizeWithMasterDefinition(Model\DataObject\ClassDefinition\Data $masterDefinition)
     {
         $this->columnLength = $masterDefinition->columnLength;
-    }
-
-    public function isFilterable(): bool
-    {
-        return true;
-    }
-
-    /**
-     * @param Model\DataObject\Concrete $object
-     * @param array $context
-     *
-     * @return null|string
-     */
-    protected function doGetDefaultValue($object, $context = [])
-    {
-        return $this->getDefaultValue();
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getDefaultValue()
-    {
-        return $this->defaultValue;
-    }
-
-    /**
-     * @param string $defaultValue
-     *
-     * @return $this
-     */
-    public function setDefaultValue($defaultValue)
-    {
-        if ((string)$defaultValue !== '') {
-            $this->defaultValue = $defaultValue;
-        }
-
-        return $this;
     }
 }

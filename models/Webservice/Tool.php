@@ -17,9 +17,6 @@
 
 namespace Pimcore\Model\Webservice;
 
-/**
- * @deprecated
- */
 class Tool
 {
     /**
@@ -32,9 +29,8 @@ class Tool
         $modelsDir = PIMCORE_PATH.'/models/';
         $files = rscandir($modelsDir);
         $includePatterns = [
-            "/Webservice\/Data/",
+            "/Webservice\/Data/"
         ];
-        $classMap = [];
 
         foreach ($files as $file) {
             if (is_file($file)) {
@@ -68,9 +64,9 @@ class Tool
     }
 
     /**
-     * @param mixed $data
+     * @param $data
      *
-     * @return mixed
+     * @return array
      */
     public static function keyValueReverseMapping($data)
     {
@@ -96,7 +92,5 @@ class Tool
         } else {
             return $data;
         }
-
-        return null;
     }
 }

@@ -24,7 +24,7 @@ abstract class Adapter
     protected $tmpFiles = [];
 
     /**
-     * @param string $path
+     * @param $path
      *
      * @return string
      */
@@ -58,39 +58,4 @@ abstract class Adapter
     {
         $this->removeTmpFiles();
     }
-
-    abstract public function load($path);
-
-    abstract public function saveImage($path, $page = 1, $resolution = 200);
-
-    /**
-     * @param string|null $path
-     *
-     * @return null|string
-     *
-     * @throws \Exception
-     */
-    abstract public function getPdf($path = null);
-
-    /**
-     * @param string $fileType
-     *
-     * @return bool
-     */
-    abstract public function isFileTypeSupported($fileType);
-
-    /**
-     * @return int
-     *
-     * @throws \Exception
-     */
-    abstract public function getPageCount();
-
-    /**
-     * @param int|null $page
-     * @param string|null $path
-     *
-     * @return bool|string
-     */
-    abstract public function getText($page, $path);
 }

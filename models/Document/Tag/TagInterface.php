@@ -17,17 +17,79 @@
 
 namespace Pimcore\Model\Document\Tag;
 
-use Pimcore\Model\Document\Editable\EditableInterface;
-
-@trigger_error(sprintf('Class "%s" is deprecated since v6.8 and will be removed in 7. Use "%s" instead.', TagInterface::class, EditableInterface::class), E_USER_DEPRECATED);
-
-class_exists(EditableInterface::class);
-
-if (false) {
+interface TagInterface
+{
     /**
-     * @deprecated use \Pimcore\Model\Document\Editable\EditableInterface instead.
+     * Return the data for direct output to the frontend, can also contain HTML code!
+     *
+     * @return string
      */
-    interface TagInterface extends EditableInterface
-    {
-    }
+    public function frontend();
+
+    /**
+     * Return the data for the admin, can also contain HTML code!
+     *
+     * @return string
+     */
+    public function admin();
+
+    /**
+     * Get the current data stored for the element
+     * this is used as general fallback for the methods getDataForResource(), admin(), getValue()
+     *
+     * @return mixed
+     */
+    public function getData();
+
+    /**
+     * Return the type of the element
+     *
+     * @return string
+     */
+    public function getType();
+
+    /**
+     * Receives the data from the editmode and convert this to the internal data in the object eg. image-id to Asset\Image
+     *
+     * @param mixed $data
+     */
+    public function setDataFromEditmode($data);
+
+    /**
+     * Receives the data from the resource, an convert to the internal data in the object eg. image-id to Asset\Image
+     *
+     * @param mixed $data
+     *
+     * @return string
+     */
+    public function setDataFromResource($data);
+
+    /**
+     * Receives data from webservice import and fills the current tag's data
+     *
+     * @abstract
+     *
+     * @param  object $wsElement
+     * @param IdMapper $idMapper
+     */
+    //    JAIC: $idMapper is needed for REST webservice import. However, cannot just add this to
+    //    the interface as otherwise all tags would have to implement it including those defined
+    //    in (internal & external) plugins which are already in use.
+    //    public function getFromWebserviceImport($wsElement, $idMapper = null);
+
+    /**
+     * Returns the current tag's data for web service export
+     *
+     * @param $document
+     * @param mixed $params
+     * @abstract
+     *
+     * @return array
+     */
+    public function getForWebserviceExport($document = null, $params = []);
+
+    /**
+     * @return bool
+     */
+    public function isEmpty();
 }

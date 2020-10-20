@@ -21,30 +21,20 @@ use Pimcore\Model;
 /**
  * @method \Pimcore\Model\DataObject\ClassDefinition\CustomLayout\Listing\Dao getDao()
  * @method Model\DataObject\ClassDefinition\CustomLayout[] load()
- * @method Model\DataObject\ClassDefinition\CustomLayout current()
  */
 class Listing extends Model\Listing\AbstractListing
 {
     /**
      * @var array|null
-     *
-     * @deprecated use getter/setter methods or $this->data
      */
     protected $layoutDefinitions = null;
 
-    public function __construct()
-    {
-        $this->layoutDefinitions = & $this->data;
-    }
-
     /**
-     * @param Model\DataObject\ClassDefinition\CustomLayout[]|null $layoutDefinitions
-     *
-     * @return self
+     * @param array $layoutDefinitions
      */
     public function setLayoutDefinitions($layoutDefinitions)
     {
-        return $this->setData($layoutDefinitions);
+        $this->layoutDefinitions = $layoutDefinitions;
     }
 
     /**
@@ -52,6 +42,10 @@ class Listing extends Model\Listing\AbstractListing
      */
     public function getLayoutDefinitions()
     {
-        return $this->getData();
+        if ($this->layoutDefinitions === null) {
+            $this->getDao()->load();
+        }
+
+        return $this->layoutDefinitions;
     }
 }

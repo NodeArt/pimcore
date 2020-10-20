@@ -25,7 +25,7 @@ use Pimcore\Model;
 class Dao extends Model\Dao\AbstractDao
 {
     /**
-     * @param int $id
+     * @param $id
      *
      * @throws \Exception
      */

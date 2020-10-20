@@ -103,7 +103,7 @@ class DefaultFindologic implements ProductListInterface
     protected $conditions = [];
 
     /**
-     * @var array
+     * @var string[]
      */
     protected $queryConditions = [];
 
@@ -196,7 +196,7 @@ class DefaultFindologic implements ProductListInterface
      * Fieldname is optional but highly recommended - needed for resetting condition based on fieldname
      * and exclude functionality in group by results
      *
-     * @param string $condition
+     * @param $condition
      * @param string $fieldname
      */
     public function addQueryCondition($condition, $fieldname = '')
@@ -208,7 +208,9 @@ class DefaultFindologic implements ProductListInterface
     /**
      * Reset query condition for fieldname
      *
-     * @param string $fieldname
+     * @param $fieldname
+     *
+     * @return mixed
      */
     public function resetQueryCondition($fieldname)
     {
@@ -284,7 +286,7 @@ class DefaultFindologic implements ProductListInterface
     }
 
     /**
-     * @param string|array $orderKey either single field name, or array of field names or array of arrays (field name, direction)
+     * @param $orderKey string | array  - either single field name, or array of field names or array of arrays (field name, direction)
      */
     public function setOrderKey($orderKey)
     {
@@ -600,7 +602,7 @@ class DefaultFindologic implements ProductListInterface
     /**
      * loads group by values based on relation fieldname either from local variable if prepared or directly from product index
      *
-     * @param string $fieldname
+     * @param      $fieldname
      * @param bool $countValues
      * @param bool $fieldnameShouldBeExcluded => set to false for and-conditions
      *
@@ -614,7 +616,7 @@ class DefaultFindologic implements ProductListInterface
     }
 
     /**
-     * @param string $fieldname
+     * @param      $fieldname
      * @param bool $countValues
      * @param bool $fieldnameShouldBeExcluded
      *
@@ -655,13 +657,13 @@ class DefaultFindologic implements ProductListInterface
                 $field = $this->groupedValues[$fieldname];
 
                 $groups[] = [
-                    'value' => null, 'label' => null, 'count' => null, 'parameter' => $field->attributes->totalRange,
+                    'value' => null, 'label' => null, 'count' => null, 'parameter' => $field->attributes->totalRange
                 ];
             } elseif ($fieldname === SelectCategory::FIELDNAME) {
                 $rec = function (array $items) use (&$rec, &$groups) {
                     foreach ($items as $item) {
                         $groups[$item->name] = [
-                            'value' => $item->name, 'label' => $item->name, 'count' => $item->frequency, 'parameter' => $item->parameters,
+                            'value' => $item->name, 'label' => $item->name, 'count' => $item->frequency, 'parameter' => $item->parameters
                         ];
 
                         if ($item->items) {
@@ -685,7 +687,7 @@ class DefaultFindologic implements ProductListInterface
 
                 foreach ($hits as $item) {
                     $groups[] = [
-                        'value' => $item->name, 'label' => $item->name, 'count' => $item->frequency, 'parameter' => $item->parameters,
+                        'value' => $item->name, 'label' => $item->name, 'count' => $item->frequency, 'parameter' => $item->parameters
                     ];
                 }
             }
@@ -715,6 +717,9 @@ class DefaultFindologic implements ProductListInterface
         return $relations;
     }
 
+    /**
+     * @return IndexableInterface[]
+     */
     protected function doLoadGroupByValues()
     {
         // init
@@ -763,7 +768,7 @@ class DefaultFindologic implements ProductListInterface
     {
         // add system params
         $params = [
-            'shopkey' => $this->tenantConfig->getClientConfig('shopKey'), 'shopurl' => $this->tenantConfig->getClientConfig('shopUrl'), 'userip' => $this->userIp, 'referer' => $this->referer, 'revision' => $this->revision,
+            'shopkey' => $this->tenantConfig->getClientConfig('shopKey'), 'shopurl' => $this->tenantConfig->getClientConfig('shopUrl'), 'userip' => $this->userIp, 'referer' => $this->referer, 'revision' => $this->revision
         ] + $params;
 
         // we have different end points for search and navigation
@@ -786,7 +791,7 @@ class DefaultFindologic implements ProductListInterface
         $start = microtime(true);
         $client = \Pimcore::getContainer()->get('pimcore.http_client');
         $response = $client->request('GET', $url, [
-            'timeout' => $this->timeout,
+            'timeout' => $this->timeout
         ]);
         $this->getLogger()->info('Duration: ' . number_format(microtime(true) - $start, 3));
 

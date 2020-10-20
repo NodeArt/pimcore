@@ -62,6 +62,7 @@ class OutputTimestampResolver extends AbstractRequestResolver
     /**
      * Sets output timestamp to given value
      *
+     * @param Request $request
      * @param int $timestamp
      */
     public function setOutputTimestamp(int $timestamp)

@@ -50,16 +50,11 @@ class Processor
         'sharpen' => ['radius', 'sigma', 'amount', 'threshold'],
         'gaussianBlur' => ['radius', 'sigma'],
         'brightnessSaturation' => ['brightness', 'saturation', 'hue'],
-        'mirror' => ['mode'],
+        'mirror' => ['mode']
     ];
 
     /**
-     * @var null|bool
-     */
-    protected static $hasWebpSupport = null;
-
-    /**
-     * @param string $format
+     * @param $format
      * @param array $allowed
      * @param string $fallback
      *
@@ -69,10 +64,10 @@ class Processor
     {
         $typeMappings = [
             'jpg' => 'jpeg',
-            'tif' => 'tiff',
+            'tif' => 'tiff'
         ];
 
-        if (isset($typeMappings[$format])) {
+        if (array_key_exists($format, $typeMappings)) {
             $format = $typeMappings[$format];
         }
 
@@ -88,7 +83,7 @@ class Processor
     /**
      * @param Asset $asset
      * @param Config $config
-     * @param string|null $fileSystemPath
+     * @param null $fileSystemPath
      * @param bool $deferred deferred means that the image will be generated on-the-fly (details see below)
      * @param bool $returnAbsolutePath
      * @param bool $generated
@@ -100,13 +95,7 @@ class Processor
         $generated = false;
         $errorImage = PIMCORE_WEB_ROOT . '/bundles/pimcoreadmin/img/filetype-not-supported.svg';
         $format = strtolower($config->getFormat());
-        // Optimize if allowed to strip info.
-        $optimizeContent = (!$config->isPreserveColor() && !$config->isPreserveMetaData());
-        $optimizedFormat = false;
-
-        if (self::containsTransformationType($config, '1x1_pixel')) {
-            return 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-        }
+        $contentOptimizedFormat = false;
 
         if (!$fileSystemPath && $asset instanceof Asset) {
             $fileSystemPath = $asset->getFileSystemPath();
@@ -116,30 +105,32 @@ class Processor
 
         // simple detection for source type if SOURCE is selected
         if ($format == 'source' || empty($format)) {
-            $optimizedFormat = true;
-            $format = self::getAllowedFormat($fileExt, ['pjpeg', 'jpeg', 'gif', 'png'], 'png');
-            if ($format === 'jpeg') {
-                $format = 'pjpeg';
-            }
+            $format = self::getAllowedFormat($fileExt, ['jpeg', 'gif', 'png'], 'png');
+            $contentOptimizedFormat = true; // format can change depending of the content (alpha-channel, ...)
         }
 
         if ($format == 'print') {
-            // Don't optimize images for print as we assume we want images as
-            // untouched as possible.
-            $optimizedFormat = $optimizeContent = false;
             $format = self::getAllowedFormat($fileExt, ['svg', 'jpeg', 'png', 'tiff'], 'png');
 
             if (($format == 'tiff') && \Pimcore\Tool::isFrontendRequestByAdmin()) {
                 // return a webformat in admin -> tiff cannot be displayed in browser
                 $format = 'png';
                 $deferred = false; // deferred is default, but it's not possible when using isFrontendRequestByAdmin()
-            } elseif ($format == 'tiff' && self::containsTransformationType($config, 'tifforiginal')) {
-                return self::returnPath($fileSystemPath, $returnAbsolutePath);
+            } elseif ($format == 'tiff') {
+                $transformations = $config->getItems();
+                if (is_array($transformations) && count($transformations) > 0) {
+                    foreach ($transformations as $transformation) {
+                        if (!empty($transformation)) {
+                            if ($transformation['method'] == 'tifforiginal') {
+                                return self::returnPath($fileSystemPath, $returnAbsolutePath);
+                            }
+                        }
+                    }
+                }
             } elseif ($format == 'svg') {
                 return $asset->getFullPath();
             }
         } elseif ($format == 'tiff') {
-            $optimizedFormat = $optimizeContent = false;
             if (\Pimcore\Tool::isFrontendRequestByAdmin()) {
                 // return a webformat in admin -> tiff cannot be displayed in browser
                 $format = 'png';
@@ -149,13 +140,12 @@ class Processor
 
         $image = Asset\Image::getImageTransformInstance();
 
-        if ($optimizedFormat && self::hasWebpSupport() && $image->supportsFormat('webp')) {
-            $optimizedFormat = $optimizeContent = false;
+        if ($contentOptimizedFormat && Frontend::hasWebpSupport() && $image->supportsFormat('webp')) {
             $format = 'webp';
         }
 
         $thumbDir = $asset->getImageThumbnailSavePath() . '/image-thumb__' . $asset->getId() . '__' . $config->getName();
-        $filename = preg_replace("/\." . preg_quote(File::getFileExtension($asset->getFilename()), '/') . '$/i', '', $asset->getFilename());
+        $filename = preg_replace("/\." . preg_quote(File::getFileExtension($asset->getFilename())) . '/', '', $asset->getFilename());
 
         // add custom suffix if available
         if ($config->getFilenameSuffix()) {
@@ -169,21 +159,17 @@ class Processor
         $fileExtension = $format;
         if ($format == 'original') {
             $fileExtension = \Pimcore\File::getFileExtension($fileSystemPath);
-        } elseif ($format === 'pjpeg' || $format === 'jpeg') {
-            $fileExtension = 'jpg';
         }
-
         $filename .= '.' . $fileExtension;
 
         $fsPath = $thumbDir . '/' . $filename;
 
         // deferred means that the image will be generated on-the-fly (when requested by the browser)
-        // the configuration is saved for later use in
-        // \Pimcore\Bundle\CoreBundle\Controller\PublicServicesController::thumbnailAction()
+        // the configuration is saved for later use in Pimcore\Controller\Plugin\Thumbnail::routeStartup()
         // so that it can be used also with dynamic configurations
         if ($deferred) {
-            // only add the config to the TmpStore if necessary (e.g. if the config is auto-generated)
-            if (!Config::exists($config->getName())) {
+            // only add the config to the TmpStore if necessary (the config is auto-generated)
+            if (!Config::getByName($config->getName())) {
                 $configId = 'thumb_' . $asset->getId() . '__' . md5(self::returnPath($fsPath, false));
                 TmpStore::add($configId, $config, 'thumbnail_deferred');
             }
@@ -241,8 +227,8 @@ class Processor
                             array_unshift($transformations, [
                                 'method' => 'rotate',
                                 'arguments' => [
-                                    'angle' => $angleMappings[$orientation],
-                                ],
+                                    'angle' => $angleMappings[$orientation]
+                                ]
                             ]);
                         }
 
@@ -251,15 +237,15 @@ class Processor
                             2 => 'vertical',
                             4 => 'horizontal',
                             5 => 'vertical',
-                            7 => 'horizontal',
+                            7 => 'horizontal'
                         ];
 
                         if (array_key_exists($orientation, $mirrorMappings)) {
                             array_unshift($transformations, [
                                 'method' => 'mirror',
                                 'arguments' => [
-                                    'mode' => $mirrorMappings[$orientation],
-                                ],
+                                    'mode' => $mirrorMappings[$orientation]
+                                ]
                             ]);
                         }
                     }
@@ -337,7 +323,7 @@ class Processor
                                     if ($transformation['method'] == 'cover' && $key == 'positioning' && $asset->getCustomSetting('focalPointX')) {
                                         $value = [
                                             'x' => $asset->getCustomSetting('focalPointX'),
-                                            'y' => $asset->getCustomSetting('focalPointY'),
+                                            'y' => $asset->getCustomSetting('focalPointY')
                                         ];
                                     }
 
@@ -357,7 +343,7 @@ class Processor
             }
         }
 
-        if ($optimizedFormat) {
+        if ($contentOptimizedFormat && !Frontend::hasWebpSupport()) {
             $format = $image->getContentOptimizedFormat();
         }
 
@@ -367,10 +353,9 @@ class Processor
 
         $generated = true;
 
-        if ($optimizeContent) {
-            $filePath = str_replace(PIMCORE_TEMPORARY_DIRECTORY . '/', '', $fsPath);
-            $tmpStoreKey = 'thumb_' . $asset->getId() . '__' . md5($filePath);
-            TmpStore::add($tmpStoreKey, $filePath, 'image-optimize-queue');
+        if ($contentOptimizedFormat) {
+            $tmpStoreKey = str_replace(PIMCORE_TEMPORARY_DIRECTORY . '/', '', $fsPath);
+            TmpStore::add($tmpStoreKey, '-', 'image-optimize-queue');
         }
 
         clearstatcache();
@@ -391,32 +376,10 @@ class Processor
     }
 
     /**
-     * @param Config $config
-     * @param string $transformationType
+     * @param $path
+     * @param $absolute
      *
-     * @return bool
-     */
-    protected static function containsTransformationType(Config $config, string $transformationType): bool
-    {
-        $transformations = $config->getItems();
-        if (is_array($transformations) && count($transformations) > 0) {
-            foreach ($transformations as $transformation) {
-                if (!empty($transformation)) {
-                    if ($transformation['method'] == $transformationType) {
-                        return true;
-                    }
-                }
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * @param string $path
-     * @param bool $absolute
-     *
-     * @return string
+     * @return mixed
      */
     protected static function returnPath($path, $absolute)
     {
@@ -425,30 +388,5 @@ class Processor
         }
 
         return $path;
-    }
-
-    /**
-     * @param bool|null $webpSupport
-     *
-     * @return bool|null
-     */
-    public static function setHasWebpSupport(?bool $webpSupport): ?bool
-    {
-        $prevValue = self::$hasWebpSupport;
-        self::$hasWebpSupport = $webpSupport;
-
-        return $prevValue;
-    }
-
-    /**
-     * @return bool
-     */
-    protected static function hasWebpSupport(): bool
-    {
-        if (self::$hasWebpSupport !== null) {
-            return self::$hasWebpSupport;
-        }
-
-        return Frontend::hasWebpSupport();
     }
 }

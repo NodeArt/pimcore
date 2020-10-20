@@ -24,8 +24,8 @@ interface CheckoutStepInterface
      *
      * @param CheckoutManagerCheckoutStepInterface $step
      * @param CartInterface $cart
-     * @param string|null $stepNumber
-     * @param string|null $checkoutOption
+     * @param null $stepNumber
+     * @param null $checkoutOption
      */
     public function trackCheckoutStep(CheckoutManagerCheckoutStepInterface $step, CartInterface $cart, $stepNumber = null, $checkoutOption = null);
 }

@@ -52,9 +52,9 @@ pimcore.object.tags.hotspotimage = Class.create(pimcore.object.tags.image, {
 
     getGridColumnConfig: function (field, forGridConfigPreview) {
         return {
-            text: t(field.label), width: 100, sortable: false, dataIndex: field.key,
+            text: ts(field.label), width: 100, sortable: false, dataIndex: field.key,
             getEditor: this.getWindowCellEditor.bind(this, field),
-            renderer: function (key, value, metaData, record, rowIndex, colIndex, store, view) {
+            renderer: function (key, value, metaData, record) {
                 this.applyPermissionStyle(key, value, metaData, record);
 
                 if (record.data.inheritedFields[key] && record.data.inheritedFields[key].inherited == true) {
@@ -62,29 +62,24 @@ pimcore.object.tags.hotspotimage = Class.create(pimcore.object.tags.image, {
                 }
 
                 if (value && value.id) {
-                    var params = {
-                        id: value.id
-                    };
-
+                    var baseUrl = '<img src="/admin/asset/get-image-thumbnail?id=' + value.id;
                     if (forGridConfigPreview) {
-                        params['width'] = 88;
-                        params['height'] = 20;
-                        params['frame'] = true;
-
-                        return '<img src="' + Routing.generate('pimcore_admin_asset_getimagethumbnail', params)  + '" />';
+                        return baseUrl + '&width=88&height=20&frame=true" />';
                     } else {
-                        params['width'] = 88;
-                        params['height'] = 88;
-                        params['frame'] = true;
+                        var params = {
+                            width: 88,
+                            height: 88,
+                            frame: true
+                        };
 
-                        var url = Routing.generate('pimcore_admin_asset_getimagethumbnail', params);
+                        var url = Ext.String.urlAppend(baseUrl, Ext.Object.toQueryString(params));
 
                         if (value.crop) {
                             var cropParams = Ext.Object.toQueryString(value.crop);
                             url = Ext.String.urlAppend(url, cropParams);
                         }
 
-                        url = '<img src="' + url + '" style="width:88px; height:88px;" />';
+                        url = url + '" />';
                         return url;
                     }
                 }
@@ -236,12 +231,12 @@ pimcore.object.tags.hotspotimage = Class.create(pimcore.object.tags.image, {
             width: this.fieldConfig.width,
             height: this.fieldConfig.height,
             border: true,
-            componentCls: "object_field object_field_type_" + this.type,
+            componentCls: "object_field",
             tbar: toolbar
         };
 
-        if (!this.additionalConfig.gallery) {
-             conf.style = "padding-bottom: 10px;";
+        if (!this.additionalConfig.condensed) {
+            // conf.style = "padding-bottom: 10px;";
         }
 
         this.component = new Ext.Panel(conf);
@@ -309,7 +304,7 @@ pimcore.object.tags.hotspotimage = Class.create(pimcore.object.tags.image, {
         // 5px padding (-10)
         var body = this.getBody();
 
-        if (this.data && this.data['id']) {
+        if (this.data.id) {
             var width = null;
             var height = null;
 
@@ -324,12 +319,9 @@ pimcore.object.tags.hotspotimage = Class.create(pimcore.object.tags.image, {
                 height = body.getHeight() - 10;
             }
 
-            var path = Routing.generate('pimcore_admin_asset_getimagethumbnail', Ext.merge({
-                id: this.data.id,
-                width: width,
-                height: height,
-                contain: true
-            }, this.crop));
+            var path = "/admin/asset/get-image-thumbnail?id=" + this.data.id + "&width=" + width
+                + "&height=" + height + "&contain=true" + "&" + Ext.urlEncode(this.crop);
+
 
             body.setStyle({
                 backgroundImage: "url(" + path + ")",
@@ -338,13 +330,15 @@ pimcore.object.tags.hotspotimage = Class.create(pimcore.object.tags.image, {
             });
 
             this.getFileInfo(path);
-        } else {
-            this.fileinfo = null;
+        } {
+            this.fileinfo
             body.setStyle({});
         }
 
         body.removeCls("pimcore_droptarget_image");
         body.repaint();
+
+
 
         this.showPreview();
     },
@@ -561,4 +555,6 @@ pimcore.object.tags.hotspotimage = Class.create(pimcore.object.tags.image, {
     setContainer: function (container) {
         this.container = container;
     }
-});
+
+})
+;

@@ -19,9 +19,6 @@ use Pimcore\Targeting\Document\DocumentTargetingConfigurator;
 use Pimcore\Templating\Renderer\ActionRenderer;
 use Symfony\Component\Templating\Helper\Helper;
 
-/**
- * @deprecated
- */
 class Action extends Helper
 {
     /**

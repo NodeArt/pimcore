@@ -50,7 +50,7 @@ class ObjectBrickSetter extends AbstractOperator
 
         $this->attr = $config->attr;
         $this->brickType = $config->brickType;
-        $this->mode = $config->mode ?? 'ifNotEmpty';
+        $this->mode = $config->mode;
     }
 
     public function process($element, &$target, array &$rowData, $colIndex, array &$context = [])
@@ -79,7 +79,7 @@ class ObjectBrickSetter extends AbstractOperator
         if (!$childs || !$brick) {
             return;
         } else {
-            /** @var AbstractConfigElement $child */
+            /** @var $child AbstractConfigElement */
             foreach ($childs as $child) {
                 $child->process($element, $brick, $rowData, $colIndex, $context);
             }

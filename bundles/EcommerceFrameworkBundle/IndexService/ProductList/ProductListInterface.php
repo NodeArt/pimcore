@@ -75,7 +75,7 @@ interface ProductListInterface extends \Iterator, AdapterInterface, AdapterAggre
      * Fieldname is optional but highly recommended - needed for resetting condition based on fieldname
      * and exclude functionality in group by results
      *
-     * @param string $condition
+     * @param $condition
      * @param string $fieldname
      */
     public function addQueryCondition($condition, $fieldname = '');
@@ -83,7 +83,7 @@ interface ProductListInterface extends \Iterator, AdapterInterface, AdapterAggre
     /**
      * Reset filter condition for fieldname
      *
-     * @param string $fieldname
+     * @param $fieldname
      *
      * @return mixed
      */
@@ -92,7 +92,9 @@ interface ProductListInterface extends \Iterator, AdapterInterface, AdapterAggre
     /**
      * Reset query condition for fieldname
      *
-     * @param string $fieldname
+     * @param $fieldname
+     *
+     * @return mixed
      */
     public function resetQueryCondition($fieldname);
 
@@ -132,7 +134,9 @@ interface ProductListInterface extends \Iterator, AdapterInterface, AdapterAggre
     /**
      * sets order direction
      *
-     * @param string $order
+     * @param $order
+     *
+     * @return void
      */
     public function setOrder($order);
 
@@ -146,7 +150,9 @@ interface ProductListInterface extends \Iterator, AdapterInterface, AdapterAggre
     /**
      * sets order key
      *
-     * @param string|array $orderKey either single field name, or array of field names or array of arrays (field name, direction)
+     * @param $orderKey string | array  - either single field name, or array of field names or array of arrays (field name, direction)
+     *
+     * @return void
      */
     public function setOrderKey($orderKey);
 
@@ -156,7 +162,9 @@ interface ProductListInterface extends \Iterator, AdapterInterface, AdapterAggre
     public function getOrderKey();
 
     /**
-     * @param int $limit
+     * @param $limit int
+     *
+     * @return void
      */
     public function setLimit($limit);
 
@@ -166,7 +174,9 @@ interface ProductListInterface extends \Iterator, AdapterInterface, AdapterAggre
     public function getLimit();
 
     /**
-     * @param int $offset
+     * @param $offset int
+     *
+     * @return void
      */
     public function setOffset($offset);
 
@@ -176,7 +186,9 @@ interface ProductListInterface extends \Iterator, AdapterInterface, AdapterAggre
     public function getOffset();
 
     /**
-     * @param AbstractCategory $category
+     * @param $category
+     *
+     * @return void
      */
     public function setCategory(AbstractCategory $category);
 
@@ -186,7 +198,9 @@ interface ProductListInterface extends \Iterator, AdapterInterface, AdapterAggre
     public function getCategory();
 
     /**
-     * @param string $variantMode
+     * @param $variantMode
+     *
+     * @return void
      */
     public function setVariantMode($variantMode);
 
@@ -248,7 +262,7 @@ interface ProductListInterface extends \Iterator, AdapterInterface, AdapterAggre
     /**
      * loads group by values based on fieldname either from local variable if prepared or directly from product index
      *
-     * @param string $fieldname
+     * @param $fieldname
      * @param bool $countValues
      * @param bool $fieldnameShouldBeExcluded => set to false for and-conditions
      *
@@ -261,7 +275,7 @@ interface ProductListInterface extends \Iterator, AdapterInterface, AdapterAggre
     /**
      * loads group by values based on relation fieldname either from local variable if prepared or directly from product index
      *
-     * @param string $fieldname
+     * @param      $fieldname
      * @param bool $countValues
      * @param bool $fieldnameShouldBeExcluded => set to false for and-conditions
      *
@@ -274,7 +288,7 @@ interface ProductListInterface extends \Iterator, AdapterInterface, AdapterAggre
     /**
      * loads group by values based on relation fieldname either from local variable if prepared or directly from product index
      *
-     * @param string $fieldname
+     * @param      $fieldname
      * @param bool $countValues
      * @param bool $fieldnameShouldBeExcluded => set to false for and-conditions
      *

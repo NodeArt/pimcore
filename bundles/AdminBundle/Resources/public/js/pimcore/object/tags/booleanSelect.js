@@ -45,7 +45,7 @@ pimcore.object.tags.booleanSelect = Class.create(pimcore.object.tags.abstract, {
         }.bind(this, field.key);
 
         return {
-            text: t(field.label), sortable: true, dataIndex: field.key, renderer: renderer,
+            text: ts(field.label), sortable: true, dataIndex: field.key, renderer: renderer,
             editor: this.getGridColumnEditor(field)
         };
 
@@ -86,7 +86,9 @@ pimcore.object.tags.booleanSelect = Class.create(pimcore.object.tags.abstract, {
             value: value
         });
 
-        return new Ext.form.ComboBox(editorConfig);
+        var combo = new Ext.form.ComboBox(editorConfig);
+        var currentValue = combo.getValue();
+        return combo;
     },
 
     getGridColumnEditor: function(field) {
@@ -157,7 +159,7 @@ pimcore.object.tags.booleanSelect = Class.create(pimcore.object.tags.abstract, {
         if (this.fieldConfig.options) {
             for (var i = 0; i < this.fieldConfig.options.length; i++) {
                 var value = this.fieldConfig.options[i].value;
-                store.push([value, t(this.fieldConfig.options[i].key)]);
+                store.push([value, ts(this.fieldConfig.options[i].key)]);
                 validValues.push(value);
             }
         }
@@ -171,7 +173,7 @@ pimcore.object.tags.booleanSelect = Class.create(pimcore.object.tags.abstract, {
             selectOnFocus: true,
             fieldLabel: this.fieldConfig.title,
             store: store,
-            componentCls: "object_field object_field_type_" + this.type,
+            componentCls: "object_field",
             width: 250,
             labelWidth: 100
         };

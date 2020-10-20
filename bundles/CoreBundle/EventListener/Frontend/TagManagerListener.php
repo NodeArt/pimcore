@@ -23,9 +23,6 @@ use Pimcore\Model\Site;
 use Pimcore\Model\Tool\Tag;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 
-/**
- * @deprecated
- */
 class TagManagerListener
 {
     use PimcoreContextAwareTrait;
@@ -111,7 +108,7 @@ class TagManagerListener
 
         $editmode = $this->editmodeResolver->isEditmode($request);
 
-        /** @var Tag\Config $tag */
+        /** @var $tag Tag\Config */
         foreach ($tags as $tag) {
             if ($tag->isDisabled()) {
                 continue;

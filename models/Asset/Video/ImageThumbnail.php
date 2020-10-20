@@ -24,7 +24,6 @@ use Pimcore\Logger;
 use Pimcore\Model;
 use Pimcore\Model\Asset\Image;
 use Symfony\Component\EventDispatcher\GenericEvent;
-use Symfony\Component\Lock\Factory as LockFactory;
 
 class ImageThumbnail
 {
@@ -36,15 +35,15 @@ class ImageThumbnail
     protected $timeOffset;
 
     /**
-     * @var Image|null
+     * @var Image
      */
     protected $imageAsset;
 
     /**
-     * @param Model\Asset\Video $asset
-     * @param string|array|Image\Thumbnail\Config|null $config
-     * @param int|null $timeOffset
-     * @param Image|null $imageAsset
+     * @param $asset
+     * @param null $config
+     * @param null $timeOffset
+     * @param null $imageAsset
      * @param bool $deferred
      */
     public function __construct($asset, $config = null, $timeOffset = null, $imageAsset = null, $deferred = true)
@@ -59,16 +58,17 @@ class ImageThumbnail
     /**
      * @param bool $deferredAllowed
      *
-     * @return string
+     * @return mixed|string
      */
     public function getPath($deferredAllowed = true)
     {
         $fsPath = $this->getFileSystemPath($deferredAllowed);
-        $path = $this->convertToWebPath($fsPath);
+        $path = str_replace(PIMCORE_TEMPORARY_DIRECTORY . '/image-thumbnails', '', $fsPath);
+        $path = urlencode_ignore_slash($path);
 
         $event = new GenericEvent($this, [
             'filesystemPath' => $fsPath,
-            'frontendPath' => $path,
+            'frontendPath' => $path
         ]);
         \Pimcore::getEventDispatcher()->dispatch(FrontendEvents::ASSET_VIDEO_IMAGE_THUMBNAIL, $event);
         $path = $event->getArgument('frontendPath');
@@ -84,7 +84,7 @@ class ImageThumbnail
     public function generate($deferredAllowed = true)
     {
         $errorImage = PIMCORE_WEB_ROOT . '/bundles/pimcoreadmin/img/filetype-not-supported.svg';
-        $deferred = $deferredAllowed && $this->deferred;
+        $deferred = ($deferredAllowed && $this->deferred) ? true : false;
         $generated = false;
 
         if (!$this->asset) {
@@ -127,8 +127,7 @@ class ImageThumbnail
 
                 if (!is_file($path)) {
                     $lockKey = 'video_image_thumbnail_' . $this->asset->getId() . '_' . $timeOffset;
-                    $lock = \Pimcore::getContainer()->get(LockFactory::class)->createLock($lockKey);
-                    $lock->acquire(true);
+                    Model\Tool\Lock::acquire($lockKey);
 
                     // after we got the lock, check again if the image exists in the meantime - if not - generate it
                     if (!is_file($path)) {
@@ -136,7 +135,7 @@ class ImageThumbnail
                         $generated = true;
                     }
 
-                    $lock->release();
+                    Model\Tool\Lock::release($lockKey);
                 }
 
                 if ($this->getConfig()) {
@@ -170,7 +169,7 @@ class ImageThumbnail
 
             \Pimcore::getEventDispatcher()->dispatch(AssetEvents::VIDEO_IMAGE_THUMBNAIL, new GenericEvent($this, [
                 'deferred' => $deferred,
-                'generated' => $generated,
+                'generated' => $generated
             ]));
         }
     }
@@ -188,12 +187,20 @@ class ImageThumbnail
     }
 
     /**
-     * @param string|array|Image\Thumbnail\Config $selector
+     * @param $selector
      *
-     * @return Image\Thumbnail\Config|null
+     * @return bool|static
      */
     protected function createConfig($selector)
     {
-        return Image\Thumbnail\Config::getByAutoDetect($selector);
+        $config = Image\Thumbnail\Config::getByAutoDetect($selector);
+        if ($config) {
+            $format = strtolower($config->getFormat());
+            if ($format == 'source') {
+                $config->setFormat('PNG');
+            }
+        }
+
+        return $config;
     }
 }

@@ -189,8 +189,7 @@ pimcore.asset.helpers.metadataTree = Class.create({
             expandable: initData.childs.length,
             allowDrag: false,
             iconCls: "pimcore_icon_" + type,
-            text: t(nodeLabel),
-            copyText: t(nodeLabel)
+            text: t(nodeLabel)
         };
 
         newNode = this.appendChild(newNode);
@@ -210,14 +209,11 @@ pimcore.asset.helpers.metadataTree = Class.create({
 
             var text = initData.title;
 
-
             var subType = initData.subtype;
 
             if(subType) {
                 text += " (" + subType + ")";
             }
-
-            var copyText = initData.copyTitle ? initData.copyTitle : text;
 
             var newNode = {
                 text: text,
@@ -228,8 +224,7 @@ pimcore.asset.helpers.metadataTree = Class.create({
                 allowDrag: draggable,
                 dataType: type,
                 iconCls: "pimcore_icon_" + type,
-                expanded: true,
-                copyText: copyText
+                expanded: true
             };
 
             newNode = this.appendChild(newNode);

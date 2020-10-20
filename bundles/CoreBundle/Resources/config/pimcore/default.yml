@@ -85,20 +85,6 @@ pimcore:
             - src
             - vendor/pimcore/pimcore/bundles
 
-    assets:
-        metadata:
-            class_definitions:
-                data:
-                    map:
-                        asset: \Pimcore\Model\Asset\MetaData\ClassDefinition\Data\Asset
-                        checkbox: \Pimcore\Model\Asset\MetaData\ClassDefinition\Data\Checkbox
-                        date: \Pimcore\Model\Asset\MetaData\ClassDefinition\Data\Date
-                        document: \Pimcore\Model\Asset\MetaData\ClassDefinition\Data\Document
-                        input: \Pimcore\Model\Asset\MetaData\ClassDefinition\Data\Input
-                        object: \Pimcore\Model\Asset\MetaData\ClassDefinition\Data\DataObject
-                        select: \Pimcore\Model\Asset\MetaData\ClassDefinition\Data\Select
-                        textarea: \Pimcore\Model\Asset\MetaData\ClassDefinition\Data\Textarea
-
     objects:
         class_definitions:
             data:
@@ -137,7 +123,6 @@ pimcore:
                     multiselect: \Pimcore\Model\DataObject\ClassDefinition\Data\Multiselect
                     newsletterActive: \Pimcore\Model\DataObject\ClassDefinition\Data\NewsletterActive
                     reverseManyToManyObjectRelation: \Pimcore\Model\DataObject\ClassDefinition\Data\ReverseManyToManyObjectRelation
-                    urlSlug: \Pimcore\Model\DataObject\ClassDefinition\Data\UrlSlug
                     numeric: \Pimcore\Model\DataObject\ClassDefinition\Data\Numeric
                     objectbricks: \Pimcore\Model\DataObject\ClassDefinition\Data\Objectbricks
                     manyToManyObjectRelation: \Pimcore\Model\DataObject\ClassDefinition\Data\ManyToManyObjectRelation
@@ -168,22 +153,15 @@ pimcore:
                     - \Object_Class_Layout_
 
     documents:
-        editables:
+        tags:
             map:
-                # @TODO: BC layer, to be removed in v7
-                href: \Pimcore\Model\Document\Editable\Relation
-                multihref: \Pimcore\Model\Document\Editable\Relations
-
-            prefixes:
-                - \Pimcore\Model\Document\Editable\
-        tags: # @TODO to be removed in v7
-            map:
+                # @TODO: BC layer, to be removed in v6.0
                 href: \Pimcore\Model\Document\Tag\Relation
                 multihref: \Pimcore\Model\Document\Tag\Relations
 
             prefixes:
                 - \Pimcore\Model\Document\Tag\
-                - \Document_Tag_ # @TODO to be removed in v7
+                - \Document_Tag_
     newsletter:
         source_adapters:
             defaultAdapter: pimcore.document.newsletter.factory.default
@@ -242,6 +220,7 @@ pimcore:
         session:
             attribute_bags:
                 - pimcore_admin
+                - pimcore_documents
                 - pimcore_objects
                 - pimcore_copy
                 - pimcore_gridconfig
@@ -267,13 +246,13 @@ pimcore:
             app:
                 name: Migrations
                 namespace: App\Migrations
-                directory: "%kernel.root_dir%/Migrations"
+                directory: "%kernel.root_dir%/Resources/migrations"
 
             # this is the core migration set used for Composer post-package-update event
             pimcore_core:
                 name: Pimcore Core Migrations
                 namespace: Pimcore\Bundle\CoreBundle\Migrations
-                directory: "%kernel.root_dir%/../vendor/pimcore/pimcore/bundles/CoreBundle/Migrations"
+                directory: "%kernel.root_dir%/../vendor/pimcore/pimcore/bundles/CoreBundle/Resources/migrations"
 
     sitemaps:
         generators:
@@ -421,12 +400,10 @@ pimcore:
             cgm: 'image/cgm'
             gif: 'image/gif'
             ief: 'image/ief'
-            pjpeg: 'image/jpeg'
             jpeg: 'image/jpeg'
             jpg: 'image/jpeg'
             jpe: 'image/jpeg'
             png: 'image/png'
-            webp: 'image/webp'
             svg: 'image/svg+xml'
             tiff: 'image/tiff'
             tif: 'image/tiff'

@@ -20,13 +20,13 @@ pimcore.object.tags.indexFieldSelectionCombo = Class.create(pimcore.object.tags.
     initialize: function (data, fieldConfig) {
         this.data = data;
         this.fieldConfig = fieldConfig;
-
+        
         this.store = new Ext.data.JsonStore({
             autoDestroy: true,
             autoLoad: true,
             proxy: {
                 type: 'ajax',
-                url: Routing.generate('pimcore_ecommerceframework_index_getfields'),
+                url: '/admin/ecommerceframework/index/get-fields',
                 reader: {
                     rootProperty: 'data',
                     idProperty: 'key'
@@ -50,7 +50,7 @@ pimcore.object.tags.indexFieldSelectionCombo = Class.create(pimcore.object.tags.
                 autoLoad: true,
                 proxy: {
                     type: 'ajax',
-                    url: Routing.generate('pimcore_ecommerceframework_index_getalltenants'),
+                    url: '/admin/ecommerceframework/index/get-all-tenants',
                     reader: {
                         rootProperty: 'data',
                         idProperty: 'key'

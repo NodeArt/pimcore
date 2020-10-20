@@ -16,9 +16,6 @@ namespace Pimcore\Tool;
 
 use Pimcore\DependencyInjection\ConfigMerger;
 
-/**
- * @deprecated will be removed in Pimcore 7
- */
 class ArrayUtils
 {
     /**

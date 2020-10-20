@@ -39,7 +39,7 @@ class PhpArrayFileTable
     protected $lastInsertId;
 
     /**
-     * @param string $filePath
+     * @param $filePath
      *
      * @return self
      */
@@ -65,7 +65,7 @@ class PhpArrayFileTable
     }
 
     /**
-     * @param string $filePath
+     * @param $filePath
      *
      * @throws \Exception
      */
@@ -73,10 +73,10 @@ class PhpArrayFileTable
     {
         $writeable = false;
 
-        if (file_exists($filePath) && is_writable($filePath)) {
+        if (file_exists($filePath) && is_writeable($filePath)) {
             $writeable = true;
         } elseif (!file_exists($filePath)) {
-            if (is_writable(dirname($filePath))) {
+            if (is_writeable(dirname($filePath))) {
                 $writeable = true;
             }
         }
@@ -91,7 +91,7 @@ class PhpArrayFileTable
     }
 
     /**
-     * @param array $data
+     * @param $data
      * @param string|int $id
      *
      * @throws \Exception
@@ -135,8 +135,8 @@ class PhpArrayFileTable
     }
 
     /**
-     * @param callable|null $filter
-     * @param callable|null $order
+     * @param null $filter
+     * @param null $order
      *
      * @return array
      */

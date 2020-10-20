@@ -51,8 +51,6 @@ class OrderDateTime implements OrderListFilterInterface
         if ($this->getTill()) {
             $query->where($this->getColumn() . ' <= ?', $this->getTill()->getTimestamp());
         }
-
-        return $this;
     }
 
     /**

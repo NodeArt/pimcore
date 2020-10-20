@@ -23,30 +23,24 @@ use Pimcore\Model\Tool\Targeting\Rule;
 /**
  * @method Listing\Dao getDao()
  * @method Rule[] load()
- * @method Rule current()
  */
 class Listing extends Model\Listing\AbstractListing
 {
     /**
      * @var Rule[]|null
-     *
-     * @deprecated use getter/setter methods or $this->data
      */
     protected $targets = null;
-
-    public function __construct()
-    {
-        $this->targets = & $this->data;
-    }
 
     /**
      * @param Rule[] $targets
      *
-     * @return static
+     * @return $this
      */
     public function setTargets(array $targets)
     {
-        return $this->setData($targets);
+        $this->targets = $targets;
+
+        return $this;
     }
 
     /**
@@ -54,6 +48,10 @@ class Listing extends Model\Listing\AbstractListing
      */
     public function getTargets(): array
     {
-        return $this->getData();
+        if ($this->targets === null) {
+            $this->getDao()->load();
+        }
+
+        return $this->targets;
     }
 }

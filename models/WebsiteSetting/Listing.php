@@ -19,7 +19,6 @@ use Pimcore\Model;
 /**
  * @method \Pimcore\Model\WebsiteSetting\Listing\Dao getDao()
  * @method \Pimcore\Model\WebsiteSetting[] load()
- * @method int getTotalCount()
  */
 class Listing extends Model\Listing\JsonListing
 {

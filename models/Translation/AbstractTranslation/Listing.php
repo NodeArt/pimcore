@@ -22,9 +22,6 @@ use Pimcore\Model;
 /**
  * @method \Pimcore\Model\Translation\AbstractTranslation\Listing\Dao getDao()
  * @method Model\Translation\AbstractTranslation[] load()
- * @method Model\Translation\AbstractTranslation current()
- * @method int getTotalCount()
- * @method void onCreateQuery(callable $callback)
  */
 class Listing extends Model\Listing\AbstractListing
 {
@@ -33,32 +30,31 @@ class Listing extends Model\Listing\AbstractListing
 
     /**
      * @var array|null
-     *
-     * @deprecated use getter/setter methods or $this->data
      */
     protected $translations = null;
-
-    public function __construct()
-    {
-        $this->translations = & $this->data;
-    }
 
     /**
      * @return \Pimcore\Model\Translation\AbstractTranslation[]
      */
     public function getTranslations()
     {
-        return $this->getData();
+        if ($this->translations === null) {
+            $this->getDao()->load();
+        }
+
+        return $this->translations;
     }
 
     /**
      * @param array $translations
      *
-     * @return static
+     * @return $this
      */
     public function setTranslations($translations)
     {
-        return $this->setData($translations);
+        $this->translations = $translations;
+
+        return $this;
     }
 
     /**

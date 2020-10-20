@@ -288,7 +288,7 @@ class DocType extends Model\AbstractModel
     }
 
     /**
-     * @param string $module
+     * @param $module
      *
      * @return $this
      */
@@ -308,7 +308,7 @@ class DocType extends Model\AbstractModel
     }
 
     /**
-     * @param int $modificationDate
+     * @param $modificationDate
      *
      * @return $this
      */
@@ -328,7 +328,7 @@ class DocType extends Model\AbstractModel
     }
 
     /**
-     * @param int $creationDate
+     * @param $creationDate
      *
      * @return $this
      */

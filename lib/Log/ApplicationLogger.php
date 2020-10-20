@@ -80,7 +80,7 @@ class ApplicationLogger implements LoggerInterface
     }
 
     /**
-     * @param object $writer
+     * @param $writer
      */
     public function addWriter($writer)
     {
@@ -118,7 +118,7 @@ class ApplicationLogger implements LoggerInterface
     /**
      * @deprecated
      *
-     * @param \Pimcore\Model\DataObject\AbstractObject|\Pimcore\Model\Document|\Pimcore\Model\Asset|int $relatedObject
+     * @param \\Pimcore\Model\DataObject\AbstractObject | \Pimcore\Model\Document | \Pimcore\Model\Asset | int $relatedObject
      */
     public function setRelatedObject($relatedObject)
     {
@@ -139,6 +139,8 @@ class ApplicationLogger implements LoggerInterface
      * @param mixed $level
      * @param string $message
      * @param array $context
+     *
+     * @return null
      */
     public function log($level, $message, array $context = [])
     {
@@ -183,6 +185,8 @@ class ApplicationLogger implements LoggerInterface
                 $logger->log($level, $message, $context);
             }
         }
+
+        return null;
     }
 
     /**
@@ -194,7 +198,7 @@ class ApplicationLogger implements LoggerInterface
     {
         $validMethods = [
             'log', 'logException', 'emergency', 'critical', 'error',
-            'alert', 'warning', 'notice', 'info', 'debug',
+            'alert', 'warning', 'notice', 'info', 'debug'
         ];
 
         $previousCall = null;
@@ -325,9 +329,9 @@ class ApplicationLogger implements LoggerInterface
     }
 
     /**
-     * @param mixed $level
-     * @param string $message
-     * @param array $params
+     * @param $level
+     * @param $message
+     * @param $params
      */
     protected function handleLog($level, $message, $params)
     {
@@ -358,11 +362,11 @@ class ApplicationLogger implements LoggerInterface
     }
 
     /**
-     * @param string $message
+     * @param $message
      * @param \Throwable $exceptionObject
      * @param string $priority
-     * @param \Pimcore\Model\DataObject\AbstractObject|null $relatedObject
-     * @param string|null $component
+     * @param null $relatedObject
+     * @param null $component
      */
     public function logException($message, $exceptionObject, $priority = 'alert', $relatedObject = null, $component = null)
     {
@@ -377,7 +381,7 @@ class ApplicationLogger implements LoggerInterface
         $this->log($priority, $message, [
             'relatedObject' => $relatedObject,
             'fileObject' => $fileObject,
-            'component' => $component,
+            'component' => $component
          ]);
     }
 
@@ -389,7 +393,7 @@ class ApplicationLogger implements LoggerInterface
      * @param string $message
      * @param \Throwable $exception
      * @param mixed $level
-     * @param \Pimcore\Model\DataObject\AbstractObject|null $relatedObject
+     * @param null $relatedObject
      * @param array $context
      */
     public static function logExceptionObject(

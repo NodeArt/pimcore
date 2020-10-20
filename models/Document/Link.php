@@ -31,7 +31,7 @@ class Link extends Model\Document
     /**
      * Contains the ID of the internal ID
      *
-     * @var int|null
+     * @var int
      */
     protected $internal;
 
@@ -43,9 +43,9 @@ class Link extends Model\Document
     protected $internalType;
 
     /**
-     * Contains object of linked Document|Asset|DataObject
+     * Contains object of linked Document|Asset
      *
-     * @var Document|Asset|Model\DataObject\Concrete|null
+     * @var Document | Asset
      */
     protected $object;
 
@@ -92,7 +92,7 @@ class Link extends Model\Document
 
                 $dependencies[$key] = [
                     'id' => $this->getObject()->getId(),
-                    'type' => $this->getInternalType(),
+                    'type' => $this->getInternalType()
                 ];
             }
         }
@@ -292,7 +292,7 @@ class Link extends Model\Document
     }
 
     /**
-     * @return Document|Asset|Model\DataObject\Concrete|null
+     * @return Document|Asset
      */
     public function getObject()
     {
@@ -304,11 +304,11 @@ class Link extends Model\Document
             }
         }
 
-        return null;
+        return false;
     }
 
     /**
-     * @param Document|Asset|Model\DataObject\Concrete $object
+     * @param $object
      *
      * @return $this
      */

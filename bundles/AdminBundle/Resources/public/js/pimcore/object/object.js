@@ -59,7 +59,7 @@ pimcore.object.object = Class.create(pimcore.object.abstract, {
         var options = this.options || {};
 
         Ext.Ajax.request({
-            url: Routing.generate('pimcore_admin_dataobject_dataobject_get'),
+            url: "/admin/object/get",
             params: params,
             ignoreErrors: options.ignoreNotFoundError,
             success: this.getDataComplete.bind(this),
@@ -170,11 +170,14 @@ pimcore.object.object = Class.create(pimcore.object.abstract, {
 
     addTab: function () {
 
+        // icon class
+        var iconClass = this.data.general.o_type == "variant" ? "pimcore_icon_variant" : " pimcore_icon_object";
         if (this.data.general["iconCls"]) {
             iconClass = this.data.general["iconCls"];
         } else if (this.data.general["icon"]) {
             iconClass = pimcore.helpers.getClassForIcon(this.data.general["icon"]);
         }
+
 
         this.tabPanel = Ext.getCmp("pimcore_panel_tabs");
         var tabId = "object_" + this.id;
@@ -196,7 +199,7 @@ pimcore.object.object = Class.create(pimcore.object.abstract, {
 
         this.tab.on("beforedestroy", function () {
             Ext.Ajax.request({
-                url: Routing.generate('pimcore_admin_element_unlockelement'),
+                url: "/admin/element/unlock-element",
                 method: 'PUT',
                 params: {
                     id: this.id,
@@ -365,22 +368,11 @@ pimcore.object.object = Class.create(pimcore.object.abstract, {
                 cls: "pimcore_save_button",
                 scale: "medium",
                 handler: this.save.bind(this, "version"),
-                menu: [
-                    {
-                        text: t('save_close'),
-                        iconCls: "pimcore_icon_save",
-                        handler: function() {
-                            this.save("version");
-                            this.close();
-                        }.bind(this)
-                    },
-                    {
-                        text: t('save_only_scheduled_tasks'),
-                        iconCls: "pimcore_icon_save",
-                        handler: this.save.bind(this, "scheduler", "scheduler"),
-                        hidden: !this.isAllowed("settings") || this.data.general.o_published
-                    }
-                ]
+                menu: [{
+                    text: t('save_close'),
+                    iconCls: "pimcore_icon_save",
+                    handler: this.unpublishClose.bind(this)
+                }]
             });
 
 
@@ -391,21 +383,21 @@ pimcore.object.object = Class.create(pimcore.object.abstract, {
                 scale: "medium",
                 handler: this.publish.bind(this),
                 menu: [{
-                        text: t('save_pubish_close'),
-                        iconCls: "pimcore_icon_save",
-                        handler: this.publishClose.bind(this)
-                    },
+                    text: t('save_pubish_close'),
+                    iconCls: "pimcore_icon_save",
+                    handler: this.publishClose.bind(this)
+                },
                     {
                         text: t('save_only_new_version'),
                         iconCls: "pimcore_icon_save",
                         handler: this.save.bind(this, "version"),
-                        hidden: !this.isAllowed("save") || !this.data.general.o_published
+                        hidden: !this.isAllowed("save")
                     },
                     {
                         text: t('save_only_scheduled_tasks'),
                         iconCls: "pimcore_icon_save",
                         handler: this.save.bind(this, "scheduler", "scheduler"),
-                        hidden: !this.isAllowed("settings") || !this.data.general.o_published
+                        hidden: !this.isAllowed("settings")
                     }
                 ]
             });
@@ -464,7 +456,7 @@ pimcore.object.object = Class.create(pimcore.object.abstract, {
 
                 var menu = [];
                 for (var i = 0; i < this.data.validLayouts.length; i++) {
-                    var menuLabel = t(this.data.validLayouts[i].name);
+                    var menuLabel = ts(this.data.validLayouts[i].name);
                     if (this.data.currentLayoutId == this.data.validLayouts[i].id) {
                         menuLabel = "<b>" + menuLabel + "</b>";
                     }
@@ -503,23 +495,6 @@ pimcore.object.object = Class.create(pimcore.object.abstract, {
                 menu: this.getMetaInfoMenuItems()
             });
 
-            if (this.data.general.showFieldLookup) {
-                buttons.push({
-                    xtype: "button",
-                    tooltip: t("fieldlookup"),
-                    iconCls: "pimcore_material_fieldlookup pimcore_material_icon",
-                    scale: "medium",
-                    handler: function() {
-                        var object = this.edit.object;
-                        var config = {
-                            classid: object.data.general.o_classId
-                        }
-                        var dialog = new pimcore.object.fieldlookup.filterdialog(config, null, object);
-                        dialog.show();
-                    }.bind(this)
-                });
-            }
-
 
             if (this.data.hasPreview) {
                 buttons.push("-");
@@ -529,7 +504,7 @@ pimcore.object.object = Class.create(pimcore.object.abstract, {
                     scale: "medium",
                     handler: function () {
                         var date = new Date();
-                        var path = Routing.generate('pimcore_admin_dataobject_dataobject_preview', {id: this.data.general.o_id, time: date.getTime()});
+                        var path = "/admin/object/preview?id=" + this.data.general.o_id + "&time=" + date.getTime();
                         this.saveToSession(function () {
                             window.open(path);
                         });
@@ -556,7 +531,7 @@ pimcore.object.object = Class.create(pimcore.object.abstract, {
             buttons.push("-");
             buttons.push({
                 xtype: 'tbtext',
-                text: t(this.data.general.o_className),
+                text: ts(this.data.general.o_className),
                 scale: "medium"
             });
 
@@ -667,22 +642,20 @@ pimcore.object.object = Class.create(pimcore.object.abstract, {
         return data;
     },
 
-    close: function() {
-        var tabPanel = Ext.getCmp("pimcore_panel_tabs");
-        tabPanel.remove(this.tab);
-    },
-
     saveClose: function (only) {
-        this.save(null, only, function () {
-            this.close();
-        }.bind(this))
+        if (this.save()) {
+            var tabPanel = Ext.getCmp("pimcore_panel_tabs");
+            tabPanel.remove(this.tab);
+        }
     },
 
     publishClose: function () {
         this.publish(null, function () {
-            this.close();
+            var tabPanel = Ext.getCmp("pimcore_panel_tabs");
+            tabPanel.remove(this.tab);
         }.bind(this))
     },
+
 
     publish: function (only, callback) {
         return this.save("publish", only, callback, function (rdata) {
@@ -702,28 +675,26 @@ pimcore.object.object = Class.create(pimcore.object.abstract, {
         }.bind(this));
     },
 
-    unpublish: function (only, callback) {
-        this.save("unpublish", only, callback, function (rdata) {
-            if (rdata && rdata.success) {
-                this.data.general.o_published = false;
+    unpublish: function () {
+        this.data.general.o_published = false;
 
-                // toggle buttons
-                this.toolbarButtons.unpublish.hide();
-                this.toolbarButtons.save.show();
+        if (this.save("unpublish")) {
+            // toggle buttons
+            this.toolbarButtons.unpublish.hide();
+            this.toolbarButtons.save.show();
 
-                pimcore.elementservice.setElementPublishedState({
-                    elementType: "object",
-                    id: this.id,
-                    published: false
-                });
-            }
-        }.bind(this))
+            pimcore.elementservice.setElementPublishedState({
+                elementType: "object",
+                id: this.id,
+                published: false
+            });
+        }
     },
 
     unpublishClose: function () {
-        this.unpublish(null, function () {
-            this.close();
-        }.bind(this));
+        this.unpublish();
+        var tabPanel = Ext.getCmp("pimcore_panel_tabs");
+        tabPanel.remove(this.tab);
     },
 
     saveToSession: function (callback) {
@@ -748,6 +719,16 @@ pimcore.object.object = Class.create(pimcore.object.abstract, {
         var saveData = this.getSaveData(only, omitMandatoryCheck);
 
         if (saveData && saveData.data != false && saveData.data != "false") {
+
+            // check for version notification
+            if (this.newerVersionNotification) {
+                if (task == "publish" || task == "unpublish") {
+                    this.newerVersionNotification.hide();
+                } else if (task != "session") {
+                    this.newerVersionNotification.show();
+                }
+            }
+
             try {
                 pimcore.plugin.broker.fireEvent('preSaveObject', this, 'object');
             } catch (e) {
@@ -765,7 +746,7 @@ pimcore.object.object = Class.create(pimcore.object.abstract, {
             }
 
             Ext.Ajax.request({
-                url: Routing.generate('pimcore_admin_dataobject_dataobject_save', {task: task}),
+                url: '/admin/object/save?task=' + task,
                 method: "PUT",
                 params: saveData,
                 success: function (response) {
@@ -773,24 +754,16 @@ pimcore.object.object = Class.create(pimcore.object.abstract, {
                         try {
                             var rdata = Ext.decode(response.responseText);
                             if (typeof successCallback == 'function') {
-                                // the successCallback function retrieves response data information
+                                //the successCallback function retrieves response data information
                                 successCallback(rdata);
                             }
                             if (rdata && rdata.success) {
-                                // check for version notification
-                                if (this.newerVersionNotification) {
-                                    if (task == "publish" || task == "unpublish") {
-                                        this.newerVersionNotification.hide();
-                                    } else {
-                                        this.newerVersionNotification.show();
-                                    }
-                                }
-
-                                pimcore.helpers.showNotification(t("success"), t("saved_successfully"), "success");
+                                pimcore.helpers.showNotification(t("success"), t("saved_successfully"),
+                                    "success");
                                 this.resetChanges();
                                 Ext.apply(this.data.general, rdata.general);
 
-                                pimcore.helpers.updateTreeElementStyle('object', this.id, rdata.treeData);
+                                pimcore.helpers.updateObjectStyle(this.id, rdata.treeData);
                                 pimcore.plugin.broker.fireEvent("postSaveObject", this);
 
                                 // for internal use ID.
@@ -812,12 +785,14 @@ pimcore.object.object = Class.create(pimcore.object.abstract, {
                         }
                     }
 
+
                     this.tab.unmask();
 
                     if (typeof callback == "function") {
                         callback();
                     }
-                }.bind(this),
+
+                }.bind(this).bind(successCallback),
                 failure: function (response) {
                     this.tab.unmask();
                 }.bind(this)
@@ -829,6 +804,7 @@ pimcore.object.object = Class.create(pimcore.object.abstract, {
         }
         return false;
     },
+
 
     remove: function () {
         var options = {
@@ -849,7 +825,7 @@ pimcore.object.object = Class.create(pimcore.object.abstract, {
         // Reload layout when explicitly set to false
         if (params['layoutId'] === false) {
             params['layoutId'] = null;
-        } else if (params['layoutId'] !== 0 && !params['layoutId']) {
+        } else if (!params['layoutId']) {
             params['layoutId'] = this.data.currentLayoutId;
         }
 

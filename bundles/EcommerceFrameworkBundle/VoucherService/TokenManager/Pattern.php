@@ -43,7 +43,7 @@ class Pattern extends AbstractTokenManager implements ExportableTokenManagerInte
     protected $characterPools = [
         'alphaNumeric' => '123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ',
         'numeric' => '123456789',
-        'alpha' => 'abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ',
+        'alpha' => 'abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ'
     ];
 
     public function __construct(AbstractVoucherTokenType $configuration)
@@ -214,7 +214,7 @@ class Pattern extends AbstractTokenManager implements ExportableTokenManagerInte
             'usageCount' => $usageCount,
             'freeCount' => $overallCount - $usageCount - $reservedTokenCount,
             'reservedCount' => $reservedTokenCount,
-            'usage' => $usage,
+            'usage' => $usage
         ];
     }
 
@@ -376,14 +376,12 @@ class Pattern extends AbstractTokenManager implements ExportableTokenManagerInte
         if (!empty($check)) {
             return true;
         }
-
-        return false;
     }
 
     /**
      * Builds an insert query for an array of tokens.
      *
-     * @param array $insertTokens
+     * @param $insertTokens
      *
      * @return string
      */
@@ -391,9 +389,8 @@ class Pattern extends AbstractTokenManager implements ExportableTokenManagerInte
     {
         $query = 'INSERT INTO ' . Token\Dao::TABLE_NAME . '(token,length,voucherSeriesId) ';
         $finalLength = $this->getFinalTokenLength();
-        $insertParts = [];
 
-        if (count($insertTokens) > 0) {
+        if (sizeof($insertTokens) > 0) {
             foreach ($insertTokens as $token) {
                 $insertParts[] =
                     "('" .
@@ -451,7 +448,6 @@ class Pattern extends AbstractTokenManager implements ExportableTokenManagerInte
                         $checkTokenCount++;
                     }
                 } else {
-                    $token = null;
                     $checkTokenCount++;
                 }
 
@@ -490,7 +486,7 @@ class Pattern extends AbstractTokenManager implements ExportableTokenManagerInte
             }
 
             // If there are tokens to insert add them to query.
-            if (count($insertTokens)) {
+            if (sizeof($insertTokens)) {
                 $resultTokenSet[] = $insertTokens;
             }
 
@@ -504,7 +500,7 @@ class Pattern extends AbstractTokenManager implements ExportableTokenManagerInte
      * Creates an array with the indices of days of the given usage period.
      *
      * @param array $data
-     * @param int $usagePeriod
+     * @param $usagePeriod
      */
     protected function prepareUsageStatisticData(&$data, $usagePeriod)
     {
@@ -521,7 +517,7 @@ class Pattern extends AbstractTokenManager implements ExportableTokenManagerInte
     /**
      * Prepares the view and returns the according template for rendering.
      *
-     * @param array $viewParamsBag
+     * @param $viewParamsBag
      * @param array $params
      *
      * @return string
@@ -551,7 +547,7 @@ class Pattern extends AbstractTokenManager implements ExportableTokenManagerInte
             $paginator->setCurrentPageNumber($params['page']);
 
             $viewParamsBag['paginator'] = $paginator;
-            $viewParamsBag['count'] = count($tokens);
+            $viewParamsBag['count'] = sizeof($tokens);
         } else {
             $viewParamsBag['msg']['result'] = 'bundle_ecommerce_voucherservice_msg-error-token-noresult';
         }
@@ -605,7 +601,7 @@ class Pattern extends AbstractTokenManager implements ExportableTokenManagerInte
                 'token' => $token->getToken(),
                 'usages' => $token->getUsages(),
                 'length' => $token->getLength(),
-                'timestamp' => $token->getTimestamp(),
+                'timestamp' => $token->getTimestamp()
             ];
         }
 
@@ -628,7 +624,7 @@ class Pattern extends AbstractTokenManager implements ExportableTokenManagerInte
      * Checks whether an index for the given name parameter exists in
      * the character pool member array.
      *
-     * @param string $poolName
+     * @param $poolName
      *
      * @return bool
      */

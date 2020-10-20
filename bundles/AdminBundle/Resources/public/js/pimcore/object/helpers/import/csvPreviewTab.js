@@ -85,6 +85,7 @@ pimcore.object.helpers.import.csvPreviewTab = Class.create({
 
                         handler: function (dataStore, grid, rowIndex, colIndex) {
                             if (!this.hasHeadline.getValue() || rowIndex > 0) {
+                                var rec = dataStore.getAt(rowIndex);
                                 this.callback.preview(rowIndex);
                             }
                         }.bind(this, dataStore)

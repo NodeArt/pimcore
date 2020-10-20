@@ -14,7 +14,6 @@
 
 namespace Pimcore\Bundle\EcommerceFrameworkBundle\Model;
 
-use Pimcore\Bundle\EcommerceFrameworkBundle\Exception\UnsupportedException;
 use Pimcore\Logger;
 
 class DefaultMockup implements ProductInterface
@@ -45,7 +44,7 @@ class DefaultMockup implements ProductInterface
     }
 
     /**
-     * @param string $key
+     * @param $key
      *
      * @return mixed
      */
@@ -55,7 +54,7 @@ class DefaultMockup implements ProductInterface
     }
 
     /**
-     * @param array $params
+     * @param mixed $params
      *
      * @return $this
      */
@@ -182,18 +181,5 @@ class DefaultMockup implements ProductInterface
     public function getOSProductNumber()
     {
         return $this->__call('getOSProductNumber', []);
-    }
-
-    /**
-     * returns array of categories.
-     * has to be overwritten either in pimcore object or mapped sub class.
-     *
-     * @throws UnsupportedException
-     *
-     * @return array
-     */
-    public function getCategories()
-    {
-        return $this->__call('getCategories', []);
     }
 }

@@ -14,9 +14,6 @@
 
 namespace Pimcore\Tool;
 
-/**
- * @deprecated since version 6.8 and will be removed in 7.0.
- */
 class HybridAuth
 {
     /**
@@ -24,11 +21,6 @@ class HybridAuth
      */
     public static function init()
     {
-        @trigger_error(
-            'Class ' . self::class . ' is deprecated since version 6.8 and will be removed in 7.0. ' .
-            E_USER_DEPRECATED
-        );
-
         $cacheService = \Pimcore::getContainer()->get('pimcore.event_listener.frontend.full_page_cache');
         $cacheService->disable('HybridAuth');
     }

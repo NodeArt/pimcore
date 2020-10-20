@@ -30,9 +30,6 @@ use Pimcore\Model\DataObject\OnlineShopOrder;
 use Pimcore\Model\DataObject\OnlineShopOrderItem;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-/**
- * @deprecated since v6.8.0 and will be moved to package "pimcore/payment-payu" in Pimcore 7.
- */
 class PayU extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrameworkBundle\PaymentManager\V7\Payment\PaymentInterface
 {
     const ORDER_URL = 'https://secure%s.payu.com/api/v2_1/orders';
@@ -104,7 +101,7 @@ class PayU extends AbstractPayment implements \Pimcore\Bundle\EcommerceFramework
             'pos_id',
             'md5_key',
             'oauth_client_id',
-            'oauth_client_secret',
+            'oauth_client_secret'
         ]);
 
         $resolver
@@ -168,10 +165,10 @@ class PayU extends AbstractPayment implements \Pimcore\Bundle\EcommerceFramework
         $orderData['customerIp'] = $config['customerIp'];
         $orderData['merchantPosId'] = $this->posId;
         $orderData['buyer'] = [
-            'email' => $order->getCustomer()->getEmail(),
+            'email' => $order->getCustomer()->getEmail()
         ];
         $orderData['currencyCode'] = $price->getCurrency()->getShortName();
-        $orderData['totalAmount'] = (string) (round($price->getAmount()->asNumeric(), 2) * 100);
+        $orderData['totalAmount'] = (string) round($price->getAmount()->asNumeric(), 2) * 100;
         $orderData['products'] = $this->setProducts($order->getItems());
 
         $orderData = $this->setAdditionalData($orderData);
@@ -198,7 +195,7 @@ class PayU extends AbstractPayment implements \Pimcore\Bundle\EcommerceFramework
             $product = $item->getProduct();
 
             $products[$key]['name'] = $product->getName();
-            $products[$key]['unitPrice'] = (string) (round($product->getOSPrice()->getAmount()->asNumeric(), 2) * 100);
+            $products[$key]['unitPrice'] = (string) round($product->getOSPrice()->getAmount()->asNumeric(), 2) * 100;
             $products[$key]['quantity'] = $item->getAmount();
         }
 
@@ -215,7 +212,7 @@ class PayU extends AbstractPayment implements \Pimcore\Bundle\EcommerceFramework
         $response = $this->client->post($this->authorizeUrl, ['form_params' => [
             'grant_type' => 'client_credentials',
             'client_id' => $this->oauthClientId,
-            'client_secret' => $this->oauthClientSecret,
+            'client_secret' => $this->oauthClientSecret
         ]]);
 
         $response = \GuzzleHttp\json_decode($response->getBody()->getContents());
@@ -238,11 +235,11 @@ class PayU extends AbstractPayment implements \Pimcore\Bundle\EcommerceFramework
     {
         $response = $this->client->post($this->orderUrl, [
             'headers' => [
-                'Authorization' => 'Bearer ' . $this->accessToken,
+                'Authorization' => 'Bearer ' . $this->accessToken
             ],
             'json' => $order,
             'allow_redirects' => false,
-            'http_errors' => false,
+            'http_errors' => false
         ]);
 
         $response = \GuzzleHttp\json_decode($response->getBody()->getContents());
@@ -284,11 +281,11 @@ class PayU extends AbstractPayment implements \Pimcore\Bundle\EcommerceFramework
             'totalAmount' => null,
             'currencyCode' => null,
             'status' => null,
-            'order' => null,
+            'order' => null
         ];
 
         $authorizedData = [
-            'orderId' => null,
+            'orderId' => null
         ];
 
         // check fields
@@ -343,7 +340,7 @@ class PayU extends AbstractPayment implements \Pimcore\Bundle\EcommerceFramework
                 AbstractOrder::ORDER_STATE_COMMITTED,
                 [
                     'payu_PaymentType' => $response['payMethod']['type'],
-                    'payu_amount' => (string) $price,
+                    'payu_amount' => (string) $price
                 ]
             );
         } else {

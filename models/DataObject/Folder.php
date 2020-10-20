@@ -43,7 +43,7 @@ class Folder extends AbstractObject
     }
 
     /**
-     * @param bool|null $isUpdate
+     * @param null $isUpdate
      * @param array $params additional parameters (e.g. "versionNote" for the version note)
      *
      * @throws \Exception
@@ -57,12 +57,12 @@ class Folder extends AbstractObject
     /**
      * @inheritdoc
      */
-    public function delete()
+    public function delete(bool $isNested = false)
     {
         if ($this->getId() == 1) {
             throw new \Exception('root-node cannot be deleted');
         }
 
-        parent::delete();
+        parent::delete($isNested);
     }
 }

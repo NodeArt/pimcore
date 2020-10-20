@@ -28,6 +28,7 @@ The `PimcoreCoreBundle` defines a default cache configuration which you can over
 
 pimcore:
     cache:
+        enabled:              true
         pool_service_id:      null
         default_lifetime:     2419200
         pools:
@@ -109,21 +110,34 @@ If you don't need the transactional tagging functionality as used in the core yo
 integrated with Pimcore's cache clearing functionality.
  
 #### Example of custom usage in an action
-```php
+```php 
 $lifetime = 99999;
+$uri = "http://www.pimcore.org/...";
 $cacheKey = md5($uri);
 if(!$data = \Pimcore\Cache::load($cacheKey)) {
-    $data = \Pimcore\Tool::getHttpData('http://www.pimcore.org/...');
-    \Pimcore\Cache::save(
-        $data,
-        $cacheKey,
-        ["output","tag1","tag2"],
-        $lifetime);
+ 
+    $httpClient = \Pimcore\Tool::getHttpClient();
+    $httpClient->setUri($uri);
+ 
+    try {
+        $response = $httpClient->request();
+ 
+        if($response->isSuccessful()) {
+            $data = $response->getBody();
+            \Pimcore\Cache::save(
+                $data,
+                $cacheKey,
+                ["output","tag1","tag2"],
+                $lifetime);
+        }
+    } catch (Exception $e) {
+        die("Something went wrong, ... sorry");
+    }
 }
 ```
 
 #### Overview of functionalities
-```php
+```php 
 // disable the cache globally
 \Pimcore\Cache::disable();
  

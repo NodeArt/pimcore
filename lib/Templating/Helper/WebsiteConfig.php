@@ -21,9 +21,6 @@ use Pimcore\Config;
 use Pimcore\Http\RequestHelper;
 use Symfony\Component\Templating\Helper\Helper;
 
-/**
- * @deprecated
- */
 class WebsiteConfig extends Helper
 {
     /**

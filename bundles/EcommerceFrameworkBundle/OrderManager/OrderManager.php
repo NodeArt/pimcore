@@ -31,7 +31,6 @@ use Pimcore\Bundle\EcommerceFrameworkBundle\Type\Decimal;
 use Pimcore\Bundle\EcommerceFrameworkBundle\VoucherService\VoucherServiceInterface;
 use Pimcore\File;
 use Pimcore\Logger;
-use Pimcore\Model\DataObject\AbstractObject;
 use Pimcore\Model\DataObject\Folder;
 use Pimcore\Model\DataObject\Service;
 use Pimcore\Model\FactoryInterface;
@@ -120,7 +119,7 @@ class OrderManager implements OrderManagerInterface
             'order_item_class' => '\\Pimcore\\Model\\DataObject\\OnlineShopOrderItem',
             'list_class' => Listing::class,
             'list_item_class' => Listing\Item::class,
-            'parent_order_folder' => '/order/%Y/%m/%d',
+            'parent_order_folder' => '/order/%Y/%m/%d'
         ]);
 
         foreach ($classProperties as $classProperty) {
@@ -132,7 +131,7 @@ class OrderManager implements OrderManagerInterface
      * Sets the model factory. For BC, this is currently added as extra method call. The required annotation
      * makes sure this is called via autowiring.
      *
-     * TODO Pimcore 7 set modelFactory as constructor dependency
+     * TODO Pimcore 6 set modelFactory as constructor dependency
      *
      * @required
      *
@@ -317,13 +316,7 @@ class OrderManager implements OrderManagerInterface
 
             $order->setOrdernumber($tempOrdernumber);
             $order->setOrderdate(new \DateTime());
-
-            $cartId = $this->createCartId($cart);
-            if (strlen($cartId) > 190) {
-                throw new \Exception('CartId cannot be longer than 190 characters');
-            }
-
-            $order->setCartId($cartId);
+            $order->setCartId($this->createCartId($cart));
         }
 
         // check if pending payment. if one, do not update order from cart
@@ -345,13 +338,6 @@ class OrderManager implements OrderManagerInterface
             $modificationItem->setName($modification->getDescription() ? $modification->getDescription() : $name);
             $modificationItem->setAmount($modification->getGrossAmount()->asString());
             $modificationItem->setNetAmount($modification->getNetAmount()->asString());
-
-            if ($rule = $modification->getRule()) {
-                $modificationItem->setPricingRuleId($rule->getId());
-            } else {
-                $modificationItem->setPricingRuleId(null);
-            }
-
             $modificationItems->add($modificationItem);
         }
 
@@ -538,13 +524,14 @@ class OrderManager implements OrderManagerInterface
      *
      * @param string $customerId
      * @param PaymentInterface $paymentProvider
-     * @param string|null $paymentMethod
+     * @param null $paymentMethod
+     * @param null|int $limit
      * @param string $orderId
      *
      * @throws ProviderNotFoundException
      * @throws \Exception
      *
-     * @return \Pimcore\Model\DataObject\Listing\Concrete
+     * @return false|\Pimcore\Model\DataObject\Listing\Concrete
      */
     public function getRecurringPaymentSourceOrderList(string $customerId, PaymentInterface $paymentProvider, $paymentMethod = null, $orderId = '')
     {
@@ -576,7 +563,7 @@ class OrderManager implements OrderManagerInterface
      *
      * @param string $customerId
      * @param PaymentInterface $paymentProvider
-     * @param string|null $paymentMethod
+     * @param null $paymentMethod
      *
      * @return mixed
      */
@@ -623,7 +610,7 @@ class OrderManager implements OrderManagerInterface
 
     /**
      * @param CartItemInterface $item
-     * @param AbstractObject $parent
+     * @param $parent
      * @param bool $isGiftItem
      *
      * @return AbstractOrderItem
@@ -711,7 +698,7 @@ class OrderManager implements OrderManagerInterface
             $taxArray[] = [
                 $taxEntry->getEntry()->getName(),
                 $taxEntry->getPercent() . '%',
-                $taxEntry->getAmount()->asString(),
+                $taxEntry->getAmount()->asString()
             ];
         }
 
@@ -741,9 +728,9 @@ class OrderManager implements OrderManagerInterface
     /**
      * Build list class name, try namespaced first and fall back to legacy naming
      *
-     * @param string $className
+     * @param $className
      *
-     * @return string
+     * @return mixed
      *
      * @throws \Exception
      */

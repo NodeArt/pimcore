@@ -97,8 +97,10 @@ class MultiCartManager implements CartManagerInterface
 
     protected function initSavedCarts()
     {
+        $classname = $this->getCartClassName();
+
         /* @var CartInterface[] $carts */
-        $carts = $this->getAllCartsForCurrentUser();
+        $carts = $classname::getAllCartsForUser($this->environment->getCurrentUserId());
 
         if (empty($carts)) {
             $this->carts = [];
@@ -110,13 +112,13 @@ class MultiCartManager implements CartManagerInterface
                     $this->carts[$cart->getId()] = $cart;
 
                     if ($cart instanceof AbstractCart) {
-                        $cart->setCurrentReadonlyMode($this->cartFactory->getCartReadOnlyMode());
+                        $cart->setCurrentReadOnlyMode($this->cartFactory->getCartReadOnlyMode());
                     }
                 } else {
                     // cart is already committed - cleanup cart and environment
                     $this->logger->warning('Deleting cart with id {cartId} because linked order {orderId} is already committed.', [
                         'cartId' => $cart->getId(),
-                        'orderId' => $order->getId(),
+                        'orderId' => $order->getId()
                     ]);
 
                     $cart->delete();
@@ -129,24 +131,14 @@ class MultiCartManager implements CartManagerInterface
     }
 
     /**
-     * @return CartInterface[]|null
-     */
-    protected function getAllCartsForCurrentUser()
-    {
-        $classname = $this->getCartClassName();
-
-        return $classname::getAllCartsForUser($this->environment->getCurrentUserId());
-    }
-
-    /**
      * @param CheckoutableInterface $product
      * @param float $count
-     * @param string|null $key
-     * @param string|null $itemKey
+     * @param null $key
+     * @param null $itemKey
      * @param bool $replace
      * @param array $params
      * @param array $subProducts
-     * @param string|null $comment
+     * @param null $comment
      *
      * @return null|string
      *
@@ -189,7 +181,7 @@ class MultiCartManager implements CartManagerInterface
     }
 
     /**
-     * @param string|null $key
+     * @param null $key
      */
     public function deleteCart($key = null)
     {
@@ -210,9 +202,7 @@ class MultiCartManager implements CartManagerInterface
     {
         $this->checkForInit();
 
-        $cartId = $params['id'] ?? null;
-
-        if ($cartId && isset($this->carts[$cartId])) {
+        if (array_key_exists($params['id'], $this->carts)) {
             throw new InvalidConfigException('Cart with id ' . $params['id'] . ' already exists.');
         }
 
@@ -220,7 +210,7 @@ class MultiCartManager implements CartManagerInterface
             throw new InvalidConfigException('Cart name is missing');
         }
 
-        $cart = $this->cartFactory->create($this->environment, (string)$params['name'], $cartId, $params);
+        $cart = $this->cartFactory->create($this->environment, (string)$params['name'], $params['id'] ?? null, $params);
         $cart->save();
 
         $this->carts[$cart->getId()] = $cart;
@@ -229,7 +219,7 @@ class MultiCartManager implements CartManagerInterface
     }
 
     /**
-     * @param string|null $key
+     * @param null $key
      *
      * @throws InvalidConfigException
      */
@@ -248,7 +238,7 @@ class MultiCartManager implements CartManagerInterface
     }
 
     /**
-     * @param string|null $key
+     * @param null $key
      *
      * @return CartInterface
      *
@@ -296,7 +286,7 @@ class MultiCartManager implements CartManagerInterface
 
         if (empty($cart)) {
             $cartKey = $this->createCart([
-                'name' => $name,
+                'name' => $name
             ]);
             $cart = $this->getCart($cartKey);
         }
@@ -316,7 +306,7 @@ class MultiCartManager implements CartManagerInterface
 
     /**
      * @param string $itemKey
-     * @param string|null $key
+     * @param null $key
      *
      * @throws InvalidConfigException
      */

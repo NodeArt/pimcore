@@ -18,7 +18,6 @@
 namespace Pimcore\DataObject\GridColumnConfig\Operator;
 
 use Pimcore\DataObject\GridColumnConfig\ConfigElementInterface;
-use Pimcore\Tool;
 
 abstract class AbstractOperator implements OperatorInterface
 {
@@ -78,13 +77,5 @@ abstract class AbstractOperator implements OperatorInterface
     public function setLabel($label)
     {
         $this->label = $label;
-    }
-
-    /**
-     * @return string[]
-     */
-    public function getValidLanguages()
-    {
-        return Tool::getValidLanguages();
     }
 }

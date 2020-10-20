@@ -22,7 +22,7 @@ class ImageChart
     public static $serviceUrl = 'https://chart.googleapis.com/chart';
 
     /**
-     * @param array $data
+     * @param $data
      * @param string $parameters
      *
      * @return string

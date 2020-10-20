@@ -33,8 +33,8 @@ class GridConfigShare extends AbstractModel
     public $sharedWithUserId;
 
     /**
-     * @param int $gridConfigId
-     * @param int $sharedWithUserId
+     * @param $gridConfigId
+     * @param $sharedWithUserId
      *
      * @return GridConfigShare
      */

@@ -31,7 +31,7 @@ class DataObjects extends Elements implements DataProviderInterface
     protected $service;
 
     /**
-     * @var array
+     * @var string[]
      */
     protected $exportIds = [];
 
@@ -192,7 +192,7 @@ class DataObjects extends Elements implements DataProviderInterface
         if ($sortingSettings['orderKey']) {
             // we need a special mapping for classname as this is stored in subtype column
             $sortMapping = [
-                'classname' => 'subtype',
+                'classname' => 'subtype'
             ];
 
             $sort = $sortingSettings['orderKey'];
@@ -213,8 +213,9 @@ class DataObjects extends Elements implements DataProviderInterface
             if ($element instanceof Concrete) {
                 $data = \Pimcore\Model\DataObject\Service::gridObjectData($element);
                 $data['__gdprIsDeletable'] = $this->config['classes'][$element->getClassName()]['allowDelete'];
-                $elements[] = $data;
             }
+
+            $elements[] = $data;
         }
 
         // only get the real total-count when the limit parameter is given otherwise use the default limit

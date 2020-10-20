@@ -239,7 +239,7 @@ pimcore.settings.translation.word = Class.create({
         }
 
         Ext.Ajax.request({
-            url: Routing.generate('pimcore_admin_translation_contentexportjobs'),
+            url: "/admin/translation/content-export-jobs",
             method: 'POST',
             params: {
                 source: this.exportSourceLanguageSelector.getValue(),
@@ -256,12 +256,12 @@ pimcore.settings.translation.word = Class.create({
                 this.exportProgressWin = new Ext.Window({
                     title: t("export"),
                     layout:'fit',
-                    width:200,
+                    width:500,
                     bodyStyle: "padding: 10px;",
                     closable:false,
                     plain: true,
-                    items: [this.exportProgressbar],
-                    listeners: pimcore.helpers.getProgressWindowListeners()
+                    modal: true,
+                    items: [this.exportProgressbar]
                 });
 
                 this.exportProgressWin.show();
@@ -276,7 +276,7 @@ pimcore.settings.translation.word = Class.create({
                         this.exportProgressbar = null;
                         this.exportProgressWin = null;
 
-                        pimcore.helpers.download(Routing.generate('pimcore_admin_translation_wordexportdownload', {id: id}));
+                        pimcore.helpers.download('/admin/translation/word-export-download?id='+ id);
                     }.bind(this, res.id),
                     update: function (currentStep, steps, percent) {
                         if(this.exportProgressbar) {

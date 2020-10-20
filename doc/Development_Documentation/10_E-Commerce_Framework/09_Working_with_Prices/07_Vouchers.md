@@ -44,7 +44,6 @@ not all other conditions of the pricing rule are met.
 
 #### Allow the User to Add a Token to his Cart
 A voucher token is always applied to a cart. To do so, use following snippet. 
-
 ```php
 <?php
 
@@ -60,8 +59,8 @@ if($token = strip_tags($request->get('voucher-code'))) {
         $this->addFlash('danger', $translator->trans('cart.error-voucher-code-' . $e->getCode()));
     }
 }
-```
 
+```
 ##### Error Codes of Exceptions thrown
 
 | Code | Description |
@@ -97,7 +96,7 @@ for each added token with following information:
 
 See an sample snippet to display the voucher information to the customer:
 
-```twig
+```twig 
 <form method="post" action="{{ path('shop-cart-apply-voucher') }}" class="card p-2 mb-4">
 
     {% if(cart.pricingManagerTokenInformationDetails | length > 0) %}
@@ -143,3 +142,4 @@ See an sample snippet to display the voucher information to the customer:
     </div>
 </form>
 ```
+ 

@@ -32,7 +32,7 @@ pimcore.object.tags.consent = Class.create(pimcore.object.tags.abstract, {
 
     getGridColumnConfig:function (field) {
         var columnConfig = {
-            text: t(field.label),
+            text: ts(field.label),
             dataIndex: field.key,
             renderer:function (key, value, metaData, record, rowIndex, colIndex, store) {
                 var key = field.key;
@@ -105,7 +105,7 @@ pimcore.object.tags.consent = Class.create(pimcore.object.tags.abstract, {
             combineErrors: false,
             width: width,
             items: [this.checkBox, this.textLabel],
-            componentCls: "object_field object_field_type_" + this.type,
+            componentCls: "object_field",
             isDirty: function() {
                 return this.checkBox.isDirty()
             }.bind(this)
@@ -129,5 +129,10 @@ pimcore.object.tags.consent = Class.create(pimcore.object.tags.abstract, {
 
     getName:function () {
         return this.fieldConfig.name;
+    },
+
+    isInvalidMandatory:function () {
+        return false;
     }
+
 });

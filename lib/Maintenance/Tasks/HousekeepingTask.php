@@ -20,60 +20,35 @@ use Pimcore\Maintenance\TaskInterface;
 final class HousekeepingTask implements TaskInterface
 {
     /**
-     * @var int
-     */
-    protected $tmpFileTime;
-
-    /**
-     * @var int
-     */
-    protected $profilerTime;
-
-    /**
-     * @param int $tmpFileTime
-     * @param int $profilerTime
-     */
-    public function __construct(int $tmpFileTime, int $profilerTime)
-    {
-        $this->tmpFileTime = $tmpFileTime;
-        $this->profilerTime = $profilerTime;
-    }
-
-    /**
      * {@inheritdoc}
      */
     public function execute()
     {
-        $this->deleteFilesInFolderOlderThanSeconds(PIMCORE_TEMPORARY_DIRECTORY, $this->tmpFileTime);
+        $this->deleteFilesInFolderOlderThanDays(PIMCORE_TEMPORARY_DIRECTORY, 90);
 
         $environments = Config::getEnvironmentConfig()->getProfilerHousekeepingEnvironments();
 
         foreach ($environments as $environment) {
-            $profilerDir = sprintf('%s/%s/profiler', PIMCORE_SYMFONY_CACHE_DIRECTORY, $environment);
+            $profilerDir = sprintf('%s/cache/%s/profiler', PIMCORE_PRIVATE_VAR, $environment);
 
-            $this->deleteFilesInFolderOlderThanSeconds($profilerDir, $this->profilerTime);
+            $this->deleteFilesInFolderOlderThanDays($profilerDir, 4);
         }
     }
 
     /**
-     * @param string $folder
-     * @param int $seconds
+     * @param $folder
+     * @param $days
      */
-    protected function deleteFilesInFolderOlderThanSeconds($folder, $seconds)
+    protected function deleteFilesInFolderOlderThanDays($folder, $days)
     {
         if (!is_dir($folder)) {
             return;
         }
 
         $directory = new \RecursiveDirectoryIterator($folder);
-        $filter = new \RecursiveCallbackFilterIterator($directory, function (\SplFileInfo $current, $key, $iterator) use ($seconds) {
-            if (strpos($current->getFilename(), '-low-quality-preview.svg')) {
-                // do not delete low quality image previews
-                return false;
-            }
-
+        $filter = new \RecursiveCallbackFilterIterator($directory, function (\SplFileInfo $current, $key, $iterator) use ($days) {
             if ($current->isFile()) {
-                if ($current->getATime() && $current->getATime() < (time() - $seconds)) {
+                if ($current->getATime() && $current->getATime() < (time() - ($days * 86400))) {
                     return true;
                 }
             } else {

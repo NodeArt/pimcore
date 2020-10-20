@@ -22,7 +22,6 @@ use Pimcore\Model\Element\Service;
 
 /**
  * @method \Pimcore\Model\Property\Dao getDao()
- * @method void save()
  */
 class Property extends AbstractModel
 {
@@ -315,7 +314,7 @@ class Property extends AbstractModel
             $key = $elementType . '_' . $this->getData()->getId();
             $dependencies[$key] = [
                 'id' => $this->getData()->getId(),
-                'type' => $elementType,
+                'type' => $elementType
             ];
         }
 

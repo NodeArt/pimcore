@@ -24,15 +24,13 @@ use Zend\Paginator\AdapterAggregateInterface;
 
 /**
  * @method Document[] load()
- * @method Document current()
  * @method int getTotalCount()
  * @method int getCount()
  * @method int[] loadIdList()
  * @method \Pimcore\Model\Document\Listing\Dao getDao()
  * @method onCreateQuery(callable $callback)
- * @method array loadIdPathList()
  */
-class Listing extends Model\Listing\AbstractListing implements AdapterInterface, AdapterAggregateInterface
+class Listing extends Model\Listing\AbstractListing implements \Iterator, AdapterInterface, AdapterAggregateInterface
 {
     /**
      * Return all documents as Type Document. eg. for trees an so on there isn't the whole data required
@@ -43,8 +41,6 @@ class Listing extends Model\Listing\AbstractListing implements AdapterInterface,
 
     /**
      * @var array|null
-     *
-     * @deprecated use getter/setter methods or $this->data
      */
     protected $documents = null;
 
@@ -53,17 +49,16 @@ class Listing extends Model\Listing\AbstractListing implements AdapterInterface,
      */
     public $unpublished = false;
 
-    public function __construct()
-    {
-        $this->documents = & $this->data;
-    }
-
     /**
      * @return Document[]
      */
     public function getDocuments()
     {
-        return $this->getData();
+        if ($this->documents === null) {
+            $this->getDao()->load();
+        }
+
+        return $this->documents;
     }
 
     /**
@@ -73,7 +68,9 @@ class Listing extends Model\Listing\AbstractListing implements AdapterInterface,
      */
     public function setDocuments($documents)
     {
-        return $this->setData($documents);
+        $this->documents = $documents;
+
+        return $this;
     }
 
     /**
@@ -89,9 +86,9 @@ class Listing extends Model\Listing\AbstractListing implements AdapterInterface,
     /**
      * Set the unpublished flag for the document.
      *
-     * @param bool $unpublished
+     * @param $unpublished
      *
-     * @return $this
+     * @return bool
      */
     public function setUnpublished($unpublished)
     {
@@ -141,7 +138,7 @@ class Listing extends Model\Listing\AbstractListing implements AdapterInterface,
      * @param int $offset
      * @param int $itemCountPerPage
      *
-     * @return Document[]
+     * @return Listing
      */
     public function getItems($offset, $itemCountPerPage)
     {
@@ -157,5 +154,70 @@ class Listing extends Model\Listing\AbstractListing implements AdapterInterface,
     public function getPaginatorAdapter()
     {
         return $this;
+    }
+
+    /**
+     * Methods for Iterator
+     */
+
+    /**
+     * Rewind the listing back to te start.
+     */
+    public function rewind()
+    {
+        $this->getDocuments();
+        reset($this->documents);
+    }
+
+    /**
+     * Returns the current listing row.
+     *
+     * @return Document
+     */
+    public function current()
+    {
+        $this->getDocuments();
+        $var = current($this->documents);
+
+        return $var;
+    }
+
+    /**
+     * Returns the current listing row key.
+     *
+     * @return mixed
+     */
+    public function key()
+    {
+        $this->getDocuments();
+        $var = key($this->documents);
+
+        return $var;
+    }
+
+    /**
+     * Returns the next listing row key.
+     *
+     * @return mixed
+     */
+    public function next()
+    {
+        $this->getDocuments();
+        $var = next($this->documents);
+
+        return $var;
+    }
+
+    /**
+     * Checks whether the listing contains more entries.
+     *
+     * @return bool
+     */
+    public function valid()
+    {
+        $this->getDocuments();
+        $var = $this->current() !== false;
+
+        return $var;
     }
 }

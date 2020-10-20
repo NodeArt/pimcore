@@ -21,13 +21,11 @@ use Pimcore\Model;
 
 /**
  * @method \Pimcore\Model\Tool\Email\Blacklist\Dao getDao()
- * @method \Pimcore\Model\Tool\Email\Blacklist\Dao delete()
- * @method \Pimcore\Model\Tool\Email\Blacklist\Dao save()
  */
 class Blacklist extends Model\AbstractModel
 {
     /**
-     * @var string
+     * @var int
      */
     public $address;
 
@@ -42,7 +40,7 @@ class Blacklist extends Model\AbstractModel
     public $modificationDate;
 
     /**
-     * @param string $addr
+     * @param $addr
      *
      * @return null|Blacklist
      */
@@ -59,7 +57,7 @@ class Blacklist extends Model\AbstractModel
     }
 
     /**
-     * @param string $address
+     * @param int $address
      */
     public function setAddress($address)
     {
@@ -67,7 +65,7 @@ class Blacklist extends Model\AbstractModel
     }
 
     /**
-     * @return string
+     * @return int
      */
     public function getAddress()
     {

@@ -20,20 +20,17 @@ namespace Pimcore\Model\Tool\Qrcode\Config;
 use Pimcore\Model;
 
 /**
- * @deprecated
- *
  * @method \Pimcore\Model\Tool\Qrcode\Config\Listing\Dao getDao()
- * @method \Pimcore\Model\Tool\Qrcode\Config[] load()
  */
 class Listing extends Model\Listing\JsonListing
 {
     /**
-     * @var Model\Tool\Qrcode\Config[]|null
+     * @var array|null
      */
     protected $codes = null;
 
     /**
-     * @return Model\Tool\Qrcode\Config[]
+     * @return \Pimcore\Model\Tool\Qrcode\Config[]
      */
     public function getCodes()
     {
@@ -45,7 +42,7 @@ class Listing extends Model\Listing\JsonListing
     }
 
     /**
-     * @param Model\Tool\Qrcode\Config[]|null $codes
+     * @param $codes
      *
      * @return $this
      */

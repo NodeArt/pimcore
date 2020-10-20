@@ -20,8 +20,6 @@ namespace Pimcore\Model\Tool\Tag\Config;
 use Pimcore\Model;
 
 /**
- * @deprecated
- *
  * @property \Pimcore\Model\Tool\Tag\Config $model
  */
 class Dao extends Model\Dao\PhpArrayTable
@@ -33,7 +31,7 @@ class Dao extends Model\Dao\PhpArrayTable
     }
 
     /**
-     * @param string|null $id
+     * @param null $id
      *
      * @throws \Exception
      */
@@ -67,7 +65,7 @@ class Dao extends Model\Dao\PhpArrayTable
         $dataRaw = $this->model->getObjectVars();
         $data = [];
         $allowedProperties = ['name', 'description', 'disabled', 'items', 'siteId', 'urlPattern', 'textPattern',
-            'httpMethod', 'params', 'creationDate', 'modificationDate', ];
+            'httpMethod', 'params', 'creationDate', 'modificationDate'];
 
         foreach ($dataRaw as $key => $value) {
             if (in_array($key, $allowedProperties)) {

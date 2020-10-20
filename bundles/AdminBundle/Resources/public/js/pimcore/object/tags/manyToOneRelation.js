@@ -54,7 +54,7 @@ pimcore.object.tags.manyToOneRelation = Class.create(pimcore.object.tags.abstrac
         }.bind(this, field.key);
 
         return {
-            text: t(field.label), sortable: false, dataIndex: field.key, renderer: renderer,
+            text: ts(field.label), sortable: false, dataIndex: field.key, renderer: renderer,
             getEditor: this.getWindowCellEditor.bind(this, field)
         };
     },
@@ -87,6 +87,7 @@ pimcore.object.tags.manyToOneRelation = Class.create(pimcore.object.tags.abstrac
             this.component.addCls("strikeThrough");
         }
         this.component.on("render", function (el) {
+
             // add drop zone
             new Ext.dd.DropZone(el.getEl(), {
                 reference: this,
@@ -107,14 +108,6 @@ pimcore.object.tags.manyToOneRelation = Class.create(pimcore.object.tags.abstrac
 
             el.getEl().on("contextmenu", this.onContextMenu.bind(this));
 
-            el.getEl().on('dblclick', function(){
-                var subtype = this.data.subtype;
-                if (this.data.type == "object" && this.data.subtype != "folder") {
-                    subtype = "object";
-                }
-
-                pimcore.helpers.openElement(this.data.id, this.data.type, subtype);
-            }.bind(this));
         }.bind(this));
 
         // disable typing into the textfield
@@ -156,7 +149,7 @@ pimcore.object.tags.manyToOneRelation = Class.create(pimcore.object.tags.abstrac
             labelWidth: labelWidth,
             layout: 'hbox',
             items: items,
-            componentCls: "object_field object_field_type_" + this.type,
+            componentCls: "object_field",
             border: false,
             style: {
                 padding: 0
@@ -177,6 +170,7 @@ pimcore.object.tags.manyToOneRelation = Class.create(pimcore.object.tags.abstrac
         var href = {
             fieldLabel: this.fieldConfig.title,
             name: this.fieldConfig.name,
+            cls: "object_field",
             labelWidth: this.fieldConfig.labelWidth ? this.fieldConfig.labelWidth : 100
         };
 
@@ -207,7 +201,7 @@ pimcore.object.tags.manyToOneRelation = Class.create(pimcore.object.tags.abstrac
                 iconCls: "pimcore_icon_open",
                 handler: this.openElement.bind(this)
             }],
-            componentCls: "object_field object_field_type_" + this.type,
+            componentCls: "object_field",
             border: false,
             style: {
                 padding: 0
@@ -465,6 +459,13 @@ pimcore.object.tags.manyToOneRelation = Class.create(pimcore.object.tags.abstrac
             }
         }
         return isAllowed;
+    },
+
+    isInvalidMandatory: function () {
+        if (this.data.id) {
+            return false;
+        }
+        return true;
     },
 
     requestNicePathData: function () {

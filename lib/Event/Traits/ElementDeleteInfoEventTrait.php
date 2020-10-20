@@ -32,7 +32,7 @@ trait ElementDeleteInfoEventTrait
     protected $reason;
 
     /**
-     * @return bool
+     * @return mixed
      */
     public function getDeletionAllowed(): bool
     {

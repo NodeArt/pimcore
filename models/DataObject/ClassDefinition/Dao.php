@@ -27,8 +27,6 @@ class Dao extends Model\Dao\AbstractDao
 {
     use DataObject\ClassDefinition\Helper\Dao;
 
-    use DataObject\Traits\CompositeIndexTrait;
-
     /**
      * @var DataObject\ClassDefinition
      */
@@ -40,7 +38,7 @@ class Dao extends Model\Dao\AbstractDao
     protected $tableDefinitions = null;
 
     /**
-     * @param string $id
+     * @param mixed $id
      *
      * @return string|null
      */
@@ -49,7 +47,7 @@ class Dao extends Model\Dao\AbstractDao
         $name = null;
         try {
             if (!empty($id)) {
-                $name = $this->db->fetchOne('SELECT name FROM classes WHERE id = ?', [$id]);
+                $name = $this->db->fetchOne('SELECT name FROM classes WHERE id = ?', $id);
             }
         } catch (\Exception $e) {
         }
@@ -60,14 +58,14 @@ class Dao extends Model\Dao\AbstractDao
     /**
      * @param string $name
      *
-     * @return string|null
+     * @return mixed|null
      */
     public function getIdByName($name)
     {
         $id = null;
         try {
             if (!empty($name)) {
-                $id = $this->db->fetchOne('SELECT id FROM classes WHERE name = ?', [$name]);
+                $id = $this->db->fetchOne('SELECT id FROM classes WHERE name = ?', $name);
             }
         } catch (\Exception $e) {
         }
@@ -90,6 +88,7 @@ class Dao extends Model\Dao\AbstractDao
     }
 
     /**
+     * @throws \Exception
      * @throws \Exception
      */
     public function update()
@@ -131,17 +130,23 @@ class Dao extends Model\Dao\AbstractDao
 			) DEFAULT CHARSET=utf8mb4;");
 
         $this->db->query('CREATE TABLE IF NOT EXISTS `' . $objectDatastoreTableRelation . "` (
-              `id` BIGINT(20) NOT NULL PRIMARY KEY  AUTO_INCREMENT,
-              `src_id` int(11) NOT NULL DEFAULT '0',
-              `dest_id` int(11) NOT NULL DEFAULT '0',
-              `type` varchar(50) NOT NULL DEFAULT '',
-              `fieldname` varchar(70) NOT NULL DEFAULT '0',
-              `index` int(11) unsigned NOT NULL DEFAULT '0',
-              `ownertype` enum('object','fieldcollection','localizedfield','objectbrick') NOT NULL DEFAULT 'object',
-              `ownername` varchar(70) NOT NULL DEFAULT '',
-              `position` varchar(70) NOT NULL DEFAULT '0',
-              INDEX `forward_lookup` (`src_id`, `ownertype`, `ownername`, `position`),
-              INDEX `reverse_lookup` (`dest_id`, `type`)
+          `src_id` int(11) NOT NULL DEFAULT '0',
+          `dest_id` int(11) NOT NULL DEFAULT '0',
+          `type` varchar(50) NOT NULL DEFAULT '',
+          `fieldname` varchar(70) NOT NULL DEFAULT '0',
+          `index` int(11) unsigned NOT NULL DEFAULT '0',
+          `ownertype` enum('object','fieldcollection','localizedfield','objectbrick') NOT NULL DEFAULT 'object',
+          `ownername` varchar(70) NOT NULL DEFAULT '',
+          `position` varchar(70) NOT NULL DEFAULT '0',
+          PRIMARY KEY (`src_id`,`dest_id`,`ownertype`,`ownername`,`fieldname`,`type`,`position`, `index`),
+          KEY `index` (`index`),
+          KEY `src_id` (`src_id`),
+          KEY `dest_id` (`dest_id`),
+          KEY `fieldname` (`fieldname`),
+          KEY `position` (`position`),
+          KEY `ownertype` (`ownertype`),
+          KEY `type` (`type`),
+          KEY `ownername` (`ownername`)
         ) DEFAULT CHARSET=utf8mb4;");
 
         $this->handleEncryption($this->model, [$objectTable, $objectDatastoreTable, $objectDatastoreTableRelation]);
@@ -159,7 +164,6 @@ class Dao extends Model\Dao\AbstractDao
             foreach ($this->model->getFieldDefinitions() as $key => $value) {
                 if ($value instanceof DataObject\ClassDefinition\Data\ResourcePersistenceAwareInterface || method_exists($value, 'getDataForResource')) {
                     // if a datafield requires more than one column in the datastore table => only for non-relation types
-                    /** @var Data&DataObject\ClassDefinition\Data\ResourcePersistenceAwareInterface $value */
                     if (!$value->isRelationType()) {
                         if (is_array($value->getColumnType())) {
                             foreach ($value->getColumnType() as $fkey => $fvalue) {
@@ -214,9 +218,6 @@ class Dao extends Model\Dao\AbstractDao
         } catch (\Exception $e) {
             Logger::debug($e);
         }
-
-        $this->updateCompositeIndices($objectDatastoreTable, 'store', $this->model->getCompositeIndices());
-        $this->updateCompositeIndices($objectTable, 'query', $this->model->getCompositeIndices());
 
         $this->tableDefinitions = null;
     }
@@ -281,22 +282,19 @@ class Dao extends Model\Dao\AbstractDao
             $brickTable = current($table);
             $this->db->query('DROP TABLE `'.$brickTable.'`');
         }
-
-        // clean slug table
-        DataObject\Data\UrlSlug::handleClassDeleted($this->model->getId());
     }
 
     /**
      * Update the class name in all object
      *
-     * @param string $newName
+     * @param $newName
      */
     public function updateClassNameInObjects($newName)
     {
         $this->db->update('objects', ['o_className' => $newName], ['o_classId' => $this->model->getId()]);
 
         $this->db->updateWhere('object_query_' . $this->model->getId(), [
-            'oo_className' => $newName,
+            'oo_className' => $newName
         ]);
     }
 }

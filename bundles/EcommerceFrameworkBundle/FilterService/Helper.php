@@ -19,7 +19,6 @@ use Pimcore\Bundle\EcommerceFrameworkBundle\Model\AbstractCategory;
 use Pimcore\Templating\Model\ViewModel;
 
 /**
- * @deprecated will be removed in Pimcore 7, use \Pimcore\Bundle\EcommerceFrameworkBundle\FilterService\ListHelper service instead
  * Helper Class for setting up a product list utilizing the filter service
  * based on a filter definition and set filter parameters
  */
@@ -28,7 +27,7 @@ class Helper
     /**
      * @param \Pimcore\Model\DataObject\FilterDefinition $filterDefinition
      * @param ProductListInterface $productList
-     * @param array $params
+     * @param $params
      * @param ViewModel $viewModel
      * @param FilterService $filterService
      * @param bool $loadFullPage
@@ -126,12 +125,10 @@ class Helper
                     }
                 }
 
-                $viewModel->currentOrderBy = implode('#', reset($orderByList) ?: []);
+                $viewModel->currentOrderBy = implode('#', reset($orderByList));
             }
-            if ($orderByList) {
-                $productList->setOrderKey($orderByList);
-                $productList->setOrder('ASC');
-            }
+            $productList->setOrderKey($orderByList);
+            $productList->setOrder('ASC');
         }
 
         if ($filterService) {
@@ -142,7 +139,7 @@ class Helper
     }
 
     /**
-     * @param int $page
+     * @param $page
      *
      * @return string
      */
@@ -167,9 +164,9 @@ class Helper
     }
 
     /**
-     * @param array $conditions
+     * @param $conditions
      *
-     * @return AbstractCategory|null
+     * @return AbstractCategory
      */
     public static function getFirstFilteredCategory($conditions)
     {
@@ -180,7 +177,5 @@ class Helper
                 }
             }
         }
-
-        return null;
     }
 }

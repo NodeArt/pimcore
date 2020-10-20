@@ -40,9 +40,6 @@ namespace Pimcore\Templating\Helper;
 use Pimcore\Templating\Helper\Placeholder\AbstractHelper;
 use Pimcore\Templating\Helper\Placeholder\Container;
 
-/**
- * @deprecated
- */
 class HeadTitle extends AbstractHelper
 {
     /**
@@ -68,8 +65,8 @@ class HeadTitle extends AbstractHelper
     }
 
     /**
-     * @param string|null $title
-     * @param string|null $setType
+     * @param null $title
+     * @param null $setType
      *
      * @return $this
      */
@@ -108,7 +105,7 @@ class HeadTitle extends AbstractHelper
         if (!in_array($setType, [
             Container::APPEND,
             Container::SET,
-            Container::PREPEND,
+            Container::PREPEND
         ])) {
             throw new Exception("You must use a valid attach order: 'PREPEND', 'APPEND' or 'SET'");
         }

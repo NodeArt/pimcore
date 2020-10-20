@@ -34,7 +34,7 @@ class RobotsTxt
     private $_rules = [];
 
     /**
-     * @param string $domain
+     * @param $domain
      */
     public function __construct($domain)
     {
@@ -54,7 +54,7 @@ class RobotsTxt
     }
 
     /**
-     * @param string $url
+     * @param $url
      * @param string $userAgent
      *
      * @return bool
@@ -99,7 +99,7 @@ class RobotsTxt
     }
 
     /**
-     * @param string $robotsTxt
+     * @param $robotsTxt
      *
      * @return array
      */
@@ -137,7 +137,7 @@ class RobotsTxt
     }
 
     /**
-     * @param string $path
+     * @param $path
      *
      * @return string
      */

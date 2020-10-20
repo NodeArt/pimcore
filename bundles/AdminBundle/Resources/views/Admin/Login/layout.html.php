@@ -1,8 +1,8 @@
 <?php
-/** @var \Pimcore\Templating\PhpEngine $view */
-/** @var \Pimcore\Config $config */
+/** @var $view \Pimcore\Templating\PhpEngine */
 
 $config = $this->config;
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -20,10 +20,12 @@ $config = $this->config;
         <link rel="stylesheet" type="text/css" href="<?= $pluginCssPath ?>?_dc=<?= time(); ?>"/>
     <?php endforeach; ?>
 </head>
-<body class="pimcore_version_6 <?= $config['branding']['login_screen_invert_colors'] ? 'inverted' : '' ?>">
+<body class="pimcore_version_6 <?= $config->branding->login_screen_invert_colors ? 'inverted' : '' ?>">
 
 <?php
-    if (empty($backgroundImageUrl = $config['branding']['login_screen_custom_image'])) {
+    if ($config->general->loginscreencustomimage) {
+        $backgroundImageUrl = $config->general->loginscreencustomimage;
+    } else {
         $defaultImages = ['pimconaut-ecommerce.svg', 'pimconaut-world.svg', 'pimconaut-engineer.svg', 'pimconaut-moon.svg', 'pimconaut-rocket.svg'];
         $backgroundImageUrl = '/bundles/pimcoreadmin/img/login/' . $defaultImages[array_rand($defaultImages)];
     }
@@ -35,20 +37,24 @@ $config = $this->config;
         }
     </style>
 
-<?php if (!empty($customColor = $config['branding']['color_login_screen'])) { ?>
-    <style type="text/css">
-        #content button {
-            background: <?= $customColor ?>;
-        }
+<?php if($config->branding) { ?>
+    <?php if($config->branding->color_login_screen) {
+        $customColor = $config->branding->color_login_screen;
+        ?>
+        <style type="text/css">
+            #content button {
+                background: <?= $customColor ?>;
+            }
 
-        #content a {
-            color: <?= $customColor ?>;
-        }
-    </style>
+            #content a {
+                color: <?= $customColor ?>;
+            }
+        </style>
+    <?php } ?>
 <?php } ?>
 
 <div id="logo">
-    <img src="<?=$view->router()->path('pimcore_settings_display_custom_logo')?><?= $config['branding']['login_screen_invert_colors'] ? '' : '?white=true' ?>">
+    <img src="/admin/settings/display-custom-logo<?= $config->branding->login_screen_invert_colors ? '' : '?white=true' ?>">
 </div>
 
 <div id="content">

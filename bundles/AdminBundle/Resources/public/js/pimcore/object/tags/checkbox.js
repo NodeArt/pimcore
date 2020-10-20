@@ -18,24 +18,23 @@ pimcore.object.tags.checkbox = Class.create(pimcore.object.tags.abstract, {
 
     initialize:function (data, fieldConfig) {
 
-        this.data = data;
-        this.fieldConfig = fieldConfig;
-    },
+        this.data = "";
 
-    applyDefaultValue: function() {
-        if ((typeof this.data === "undefined" || this.data === null)) {
-            if (this.fieldConfig.defaultValue !== null) {
+        if (data) {
+            this.data = data;
+        } else if ((typeof data === "undefined" || data === null)) {
+            if (fieldConfig.defaultValue !== null) {
                 this.dataChanged = true;
             }
 
-            this.data = this.fieldConfig.defaultValue;
+            this.data = fieldConfig.defaultValue;
         }
+        this.fieldConfig = fieldConfig;
     },
-
 
     getGridColumnConfig:function (field) {
         var columnConfig = {
-            text: t(field.label),
+            text:ts(field.label),
             dataIndex:field.key,
             renderer:function (key, value, metaData, record, rowIndex, colIndex, store) {
                 var key = field.key;
@@ -116,35 +115,6 @@ pimcore.object.tags.checkbox = Class.create(pimcore.object.tags.abstract, {
             checkbox.labelWidth = this.fieldConfig.labelWidth;
         }
 
-
-        this.createEmptyButton();
-
-        this.checkbox = new Ext.form.Checkbox(checkbox);
-
-        var componentCfg = {
-            fieldLabel:this.fieldConfig.title,
-            layout: 'hbox',
-            items: [
-                this.checkbox,
-                this.emptyButton
-            ],
-            componentCls: "object_field object_field_type_" + this.type,
-            border: false,
-            style: {
-                padding: 0
-            }
-        };
-
-        if (this.fieldConfig.labelWidth) {
-            componentCfg.labelWidth = this.fieldConfig.labelWidth;
-        }
-
-        this.component = Ext.create('Ext.form.FieldContainer', componentCfg);
-
-        return this.component;
-    },
-
-    createEmptyButton: function() {
         if (this.getObject()) {
             this.emptyButton = new Ext.Button({
                 iconCls: "pimcore_icon_delete",
@@ -163,7 +133,29 @@ pimcore.object.tags.checkbox = Class.create(pimcore.object.tags.abstract, {
                 style: "margin-left: 10px; filter:grayscale(100%);",
             });
         }
+
+        this.checkbox = new Ext.form.Checkbox(checkbox);
+
+        var componentCfg = {
+            fieldLabel:this.fieldConfig.title,
+            layout: 'hbox',
+            border: true,
+            items: [
+                this.checkbox,
+                this.emptyButton
+            ],
+            componentCls: "object_field",
+            border: false,
+            style: {
+                padding: 0
+            }
+        };
+
+        this.component = Ext.create('Ext.form.FieldContainer', componentCfg);
+
+        return this.component;
     },
+
 
     addInheritanceSourceButton:function ($super, metaData) {
         this.updateStyle("#6782F6");
@@ -184,6 +176,10 @@ pimcore.object.tags.checkbox = Class.create(pimcore.object.tags.abstract, {
 
     getName:function () {
         return this.fieldConfig.name;
+    },
+
+    isInvalidMandatory:function () {
+        return false;
     },
 
     isDirty:function () {

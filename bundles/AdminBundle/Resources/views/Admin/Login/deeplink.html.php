@@ -1,11 +1,8 @@
-<?php
-/** @var \Pimcore\Templating\PhpEngine $view */
-?>
-
 <!DOCTYPE html>
 <html>
 <head>
     <?php
+    /** @var \Pimcore\Templating\PhpEngine $view */
     $redirect = $view->router()->path('pimcore_admin_login', [
         'deeplink' => 'true',
         'perspective' => $this->perspective

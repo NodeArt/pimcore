@@ -34,12 +34,12 @@ class GridConfigListener implements EventSubscriberInterface
         return [
             DataObjectClassDefinitionEvents::POST_DELETE => 'onClassDelete',
             UserRoleEvents::POST_DELETE => 'onUserDelete',
-            DataObjectEvents::POST_DELETE => 'onObjectDelete',
+            DataObjectEvents::POST_DELETE => 'onObjectDelete'
         ];
     }
 
     /**
-     * @param DataObjectEvent $event
+     * @param $event DataObjectEvent
      */
     public function onObjectDelete($event)
     {
@@ -50,7 +50,7 @@ class GridConfigListener implements EventSubscriberInterface
     }
 
     /**
-     * @param ClassDefinitionEvent $event
+     * @param $event ClassDefinitionEvent
      */
     public function onClassDelete($event)
     {
@@ -69,7 +69,7 @@ class GridConfigListener implements EventSubscriberInterface
     }
 
     /**
-     * @param UserRoleEvent $event
+     * @param $event UserRoleEvent
      */
     public function onUserDelete($event)
     {

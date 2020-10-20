@@ -18,20 +18,16 @@
 namespace Pimcore\Model\DataObject\Fieldcollection\Data;
 
 use Pimcore\Model;
-use Pimcore\Model\DataObject\ClassDefinition\Data\LazyLoadingSupportInterface;
 use Pimcore\Model\DataObject\Concrete;
 
 /**
  * @method Dao getDao()
- * @method void save(Model\DataObject\Concrete $object, $params = [], $saveRelationalData = true)
  */
-abstract class AbstractData extends Model\AbstractModel implements Model\DataObject\LazyLoadedFieldsInterface, Model\Element\ElementDumpStateInterface, Model\Element\DirtyIndicatorInterface
+abstract class AbstractData extends Model\AbstractModel implements Model\DataObject\LazyLoadedFieldsInterface, Model\Element\ElementDumpStateInterface
 {
     use Model\Element\ElementDumpStateTrait;
 
     use Model\DataObject\Traits\LazyLoadedRelationTrait;
-
-    use Model\Element\Traits\DirtyIndicatorTrait;
 
     /**
      * @var int
@@ -87,7 +83,7 @@ abstract class AbstractData extends Model\AbstractModel implements Model\DataObj
     }
 
     /**
-     * @param string $fieldname
+     * @param $fieldname
      *
      * @return $this
      */
@@ -107,7 +103,7 @@ abstract class AbstractData extends Model\AbstractModel implements Model\DataObj
     }
 
     /**
-     * @return Model\DataObject\Fieldcollection\Definition
+     * @return mixed
      */
     public function getDefinition()
     {
@@ -143,7 +139,7 @@ abstract class AbstractData extends Model\AbstractModel implements Model\DataObj
 
     /**
      * @param string $fieldName
-     * @param string|null $language
+     * @param null $language
      *
      * @return mixed
      */
@@ -154,8 +150,8 @@ abstract class AbstractData extends Model\AbstractModel implements Model\DataObj
 
     /**
      * @param string $fieldName
-     * @param mixed $value
-     * @param string|null $language
+     * @param $value
+     * @param null $language
      *
      * @return mixed
      */
@@ -172,8 +168,7 @@ abstract class AbstractData extends Model\AbstractModel implements Model\DataObj
         $lazyLoadedFieldNames = [];
         $fields = $this->getDefinition()->getFieldDefinitions(['suppressEnrichment' => true]);
         foreach ($fields as $field) {
-            if (($field instanceof LazyLoadingSupportInterface || method_exists($field, 'getLazyLoading'))
-                            && $field->getLazyLoading()) {
+            if (method_exists($field, 'getLazyLoading') && $field->getLazyLoading()) {
                 $lazyLoadedFieldNames[] = $field->getName();
             }
         }
@@ -200,7 +195,7 @@ abstract class AbstractData extends Model\AbstractModel implements Model\DataObj
     public function __sleep()
     {
         $parentVars = parent::__sleep();
-        $blockedVars = ['loadedLazyKeys', 'object'];
+        $blockedVars = ['loadedLazyKeys', 'object', $this->getDumpStateProperty()];
         $finalVars = [];
 
         if (!$this->isInDumpState()) {

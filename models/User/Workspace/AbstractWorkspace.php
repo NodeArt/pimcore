@@ -21,7 +21,6 @@ use Pimcore\Model;
 
 /**
  * @method \Pimcore\Model\User\Workspace\Dao getDao()
- * @method void save()
  */
 class AbstractWorkspace extends Model\AbstractModel
 {
@@ -86,7 +85,7 @@ class AbstractWorkspace extends Model\AbstractModel
     public $properties = false;
 
     /**
-     * @param bool $create
+     * @param $create
      *
      * @return $this
      */
@@ -106,7 +105,7 @@ class AbstractWorkspace extends Model\AbstractModel
     }
 
     /**
-     * @param bool $delete
+     * @param $delete
      *
      * @return $this
      */
@@ -126,7 +125,7 @@ class AbstractWorkspace extends Model\AbstractModel
     }
 
     /**
-     * @param bool $list
+     * @param $list
      *
      * @return $this
      */
@@ -146,7 +145,7 @@ class AbstractWorkspace extends Model\AbstractModel
     }
 
     /**
-     * @param bool $properties
+     * @param $properties
      *
      * @return $this
      */
@@ -166,7 +165,7 @@ class AbstractWorkspace extends Model\AbstractModel
     }
 
     /**
-     * @param bool $publish
+     * @param $publish
      *
      * @return $this
      */
@@ -186,7 +185,7 @@ class AbstractWorkspace extends Model\AbstractModel
     }
 
     /**
-     * @param bool $rename
+     * @param $rename
      *
      * @return $this
      */
@@ -206,7 +205,7 @@ class AbstractWorkspace extends Model\AbstractModel
     }
 
     /**
-     * @param bool $settings
+     * @param $settings
      *
      * @return $this
      */
@@ -226,7 +225,7 @@ class AbstractWorkspace extends Model\AbstractModel
     }
 
     /**
-     * @param bool $versions
+     * @param $versions
      *
      * @return $this
      */
@@ -246,7 +245,7 @@ class AbstractWorkspace extends Model\AbstractModel
     }
 
     /**
-     * @param bool $view
+     * @param $view
      *
      * @return $this
      */
@@ -266,7 +265,7 @@ class AbstractWorkspace extends Model\AbstractModel
     }
 
     /**
-     * @param int $cid
+     * @param $cid
      *
      * @return $this
      */
@@ -286,7 +285,7 @@ class AbstractWorkspace extends Model\AbstractModel
     }
 
     /**
-     * @param int $userId
+     * @param $userId
      *
      * @return $this
      */
@@ -306,7 +305,7 @@ class AbstractWorkspace extends Model\AbstractModel
     }
 
     /**
-     * @param string $cpath
+     * @param $cpath
      *
      * @return $this
      */

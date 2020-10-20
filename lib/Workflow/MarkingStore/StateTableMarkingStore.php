@@ -67,11 +67,10 @@ class StateTableMarkingStore implements MarkingStoreInterface
     public function setMarking($subject, Marking $marking)
     {
         $subject = $this->checkIfSubjectIsValid($subject);
-        $type = Service::getType($subject);
 
-        if (!$workflowState = WorkflowState::getByPrimary($subject->getId(), $type, $this->workflowName)) {
+        if (!$workflowState = WorkflowState::getByPrimary($subject->getId(), 'object', $this->workflowName)) {
             $workflowState = new WorkflowState();
-            $workflowState->setCtype($type);
+            $workflowState->setCtype(Service::getType($subject));
             $workflowState->setCid($subject->getId());
             $workflowState->setWorkflow($this->workflowName);
         }
@@ -89,7 +88,7 @@ class StateTableMarkingStore implements MarkingStoreInterface
     }
 
     /**
-     * @param object $subject
+     * @param $subject
      *
      * @return ElementInterface
      */

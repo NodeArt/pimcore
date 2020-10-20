@@ -19,9 +19,6 @@ namespace Pimcore\Model\Webservice\Data\Asset\Listing;
 
 use Pimcore\Model;
 
-/**
- * @deprecated
- */
 class Item extends Model\Webservice\Data\Element\Listing\Item
 {
 }

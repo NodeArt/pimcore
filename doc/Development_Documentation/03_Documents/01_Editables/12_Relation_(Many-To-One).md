@@ -33,7 +33,7 @@ You can just create the code line like, below:
 
 <div class="code-section">
 
-```php
+```php 
 <?= $this->relation("myRelation"); ?>
 ```
 
@@ -70,14 +70,16 @@ options in the editable configuration.
 {{ pimcore_relation("myRelation",{
     "types": ["asset","object"],
     "subtypes": {
-        "asset": ["video", "image"],
+        "assets": ["video", "image"],
         "object": ["object"],
     },
     "classes": ["person"]
 }) }}
 ```
-
 </div>
+
+
+
 
 
 We restricted the `myRelation` editable to the following entities: 
@@ -113,5 +115,4 @@ Another useful use-case for the relation editable is a download link.
     {% endif %}
 {% endif %}
 ```
-
 </div>

@@ -29,7 +29,7 @@ class Id
     public $type;
 
     /**
-     * @param Element\ElementInterface $webResource
+     * @param $webResource
      */
     public function __construct($webResource)
     {

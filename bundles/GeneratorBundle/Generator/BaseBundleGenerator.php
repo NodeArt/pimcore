@@ -3,15 +3,22 @@
 namespace Pimcore\Bundle\GeneratorBundle\Generator;
 
 use Pimcore\Bundle\GeneratorBundle\Model\Bundle;
+use Symfony\Component\Filesystem\Filesystem;
 
 /**
- * @deprecated
  * Generates a bundle.
  *
  * The following class is copied from \Sensio\Bundle\GeneratorBundle\Generator\BundleGenerator
  */
 class BaseBundleGenerator extends Generator
 {
+    private $filesystem;
+
+    public function __construct(Filesystem $filesystem)
+    {
+        $this->filesystem = $filesystem;
+    }
+
     public function generateBundle(Bundle $bundle)
     {
         $dir = $bundle->getTargetDirectory();

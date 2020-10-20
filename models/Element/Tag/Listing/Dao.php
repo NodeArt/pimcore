@@ -57,13 +57,16 @@ class Dao extends Model\Listing\Dao\AbstractDao
 
     /**
      * @return int
+     *
+     * @todo: $amount could not be defined, so this could cause an issue
      */
     public function getTotalCount()
     {
         try {
-            return (int) $this->db->fetchOne('SELECT COUNT(*) FROM tags ' . $this->getCondition(), $this->model->getConditionVariables());
+            $amount = (int) $this->db->fetchOne('SELECT COUNT(*) as amount FROM tags ' . $this->getCondition(), $this->model->getConditionVariables());
         } catch (\Exception $e) {
-            return 0;
         }
+
+        return $amount;
     }
 }

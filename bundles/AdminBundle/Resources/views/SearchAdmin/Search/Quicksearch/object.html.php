@@ -7,7 +7,7 @@ use Pimcore\Model\DataObject;
  */
 $element = $this->element;
 $fields = $element->getClass()->getFieldDefinitions();
-$this->get('translate')->setDomain('admin');
+
 ?>
 
 
@@ -26,7 +26,7 @@ $this->get('translate')->setDomain('admin');
             <?php foreach (\Pimcore\Tool::getValidLanguages() as $language) { ?>
                 <?php foreach ($definition->getFieldDefinitions() as $lfd) { ?>
                     <tr<?php if ($c % 2) { ?> class="odd"<?php } ?>>
-                        <th><?= $lfd->getTitle() ? $this->translate($lfd->getTitle()) : $lfd->getName() ?> (<?= $language; ?>)</th>
+                        <th><?= $lfd->getTitle() ? $lfd->getTitle() : $lfd->getName() ?> (<?= $language; ?>)</th>
                         <td>
                             <div class="limit-height">
                                 <?php
@@ -43,7 +43,7 @@ $this->get('translate')->setDomain('admin');
                 <?php break; } ?>
         <?php } else if($definition instanceof DataObject\ClassDefinition\Data\Classificationstore) {
 
-            /** @var DataObject\Classificationstore $storedata */
+            /** @var $storedata DataObject\Classificationstore */
             $storedata = $definition->getVersionPreview($element->getValueForFieldName($fieldName));
 
             $existingGroups = array();
@@ -74,15 +74,15 @@ $this->get('translate')->setDomain('admin');
                 if (!$activeGroups[$activeGroupId]) {
                     continue;
                 }
-                /** @var DataObject\Classificationstore\GroupConfig $groupDefinition */
+                /** @var $groupDefinition DataObject\Classificationstore\GroupConfig */
                 $groupDefinition = Pimcore\Model\DataObject\Classificationstore\GroupConfig::getById($activeGroupId);
                 if (!$groupDefinition) {
                     continue;
                 }
 
+                /** @var $keyGroupRelation DataObject\Classificationstore\KeyGroupRelation */
                 $keyGroupRelations = $groupDefinition->getRelations();
 
-                /** @var DataObject\Classificationstore\KeyGroupRelation $keyGroupRelation */
                 foreach ($keyGroupRelations as $keyGroupRelation) {
 
                     $keyDef = DataObject\Classificationstore\Service::getFieldDefinitionFromJson(json_decode($keyGroupRelation->getDefinition()),
@@ -99,7 +99,7 @@ $this->get('translate')->setDomain('admin');
                         ?>
 
                         <tr class="<?php if ($c % 2) { ?>odd<?php } ?>">
-                            <td><?= $this->translate($definition->getTitle()) ?></td>
+                            <td><?= $definition->getTitle() ?></td>
                             <td><?= $groupDefinition->getName() ?>
                                 - <?= $keyGroupRelation->getName() ?> <?= $definition->isLocalized() ? "/ " . $language : "" ?></td>
                             <?php if (!$this->isImportPreview || !$this->isNew) { ?>
@@ -131,12 +131,12 @@ $this->get('translate')->setDomain('admin');
                         <?php foreach (\Pimcore\Tool::getValidLanguages() as $language) { ?>
                             <?php foreach ($lfd->getFieldDefinitions() as $localizedFieldDefinition) { ?>
                                 <tr<?php if ($c % 2) { ?> class="odd"<?php } ?>>
-                                    <th><?= $localizedFieldDefinition->getTitle() ? $this->translate($localizedFieldDefinition->getTitle()) : $localizedFieldDefinition->getName() ?> (<?= $language; ?>)</th>
+                                    <th><?= $localizedFieldDefinition->getTitle() ? $localizedFieldDefinition->getTitle() : $localizedFieldDefinition->getName() ?> (<?= $language; ?>)</th>
                                     <td>
                                         <div class="limit-height">
                                             <?php
                                                 if ($brickValue) {
-                                                    /** @var DataObject\Localizedfield $localizedBrickValues */
+                                                    /** @var  $localizedBrickValues DataObject\Localizedfield */
                                                     $localizedBrickValues = $brickValue->getLocalizedFields();
                                                     $localizedBrickValue = $localizedBrickValues->getLocalizedValue($localizedFieldDefinition->getName(), $language);
                                                     $versionPreview = $localizedFieldDefinition->getVersionPreview($localizedBrickValue);
@@ -161,7 +161,7 @@ $this->get('translate')->setDomain('admin');
 
                         ?>
                         <tr<?php if ($c % 2) { ?> class="odd"<?php } ?>>
-                            <th><?= ucfirst($asAllowedType) . " - " . ($lfd->getTitle() ? $this->translate($lfd->getTitle()) : $lfd->getName()) ?></th>
+                            <th><?= ucfirst($asAllowedType) . " - " . ($lfd->getTitle() ? $lfd->getTitle() : $lfd->getName()) ?></th>
                             <td>
                                 <div class="limit-height">
                                     <?= $value ?>
@@ -175,7 +175,7 @@ $this->get('translate')->setDomain('admin');
             <?php } ?>
         <?php } else { ?>
             <tr<?php if ($c % 2) { ?> class="odd"<?php } ?>>
-                <th><?= $definition->getTitle() ? $this->translate($definition->getTitle()) : $definition->getName() ?></th>
+                <th><?= $definition->getTitle() ? $definition->getTitle() : $definition->getName() ?></th>
                 <td>
                     <div class="limit-height">
                         <?= $definition->getVersionPreview($element->getValueForFieldName($fieldName)) ?>

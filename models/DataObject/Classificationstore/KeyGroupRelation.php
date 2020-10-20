@@ -21,8 +21,6 @@ use Pimcore\Model;
 
 /**
  * @method \Pimcore\Model\DataObject\Classificationstore\KeyGroupRelation\Dao getDao()
- * @method void save()
- * @method void delete()
  */
 class KeyGroupRelation extends Model\AbstractModel
 {
@@ -41,24 +39,18 @@ class KeyGroupRelation extends Model\AbstractModel
      */
     public $name;
 
-    /**
-     * The key description.
-     *
-     * @var string
+    /** The key description.
+     * @var
      */
     public $description;
 
-    /**
-     * Field definition
-     *
-     * @var string
+    /** Field definition
+     * @var
      */
     public $definition;
 
-    /**
-     * Field type
-     *
-     * @var string
+    /** Field type
+     * @var
      */
     public $type;
 
@@ -136,7 +128,7 @@ class KeyGroupRelation extends Model\AbstractModel
     }
 
     /**
-     * @return string
+     * @return mixed
      */
     public function getDescription()
     {
@@ -144,7 +136,7 @@ class KeyGroupRelation extends Model\AbstractModel
     }
 
     /**
-     * @param string $description
+     * @param mixed $description
      */
     public function setDescription($description)
     {
@@ -152,7 +144,7 @@ class KeyGroupRelation extends Model\AbstractModel
     }
 
     /**
-     * @return string
+     * @return mixed
      */
     public function getDefinition()
     {
@@ -160,7 +152,7 @@ class KeyGroupRelation extends Model\AbstractModel
     }
 
     /**
-     * @param string $definition
+     * @param mixed $definition
      */
     public function setDefinition($definition)
     {
@@ -168,7 +160,7 @@ class KeyGroupRelation extends Model\AbstractModel
     }
 
     /**
-     * @return string
+     * @return mixed
      */
     public function getType()
     {
@@ -176,7 +168,7 @@ class KeyGroupRelation extends Model\AbstractModel
     }
 
     /**
-     * @param string $type
+     * @param mixed $type
      */
     public function setType($type)
     {
@@ -212,7 +204,7 @@ class KeyGroupRelation extends Model\AbstractModel
      */
     public function setMandatory($mandatory)
     {
-        $this->mandatory = (bool)$mandatory;
+        $this->mandatory = intval($mandatory);
     }
 
     /**
@@ -232,8 +224,8 @@ class KeyGroupRelation extends Model\AbstractModel
     }
 
     /**
-     * @param int $groupId
-     * @param int $keyId
+     * @param $groupId
+     * @param $keyId
      *
      * @return KeyGroupRelation|null
      */

@@ -17,19 +17,42 @@
 
 namespace Pimcore\Model\Version;
 
-@trigger_error(
-    'Pimcore\Model\Version\PimcoreClassDefinitionReplaceFilter is deprecated since version 6.8.0 and will be removed in 7.0.0. ' .
-    ' Use ' . \Pimcore\Model\Element\DeepCopy\PimcoreClassDefinitionReplaceFilter::class . ' instead.',
-    E_USER_DEPRECATED
-);
+use DeepCopy\Filter\Filter;
+use DeepCopy\Reflection\ReflectionHelper;
+use Pimcore\Model\DataObject\Concrete;
 
-class_exists(\Pimcore\Model\Element\DeepCopy\PimcoreClassDefinitionReplaceFilter::class);
-
-if (false) {
+class PimcoreClassDefinitionReplaceFilter implements Filter
+{
     /**
-     * @deprecated use \Pimcore\Model\Element\DeepCopy\PimcoreClassDefinitionReplaceFilter instead.
+     * @var callable
      */
-    class PimcoreClassDefinitionReplaceFilter extends \Pimcore\Model\Element\DeepCopy\PimcoreClassDefinitionReplaceFilter
+    protected $callback;
+
+    /**
+     * @param callable $callable Will be called to get the new value for each property to replace
+     */
+    public function __construct(callable $callable)
     {
+        $this->callback = $callable;
+    }
+
+    public function apply($object, $property, $objectCopier)
+    {
+        if (!$object instanceof Concrete) {
+            return;
+        }
+
+        $fieldDefinition = $object->getClass()->getFieldDefinition($property);
+
+        if (!$fieldDefinition) {
+            return;
+        }
+
+        $reflectionProperty = ReflectionHelper::getProperty($object, $property);
+        $reflectionProperty->setAccessible(true);
+
+        $value = call_user_func($this->callback, $object, $fieldDefinition, $property, $reflectionProperty->getValue($object));
+
+        $reflectionProperty->setValue($object, $value);
     }
 }

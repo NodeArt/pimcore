@@ -35,7 +35,7 @@ class MultiSelectCategory extends AbstractFilterType
             $explode = explode(',', $v['value']);
             foreach ($explode as $e) {
                 if (!empty($e) && (empty($availableRelations) || $availableRelations[$e] === true)) {
-                    if (!empty($values[$e])) {
+                    if ($values[$e]) {
                         $count = $values[$e]['count'] + $v['count'];
                     } else {
                         $count = $v['count'];
@@ -52,18 +52,17 @@ class MultiSelectCategory extends AbstractFilterType
             'values' => array_values($values),
             'fieldname' => $filterDefinition->getField(),
             'metaData' => $filterDefinition->getMetaData(),
-            'resultCount' => $productList->count(),
+            'resultCount' => $productList->count()
         ]);
     }
 
     public function addCondition(AbstractFilterDefinitionType $filterDefinition, ProductListInterface $productList, $currentFilter, $params, $isPrecondition = false)
     {
-        $value = $params[$filterDefinition->getField()] ?? null;
-        $isReload = $params['is_reload'] ?? null;
+        $value = $params[$filterDefinition->getField()];
 
         if ($value == AbstractFilterType::EMPTY_STRING) {
             $value = null;
-        } elseif (empty($value) && !$isReload) {
+        } elseif (empty($value) && !$params['is_reload']) {
             $value = $filterDefinition->getPreSelect();
         }
 
@@ -82,7 +81,7 @@ class MultiSelectCategory extends AbstractFilterType
             }
         }
 
-        if (count($conditions)) {
+        if (sizeof($conditions)) {
             if ($filterDefinition->getUseAndCondition()) {
                 $conditions = implode(' AND ', $conditions);
             } else {

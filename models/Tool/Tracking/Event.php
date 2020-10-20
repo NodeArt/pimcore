@@ -20,8 +20,6 @@ namespace Pimcore\Model\Tool\Tracking;
 use Pimcore\Model;
 
 /**
- * @deprecated
- *
  * @method \Pimcore\Model\Tool\Tracking\Event\Dao getDao()
  */
 class Event extends Model\AbstractModel
@@ -57,7 +55,7 @@ class Event extends Model\AbstractModel
     public $data;
 
     /**
-     * @param int $id
+     * @param $id
      *
      * @return Event|null
      */
@@ -74,12 +72,12 @@ class Event extends Model\AbstractModel
     }
 
     /**
-     * @param string $category
-     * @param string $action
-     * @param string $label
-     * @param int $day
-     * @param int $month
-     * @param int $year
+     * @param $category
+     * @param $action
+     * @param $label
+     * @param $day
+     * @param $month
+     * @param $year
      *
      * @return Event
      */
@@ -99,7 +97,7 @@ class Event extends Model\AbstractModel
     }
 
     /**
-     * @param string $action
+     * @param $action
      *
      * @return $this
      */
@@ -119,7 +117,7 @@ class Event extends Model\AbstractModel
     }
 
     /**
-     * @param string $category
+     * @param $category
      *
      * @return $this
      */
@@ -139,7 +137,7 @@ class Event extends Model\AbstractModel
     }
 
     /**
-     * @param int $id
+     * @param $id
      *
      * @return $this
      */
@@ -159,7 +157,7 @@ class Event extends Model\AbstractModel
     }
 
     /**
-     * @param string $label
+     * @param $label
      *
      * @return $this
      */
@@ -179,7 +177,7 @@ class Event extends Model\AbstractModel
     }
 
     /**
-     * @param int $timestamp
+     * @param $timestamp
      *
      * @return $this
      */
@@ -199,7 +197,7 @@ class Event extends Model\AbstractModel
     }
 
     /**
-     * @param string $data
+     * @param $data
      *
      * @return $this
      */

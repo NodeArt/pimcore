@@ -24,19 +24,16 @@ use Zend\Paginator\AdapterAggregateInterface;
 
 /**
  * @method Model\DataObject[] load()
- * @method Model\DataObject current()
  * @method int getTotalCount()
  * @method int getCount()
  * @method int[] loadIdList()
  * @method \Pimcore\Model\DataObject\Listing\Dao getDao()
  * @method onCreateQuery(callable $callback)
  */
-class Listing extends Model\Listing\AbstractListing implements AdapterInterface, AdapterAggregateInterface
+class Listing extends Model\Listing\AbstractListing implements \Iterator, AdapterInterface, AdapterAggregateInterface
 {
     /**
      * @var array|null
-     *
-     * @deprecated use getter/setter methods or $this->data
      */
     protected $objects = null;
 
@@ -50,27 +47,28 @@ class Listing extends Model\Listing\AbstractListing implements AdapterInterface,
      */
     public $objectTypes = [AbstractObject::OBJECT_TYPE_OBJECT, AbstractObject::OBJECT_TYPE_FOLDER];
 
-    public function __construct()
-    {
-        $this->objects = & $this->data;
-    }
-
     /**
      * @return array
      */
     public function getObjects()
     {
-        return $this->getData();
+        if ($this->objects === null) {
+            $this->load();
+        }
+
+        return $this->objects;
     }
 
     /**
      * @param array $objects
      *
-     * @return static
+     * @return $this
      */
     public function setObjects($objects)
     {
-        return $this->setData($objects);
+        $this->objects = $objects;
+
+        return $this;
     }
 
     /**
@@ -82,28 +80,24 @@ class Listing extends Model\Listing\AbstractListing implements AdapterInterface,
     }
 
     /**
-     * @param bool $unpublished
+     * @param $unpublished
      *
      * @return $this
      */
     public function setUnpublished($unpublished)
     {
-        $this->setData(null);
-
         $this->unpublished = (bool) $unpublished;
 
         return $this;
     }
 
     /**
-     * @param array $objectTypes
+     * @param  $objectTypes
      *
      * @return $this
      */
     public function setObjectTypes($objectTypes)
     {
-        $this->setData(null);
-
         $this->objectTypes = $objectTypes;
 
         return $this;
@@ -118,8 +112,8 @@ class Listing extends Model\Listing\AbstractListing implements AdapterInterface,
     }
 
     /**
-     * @param string $key
-     * @param mixed $value
+     * @param $key
+     * @param null $value
      * @param string $concatenator
      *
      * @return $this
@@ -138,8 +132,8 @@ class Listing extends Model\Listing\AbstractListing implements AdapterInterface,
     }
 
     /**
-     * @param string $condition
-     * @param array|null $conditionVariables
+     * @param $condition
+     * @param null $conditionVariables
      *
      * @return $this
      */
@@ -149,15 +143,13 @@ class Listing extends Model\Listing\AbstractListing implements AdapterInterface,
     }
 
     /**
-     * @param string $groupBy
+     * @param $groupBy
      * @param bool $qoute
      *
      * @return $this
      */
     public function setGroupBy($groupBy, $qoute = true)
     {
-        $this->setData(null);
-
         if ($groupBy) {
             $this->groupBy = $groupBy;
 
@@ -179,7 +171,7 @@ class Listing extends Model\Listing\AbstractListing implements AdapterInterface,
      */
     public function count()
     {
-        return $this->getDao()->getTotalCount();
+        return $this->getTotalCount();
     }
 
     /**
@@ -205,28 +197,63 @@ class Listing extends Model\Listing\AbstractListing implements AdapterInterface,
     }
 
     /**
+     * Methods for Iterator
+     */
+    public function rewind()
+    {
+        $this->getObjects();
+        reset($this->objects);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function current()
+    {
+        $this->getObjects();
+        $var = current($this->objects);
+
+        return $var;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function key()
+    {
+        $this->getObjects();
+        $var = key($this->objects);
+
+        return $var;
+    }
+
+    /**
+     * @return mixed|null
+     */
+    public function next()
+    {
+        $this->getObjects();
+        $var = next($this->objects);
+
+        return $var;
+    }
+
+    /**
+     * @return bool
+     */
+    public function valid()
+    {
+        $this->getObjects();
+        $var = $this->current() !== false;
+
+        return $var;
+    }
+
+    /**
      * @return bool
      */
     public function addDistinct()
     {
         return false;
-    }
-
-    /**
-     * @internal
-     *
-     * @param string $field database column to use for WHERE condition
-     * @param string $operator SQL comparison operator, e.g. =, <, >= etc. You can use "?" as placeholder, e.g. "IN (?)"
-     * @param string|int|float|float|array $data comparison data, can be scalar or array (if operator is e.g. "IN (?)")
-     *
-     * @return static
-     */
-    public function addFilterByField($field, $operator, $data)
-    {
-        if (strpos($operator, '?') === false) {
-            $operator .= ' ?';
-        }
-
-        return $this->addConditionParam('`'.$field.'` '.$operator, $data);
     }
 }

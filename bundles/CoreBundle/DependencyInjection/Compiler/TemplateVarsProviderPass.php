@@ -21,9 +21,6 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 use Symfony\Component\DependencyInjection\Reference;
 
-/**
- * @deprecated
- */
 class TemplateVarsProviderPass implements CompilerPassInterface
 {
     /**

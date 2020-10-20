@@ -24,9 +24,6 @@ use Pimcore\Model\Element;
 use Pimcore\Model\Webservice;
 use Pimcore\Tool;
 
-/**
- * @deprecated
- */
 class Service
 {
     /**
@@ -45,7 +42,7 @@ class Service
     protected $user;
 
     /**
-     * @param Model\User $user
+     * @param $user
      */
     public function __construct($user)
     {
@@ -73,12 +70,12 @@ class Service
     /**
      * @throws \Exception
      *
-     * @param Element\ElementInterface $rootElement
-     * @param string $apiKey
-     * @param string $path
-     * @param Webservice\Data\Document|Webservice\Data\Asset\Folder|Webservice\Data\Asset\File|Webservice\Data\DataObject\Concrete|Webservice\Data\DataObject\Folder $apiElement
-     * @param bool $overwrite
-     * @param string $elementCounter
+     * @param  $rootElement
+     * @param  $apiKey
+     * @param  $path
+     * @param  $apiElement
+     * @param  bool $overwrite
+     * @param  $elementCounter
      *
      * @return Element\ElementInterface
      */
@@ -125,7 +122,6 @@ class Service
             return $existingElement;
         }
 
-        /** @var Asset|Model\Document|DataObject\AbstractObject $element */
         $element = new $className();
         $element->setId(null);
         $element->setCreationDate(time());
@@ -217,14 +213,14 @@ class Service
 
         $element->save();
 
-        //TODO save type and id for later rollback
+        //todo save type and id for later rollback
         $this->importInfo[Element\Service::getType($element) . '_' . $element->getId()] = ['id' => $element->getId(), 'type' => Element\Service::getType($element), 'fullpath' => $element->getRealFullPath()];
 
         return $element;
     }
 
     /**
-     * @param Webservice\Data\Document|Webservice\Data\Asset|Webservice\Data\DataObject $apiElement
+     * @param Webservice\Data $apiElement
      * @param string $type
      * @param array $idMapping
      */
@@ -272,8 +268,8 @@ class Service
     }
 
     /**
-     * @param Webservice\Data\DataObject\Concrete $apiElement
-     * @param array $idMapping
+     * @param  Webservice\Data\DataObject\Concrete $apiElement
+     * @param $idMapping
      */
     public function correctObjectRelations($apiElement, $idMapping)
     {
@@ -341,7 +337,7 @@ class Service
     }
 
     /**
-     * @param Element\ElementInterface $element
+     * @param $element
      * @param bool $creation
      *
      * @return $this

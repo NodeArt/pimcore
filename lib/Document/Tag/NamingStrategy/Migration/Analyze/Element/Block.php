@@ -17,9 +17,6 @@ declare(strict_types=1);
 
 namespace Pimcore\Document\Tag\NamingStrategy\Migration\Analyze\Element;
 
-/**
- * @deprecated
- */
 final class Block extends AbstractBlock
 {
     /**

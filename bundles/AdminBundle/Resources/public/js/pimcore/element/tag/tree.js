@@ -56,20 +56,14 @@ pimcore.element.tag.tree = Class.create({
         this.checkChangeCallback = callback;
     },
 
-    setFilterFieldWidth: function (size) {
-        if (this.filterField) {
-            this.filterField.width = size;
-        }
-    },
-
     getLayout: function () {
         if (!this.tree) {
 
             var store = Ext.create('Ext.data.TreeStore', {
-                autoLoad: false,
+                autoLoad: true,
                 proxy: {
                     type: 'ajax',
-                    url: Routing.generate('pimcore_admin_tags_treegetchildrenbyid'),
+                    url: '/admin/tags/tree-get-children-by-id',
                     extraParams: {
                         showSelection: this.showSelection,
                         assignmentCId: this.assignmentCId,
@@ -98,23 +92,27 @@ pimcore.element.tag.tree = Class.create({
 
             this.filterField = new Ext.form.field.Text(
                 {
+                    width: 340,
                     hideLabel: true,
                     enableKeyEvents: true,
                     listeners: {
                         "keyup": function (field, key) {
-                             if (key.getKey() == key.ENTER) {
-                                this.tagFilter();
-                             }
+                            // if (key.getKey() == key.ENTER) {
+                            // mhm
+                            this.updateTagFilter();
+                            // }
                         }.bind(this)
                     }
                 }
             );
 
-            this.filterButton = new Ext.Button({
-                iconCls: "pimcore_icon_search",
-                text: t("filter"),
-                handler: this.updateTagFilter.bind(this)
-            });
+            var tbarItems = [this.filterField,
+                {
+                    xtype: "button",
+                    iconCls: "pimcore_icon_search",
+                    text: t("filter"),
+                    handler: this.updateTagFilter.bind(this)
+                }];
 
             this.tree = Ext.create('Ext.tree.Panel', {
                 store: store,
@@ -122,7 +120,7 @@ pimcore.element.tag.tree = Class.create({
                 region: "center",
                 autoScroll: true,
                 animate: false,
-                tbar: [this.filterField, this.filterButton],
+                tbar: tbarItems,
                 viewConfig: {
                     plugins: treePlugins,
                     listeners: {
@@ -130,15 +128,14 @@ pimcore.element.tag.tree = Class.create({
                             overModel.set('expandable', true);
 
                             Ext.Ajax.request({
-                                url: Routing.generate('pimcore_admin_tags_update'),
+                                url: "/admin/tags/update",
                                 method: 'PUT',
                                 params: {
                                     id: data.records[0].id,
                                     parentId: overModel.id
                                 }
                             });
-                            this.tagFilter();
-                        }.bind(this),
+                        },
                         ontreenodeover: function (targetNode, position, dragData, e, eOpts) {
                             var node = dragData.records[0];
                             return node.getOwnerTree() == targetNode.getOwnerTree();
@@ -150,9 +147,7 @@ pimcore.element.tag.tree = Class.create({
                 root: {
                     id: '0',
                     text: t('element_tag_all_tags'),
-                    iconCls: 'pimcore_icon_folder',
-                    expanded: true,
-                    loaded:true
+                    iconCls: 'pimcore_icon_folder'
                 },
                 rootVisible: true,
                 listeners: {
@@ -166,64 +161,48 @@ pimcore.element.tag.tree = Class.create({
             });
 
             this.tree.on("render", function () {
-                this.getStore().load();
+                this.getRootNode().expand();
             });
         }
 
         return this.tree;
     },
 
-    tagFilter: function() {
-        this.tree.getStore().clearFilter();
-        var currentFilterValue = this.filterField.getValue().toLowerCase();
-
-        this.tree.getStore().load({
-            params: {
-                filter : currentFilterValue
-            },
-            callback: this.updateTagFilter.bind(this)
-        });
-    },
-
     updateTagFilter: function () {
+
         this.tree.getStore().clearFilter();
         var currentFilterValue = this.filterField.getValue().toLowerCase();
 
-        if(currentFilterValue) {
-            this.tree.getStore().filterBy(function (item) {
-                if (item.data.text.toLowerCase().indexOf(currentFilterValue) !== -1) {
+        this.tree.getStore().filterBy(function (item) {
+            if (item.data.text.toLowerCase().indexOf(currentFilterValue) !== -1) {
+                return true;
+            }
+
+            if (!item.data.leaf) {
+                if (item.data.root) {
                     return true;
                 }
 
-                if (!item.data.leaf) {
-                    if (item.data.root) {
-                        return true;
-                    }
-
-                    var childNodes = item.childNodes;
-                    var hide = true;
-                    if (childNodes) {
-                        var i;
-                        for (i = 0; i < childNodes.length; i++) {
-                            var childNode = childNodes[i];
-                            if (childNode.get("visible")) {
-                                hide = false;
-                                break;
-                            }
+                var childNodes = item.childNodes;
+                var hide = true;
+                if (childNodes) {
+                    var i;
+                    for (i = 0; i < childNodes.length; i++) {
+                        var childNode = childNodes[i];
+                        if (childNode.get("visible")) {
+                            hide = false;
+                            break;
                         }
                     }
-
-                    return !hide;
                 }
-            }.bind(this));
 
-            var rootNode = this.tree.getRootNode();
-            rootNode.set('text', currentFilterValue ? t('element_tag_filtered_tags') : t('element_tag_all_tags'));
-            var storeCount = this.tree.getStore().data.items.length;
-            if (currentFilterValue && storeCount > 1) {
-                rootNode.expand(true);
+                return !hide;
             }
-        }
+        }.bind(this));
+
+        var rootNode = this.tree.getRootNode()
+        rootNode.set('text', currentFilterValue ? t('element_tag_filtered_tags') : t('element_tag_all_tags'));
+        rootNode.expand(true);
     },
 
     onTreeNodeContextmenu: function (tree, record, item, index, e, eOpts) {
@@ -245,7 +224,7 @@ pimcore.element.tag.tree = Class.create({
             }));
         }
 
-        if (this.allowDelete && user.isAllowed("tags_configuration") && index !== 0) {
+        if (this.allowDelete && user.isAllowed("tags_configuration")) {
             hasEntries = true;
             menu.add(new Ext.menu.Item({
                 text: t('delete'),
@@ -254,7 +233,7 @@ pimcore.element.tag.tree = Class.create({
                     Ext.Msg.confirm(t('delete'), t('delete_message'), function (btn) {
                         if (btn == 'yes') {
                             Ext.Ajax.request({
-                                url: Routing.generate('pimcore_admin_tags_delete'),
+                                url: "/admin/tags/delete",
                                 method: 'DELETE',
                                 params: {
                                     id: record.data.id
@@ -269,21 +248,16 @@ pimcore.element.tag.tree = Class.create({
             }));
         }
 
-        if (this.allowRename && user.isAllowed("tags_configuration") && index !== 0) {
+        if (this.allowRename && user.isAllowed("tags_configuration")) {
             hasEntries = true;
             menu.add(new Ext.menu.Item({
                 text: t('rename'),
                 iconCls: "pimcore_icon_key pimcore_icon_overlay_go",
                 handler: function (tree, record) {
                     Ext.MessageBox.prompt(t('rename_tag'), t('enter_new_name_of_the_tag'), function (tree, record, button, value) {
-                        value = strip_tags(trim(value));
-                        if (button == "ok" && value.length > 0) {
-                            if (this.isKeyInSameLevel(record.parentNode, value, record)) {
-                                return;
-                            }
-
+                        if (button == "ok" && value.length > 2) {
                             Ext.Ajax.request({
-                                url: Routing.generate('pimcore_admin_tags_update'),
+                                url: "/admin/tags/update",
                                 method: 'PUT',
                                 params: {
                                     id: record.id,
@@ -291,11 +265,7 @@ pimcore.element.tag.tree = Class.create({
                                 },
                                 success: function (record, value) {
                                     record.set('text', value);
-                                    var currentFilterValue = this.filterField.getValue().toLowerCase();
-                                    if (currentFilterValue) {
-                                        this.tagFilter();
-                                        return;
-                                    }
+                                    tree.getStore().reload();
                                 }.bind(this, record, value)
                             });
                         } else if (button == "cancel") {
@@ -317,30 +287,15 @@ pimcore.element.tag.tree = Class.create({
     },
 
     addTagComplete: function (tree, record, button, value, object) {
-        value = strip_tags(trim(value));
-        if (button == "ok" && value.length > 0) {
-            if (this.isKeyInSameLevel(record, value, record)) {
-               return;
-            }
-
+        if (button == "ok" && value.length > 2) {
             Ext.Ajax.request({
-                url: Routing.generate('pimcore_admin_tags_add'),
+                url: "/admin/tags/add",
                 method: 'POST',
                 params: {
                     parentId: record.data.id,
                     text: value
                 },
-                success: function (tree, record, response) {
-                    res = Ext.decode(response.responseText);
-                    if (!res.success) {
-                        pimcore.helpers.showNotification(t("error"), t("error"), "error", t(res.message));
-                    }
-
-                    var currentFilterValue = this.filterField.getValue().toLowerCase();
-                    if (currentFilterValue) {
-                        this.tagFilter();
-                        return;
-                    }
+                success: function (tree, record) {
                     record.set('leaf', false);
                     record.set('expandable', true);
                     tree.getStore().reload({
@@ -367,17 +322,6 @@ pimcore.element.tag.tree = Class.create({
         });
 
         return checkedTagIds;
-    },
-
-    isKeyInSameLevel: function (parentNode, key, record) {
-        var parentChilds = parentNode.childNodes;
-        for (var i = 0; i < parentChilds.length; i++) {
-            if (parentChilds[i].data.text == key && parentChilds[i] !== record) {
-                Ext.MessageBox.alert(t('error'),
-                    t('name_already_in_use'));
-                return true;
-            }
-        }
     }
 
 });

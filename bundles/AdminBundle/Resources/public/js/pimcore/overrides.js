@@ -115,7 +115,7 @@ Ext.define('pimcore.filters', {
         var type = column.filter.type;
         var theFilter = column.filter.filter;
 
-        if (column.filter instanceof Ext.grid.filters.filter.TriFilter) {
+        if (type == "date" || type == "numeric") {
             theFilter.lt.config.type = type;
             theFilter.gt.config.type = type;
             theFilter.eq.config.type = type;
@@ -248,12 +248,6 @@ Ext.define('pimcore.tree.View', {
                 record.ptb.destroy();
                 delete record.ptb;
             }
-        },
-
-        itemupdate: function(record) {
-            if (record.needsPaging && typeof record.ptb == "undefined") {
-                this.doUpdatePaging(record);
-            }
         }
     },
 
@@ -267,7 +261,7 @@ Ext.define('pimcore.tree.View', {
 
         me.superclass.renderRow.call(this, record, rowIdx, out);
 
-        if (record.needsPaging && typeof record.ptb == "undefined") {
+        if (record.needsPaging && typeof record.ptp == "undefined") {
             this.doUpdatePaging(record);
         }
 
@@ -392,7 +386,7 @@ Ext.define('pimcore.data.PagingTreeStore', {
                 node.set('expandable', true);
             });
 
-            if (me.pageSize < total || node.inSearch) {
+            if (me.pageSize < total) {
                 node.needsPaging = true;
                 node.pagingData = {
                     total: data.total,

@@ -20,9 +20,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Controller\ArgumentValueResolverInterface;
 use Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadata;
 
-/**
- * @deprecated
- */
 class ViewModelValueResolver implements ArgumentValueResolverInterface
 {
     /**

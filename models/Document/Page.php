@@ -17,6 +17,7 @@
 
 namespace Pimcore\Model\Document;
 
+use Pimcore\Model\Document\Traits\RedirectHelperTrait;
 use Pimcore\Model\Redirect;
 use Pimcore\Model\Site;
 use Pimcore\Model\Tool\Targeting\TargetGroup;
@@ -26,6 +27,8 @@ use Pimcore\Model\Tool\Targeting\TargetGroup;
  */
 class Page extends TargetingDocument
 {
+    use RedirectHelperTrait;
+
     /**
      * Contains the title of the page (meta-title)
      *
@@ -53,7 +56,7 @@ class Page extends TargetingDocument
     protected $type = 'page';
 
     /**
-     * @var string|null
+     * @var string
      */
     protected $prettyUrl;
 
@@ -67,8 +70,12 @@ class Page extends TargetingDocument
     /**
      * @inheritdoc
      */
-    protected function doDelete()
+    public function delete(bool $isNested = false)
     {
+        if ($this->getId() == 1) {
+            throw new \Exception('root-node cannot be deleted');
+        }
+
         // check for redirects pointing to this document, and delete them too
         $redirects = new Redirect\Listing();
         $redirects->setCondition('target = ?', $this->getId());
@@ -82,7 +89,22 @@ class Page extends TargetingDocument
             $site->delete();
         }
 
-        parent::doDelete();
+        parent::delete($isNested);
+    }
+
+    /**
+     * @param array $params additional parameters (e.g. "versionNote" for the version note)
+     *
+     * @throws \Exception
+     */
+    protected function update($params = [])
+    {
+        $oldPath = $this->getDao()->getCurrentFullPath();
+        $oldDocument = self::getById($this->getId(), true);
+
+        parent::update($params);
+
+        $this->createRedirectForFormerPath($oldPath, $oldDocument);
     }
 
     /**
@@ -126,7 +148,7 @@ class Page extends TargetingDocument
     }
 
     /**
-     * @param array $metaData
+     * @param $metaData
      *
      * @return $this
      */
@@ -145,12 +167,9 @@ class Page extends TargetingDocument
         return $this->metaData;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function getFullPath(bool $force = false)
+    public function getFullPath()
     {
-        $path = parent::getFullPath($force);
+        $path = parent::getFullPath();
 
         // do not use pretty url's when in admin, the current document is wrapped by a hardlink or this document isn't in the current site
         if (!\Pimcore::inAdmin() && !($this instanceof Hardlink\Wrapper\WrapperInterface) && \Pimcore\Tool\Frontend::isDocumentInCurrentSite($this)) {
@@ -165,7 +184,7 @@ class Page extends TargetingDocument
     }
 
     /**
-     * @param string $prettyUrl
+     * @param $prettyUrl
      *
      * @return $this
      */
@@ -180,7 +199,7 @@ class Page extends TargetingDocument
     }
 
     /**
-     * @return string|null
+     * @return string
      */
     public function getPrettyUrl()
     {

@@ -26,7 +26,7 @@ use Pimcore\Model;
 class Listing extends Model\Listing\JsonListing
 {
     /**
-     * @var Model\Asset\Image\Thumbnail\Config[]|null
+     * @var array|null
      */
     protected $thumbnails = null;
 
@@ -43,7 +43,7 @@ class Listing extends Model\Listing\JsonListing
     }
 
     /**
-     * @param Model\Asset\Image\Thumbnail\Config[]|null $thumbnails
+     * @param $thumbnails
      *
      * @return $this
      */

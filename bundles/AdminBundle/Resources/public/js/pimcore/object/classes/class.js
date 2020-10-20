@@ -16,9 +16,9 @@ pimcore.object.classes.klass = Class.create({
 
     allowedInType: 'object',
     disallowedDataTypes: [],
+    uploadUrl: '/admin/class/import-class',
+    exportUrl: "/admin/class/export-class",
     context: "class",
-    uploadRoute: 'pimcore_admin_dataobject_class_importclass',
-    exportRoute: 'pimcore_admin_dataobject_class_exportclass',
 
     initialize: function (data, parentPanel, reopen, editorPrefix) {
         this.parentPanel = parentPanel;
@@ -26,21 +26,27 @@ pimcore.object.classes.klass = Class.create({
         this.editorPrefix = editorPrefix;
         this.reopen = reopen;
 
-        this.addTree();
-        this.initLayoutFields();
         this.addLayout();
+        this.initLayoutFields();
+
     },
 
     getUploadUrl: function(){
-        return Routing.generate(this.uploadRoute, {id: this.getId()});
+        return this.uploadUrl + '?id=' + this.getId();
     },
 
     getExportUrl: function() {
-        return Routing.generate(this.exportRoute, {id: this.getId()});
+        return  this.exportUrl + "?id=" + this.getId();
     },
 
+    addLayout: function () {
 
-    addTree: function() {
+        this.editpanel = new Ext.Panel({
+            region: "center",
+            bodyStyle: "padding: 10px;",
+            autoScroll: true
+        });
+
         this.tree = Ext.create('Ext.tree.Panel', {
             region: "west",
             width: 300,
@@ -62,15 +68,6 @@ pimcore.object.classes.klass = Class.create({
                     ddGroup: "element"
                 }
             }
-        });
-    },
-
-    addLayout: function () {
-
-        this.editpanel = new Ext.Panel({
-            region: "center",
-            bodyStyle: "padding: 10px;",
-            autoScroll: true
         });
 
         var displayId = this.data.key ? this.data.key : this.data.id; // because the field-collections use that also
@@ -159,16 +156,15 @@ pimcore.object.classes.klass = Class.create({
 
         pimcore.helpers.uploadDialog(this.getUploadUrl(), "Filedata", function() {
             Ext.Ajax.request({
-                url: Routing.generate('pimcore_admin_dataobject_class_get'),
+                url: "/admin/class/get",
                 params: {
                     id: this.data.id
                 },
                 success: function(response) {
                     this.data = Ext.decode(response.responseText);
                     this.parentPanel.getEditPanel().removeAll();
-                    this.addTree();
-                    this.initLayoutFields();
                     this.addLayout();
+                    this.initLayoutFields();
                     pimcore.layout.refresh();
                 }.bind(this)
             });
@@ -263,12 +259,12 @@ pimcore.object.classes.klass = Class.create({
         }
     },
 
-    getDataMenu: function(tree, record, allowedTypes, parentType, editMode) {
+     getDataMenu: function(tree, record, allowedTypes, parentType, editMode) {
         // get available data types
         var dataMenu = [];
         var dataComps = Object.keys(pimcore.object.classes.data);
 
-        // @TODO: ignoredAliases are there for BC reasons, to be removed in v7
+        // @TODO: ignoredAliases are there for BC reasons, to be removed in v6
         var ignoredAliases = ['multihrefMetadata','objectsMetadata','objects','multihref','href','nonownerobjects'];
         ignoredAliases.forEach(function (item) {
             dataComps = array_remove_value(dataComps, item);
@@ -285,6 +281,7 @@ pimcore.object.classes.klass = Class.create({
             var allowed = false;
 
             if('object' !== typeof dataComp) {
+                var tt = typeof dataComp;
                 if (dataComp.prototype.allowIn[this.allowedInType]) {
                     allowed = true;
                 }
@@ -313,7 +310,7 @@ pimcore.object.classes.klass = Class.create({
                         if (!in_array(group, groupNames)) {
                             groupNames.push(group);
                         }
-                        groups[group] = [];
+                        groups[group] = new Array();
                     }
                     var handler;
                     if (editMode) {
@@ -444,6 +441,7 @@ pimcore.object.classes.klass = Class.create({
             }
 
             if (record.data.type == "data") {
+                var dataComps = Object.keys(pimcore.object.classes.data);
                 menu.add(new Ext.menu.Item({
                     text: t('clone'),
                     iconCls: "pimcore_icon_clone",
@@ -599,10 +597,7 @@ pimcore.object.classes.klass = Class.create({
                 this.currentNode.applyData();
             }  else {
                 // save root node data
-                var items = this.rootPanel.queryBy(function(item) {
-                    if (item == this.compositeIndicesPanel) {
-                        return false;
-                    }
+                var items = this.rootPanel.queryBy(function() {
                     return true;
                 });
 
@@ -612,33 +607,8 @@ pimcore.object.classes.klass = Class.create({
                         this.data[item.name] = item.getValue();
                     }
                 }
-
-                if (this.compositeIndicesPanel) {
-                    this.collectCompositeIndices();
-                }
             }
         }
-    },
-
-    collectCompositeIndices: function() {
-        var indexData = [];
-        for(let s=0; s<this.compositeIndicesPanel.items.items.length; s++) {
-            var entry = this.compositeIndicesPanel.items.items[s];
-            var items = entry.queryBy(function(item) {
-                return true;
-            });
-
-            var indexItem = {};
-            for (var i = 0; i < items.length; i++) {
-                var item = items[i];
-                if (typeof item.getValue == "function") {
-                    indexItem[item.name] = item.getValue();
-                }
-            }
-            indexData.push(indexItem);
-        }
-
-        this.data["compositeIndices"] = indexData;
     },
 
     getRootPanel: function () {
@@ -689,54 +659,16 @@ pimcore.object.classes.klass = Class.create({
             return "Pimcore\\Model\\DataObject\\" + ucfirst(name);
         };
 
-        var iconStore = new Ext.data.ArrayStore({
-            proxy: {
-                url: Routing.generate('pimcore_admin_dataobject_class_geticons'),
-                type: 'ajax',
-                reader: {
-                    type: 'json'
-                },
-                extraParams: {
-                    classId: this.getId()
-                }
-            },
-            fields: ["text", "value"]
-        });
-
         var iconField = new Ext.form.field.Text({
-            id: "iconfield-" + this.getId(),
+            fieldLabel: t("icon"),
             name: "icon",
-            width: 396,
+            width: 600,
             value: this.data.icon,
             listeners: {
                 "afterrender": function (el) {
                     el.inputEl.applyStyles("background:url(" + el.getValue() + ") right center no-repeat;");
                 }
             }
-        });
-
-        this.compositeIndexTypeStore = new Ext.data.ArrayStore({
-            data: [['query'], ['localized_query'],['store'], ['localized_store']],
-            fields: ['value']
-        });
-
-        var suggestedColumns = [];
-        var store = this.tree.getStore();
-        var data = store.getData();
-        for (let i = 0; i < data.items.length; i++) {
-            let record = data.items[i];
-            if (record.data.type == "data") {
-                suggestedColumns.push([record.data.text]);
-            }
-        }
-
-        this.tagstore = new Ext.data.ArrayStore({
-            data: suggestedColumns,
-            fields: ['value']
-        });
-
-        this.compositeIndicesPanel = new Ext.Panel({
-            autoScroll: true
         });
 
         this.rootPanel = new Ext.form.FormPanel({
@@ -791,13 +723,6 @@ pimcore.object.classes.klass = Class.create({
                 },
                 {
                     xtype: "textfield",
-                    width: 600,
-                    name: "implementsInterfaces",
-                    fieldLabel: t("implements_interfaces"),
-                    value: this.data.implementsInterfaces
-                },
-                {
-                    xtype: "textfield",
                     fieldLabel: t("use_traits"),
                     name: "useTraits",
                     width: 600,
@@ -834,32 +759,15 @@ pimcore.object.classes.klass = Class.create({
                 {
                     xtype: "fieldcontainer",
                     layout: "hbox",
-                    fieldLabel: t("icon"),
                     defaults: {
                         labelWidth: 200
                     },
                     items: [
-                        iconField,
-                        {
-                            xtype: "combobox",
-                            store: iconStore,
-                            width: 50,
-                            valueField: 'value',
-                            displayField: 'text',
-                            listeners: {
-                                select: function (ele, rec, idx) {
-                                    var icon = ele.container.down("#iconfield-" + this.getId());
-                                    var newValue = rec.data.value;
-                                    icon.component.setValue(newValue);
-                                    icon.component.inputEl.applyStyles("background:url(" + newValue + ") right center no-repeat;");
-                                    return newValue;
-                                }.bind(this)
-                            }
-                        },
-                        {
+                        iconField, {
                             iconCls: "pimcore_icon_refresh",
                             xtype: "button",
                             tooltip: t("refresh"),
+                            style: "margin-right: 5px;",
                             handler: function(iconField) {
                                 iconField.inputEl.applyStyles("background:url(" + iconField.getValue() + ") right center no-repeat;");
                             }.bind(this, iconField)
@@ -869,7 +777,7 @@ pimcore.object.classes.klass = Class.create({
                             iconCls: "pimcore_icon_icons",
                             text: t('icon_library'),
                             handler: function () {
-                                pimcore.helpers.openGenericIframeWindow("icon-library", Routing.generate('pimcore_admin_misc_iconlist'), "pimcore_icon_icons", t("icon_library"));
+                                pimcore.helpers.openGenericIframeWindow("icon-library", "/admin/misc/icon-list", "pimcore_icon_icons", t("icon_library"));
                             }
                         }
                     ]
@@ -886,27 +794,9 @@ pimcore.object.classes.klass = Class.create({
                 this.showVariants,
                 {
                     xtype: "checkbox",
-                    fieldLabel: t("generate_type_declarations"),
-                    name: "generateTypeDeclarations",
-                    checked: this.data.generateTypeDeclarations
-                },
-                {
-                    xtype: "checkbox",
                     fieldLabel: t("show_applogger_tab"),
                     name: "showAppLoggerTab",
                     checked: this.data.showAppLoggerTab
-                },
-                {
-                    xtype: "checkbox",
-                    fieldLabel: t("show_fieldlookup"),
-                    name: "showFieldLookup",
-                    checked: this.data.showFieldLookup
-                },
-                {
-                    xtype: "checkbox",
-                    fieldLabel: t("enable_grid_locking"),
-                    name: "enableGridLocking",
-                    checked: this.data.enableGridLocking
                 },
                 {
                     xtype: "checkbox",
@@ -914,8 +804,7 @@ pimcore.object.classes.klass = Class.create({
                     name: "encryption",
                     style: 'margin: 0',
                     checked: this.data.encryption
-                },
-                {
+                }, {
                     xtype: 'container',
                     html: t('encrypt_data_description'),
                     style: 'margin-bottom:10px'
@@ -1003,22 +892,6 @@ pimcore.object.classes.klass = Class.create({
                     xtype: "displayfield",
                     hideLabel: true,
                     width: 600,
-                    value: "<b>" + t('composite_indices') + "</b>",
-                    cls: "pimcore_extra_label_headline"
-                },
-                {
-                    xtype: 'button',
-                    text: t('add'),
-                    iconCls: "pimcore_icon_add",
-                    handler: function () {
-                        this.addCompositeIndex();
-                    }.bind(this)
-                },
-                this.compositeIndicesPanel,
-                {
-                    xtype: "displayfield",
-                    hideLabel: true,
-                    width: 600,
                     value: "<b>" + t('uses_these_bricks') + "</b>",
                     cls: "pimcore_extra_label_headline"
                 },
@@ -1027,98 +900,17 @@ pimcore.object.classes.klass = Class.create({
             ]
         });
 
-        if (this.data.compositeIndices) {
-            for (let i = 0; i < this.data.compositeIndices.length; i++) {
-                let indexData = this.data.compositeIndices[i];
-                this.addCompositeIndex(indexData);
-            }
-        }
-
         this.rootPanel.on("afterrender", function() {
-            this.usagesStore.reload();
+            this.usagesStore.reload()
         }.bind(this));
 
         return this.rootPanel;
     },
 
-    addCompositeIndex: function(data) {
-        data = data || {};
-        var keyField = {
-            xtype: 'textfield',
-            name: "index_key",
-            fieldLabel: t("key"),
-            labelWidth: 100,
-            width: 250,
-            value: data.index_key
-        };
-
-        var tagsField = new Ext.form.field.Tag({
-            name: "index_columns",
-            width:550,
-            resizable: true,
-            minChars: 2,
-            store: this.tagstore,
-            fieldLabel: t("columns"),
-            value: data.columns,
-            draggable: true,
-            displayField: 'value',
-            valueField: 'value',
-            forceSelection: false,
-            delimiter: '\x01',
-            createNewOnEnter: true,
-            componentCls: 'superselect-no-drop-down',
-            value: data.index_columns
-        });
-
-        var removeButton = new Ext.button.Button({
-            iconCls: "pimcore_icon_minus",
-            style: "margin-left: 10px"
-        });
-
-        var typeCombo = {
-            xtype: 'combo',
-            name: "index_type",
-            triggerAction: "all",
-            editable: true,
-            queryMode: 'local',
-            autoComplete: false,
-            forceSelection: true,
-            selectOnFocus: true,
-            fieldLabel: t("table"),
-            store: this.compositeIndexTypeStore,
-            width: 250,
-            displayField: 'value',
-            valueField: 'value',
-            value: data.index_type ? data.index_type : "query",
-            labelWidth: 70,
-            style: "margin-left: 10px"
-        };
-
-        var keyEntry = new Ext.form.FieldContainer({
-            layout: 'hbox',
-            border: false,
-            items: [keyField, typeCombo, removeButton]
-        });
-
-
-        var entry = new Ext.form.FieldContainer({
-            layout: 'vbox',
-            border: false,
-            items: [keyEntry, tagsField]
-        });
-
-
-        removeButton.addListener("click", function() {
-            this.compositeIndicesPanel.remove(entry);
-        }.bind(this, entry));
-
-        this.compositeIndicesPanel.add(entry);
-    },
-
     getBricksGrid: function() {
         this.usagesStore = new Ext.data.ArrayStore({
             proxy: {
-                url: Routing.generate('pimcore_admin_dataobject_class_getbrickusages'),
+                url: '/admin/class/get-bricks-usages',
                 type: 'ajax',
                 reader: {
                     type: 'json'
@@ -1245,6 +1037,8 @@ pimcore.object.classes.klass = Class.create({
             theData.name = nodeLabel;
             theData.datatype = "data";
             theData.fieldtype = type;
+
+            var isLeaf = this.leaf;
 
             if (!removeExisting) {
                 var matches = nodeLabel.match(/\d+$/);
@@ -1429,12 +1223,10 @@ pimcore.object.classes.klass = Class.create({
 
         this.saveCurrentNode();
 
-        var isValidName = /^[a-zA-Z][a-zA-Z0-9]+$/;
+        var regresult = this.data["name"].match(/[a-zA-Z][a-zA-Z0-9]+/);
 
-        if (this.data["name"].length > 2 &&
-            isValidName.test(this.data["name"]) &&
-            !in_arrayi(this.data["name"], this.parentPanel.forbiddenNames)
-        ) {
+        if (this.data["name"].length > 2 && regresult == this.data["name"] && !in_array(this.data["name"].toLowerCase(),
+            this.parentPanel.forbiddennames)) {
             delete this.data.layoutDefinitions;
 
             var m = Ext.encode(this.getData());
@@ -1442,7 +1234,7 @@ pimcore.object.classes.klass = Class.create({
 
             if (this.getDataSuccess) {
                 Ext.Ajax.request({
-                    url: Routing.generate('pimcore_admin_dataobject_class_save'),
+                    url: "/admin/class/save",
                     method: "PUT",
                     params: {
                         configuration: m,
@@ -1468,16 +1260,12 @@ pimcore.object.classes.klass = Class.create({
                 pimcore.globalmanager.get("object_types_store").load();
                 pimcore.globalmanager.get("object_types_store_create").load();
 
-                // set the current modification date, to detect modifications on the class which are not made here
+                // set the current modification date, to detect modifcations on the class which are not made here
                 this.data.modificationDate = res['class'].modificationDate;
 
                 pimcore.helpers.showNotification(t("success"), t("saved_successfully"), "success");
             } else {
-                if (res.message) {
-                    pimcore.helpers.showNotification(t("error"), res.message, "error");
-                } else {
-                    throw "save was not successful, see log files in /var/logs";
-                }
+                throw "save was not successful, see log files in /var/logs";
             }
         } catch (e) {
             this.saveOnError();

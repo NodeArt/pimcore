@@ -17,9 +17,6 @@ declare(strict_types=1);
 
 namespace Pimcore\Document\Tag\NamingStrategy\Migration\Analyze\Exception;
 
-/**
- * @deprecated
- */
 class BuildEditableException extends \RuntimeException
 {
     /**

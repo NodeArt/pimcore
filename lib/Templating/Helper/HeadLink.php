@@ -57,8 +57,6 @@ use Symfony\Component\EventDispatcher\GenericEvent;
  * @method $this prependStylesheet($href, $media = 'screen', $conditionalStylesheet = false, array $extras = array())
  * @method $this setAlternate($href, $type, $title, $extras)
  * @method $this setStylesheet($href, $media = 'screen', $conditionalStylesheet = false, array $extras = array())
- *
- * @deprecated
  */
 class HeadLink extends CacheBusterAware
 {
@@ -244,7 +242,7 @@ class HeadLink extends CacheBusterAware
             throw new Exception('append() expects a data token; please use one of the custom append*() methods');
         }
 
-        $this->getContainer()->append($value);
+        return $this->getContainer()->append($value);
     }
 
     /**
@@ -261,13 +259,15 @@ class HeadLink extends CacheBusterAware
             throw new Exception('offsetSet() expects a data token; please use one of the custom offsetSet*() methods');
         }
 
-        $this->getContainer()->offsetSet($index, $value);
+        return $this->getContainer()->offsetSet($index, $value);
     }
 
     /**
      * prepend()
      *
-     * @param array $value
+     * @param  array $value
+     *
+     * @return HeadLink
      */
     public function prepend($value)
     {
@@ -275,13 +275,15 @@ class HeadLink extends CacheBusterAware
             throw new Exception('prepend() expects a data token; please use one of the custom prepend*() methods');
         }
 
-        $this->getContainer()->prepend($value);
+        return $this->getContainer()->prepend($value);
     }
 
     /**
      * set()
      *
-     * @param array $value
+     * @param  array $value
+     *
+     * @return HeadLink
      */
     public function set($value)
     {
@@ -289,7 +291,7 @@ class HeadLink extends CacheBusterAware
             throw new Exception('set() expects a data token; please use one of the custom set*() methods');
         }
 
-        $this->getContainer()->set($value);
+        return $this->getContainer()->set($value);
     }
 
     /**
@@ -375,7 +377,7 @@ class HeadLink extends CacheBusterAware
             }
 
             \Pimcore::getEventDispatcher()->dispatch(FrontendEvents::VIEW_HELPER_HEAD_LINK, new GenericEvent($this, [
-                'item' => $item,
+                'item' => $item
             ]));
 
             $source = (string)($item->href ?? '');
@@ -418,7 +420,6 @@ class HeadLink extends CacheBusterAware
         $type = 'text/css';
         $media = 'screen';
         $conditionalStylesheet = false;
-        $extras = [];
         $href = array_shift($args);
 
         if ($this->_isDuplicateStylesheet($href)) {
@@ -487,7 +488,6 @@ class HeadLink extends CacheBusterAware
         $href = array_shift($args);
         $type = array_shift($args);
         $title = array_shift($args);
-        $extras = [];
 
         if (0 < count($args) && is_array($args[0])) {
             $extras = array_shift($args);

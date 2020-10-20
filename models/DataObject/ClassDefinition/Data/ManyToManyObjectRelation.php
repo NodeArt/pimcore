@@ -21,12 +21,11 @@ use Pimcore\Model\DataObject;
 use Pimcore\Model\DataObject\ClassDefinition\Data\Relations\AbstractRelations;
 use Pimcore\Model\Element;
 
-class ManyToManyObjectRelation extends AbstractRelations implements QueryResourcePersistenceAwareInterface, OptimizedAdminLoadingInterface, TypeDeclarationSupportInterface
+class ManyToManyObjectRelation extends AbstractRelations implements QueryResourcePersistenceAwareInterface, OptimizedAdminLoadingInterface
 {
     use Model\DataObject\ClassDefinition\Data\Extension\Relation;
     use Extension\QueryColumnType;
     use DataObject\ClassDefinition\Data\Relations\AllowObjectRelationTrait;
-    use DataObject\ClassDefinition\Data\Relations\ManyToManyRelationTrait;
 
     /**
      * Static type of this element
@@ -72,14 +71,9 @@ class ManyToManyObjectRelation extends AbstractRelations implements QueryResourc
     public $relationType = true;
 
     /**
-     * @var string|null
+     * @var
      */
     public $visibleFields;
-
-    /**
-     * @var bool
-     */
-    public $allowToCreateNewObject = true;
 
     /**
      * @var bool
@@ -114,7 +108,7 @@ class ManyToManyObjectRelation extends AbstractRelations implements QueryResourc
                         'dest_id' => $object->getId(),
                         'type' => 'object',
                         'fieldname' => $this->getName(),
-                        'index' => $counter,
+                        'index' => $counter
                     ];
                 }
                 $counter++;
@@ -137,7 +131,7 @@ class ManyToManyObjectRelation extends AbstractRelations implements QueryResourc
     {
         $objects = [
             'dirty' => false,
-            'data' => [],
+            'data' => []
         ];
         if (is_array($data) && count($data) > 0) {
             foreach ($data as $object) {
@@ -157,7 +151,7 @@ class ManyToManyObjectRelation extends AbstractRelations implements QueryResourc
      * @see QueryResourcePersistenceAwareInterface::getDataForQueryResource
      *
      * @param array $data
-     * @param null|DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @throws \Exception
@@ -192,7 +186,7 @@ class ManyToManyObjectRelation extends AbstractRelations implements QueryResourc
      * @see Data::getDataForEditmode
      *
      * @param array $data
-     * @param null|DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return array
@@ -221,10 +215,10 @@ class ManyToManyObjectRelation extends AbstractRelations implements QueryResourc
      * @see Data::getDataFromEditmode
      *
      * @param array $data
-     * @param null|DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
-     * @return array|null
+     * @return array
      */
     public function getDataFromEditmode($data, $object = null, $params = [])
     {
@@ -247,36 +241,33 @@ class ManyToManyObjectRelation extends AbstractRelations implements QueryResourc
     }
 
     /**
-     * @see Data::getDataFromEditmode
-     *
-     * @param array $data
-     * @param null|DataObject\Concrete $object
-     * @param mixed $params
-     *
-     * @return array
-     */
-    public function getDataFromGridEditor($data, $object = null, $params = [])
-    {
-        return $this->getDataFromEditmode($data, $object, $params);
-    }
-
-    /**
-     * @param array|null $data
-     * @param DataObject\Concrete|null $object
+     * @param $data
+     * @param null $object
      * @param mixed $params
      *
      * @return array|null
      */
     public function getDataForGrid($data, $object = null, $params = [])
     {
-        return $this->getDataForEditmode($data, $object, $params);
+        if (is_array($data)) {
+            $pathes = [];
+            foreach ($data as $eo) {
+                if ($eo instanceof Element\ElementInterface) {
+                    $pathes[] = $eo->getRealFullPath();
+                }
+            }
+
+            return $pathes;
+        }
+
+        return null;
     }
 
     /**
      * @see Data::getVersionPreview
      *
-     * @param Element\ElementInterface[]|null $data
-     * @param null|DataObject\Concrete $object
+     * @param array $data
+     * @param null|DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return string|null
@@ -379,7 +370,7 @@ class ManyToManyObjectRelation extends AbstractRelations implements QueryResourc
      *
      * @abstract
      *
-     * @param DataObject\Concrete $object
+     * @param DataObject\AbstractObject $object
      * @param array $params
      *
      * @return string
@@ -396,14 +387,14 @@ class ManyToManyObjectRelation extends AbstractRelations implements QueryResourc
             }
 
             return implode(',', $paths);
+        } else {
+            return null;
         }
-
-        return '';
     }
 
     /**
-     * @param string $importValue
-     * @param null|DataObject\Concrete $object
+     * @param $importValue
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return array|mixed
@@ -423,7 +414,34 @@ class ManyToManyObjectRelation extends AbstractRelations implements QueryResourc
     }
 
     /**
-     * @param DataObject\AbstractObject[]|null $data
+     * This is a dummy and is mostly implemented by relation types
+     *
+     * @param mixed $data
+     * @param array $tags
+     *
+     * @return array
+     */
+    public function getCacheTags($data, $tags = [])
+    {
+        $tags = is_array($tags) ? $tags : [];
+
+        if ($this->getLazyLoading()) {
+            return $tags;
+        }
+
+        if (is_array($data) && count($data) > 0) {
+            foreach ($data as $object) {
+                if ($object instanceof Element\ElementInterface && !array_key_exists($object->getCacheTag(), $tags)) {
+                    $tags = $object->getCacheTags($tags);
+                }
+            }
+        }
+
+        return $tags;
+    }
+
+    /**
+     * @param $data
      *
      * @return array
      */
@@ -436,7 +454,7 @@ class ManyToManyObjectRelation extends AbstractRelations implements QueryResourc
                 if ($o instanceof DataObject\AbstractObject) {
                     $dependencies['object_' . $o->getId()] = [
                         'id' => $o->getId(),
-                        'type' => 'object',
+                        'type' => 'object'
                     ];
                 }
             }
@@ -446,9 +464,7 @@ class ManyToManyObjectRelation extends AbstractRelations implements QueryResourc
     }
 
     /**
-     * @deprecated
-     *
-     * @param DataObject\Concrete $object
+     * @param DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return array|mixed|null
@@ -462,24 +478,22 @@ class ManyToManyObjectRelation extends AbstractRelations implements QueryResourc
                 if ($eo instanceof Element\ElementInterface) {
                     $items[] = [
                         'type' => $eo->getType(),
-                        'id' => $eo->getId(),
+                        'id' => $eo->getId()
                     ];
                 }
             }
 
             return $items;
+        } else {
+            return null;
         }
-
-        return null;
     }
 
     /**
-     * @deprecated
-     *
      * @param mixed $value
-     * @param DataObject\Concrete|null $object
+     * @param null $object
      * @param mixed $params
-     * @param Model\Webservice\IdMapperInterface|null $idMapper
+     * @param null $idMapper
      *
      * @return array|mixed
      *
@@ -522,7 +536,7 @@ class ManyToManyObjectRelation extends AbstractRelations implements QueryResourc
     }
 
     /**
-     * @param DataObject\Concrete|DataObject\Localizedfield|DataObject\Objectbrick\Data\AbstractData|DataObject\Fieldcollection\Data\AbstractData $object
+     * @param $object
      * @param array $params
      *
      * @return array
@@ -532,8 +546,8 @@ class ManyToManyObjectRelation extends AbstractRelations implements QueryResourc
         $data = null;
         if ($object instanceof DataObject\Concrete) {
             $data = $object->getObjectVar($this->getName());
-            if (!$object->isLazyKeyLoaded($this->getName())) {
-                $data = $this->load($object);
+            if ($this->getLazyLoading() && !$object->isLazyKeyLoaded($this->getName())) {
+                $data = $this->load($object, ['force' => true]);
 
                 $object->setObjectVar($this->getName(), $data);
                 $this->markLazyloadedFieldAsLoaded($object);
@@ -563,8 +577,8 @@ class ManyToManyObjectRelation extends AbstractRelations implements QueryResourc
     }
 
     /**
-     * @param DataObject\Concrete|DataObject\Localizedfield|DataObject\Objectbrick\Data\AbstractData|DataObject\Fieldcollection\Data\AbstractData $object
-     * @param array|null $data
+     * @param $object
+     * @param $data
      * @param array $params
      *
      * @return array|null
@@ -581,7 +595,7 @@ class ManyToManyObjectRelation extends AbstractRelations implements QueryResourc
     }
 
     /**
-     * @param int|string|null $maxItems
+     * @param $maxItems
      *
      * @return $this
      */
@@ -601,7 +615,7 @@ class ManyToManyObjectRelation extends AbstractRelations implements QueryResourc
     }
 
     /** True if change is allowed in edit mode.
-     * @param DataObject\Concrete $object
+     * @param string $object
      * @param mixed $params
      *
      * @return bool
@@ -612,10 +626,10 @@ class ManyToManyObjectRelation extends AbstractRelations implements QueryResourc
     }
 
     /** Generates a pretty version preview (similar to getVersionPreview) can be either html or
-     * a image URL. See the https://github.com/pimcore/object-merger bundle documentation for details
+     * a image URL. See the ObjectMerger plugin documentation for details
      *
-     * @param Element\ElementInterface[]|null $data
-     * @param DataObject\Concrete|null $object
+     * @param $data
+     * @param null $object
      * @param mixed $params
      *
      * @return array|string
@@ -649,7 +663,7 @@ class ManyToManyObjectRelation extends AbstractRelations implements QueryResourc
      * @param array $idMapping
      * @param array $params
      *
-     * @return array
+     * @return Element\ElementInterface
      */
     public function rewriteIds($object, $idMapping, $params = [])
     {
@@ -660,7 +674,7 @@ class ManyToManyObjectRelation extends AbstractRelations implements QueryResourc
     }
 
     /**
-     * @param DataObject\ClassDefinition\Data\ManyToManyObjectRelation $masterDefinition
+     * @param DataObject\ClassDefinition\Data $masterDefinition
      */
     public function synchronizeWithMasterDefinition(DataObject\ClassDefinition\Data $masterDefinition)
     {
@@ -668,10 +682,8 @@ class ManyToManyObjectRelation extends AbstractRelations implements QueryResourc
         $this->relationType = $masterDefinition->relationType;
     }
 
-    /**
-     * Override point for Enriching the layout definition before the layout is returned to the admin interface.
-     *
-     * @param DataObject\Concrete $object
+    /** Override point for Enriching the layout definition before the layout is returned to the admin interface.
+     * @param $object DataObject\Concrete
      * @param array $context additional contextual data
      */
     public function enrichLayoutDefinition($object, $context = [])
@@ -682,7 +694,7 @@ class ManyToManyObjectRelation extends AbstractRelations implements QueryResourc
 
         $classIds = $this->getClasses();
 
-        if (empty($classIds[0]['classes'])) {
+        if (empty($classIds)) {
             return;
         }
 
@@ -690,11 +702,9 @@ class ManyToManyObjectRelation extends AbstractRelations implements QueryResourc
 
         if (is_numeric($classId)) {
             $class = DataObject\ClassDefinition::getById($classId);
-        } else {
+        } elseif (is_string($classId)) {
             $class = DataObject\ClassDefinition::getByName($classId);
-        }
-
-        if (!$class) {
+        } else {
             return;
         }
 
@@ -708,9 +718,7 @@ class ManyToManyObjectRelation extends AbstractRelations implements QueryResourc
 
             if (!$fd) {
                 $fieldFound = false;
-                /** @var Localizedfields|null $localizedfields */
-                $localizedfields = $class->getFieldDefinitions($context)['localizedfields'] ?? null;
-                if ($localizedfields) {
+                if ($localizedfields = $class->getFieldDefinitions($context)['localizedfields']) {
                     if ($fd = $localizedfields->getFieldDefinition($field)) {
                         $this->visibleFieldDefinitions[$field]['name'] = $fd->getName();
                         $this->visibleFieldDefinitions[$field]['title'] = $fd->getTitle();
@@ -735,7 +743,7 @@ class ManyToManyObjectRelation extends AbstractRelations implements QueryResourc
                 $this->visibleFieldDefinitions[$field]['fieldtype'] = $fd->getFieldType();
                 $this->visibleFieldDefinitions[$field]['noteditable'] = true;
 
-                if ($fd instanceof DataObject\ClassDefinition\Data\Select || $fd instanceof DataObject\ClassDefinition\Data\Multiselect) {
+                if ($fd instanceof DataObject\ClassDefinition\Data\Select || $fd instanceof DataObject\ClassDefinition\Data\MultiSelect) {
                     if ($fd->getOptionsProviderClass()) {
                         $this->visibleFieldDefinitions[$field]['optionsProviderClass'] = $fd->getOptionsProviderClass();
                     }
@@ -756,7 +764,7 @@ class ManyToManyObjectRelation extends AbstractRelations implements QueryResourc
 
     /** Encode value for packing it into a single column.
      * @param mixed $value
-     * @param DataObject\Concrete $object
+     * @param Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return mixed
@@ -770,7 +778,7 @@ class ManyToManyObjectRelation extends AbstractRelations implements QueryResourc
                 $id = $element->getId();
                 $result[] = [
                     'type' => $type,
-                    'id' => $id,
+                    'id' => $id
                 ];
             }
 
@@ -782,7 +790,7 @@ class ManyToManyObjectRelation extends AbstractRelations implements QueryResourc
 
     /** See marshal
      * @param mixed $value
-     * @param DataObject\Concrete $object
+     * @param Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return mixed
@@ -807,7 +815,7 @@ class ManyToManyObjectRelation extends AbstractRelations implements QueryResourc
     /**
      * Returns a ID which must be unique across the grid rows
      *
-     * @param array $item
+     * @param $item
      *
      * @return string
      */
@@ -843,7 +851,7 @@ class ManyToManyObjectRelation extends AbstractRelations implements QueryResourc
                         'title' => $item['path'],
                         'raw' => $raw,
                         'gridrow' => $item,
-                        'unique' => $unique,
+                        'unique' => $unique
                     ];
                 }
                 $data['data'] = $newItems;
@@ -853,14 +861,14 @@ class ManyToManyObjectRelation extends AbstractRelations implements QueryResourc
                 'type' => 'grid',
                 'columnConfig' => [
                     'id' => [
-                        'width' => 60,
+                        'width' => 60
                     ],
                     'path' => [
-                        'flex' => 2,
-                    ],
+                        'flex' => 2
+                    ]
 
                 ],
-                'html' => $this->getVersionPreview($originalData, $object, $params),
+                'html' => $this->getVersionPreview($originalData, $object, $params)
             ];
 
             $newData = [];
@@ -885,8 +893,8 @@ class ManyToManyObjectRelation extends AbstractRelations implements QueryResourc
     }
 
     /** See parent class.
-     * @param array $data
-     * @param DataObject\Concrete|null $object
+     * @param $data
+     * @param null $object
      * @param mixed $params
      *
      * @return mixed
@@ -911,7 +919,7 @@ class ManyToManyObjectRelation extends AbstractRelations implements QueryResourc
     }
 
     /**
-     * @param array|string|null $visibleFields
+     * @param $visibleFields
      *
      * @return $this
      */
@@ -926,27 +934,11 @@ class ManyToManyObjectRelation extends AbstractRelations implements QueryResourc
     }
 
     /**
-     * @return string|null
+     * @return mixed
      */
     public function getVisibleFields()
     {
         return $this->visibleFields;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isAllowToCreateNewObject(): bool
-    {
-        return $this->allowToCreateNewObject;
-    }
-
-    /**
-     * @param bool $allowToCreateNewObject
-     */
-    public function setAllowToCreateNewObject($allowToCreateNewObject)
-    {
-        $this->allowToCreateNewObject = (bool)$allowToCreateNewObject;
     }
 
     /**
@@ -963,33 +955,6 @@ class ManyToManyObjectRelation extends AbstractRelations implements QueryResourc
     public function setOptimizedAdminLoading($optimizedAdminLoading)
     {
         $this->optimizedAdminLoading = $optimizedAdminLoading;
-    }
-
-    public function isFilterable(): bool
-    {
-        return true;
-    }
-
-    /**
-     * @param DataObject\Listing      $listing
-     * @param DataObject\Concrete|int $data     object or object ID
-     * @param string                  $operator SQL comparison operator, e.g. =, <, >= etc. You can use "?" as placeholder, e.g. "IN (?)"
-     *
-     * @return DataObject\Listing
-     */
-    public function addListingFilter(DataObject\Listing $listing, $data, $operator = '=')
-    {
-        if ($data instanceof DataObject\Concrete) {
-            $data = $data->getId();
-        }
-
-        if ($operator === '=') {
-            $listing->addConditionParam('`'.$this->getName().'` LIKE ?', '%,'.$data.',%');
-
-            return $listing;
-        }
-
-        return parent::addListingFilter($listing, $data, $operator);
     }
 }
 

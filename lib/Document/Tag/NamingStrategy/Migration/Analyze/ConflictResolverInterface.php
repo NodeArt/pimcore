@@ -22,9 +22,6 @@ use Pimcore\Document\Tag\NamingStrategy\Migration\Analyze\Element\Editable;
 use Pimcore\Document\Tag\NamingStrategy\Migration\Analyze\Exception\BuildEditableException;
 use Pimcore\Model\Document;
 
-/**
- * @deprecated
- */
 interface ConflictResolverInterface
 {
     /**

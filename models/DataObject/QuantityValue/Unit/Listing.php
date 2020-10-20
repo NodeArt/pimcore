@@ -22,31 +22,26 @@ use Pimcore\Model;
 /**
  * @method \Pimcore\Model\DataObject\QuantityValue\Unit\Listing\Dao getDao()
  * @method Model\DataObject\QuantityValue\Unit[] load()
- * @method Model\DataObject\QuantityValue\Unit current()
- * @method int getTotalCount()
  */
 class Listing extends Model\Listing\AbstractListing
 {
     /**
-     * @var Model\DataObject\QuantityValue\Unit[]|null
-     *
-     * @deprecated use getter/setter methods or $this->data
+     * @var array|null
      */
     protected $units = null;
 
-    public function __construct()
-    {
-        $this->units = & $this->data;
-    }
-
     /**
-     * @param string $key
+     * @param $key
      *
      * @return bool
      */
     public function isValidOrderKey($key)
     {
-        return $key === 'abbreviation' || $key === 'group' || $key === 'id' || $key === 'longname';
+        if ($key == 'abbreviation' || $key == 'group' || $key == 'id' || $key == 'longname') {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -54,16 +49,18 @@ class Listing extends Model\Listing\AbstractListing
      */
     public function getUnits()
     {
-        return $this->getData();
+        if ($this->units == null) {
+            $this->getDao()->load();
+        }
+
+        return $this->units;
     }
 
     /**
-     * @param Model\DataObject\QuantityValue\Unit[]|null $units
-     *
-     * @return static
+     * @param array $units
      */
     public function setUnits($units)
     {
-        return $this->setData($units);
+        $this->units = $units;
     }
 }

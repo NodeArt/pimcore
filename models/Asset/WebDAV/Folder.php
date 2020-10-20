@@ -31,7 +31,7 @@ class Folder extends DAV\Collection
     private $asset;
 
     /**
-     * @param Asset $asset
+     * @param $asset
      */
     public function __construct($asset)
     {
@@ -75,7 +75,6 @@ class Folder extends DAV\Collection
     {
         $nameParts = explode('/', $name);
         $name = Element\Service::getValidKey($nameParts[count($nameParts) - 1], 'asset');
-        $asset = null;
 
         if (is_string($name)) {
             $parentPath = $this->asset->getRealFullPath();
@@ -110,11 +109,11 @@ class Folder extends DAV\Collection
 
     /**
      * @param string $name
-     * @param string|null $data
+     * @param null $data
+     *
+     * @return null|string|void
      *
      * @throws DAV\Exception\Forbidden
-     *
-     * @return null
      */
     public function createFile($name, $data = null)
     {
@@ -124,19 +123,17 @@ class Folder extends DAV\Collection
         $user = AdminTool::getCurrentUser();
 
         if ($this->asset->isAllowed('create')) {
-            Asset::create($this->asset->getId(), [
+            $asset = Asset::create($this->asset->getId(), [
                 'filename' => Element\Service::getValidKey($name, 'asset'),
                 'sourcePath' => $tmpFile,
                 'userModification' => $user->getId(),
-                'userOwner' => $user->getId(),
+                'userOwner' => $user->getId()
             ]);
 
             unlink($tmpFile);
-
-            return null;
+        } else {
+            throw new DAV\Exception\Forbidden();
         }
-
-        throw new DAV\Exception\Forbidden();
     }
 
     /**
@@ -153,7 +150,7 @@ class Folder extends DAV\Collection
                 'filename' => Element\Service::getValidKey($name, 'asset'),
                 'type' => 'folder',
                 'userModification' => $user->getId(),
-                'userOwner' => $user->getId(),
+                'userOwner' => $user->getId()
             ]);
         } else {
             throw new DAV\Exception\Forbidden();

@@ -17,9 +17,9 @@ namespace Pimcore;
 class Video
 {
     /**
-     * @param string|null $adapter
+     * @param null $adapter
      *
-     * @return Video\Adapter|null
+     * @return bool|null|Video\Adapter
      *
      * @throws \Exception
      */
@@ -59,7 +59,7 @@ class Video
     }
 
     /**
-     * @return Video\Adapter|null
+     * @return bool
      */
     public static function getDefaultAdapter()
     {

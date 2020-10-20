@@ -25,8 +25,6 @@ use Symfony\Component\HttpKernel\KernelEvents;
 /**
  * Handles the attributes set by TemplateControllerInterface and injects them into the Template annotation which is
  * then processed by SensioFrameworkExtraBundle. This allows us to add view auto-rendering without depending on annotations.
- *
- * @deprecated
  */
 class TemplateControllerListener implements EventSubscriberInterface
 {
@@ -59,7 +57,7 @@ class TemplateControllerListener implements EventSubscriberInterface
         // handles the Template annotation
         return [
             KernelEvents::CONTROLLER => 'onKernelController',
-            KernelEvents::VIEW => ['onKernelView', 32],
+            KernelEvents::VIEW => ['onKernelView', 32]
         ];
     }
 
@@ -110,7 +108,6 @@ class TemplateControllerListener implements EventSubscriberInterface
             $template->setTemplate($templateReference);
 
             // inject Template annotation into the request - will be used by SensioFrameworkExtraBundle
-            @trigger_error('Auto view rendering has been deprecated since v6.8.0 and will be removed in Pimcore 7.', E_USER_DEPRECATED);
             $request->attributes->set('_template', $template);
         }
     }

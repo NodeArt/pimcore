@@ -29,7 +29,7 @@ class Dao extends Model\Element\Dao
     /**
      * Fetch a row by an id from the database and assign variables to the document model.
      *
-     * @param int $id
+     * @param $id
      *
      * @throws \Exception
      */
@@ -42,7 +42,7 @@ class Dao extends Model\Element\Dao
         } catch (\Exception $e) {
         }
 
-        if (!empty($data['id'])) {
+        if ($data['id'] > 0) {
             $this->assignVariablesToModel($data);
         } else {
             throw new \Exception('Document with the ID ' . $id . " doesn't exists");
@@ -52,7 +52,7 @@ class Dao extends Model\Element\Dao
     /**
      * Fetch a row by a path from the database and assign variables to the model.
      *
-     * @param string $path
+     * @param $path
      *
      * @throws \Exception
      */
@@ -61,12 +61,12 @@ class Dao extends Model\Element\Dao
         $params = $this->extractKeyAndPath($path);
         $data = $this->db->fetchRow('SELECT id FROM documents WHERE path = :path AND `key` = :key', $params);
 
-        if (!empty($data['id'])) {
+        if ($data['id']) {
             $this->assignVariablesToModel($data);
         } else {
             // try to find a page with a pretty URL (use the original $path)
             $data = $this->db->fetchRow('SELECT id FROM documents_page WHERE prettyUrl = :prettyUrl', [
-                'prettyUrl' => $path,
+                'prettyUrl' => $path
             ]);
 
             if ($data['id']) {
@@ -81,10 +81,9 @@ class Dao extends Model\Element\Dao
     {
         $this->db->insert('documents', [
             'key' => $this->model->getKey(),
-            'type' => $this->model->getType(),
             'path' => $this->model->getRealPath(),
             'parentId' => $this->model->getParentId(),
-            'index' => 0,
+            'index' => 0
         ]);
 
         $this->model->setId($this->db->lastInsertId());
@@ -105,6 +104,8 @@ class Dao extends Model\Element\Dao
             $typeSpecificTable = 'documents_' . $this->model->getType();
             $validColumnsTypeSpecific = $this->getValidTableColumns($typeSpecificTable);
         }
+
+        $this->model->setModificationDate(time());
 
         $document = $this->model->getObjectVars();
 
@@ -173,9 +174,9 @@ class Dao extends Model\Element\Dao
     public function updateWorkspaces()
     {
         $this->db->update('users_workspaces_document', [
-            'cpath' => $this->model->getRealFullPath(),
+            'cpath' => $this->model->getRealFullPath()
         ], [
-            'cid' => $this->model->getId(),
+            'cid' => $this->model->getId()
         ]);
     }
 
@@ -184,14 +185,14 @@ class Dao extends Model\Element\Dao
      *
      * @internal
      *
-     * @param string $oldPath
+     * @param $oldPath
      *
      * @return array
      */
     public function updateChildPaths($oldPath)
     {
         //get documents to empty their cache
-        $documents = $this->db->fetchCol('SELECT id FROM documents WHERE path LIKE ?', $this->db->escapeLike($oldPath) . '%');
+        $documents = $this->db->fetchCol('SELECT id FROM documents WHERE path LIKE ?', $oldPath . '%');
 
         $userId = '0';
         if ($user = \Pimcore\Tool\Admin::getCurrentUser()) {
@@ -200,13 +201,13 @@ class Dao extends Model\Element\Dao
 
         //update documents child paths
         // we don't update the modification date here, as this can have side-effects when there's an unpublished version for an element
-        $this->db->query('update documents set path = replace(path,' . $this->db->quote($oldPath . '/') . ',' . $this->db->quote($this->model->getRealFullPath() . '/') . "), userModification = '" . $userId . "' where path like " . $this->db->quote($this->db->escapeLike($oldPath) . '/%') . ';');
+        $this->db->query('update documents set path = replace(path,' . $this->db->quote($oldPath . '/') . ',' . $this->db->quote($this->model->getRealFullPath() . '/') . "), userModification = '" . $userId . "' where path like " . $this->db->quote($oldPath . '/%') . ';');
 
         //update documents child permission paths
-        $this->db->query('update users_workspaces_document set cpath = replace(cpath,' . $this->db->quote($oldPath . '/') . ',' . $this->db->quote($this->model->getRealFullPath() . '/') . ') where cpath like ' . $this->db->quote($this->db->escapeLike($oldPath) . '/%') . ';');
+        $this->db->query('update users_workspaces_document set cpath = replace(cpath,' . $this->db->quote($oldPath . '/') . ',' . $this->db->quote($this->model->getRealFullPath() . '/') . ') where cpath like ' . $this->db->quote($oldPath . '/%') . ';');
 
         //update documents child properties paths
-        $this->db->query('update properties set cpath = replace(cpath,' . $this->db->quote($oldPath . '/') . ',' . $this->db->quote($this->model->getRealFullPath() . '/') . ') where cpath like ' . $this->db->quote($this->db->escapeLike($oldPath) . '/%') . ';');
+        $this->db->query('update properties set cpath = replace(cpath,' . $this->db->quote($oldPath . '/') . ',' . $this->db->quote($this->model->getRealFullPath() . '/') . ') where cpath like ' . $this->db->quote($oldPath . '/%') . ';');
 
         return $documents;
     }
@@ -331,15 +332,15 @@ class Dao extends Model\Element\Dao
     /**
      * Quick check if there are children.
      *
-     * @param bool|null $includingUnpublished
+     * @param bool $unpublished
      *
      * @return bool
      */
-    public function hasChildren($includingUnpublished = null)
+    public function hasChildren($unpublished = false)
     {
         $sql = 'SELECT id FROM documents WHERE parentId = ?';
 
-        if ((isset($includingUnpublished) && !$includingUnpublished) || (!isset($includingUnpublished) && Model\Document::doHideUnpublished())) {
+        if (Model\Document::doHideUnpublished() && !$unpublished) {
             $sql .= ' AND published = 1';
         }
 
@@ -376,21 +377,11 @@ class Dao extends Model\Element\Dao
     /**
      * Checks if the document has siblings
      *
-     * @param bool|null $includingUnpublished
-     *
      * @return bool
      */
-    public function hasSiblings($includingUnpublished = null)
+    public function hasSiblings()
     {
-        $sql = 'SELECT id FROM documents WHERE parentId = ? and id != ?';
-
-        if ((isset($includingUnpublished) && !$includingUnpublished) || (!isset($includingUnpublished) && Model\Document::doHideUnpublished())) {
-            $sql .= ' AND published = 1';
-        }
-
-        $sql .= ' LIMIT 1';
-
-        $c = $this->db->fetchOne($sql, [$this->model->getParentId(), $this->model->getId()]);
+        $c = $this->db->fetchOne('SELECT id FROM documents WHERE parentId = ? and id != ? LIMIT 1', [$this->model->getParentId(), $this->model->getId()]);
 
         return (bool)$c;
     }
@@ -408,7 +399,7 @@ class Dao extends Model\Element\Dao
         // check for an locked element below this element
         $belowLocks = $this->db->fetchOne("SELECT tree_locks.id FROM tree_locks
             INNER JOIN documents ON tree_locks.id = documents.id
-                WHERE documents.path LIKE ? AND tree_locks.type = 'document' AND tree_locks.locked IS NOT NULL AND tree_locks.locked != '' LIMIT 1", $this->db->escapeLike($this->model->getRealFullPath()). '/%');
+                WHERE documents.path LIKE ? AND tree_locks.type = 'document' AND tree_locks.locked IS NOT NULL AND tree_locks.locked != '' LIMIT 1", $this->model->getRealFullPath() . '/%');
 
         if ($belowLocks > 0) {
             return true;
@@ -436,19 +427,17 @@ class Dao extends Model\Element\Dao
             $this->db->insert('tree_locks', [
                 'id' => $this->model->getId(),
                 'type' => 'document',
-                'locked' => $this->model->getLocked(),
+                'locked' => $this->model->getLocked()
             ]);
         }
     }
 
     /**
      * Deletes locks from the document and its children.
-     *
-     * @return array
      */
     public function unlockPropagate()
     {
-        $lockIds = $this->db->fetchCol('SELECT id from documents WHERE path LIKE ' . $this->db->quote($this->db->escapeLike($this->model->getRealFullPath()) . '/%') . ' OR id = ' . $this->model->getId());
+        $lockIds = $this->db->fetchCol('SELECT id from documents WHERE path LIKE ' . $this->db->quote($this->model->getRealFullPath() . '/%') . ' OR id = ' . $this->model->getId());
         $this->db->deleteWhere('tree_locks', "type = 'document' AND id IN (" . implode(',', $lockIds) . ')');
 
         return $lockIds;
@@ -457,8 +446,8 @@ class Dao extends Model\Element\Dao
     /**
      * Checks if the action is allowed.
      *
-     * @param string $type
-     * @param Model\User $user
+     * @param $type
+     * @param $user
      *
      * @return bool
      */
@@ -480,7 +469,7 @@ class Dao extends Model\Element\Dao
         $userIds[] = $user->getId();
 
         try {
-            $permissionsParent = $this->db->fetchOne('SELECT `' . $type . '` FROM users_workspaces_document WHERE cid IN (' . implode(',', $parentIds) . ') AND userId IN (' . implode(',', $userIds) . ') ORDER BY LENGTH(cpath) DESC, FIELD(userId, ' . $user->getId() . ') DESC, `' . $type . '` DESC  LIMIT 1');
+            $permissionsParent = $this->db->fetchOne('SELECT `' . $type . '` FROM users_workspaces_document WHERE cid IN (' . implode(',', $parentIds) . ') AND userId IN (' . implode(',', $userIds) . ') ORDER BY LENGTH(cpath) DESC, ABS(userId-' . $user->getId() . ') ASC LIMIT 1');
 
             if ($permissionsParent) {
                 return true;
@@ -494,7 +483,7 @@ class Dao extends Model\Element\Dao
                     $path = '/';
                 }
 
-                $permissionsChildren = $this->db->fetchOne('SELECT list FROM users_workspaces_document WHERE cpath LIKE ? AND userId IN (' . implode(',', $userIds) . ') AND list = 1 LIMIT 1', $this->db->escapeLike($path) . '%');
+                $permissionsChildren = $this->db->fetchOne('SELECT list FROM users_workspaces_document WHERE cpath LIKE ? AND userId IN (' . implode(',', $userIds) . ') AND list = 1 LIMIT 1', $path . '%');
                 if ($permissionsChildren) {
                     return true;
                 }
@@ -509,21 +498,23 @@ class Dao extends Model\Element\Dao
     /**
      * Save the document index.
      *
-     * @param int $index
+     * @param $index
+     *
+     * @throws \Exception
      */
     public function saveIndex($index)
     {
         $this->db->update('documents', [
-            'index' => $index,
+            'index' => $index
         ], [
-            'id' => $this->model->getId(),
+            'id' => $this->model->getId()
         ]);
     }
 
     /**
      * Fetches the maximum index value from siblings.
      *
-     * @return int
+     * @return string
      */
     public function getNextIndex()
     {

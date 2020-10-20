@@ -49,7 +49,7 @@ class Dao extends Model\Dao\AbstractDao
     }
 
     /**
-     * @param string|null $name
+     * @param null $name
      *
      * @throws \Exception
      */

@@ -20,9 +20,6 @@ namespace Pimcore\Model\Webservice\Data\Document;
 use Pimcore\Model;
 use Pimcore\Model\Webservice;
 
-/**
- * @deprecated
- */
 class PageSnippet extends Model\Webservice\Data\Document
 {
     /**
@@ -46,20 +43,20 @@ class PageSnippet extends Model\Webservice\Data\Document
     public $elements;
 
     /**
-     * @param Model\Document\PageSnippet $object
-     * @param array|null $options
+     * @param $object
+     * @param null $options
      */
     public function map($object, $options = null)
     {
-        $originalEditables = [];
-        if (is_array($object->getEditables())) {
-            $originalEditables = $object->getEditables();
+        $originalElements = [];
+        if (is_array($object->getElements())) {
+            $originalElements = $object->getElements();
         }
 
         parent::map($object);
 
         $this->elements = [];
-        foreach ($originalEditables as $element) {
+        foreach ($originalElements as $element) {
             $el = new Webservice\Data\Document\Element();
             $el->name = $element->getName();
             $el->type = $element->getType();
@@ -69,9 +66,9 @@ class PageSnippet extends Model\Webservice\Data\Document
     }
 
     /**
-     * @param Model\Document\PageSnippet $object
+     * @param $object Model\Document\PageSnippet
      * @param bool $disableMappingExceptions
-     * @param Model\Webservice\IdMapperInterface|null $idMapper
+     * @param null $idMapper
      *
      * @throws \Exception
      */
@@ -80,14 +77,14 @@ class PageSnippet extends Model\Webservice\Data\Document
         parent::reverseMap($object, $disableMappingExceptions, $idMapper);
 
         $object->setChildren(null);
-        $object->setEditables([]);
+        $object->setElements([]);
 
         if (is_array($this->elements)) {
             foreach ($this->elements as $element) {
                 $tag = Model\Document\Tag::factory($element->type, $element->name, $this->id);
                 $tag->getFromWebserviceImport($element, $object, [], $idMapper);
 
-                $object->setEditable($element->name, $tag);
+                $object->setElement($element->name, $tag);
             }
         }
     }

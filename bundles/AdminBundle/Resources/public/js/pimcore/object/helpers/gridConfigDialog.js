@@ -85,10 +85,6 @@ pimcore.object.helpers.gridConfigDialog = Class.create(pimcore.element.helpers.g
                     }
                 }
 
-                if (child.data.locked) {
-                    obj.locked = child.data.locked;
-                }
-
                 this.data.columns.push(obj);
             }.bind(this));
         }
@@ -117,13 +113,13 @@ pimcore.object.helpers.gridConfigDialog = Class.create(pimcore.element.helpers.g
             if (preview) {
                 this.requestPreview();
             } else {
-                this.callback(this.data, this.settings, save, this.context);
+                this.callback(this.data, this.settings, save);
                 this.window.close();
             }
         } else {
             var columnsPostData = Ext.encode(this.data.columns);
             Ext.Ajax.request({
-                url: Routing.generate('pimcore_admin_dataobject_dataobjecthelper_preparehelpercolumnconfigs'),
+                url: "/admin/object-helper/prepare-helper-column-configs",
                 method: 'POST',
                 params: {
                     columns: columnsPostData
@@ -135,7 +131,7 @@ pimcore.object.helpers.gridConfigDialog = Class.create(pimcore.element.helpers.g
                     if (preview) {
                         this.requestPreview();
                     } else {
-                        this.callback(this.data, this.settings, save, this.context);
+                        this.callback(this.data, this.settings, save);
                         this.window.close();
                     }
 
@@ -145,10 +141,6 @@ pimcore.object.helpers.gridConfigDialog = Class.create(pimcore.element.helpers.g
     },
 
     requestPreview: function () {
-        if (!this.previewSettings.objectId) {
-            return;
-        }
-
         var language = this.languageField.getValue();
         var fields = this.data.columns;
         var count = fields.length;
@@ -159,38 +151,33 @@ pimcore.object.helpers.gridConfigDialog = Class.create(pimcore.element.helpers.g
             keys.push(item.key);
         }
 
-        let csvMode = this.previewSettings && this.previewSettings.csvMode;
-
         Ext.Ajax.request({
-            url: Routing.generate('pimcore_admin_dataobject_dataobject_gridproxy', {classId: this.previewSettings.classId, folderId: this.previewSettings.objectId}),
+            url: "/admin/object/grid-proxy?classId=" + this.previewSettings.classId + "&folderId=" + this.previewSettings.objectId,
             method: 'POST',
             params: {
                 "fields[]": keys,
                 language: language,
-                limit: 1,
-                csvMode: csvMode,
-                specificId: this.previewSettings.specificId,
-                context : Ext.encode(this.context)
+                limit: 1
             },
             success: function (response) {
-                let responseData = Ext.decode(response.responseText);
+                var responseData = Ext.decode(response.responseText);
                 if (responseData && responseData.data && responseData.data.length == 1) {
-                    let rootNode = this.selectionPanel.getRootNode()
-                    let childNodes = rootNode.childNodes;
-                    let previewItem = responseData.data[0];
-                    let store = this.selectionPanel.getStore()
-                    let i;
-                    let count = childNodes.length;
+                    var rootNode = this.selectionPanel.getRootNode()
+                    var childNodes = rootNode.childNodes;
+                    var previewItem = responseData.data[0];
+                    var store = this.selectionPanel.getStore()
+                    var i;
+                    var count = childNodes.length;
 
                     for (i = 0; i < count; i++) {
-                        let node = childNodes[i];
-                        let nodeId = node.id;
-                        let column = this.data.columns[i];
+                        var node = childNodes[i];
+                        var nodeId = node.id;
+                        var column = this.data.columns[i];
 
-                        let columnKey = column.key;
-                        let value = previewItem[columnKey];
+                        var columnKey = column.key;
+                        var value = previewItem[columnKey];
 
-                        let record = store.getById(nodeId);
+                        var record = store.getById(nodeId);
                         record.set("preview", value, {
                             commit: true
                         });
@@ -214,9 +201,8 @@ pimcore.object.helpers.gridConfigDialog = Class.create(pimcore.element.helpers.g
                         continue;
                     }
                     child = child[0];
-
                 } else {
-                    var text = t(nodeConf.label);
+                    var text = ts(nodeConf.label);
 
                     if (nodeConf.dataType !== "system" && this.showFieldname && nodeConf.key) {
                         text = text + " (" + nodeConf.key.replace("~", ".") + ")";
@@ -235,11 +221,6 @@ pimcore.object.helpers.gridConfigDialog = Class.create(pimcore.element.helpers.g
                         child.width = nodeConf.width;
                     }
                 }
-
-                if (nodeConf.locked) {
-                    child.locked = nodeConf.locked;
-                }
-
                 childs.push(child);
             }
 
@@ -282,9 +263,6 @@ pimcore.object.helpers.gridConfigDialog = Class.create(pimcore.element.helpers.g
                     text: t('preview'),
                     flex: 90,
                     renderer: function (value, metaData, record) {
-                        if (this.previewSettings && this.previewSettings.csvMode) {
-                            return value;
-                        }
 
                         if (record && record.parentNode.id == 0) {
 
@@ -299,7 +277,6 @@ pimcore.object.helpers.gridConfigDialog = Class.create(pimcore.element.helpers.g
                             } else if (key == "published") {
                                 return Ext.String.format('<div style="text-align: left"><div role="button" class="x-grid-checkcolumn{0}" style=""></div></div>', value ? '-checked' : '');
                             } else {
-                                var layout = Ext.clone(record.data.layout);
                                 var fieldType = record.data.dataType;
 
                                 try {
@@ -311,15 +288,14 @@ pimcore.object.helpers.gridConfigDialog = Class.create(pimcore.element.helpers.g
                                     }
 
                                     if (tag) {
-                                        layout.noteditable = true;
                                         var fc = tag.prototype.getGridColumnConfig({
                                             key: key,
-                                            layout: layout
+                                            layout: {
+                                                noteditable: true
+                                            }
                                         }, true);
 
-                                        if (fc.renderer) {
-                                            value = fc.renderer(value, null, record);
-                                        }
+                                        value = fc.renderer(value, null, record);
                                     }
                                 } catch (e) {
                                     console.log(e);
@@ -446,6 +422,8 @@ pimcore.object.helpers.gridConfigDialog = Class.create(pimcore.element.helpers.g
                                     realOverModel = realOverModel.parentNode;
                                 }
 
+                                var sourceType = this.getNodeTypeAndClass(sourceNode);
+                                var targetType = this.getNodeTypeAndClass(realOverModel);
                                 var allowed = true;
 
 
@@ -514,8 +492,11 @@ pimcore.object.helpers.gridConfigDialog = Class.create(pimcore.element.helpers.g
 
     getClassDefinitionTreePanel: function () {
         if (!this.classDefinitionTreePanel) {
+
+            var items = [];
+
             this.brickKeys = [];
-            this.classDefinitionTreePanel = this.getClassTree(Routing.generate('pimcore_admin_dataobject_class_getclassdefinitionforcolumnconfig'),
+            this.classDefinitionTreePanel = this.getClassTree("/admin/class/get-class-definition-for-column-config",
                 this.config.classid, this.config.objectId);
         }
 

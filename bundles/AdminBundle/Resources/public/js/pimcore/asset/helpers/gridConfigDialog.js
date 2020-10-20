@@ -42,19 +42,12 @@ pimcore.asset.helpers.gridConfigDialog = Class.create(pimcore.element.helpers.gr
         return this.leftPanel;
     },
 
-    getConfigPanel: function () {
-        this.configPanel = new Ext.Panel({
-            layout: "border",
-            iconCls: "pimcore_icon_table",
-            title: t("grid_configuration"),
-            items: [this.getSelectionPanel(), this.getLeftPanel()]
-        });
-        return this.configPanel;
-    },
-
     commitData: function (save, preview) {
 
         this.data = {};
+        if (this.languageField) {
+            this.data.language = this.languageField.getValue();
+        }
 
         if (this.itemsPerPage) {
             this.data.pageSize = this.itemsPerPage.getValue();
@@ -77,21 +70,17 @@ pimcore.asset.helpers.gridConfigDialog = Class.create(pimcore.element.helpers.gr
                     obj.attributes = attributes;
 
                 } else {
-                    obj.label = child.data.text;
-                    if (child.data.dataType == "system") {
+                    obj.label =  child.data.text;
+                    if(child.data.dataType == "system") {
                         obj.key = child.data.text + '~system';
-                    } else {
-                        obj.key = child.data.layout.name;
-                    }
-
-                    if (child.data.dataType == "asset" || child.data.dataType == "object" || child.data.dataType == "document") {
+                    } else if(child.data.dataType == "asset" || child.data.dataType == "object" || child.data.dataType == "document") {
                         child.data.layout.subtype = child.data.dataType;
                         child.data.layout.fieldtype = 'manyToOneRelation';
-                    }
-
-                    if (child.data.language) {
-                        obj.key = child.data.layout.name + '~' + child.data.language;
+                    } else if(child.data.language) {
+                        obj.key = child.data.text + '~' + child.data.language;
                         obj.label = child.data.layout.title = child.data.text + ' (' + child.data.language + ')';
+                    } else {
+                        obj.key = child.data.text;
                     }
 
                     obj.language = child.data.language;
@@ -101,11 +90,6 @@ pimcore.asset.helpers.gridConfigDialog = Class.create(pimcore.element.helpers.gr
                         obj.width = child.data.width;
                     }
                 }
-
-                if (child.data.locked) {
-                    obj.locked = child.data.locked;
-                }
-
                 this.data.columns.push(obj);
             }.bind(this));
         }
@@ -134,13 +118,13 @@ pimcore.asset.helpers.gridConfigDialog = Class.create(pimcore.element.helpers.gr
             if (preview) {
                 this.requestPreview();
             } else {
-                this.callback(this.data, this.settings, save, this.context);
+                this.callback(this.data, this.settings, save);
                 this.window.close();
             }
         } else {
             var columnsPostData = Ext.encode(this.data.columns);
             Ext.Ajax.request({
-                url: Routing.generate('pimcore_admin_asset_assethelper_preparehelpercolumnconfigs'),
+                url: "/admin/aset-helper/prepare-helper-column-configs",
                 method: 'POST',
                 params: {
                     columns: columnsPostData
@@ -152,7 +136,7 @@ pimcore.asset.helpers.gridConfigDialog = Class.create(pimcore.element.helpers.gr
                     if (preview) {
                         this.requestPreview();
                     } else {
-                        this.callback(this.data, this.settings, save, this.context);
+                        this.callback(this.data, this.settings, save);
                         this.window.close();
                     }
 
@@ -162,19 +146,22 @@ pimcore.asset.helpers.gridConfigDialog = Class.create(pimcore.element.helpers.gr
     },
 
     requestPreview: function () {
+        var language = this.languageField.getValue();
         var fields = this.data.columns;
         var count = fields.length;
+        var i;
         var keys = [];
-        for (let i = 0; i < count; i++) {
+        for (i = 0; i < count; i++) {
             var item = fields[i];
             keys.push(item.key);
         }
 
         Ext.Ajax.request({
-            url: Routing.generate('pimcore_admin_asset_gridproxy'),
+            url: "/admin/asset/grid-proxy",
             params: {
                 "folderId": this.previewSettings.folderId,
                 "fields[]": keys,
+                language: language,
                 limit: 1
             },
             success: function (response) {
@@ -194,6 +181,7 @@ pimcore.asset.helpers.gridConfigDialog = Class.create(pimcore.element.helpers.gr
 
                         var columnKey = column.key;
                         var value = previewItem[columnKey];
+
                         var record = store.getById(nodeId);
                         record.set("preview", value, {
                             commit: true
@@ -222,12 +210,12 @@ pimcore.asset.helpers.gridConfigDialog = Class.create(pimcore.element.helpers.gr
                 } else {
                     if(nodeConf.layout) {
                         var text = nodeConf.layout.name;
-                        var subType = nodeConf.layout.subtype;
                     } else {
                         var text = nodeConf.label;
                     }
+                    var subType = nodeConf.type;
 
-                    if (nodeConf.dataType !== "system" && subType) {
+                    if (nodeConf.dataType !== "system" && this.showFieldname && subType) {
                         text = text + " (" + subType + ")";
                     }
 
@@ -245,18 +233,13 @@ pimcore.asset.helpers.gridConfigDialog = Class.create(pimcore.element.helpers.gr
                         child.width = nodeConf.width;
                     }
                 }
-
-                if (nodeConf.locked) {
-                    child.locked = nodeConf.locked;
-                }
-
                 childs.push(child);
             }
 
             this.cellEditing = Ext.create('Ext.grid.plugin.CellEditing', {
                 clicksToEdit: 1,
                 listeners: {
-                    beforeedit: function (editor, context, eOpts) {
+                    beforeedit: function(editor, context, eOpts) {
                         //need to clear cached editors of cell-editing editor in order to
                         //enable different editors per row
                         editor.editors.each(function (e) {
@@ -307,8 +290,8 @@ pimcore.asset.helpers.gridConfigDialog = Class.create(pimcore.element.helpers.gr
                 }
             ];
 
-            var languagestore = [["none",t("none")]];
-            for (let i = 0; i < pimcore.settings.websiteLanguages.length; i++) {
+            var languagestore = [["",t("default")],["none",t("none")]];
+            for (var i = 0; i < pimcore.settings.websiteLanguages.length; i++) {
                 languagestore.push([pimcore.settings.websiteLanguages[i],
                     pimcore.available_languages[pimcore.settings.websiteLanguages[i]]]);
             }
@@ -317,13 +300,7 @@ pimcore.asset.helpers.gridConfigDialog = Class.create(pimcore.element.helpers.gr
                 text: t('language'),
                 sortable: true,
                 dataIndex: "language",
-                renderer: function (value, metaData, record, rowIndex, colIndex, store) {
-                    if (record.data.dataType == "system" || record.data.layout && record.data.layout.isUnlocalized) {
-                        return "-";
-                    }
-                    return value;
-                },
-                getEditor: function () {
+                getEditor: function() {
                     return new Ext.form.ComboBox({
                         name: "language",
                         store: languagestore,
@@ -331,11 +308,9 @@ pimcore.asset.helpers.gridConfigDialog = Class.create(pimcore.element.helpers.gr
                         triggerAction: 'all',
                         mode: "local",
                         listeners: {
-                            focusenter: function (combo, event, eOpts) {
-                                let selection = this.selectionPanel.getSelection();
-                                let currentRecord = selection[0];
-
-                                if (currentRecord.data.dataType == "system" || currentRecord.data.layout && currentRecord.data.layout.isUnlocalized) {
+                            focusenter: function ( combo, event, eOpts ) {
+                                var currentRecord =  this.selectionPanel.getSelection();
+                                if(currentRecord[0].data.dataType == "system") {
                                     combo.disable();
                                 } else {
                                     combo.expand();
@@ -358,7 +333,7 @@ pimcore.asset.helpers.gridConfigDialog = Class.create(pimcore.element.helpers.gr
                             record.data.inheritedFields = {};
 
                             if (key == "preview" && value) {
-                                return '<img height=70 width=108 src="' + value + '" />';
+                                return '<img src="' + value + '" />';
                             } else if ((key == "modificationDate" || key == "creationDate") && value) {
                                 var timestamp = intval(value) * 1000;
                                 var date = new Date(timestamp);
@@ -368,11 +343,11 @@ pimcore.asset.helpers.gridConfigDialog = Class.create(pimcore.element.helpers.gr
                                 var fieldType = record.data.dataType;
 
                                 try {
-                                    if (record.data.isOperator && record.data.configAttributes && pimcore.asset.metadata.tags[record.data.configAttributes.renderer]) {
+                                    if (record.data.isOperator && record.data.configAttributes && pimcore.asset.tags[record.data.configAttributes.renderer]) {
                                         var rendererType = record.data.configAttributes.renderer;
-                                        var tag = pimcore.asset.metadata.tags[rendererType];
+                                        var tag = pimcore.asset.tags[rendererType];
                                     } else {
-                                        var tag = pimcore.asset.metadata.tags[fieldType];
+                                        var tag = pimcore.asset.tags[fieldType];
                                     }
 
                                     if (tag) {
@@ -389,14 +364,9 @@ pimcore.asset.helpers.gridConfigDialog = Class.create(pimcore.element.helpers.gr
                                     console.log(e);
                                 }
 
-                                if (typeof pimcore.asset.metadata.tags[fieldType] !== "undefined" && typeof pimcore.asset.metadata.tags[fieldType].prototype.previewRenderer == "function") {
-                                    value = pimcore.asset.metadata.tags[fieldType].prototype.previewRenderer(value, record);
-                                }
-
                                 if (typeof value == "string") {
                                     value = '<div style="max-height: 50px">' + value + '</div>';
                                 }
-
                                 return value;
                             }
                         }
@@ -404,49 +374,6 @@ pimcore.asset.helpers.gridConfigDialog = Class.create(pimcore.element.helpers.gr
                     }.bind(this)
                 });
             }
-
-
-            let additionalItem =  {
-                xtype: "button",
-                style: {
-                    marginLeft: "10px",
-                    marginRight: "50px"
-                },
-                text: t("apply"),
-                iconCls: "pimcore_icon_apply",
-                handler: function() {
-                    store.each(function(record, id) {
-                        let value = this.languageField.getValue();
-                        if (record.data.dataType != "system"  && !(record.data.layout && record.data.layout.isUnlocalized)) {
-                            if (value === "default") {
-                                value = "";
-                            }
-                            record.set("language", value);
-                            this.updatePreview();
-                        }
-                        }.bind(this)
-                    );
-                }.bind(this)
-            };
-
-            this.languageSelection = this.getLanguageSelection({
-                additionalItem: additionalItem,
-                emptyText: t("batch_change_language"),
-                disablePreviewUpdate: true
-            });
-
-            let tbarItems = Ext.create('Ext.form.FieldContainer', {
-                layout: 'vbox',
-                items:
-                    [
-                        this.languageSelection,
-                        {
-                            xtype: "tbtext",
-                            text: t('selected_grid_columns'),
-                            cls: "x-panel-header-title-default"
-                        }
-                    ]
-            });
 
             this.selectionPanel = new Ext.tree.Panel({
                 store: store,
@@ -489,14 +416,12 @@ pimcore.asset.helpers.gridConfigDialog = Class.create(pimcore.element.helpers.gr
                                             configWindow.focus();
                                         }, 250);
                                     }
-                                } else {
-                                    let onlySingle =  (record.data.dataType == "system" || record.data.layout && record.data.layout.isUnlocalized);
 
-                                    if (onlySingle && this.selectionPanel.getRootNode().findChild("text", record.data.key)) {
+                                } else {
+                                    if (record.data.dataType == "system" && this.selectionPanel.getRootNode().findChild("text", record.data.key)) {
                                         dropHandlers.cancelDrop();
                                     } else {
-                                        let copy = Ext.apply({}, record.data);
-                                        copy.text = record.data.copyText;
+                                        var copy = Ext.apply({}, record.data);
                                         delete copy.id;
                                         copy = record.createNode(copy);
 
@@ -592,8 +517,9 @@ pimcore.asset.helpers.gridConfigDialog = Class.create(pimcore.element.helpers.gr
                         }
                     }
                 },
+                id: 'tree',
                 region: 'east',
-                tbar: [tbarItems],
+                title: t('selected_grid_columns'),
                 layout: 'fit',
                 width: 640,
                 split: true,
@@ -618,13 +544,7 @@ pimcore.asset.helpers.gridConfigDialog = Class.create(pimcore.element.helpers.gr
 
     getMetadataTreePanel: function () {
         if (!this.metadataTreePanel) {
-            let url = Routing.generate('pimcore_admin_asset_assethelper_getmetadataforcolumnconfig');
-
-            if (this.additionalConfig["treeUrl"]) {
-                url = this.additionalConfig["treeUrl"];
-            }
-
-            this.metadataTreePanel = this.getMetadataTree(url);
+            this.metadataTreePanel = this.getMetadataTree("/admin/asset-helper/get-metadata-for-column-config");
         }
 
         return this.metadataTreePanel;
@@ -636,12 +556,10 @@ pimcore.asset.helpers.gridConfigDialog = Class.create(pimcore.element.helpers.gr
 
         tree.addListener("itemdblclick", function (tree, record, item, index, e, eOpts) {
             if (!record.data.root && record.data.type != "layout") {
-                let onlySingle =  (record.data.dataType == "system" || record.data.layout && record.data.layout.isUnlocalized);
-                if (onlySingle && this.selectionPanel.getRootNode().findChild("text", record.data.key)) {
-                    // only allow single occurence
-                } else if (record.data.dataType != "localizedfields") {
+                if (record.data.dataType == "system" && this.selectionPanel.getRootNode().findChild("text", record.data.key)) {
+                    dropHandlers.cancelDrop();
+                } else {
                     var copy = Ext.apply({}, record.data);
-                    copy.text = record.data.copyText;
 
                     delete copy.id;
                     this.selectionPanel.getRootNode().appendChild(copy);

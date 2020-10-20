@@ -31,7 +31,7 @@ class GD extends Adapter
     protected $resource;
 
     /**
-     * @param string $imagePath
+     * @param $imagePath
      * @param array $options
      *
      * @return $this|self
@@ -76,11 +76,11 @@ class GD extends Adapter
     }
 
     /**
-     * @param string $path
-     * @param string|null $format
-     * @param int|null $quality
+     * @param $path
+     * @param null $format
+     * @param null $quality
      *
-     * @return $this
+     * @return $this|mixed
      */
     public function save($path, $format = null, $quality = null)
     {
@@ -155,8 +155,8 @@ class GD extends Adapter
     }
 
     /**
-     * @param int $width
-     * @param int $height
+     * @param $width
+     * @param $height
      *
      * @return resource
      */
@@ -173,8 +173,8 @@ class GD extends Adapter
     }
 
     /**
-     * @param int $width
-     * @param int $height
+     * @param  $width
+     * @param  $height
      *
      * @return self
      */
@@ -195,10 +195,10 @@ class GD extends Adapter
     }
 
     /**
-     * @param int $x
-     * @param int $y
-     * @param int $width
-     * @param int $height
+     * @param  $x
+     * @param  $y
+     * @param  $width
+     * @param  $height
      *
      * @return self
      */
@@ -225,9 +225,9 @@ class GD extends Adapter
     }
 
     /**
-     * @param int $width
-     * @param int $height
-     * @param bool $forceResize
+     * @param  $width
+     * @param  $height
+     * @param  bool $forceResize
      *
      * @return self
      */
@@ -255,7 +255,7 @@ class GD extends Adapter
     }
 
     /**
-     * @param string $color
+     * @param  $color
      *
      * @return Adapter
      */
@@ -282,7 +282,7 @@ class GD extends Adapter
     }
 
     /**
-     * @param string $image
+     * @param $image
      * @param null|string $mode
      *
      * @return $this
@@ -419,7 +419,7 @@ class GD extends Adapter
     }
 
     /**
-     * @param int $angle
+     * @param $angle
      *
      * @return $this|self
      */

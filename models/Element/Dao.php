@@ -20,7 +20,7 @@ namespace Pimcore\Model\Element;
 use Pimcore\Model;
 
 /**
- * @property Model\Document|Model\Asset|Model\DataObject\AbstractObject $model
+ * @property \Pimcore\Model\Element\AbstractElement $model
  */
 abstract class Dao extends Model\Dao\AbstractDao
 {
@@ -53,7 +53,7 @@ abstract class Dao extends Model\Dao\AbstractDao
     }
 
     /**
-     * @param string $fullpath
+     * @param $fullpath
      *
      * @return array
      */
@@ -69,7 +69,7 @@ abstract class Dao extends Model\Dao\AbstractDao
 
         return [
             'key' => $key,
-            'path' => $path,
+            'path' => $path
         ];
     }
 

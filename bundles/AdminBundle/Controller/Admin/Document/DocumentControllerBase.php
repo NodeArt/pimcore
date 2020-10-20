@@ -15,50 +15,22 @@
 namespace Pimcore\Bundle\AdminBundle\Controller\Admin\Document;
 
 use Pimcore\Bundle\AdminBundle\Controller\AdminController;
-use Pimcore\Bundle\AdminBundle\Controller\Traits\ApplySchedulerDataTrait;
-use Pimcore\Bundle\AdminBundle\Controller\Traits\DocumentTreeConfigTrait;
 use Pimcore\Controller\EventedControllerInterface;
-use Pimcore\Event\Admin\ElementAdminStyleEvent;
-use Pimcore\Event\AdminEvents;
 use Pimcore\Logger;
 use Pimcore\Model;
 use Pimcore\Model\Document\Targeting\TargetingDocumentInterface;
-use Pimcore\Model\Element;
 use Pimcore\Model\Property;
-use Symfony\Component\EventDispatcher\GenericEvent;
+use Pimcore\Model\Schedule;
+use Pimcore\Tool\Session;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Session\Attribute\AttributeBagInterface;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
+use Symfony\Component\Routing\Annotation\Route;
 
 abstract class DocumentControllerBase extends AdminController implements EventedControllerInterface
 {
-    use ApplySchedulerDataTrait;
-    use DocumentTreeConfigTrait;
-
-    protected function preSendDataActions(&$data, Model\Document $document)
-    {
-        $documentFromDatabase = Model\Document::getById($document->getId(), true);
-
-        $data['versionDate'] = $documentFromDatabase->getModificationDate();
-        $data['userPermissions'] = $document->getUserPermissions();
-        $data['idPath'] = Element\Service::getIdPath($document);
-
-        $data['php'] = [
-            'classes' => array_merge([get_class($document)], array_values(class_parents($document))),
-            'interfaces' => array_values(class_implements($document)),
-        ];
-
-        $this->addAdminStyle($document, ElementAdminStyleEvent::CONTEXT_EDITOR, $data);
-
-        $event = new GenericEvent($this, [
-            'data' => $data,
-            'document' => $document,
-        ]);
-        \Pimcore::getEventDispatcher()->dispatch(AdminEvents::DOCUMENT_GET_PRE_SEND_DATA, $event);
-        $data = $event->getArgument('data');
-    }
-
     /**
      * @param Request $request
      * @param Model\Document $document
@@ -90,10 +62,6 @@ abstract class DocumentControllerBase extends AdminController implements Evented
                         $property->setDataFromEditmode($value);
                         $property->setInheritable($propertyData['inheritable']);
 
-                        if ($propertyName == 'language') {
-                            $property->setInherited($this->getPropertyInheritance($document, $propertyName, $value));
-                        }
-
                         $properties[$propertyName] = $property;
                     } catch (\Exception $e) {
                         Logger::warning("Can't add " . $propertyName . ' to document ' . $document->getRealFullPath());
@@ -107,6 +75,33 @@ abstract class DocumentControllerBase extends AdminController implements Evented
 
         // force loading of properties
         $document->getProperties();
+    }
+
+    /**
+     * @param Request $request
+     * @param Model\Document $document
+     */
+    protected function addSchedulerToDocument(Request $request, Model\Document $document)
+    {
+
+        // scheduled tasks
+        if ($request->get('scheduler')) {
+            $tasks = [];
+            $tasksData = $this->decodeJson($request->get('scheduler'));
+
+            if (!empty($tasksData)) {
+                foreach ($tasksData as $taskData) {
+                    $taskData['date'] = strtotime($taskData['date'] . ' ' . $taskData['time']);
+
+                    $task = new Schedule\Task($taskData);
+                    $tasks[] = $task;
+                }
+            }
+
+            if ($document->isAllowed('settings')) {
+                $document->setScheduledTasks($tasks);
+            }
+        }
     }
 
     /**
@@ -127,41 +122,43 @@ abstract class DocumentControllerBase extends AdminController implements Evented
 
     /**
      * @param Request $request
-     * @param Model\Document\PageSnippet $document
+     * @param Model\Document|Model\Document\PageSnippet $document
      */
-    protected function addDataToDocument(Request $request, Model\Document\PageSnippet $document)
+    protected function addDataToDocument(Request $request, Model\Document $document)
     {
         // if a target group variant get's saved, we have to load all other editables first, otherwise they will get deleted
-        if ($request->get('appendEditables') || ($document instanceof TargetingDocumentInterface && $document->hasTargetGroupSpecificEditables())) {
-            $document->getEditables();
+        if ($request->get('appendEditables') || ($document instanceof TargetingDocumentInterface && $document->hasTargetGroupSpecificElements())) {
+            $document->getElements();
         }
 
         if ($request->get('data')) {
             $data = $this->decodeJson($request->get('data'));
             foreach ($data as $name => $value) {
-                $data = $value['data'] ?? null;
+                $data = $value['data'];
                 $type = $value['type'];
-                $document->setRawEditable($name, $type, $data);
+                $document->setRawElement($name, $type, $data);
             }
         }
     }
 
     /**
      * @param Model\Document $document
-     * @param array $data
      */
-    protected function addTranslationsData(Model\Document $document, array &$data)
+    protected function addTranslationsData(Model\Document $document)
     {
         $service = new Model\Document\Service;
         $translations = $service->getTranslations($document);
         $unlinkTranslations = $service->getTranslations($document, 'unlink');
         $language = $document->getProperty('language');
-        unset($translations[$language], $unlinkTranslations[$language]);
-        $data['translations'] = $translations;
-        $data['unlinkTranslations'] = $unlinkTranslations;
+        unset($translations[$language]);
+        unset($unlinkTranslations[$language]);
+        $document->translations = $translations;
+        $document->unlinkTranslations = $unlinkTranslations;
     }
 
     /**
+     * @Route("/save-to-session", methods={"POST"})
+     *
      * @param Request $request
      *
      * @return JsonResponse
@@ -169,8 +166,11 @@ abstract class DocumentControllerBase extends AdminController implements Evented
     public function saveToSessionAction(Request $request)
     {
         if ($request->get('id')) {
-            $documentId = $request->get('id');
-            if (!$document = Model\Document\Service::getElementFromSession('document', $documentId)) {
+            $key = 'document_' . $request->get('id');
+
+            $session = Session::get('pimcore_documents');
+
+            if (!$document = $session->get($key)) {
                 $document = Model\Document::getById($request->get('id'));
                 $document = $this->getLatestVersion($document);
             }
@@ -179,7 +179,9 @@ abstract class DocumentControllerBase extends AdminController implements Evented
             $document->setInDumpState(true);
             $this->setValuesToDocument($request, $document);
 
-            Model\Document\Service::saveElementToSession($document);
+            $session->set($key, $document);
+
+            Session::writeClose();
         }
 
         return $this->adminJson(['success' => true]);
@@ -192,11 +194,13 @@ abstract class DocumentControllerBase extends AdminController implements Evented
     protected function saveToSession($doc, $useForSave = false)
     {
         // save to session
-        Model\Document\Service::saveElementToSession($doc);
+        Session::useSession(function (AttributeBagInterface $session) use ($doc, $useForSave) {
+            $session->set('document_' . $doc->getId(), $doc);
 
-        if ($useForSave) {
-            Model\Document\Service::saveElementToSession($doc, '_useForSave');
-        }
+            if ($useForSave) {
+                $session->set('document_' . $doc->getId() . '_useForSave', true);
+            }
+        }, 'pimcore_documents');
     }
 
     /**
@@ -212,67 +216,65 @@ abstract class DocumentControllerBase extends AdminController implements Evented
             // check if there's a document in session which should be used as data-source
             // see also PageController::clearEditableDataAction() | this is necessary to reset all fields and to get rid of
             // outdated and unused data elements in this document (eg. entries of area-blocks)
+            $sessionDocument = Session::useSession(function (AttributeBagInterface $session) use ($doc) {
+                $documentKey = 'document_' . $doc->getId();
+                $useForSaveKey = 'document_' . $doc->getId() . '_useForSave';
 
-            if (($sessionDocument = Model\Document\Service::getElementFromSession('document', $doc->getId())) &&
-                ($documentForSave = Model\Document\Service::getElementFromSession('document', $doc->getId(), '_useForSave'))) {
-                Model\Document\Service::removeElementFromSession('document', $doc->getId(), '_useForSave');
-            }
+                if ($session->has($documentKey) && $session->has($useForSaveKey)) {
+                    if ($session->get($useForSaveKey)) {
+                        // only use the page from the session once
+                        $session->remove($useForSaveKey);
+
+                        return $session->get($documentKey);
+                    }
+                }
+
+                return null;
+            }, 'pimcore_documents');
         }
 
         return $sessionDocument;
     }
 
     /**
+     * @Route("/remove-from-session", methods={"DELETE"})
+     *
      * @param Request $request
      *
      * @return JsonResponse
      */
     public function removeFromSessionAction(Request $request)
     {
-        Model\Document\Service::removeElementFromSession('document', $request->get('id'));
+        $key = 'document_' . $request->get('id');
+
+        Session::useSession(function (AttributeBagInterface $session) use ($key) {
+            $session->remove($key);
+        }, 'pimcore_documents');
 
         return $this->adminJson(['success' => true]);
     }
 
     /**
-     * @param Model\Document $document
-     * @param array $data
+     * @param $document
      */
-    protected function minimizeProperties($document, array &$data)
+    protected function minimizeProperties($document)
     {
-        $data['properties'] = Model\Element\Service::minimizePropertiesForEditmode($document->getProperties());
+        $properties = Model\Element\Service::minimizePropertiesForEditmode($document->getProperties());
+        $document->setProperties($properties);
     }
 
     /**
      * @param Model\Document $document
-     * @param string $propertyName
-     * @param string $propertyValue
      *
-     * @return bool
+     * @return Model\Document
      */
-    protected function getPropertyInheritance(Model\Document $document, $propertyName, $propertyValue)
-    {
-        if ($document->getParent()) {
-            return $propertyValue == $document->getParent()->getProperty($propertyName);
-        }
-
-        return false;
-    }
-
-    /**
-     * @param Model\Document\PageSnippet $document
-     * @param bool $isLatestVersion
-     *
-     * @return Model\Document\PageSnippet
-     */
-    protected function getLatestVersion(Model\Document\PageSnippet $document, &$isLatestVersion = true)
+    protected function getLatestVersion(Model\Document $document)
     {
         $latestVersion = $document->getLatestVersion();
         if ($latestVersion) {
             $latestDoc = $latestVersion->loadData();
-            if ($latestDoc instanceof Model\Document\PageSnippet) {
-                $isLatestVersion = false;
-
+            if ($latestDoc instanceof Model\Document) {
+                $latestDoc->setModificationDate($document->getModificationDate()); // set de modification-date from published version to compare it in js-frontend
                 return $latestDoc;
             }
         }
@@ -283,6 +285,8 @@ abstract class DocumentControllerBase extends AdminController implements Evented
     /**
      * This is used for pages and snippets to change the master document (which is not saved with the normal save button)
      *
+     * @Route("/change-master-document", methods={"PUT"})
+     *
      * @param Request $request
      *
      * @return JsonResponse
@@ -291,7 +295,7 @@ abstract class DocumentControllerBase extends AdminController implements Evented
     {
         $doc = Model\Document::getById($request->get('id'));
         if ($doc instanceof Model\Document\PageSnippet) {
-            $doc->setEditables([]);
+            $doc->setElements([]);
             $doc->setContentMasterDocumentId($request->get('contentMasterDocumentPath'));
             $doc->saveVersion();
         }

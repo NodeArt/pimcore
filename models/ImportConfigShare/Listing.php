@@ -22,28 +22,24 @@ use Pimcore\Model;
 /**
  * @method \Pimcore\Model\ImportConfigShare\Listing\Dao getDao()
  * @method Model\ImportConfigShare[] load()
- * @method Model\ImportConfigShare current()
  */
 class Listing extends Model\Listing\AbstractListing
 {
     /**
      * @var array|null
-     *
-     * @deprecated use getter/setter methods or $this->data
      */
     protected $importConfigShares = null;
-
-    public function __construct()
-    {
-        $this->importConfigShares = & $this->data;
-    }
 
     /**
      * @return Model\ImportConfigShare[]
      */
     public function getImportConfigShares(): array
     {
-        return $this->getData();
+        if ($this->importConfigShares === null) {
+            $this->getDao()->load();
+        }
+
+        return $this->importConfigShares;
     }
 
     /**
@@ -51,6 +47,6 @@ class Listing extends Model\Listing\AbstractListing
      */
     public function setImportConfigShares(array $importConfigShares)
     {
-        return $this->setData($importConfigShares);
+        $this->importConfigShares = $importConfigShares;
     }
 }

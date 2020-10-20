@@ -19,9 +19,6 @@ use Pimcore\Http\Request\Resolver\EditmodeResolver;
 use Pimcore\Tool;
 use Symfony\Component\Templating\Helper\Helper;
 
-/**
- * @deprecated
- */
 class Cache extends Helper
 {
     /**
@@ -63,8 +60,8 @@ class Cache extends Helper
     }
 
     /**
-     * @param string $name
-     * @param int|null $lifetime
+     * @param $name
+     * @param null $lifetime
      * @param bool $force
      *
      * @return mixed
@@ -138,7 +135,7 @@ class Cache extends Helper
     /**
      * Output the content.
      *
-     * @param string $content the content, either rendered or retrieved directly from the cache.
+     * @param $content the content, either rendered or retrieved directly from the cache.
      * @param string $key the cache key
      * @param bool $isLoadedFromCache true if the content origins from the cache and hasn't been created "live".
      */
@@ -150,9 +147,9 @@ class Cache extends Helper
     /**
      * Save the (rendered) content to to cache. May be overriden to add custom markup / code, or specific tags, etc.
      *
-     * @param string $content
+     * @param $content
      * @param string $key
-     * @param array $tags
+     * @param $tags
      */
     protected function saveContentToCache($content, string $key, array $tags)
     {

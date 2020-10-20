@@ -14,8 +14,6 @@
 pimcore.registerNS("pimcore.object.tags.reverseManyToManyObjectRelation");
 pimcore.object.tags.reverseManyToManyObjectRelation = Class.create(pimcore.object.tags.manyToManyObjectRelation, {
 
-    pathProperty: "path",
-
     initialize: function (data, fieldConfig) {
         this.data = [];
         this.fieldConfig = fieldConfig;
@@ -53,7 +51,7 @@ pimcore.object.tags.reverseManyToManyObjectRelation = Class.create(pimcore.objec
         if (pimcore.globalmanager.exists("object_" + this.getStore().getAt(index).data.id) == false) {
 
             Ext.Ajax.request({
-                url: Routing.generate('pimcore_admin_dataobject_dataobject_get'),
+                url: "/admin/object/get",
                 async: false,
                 params: {id: this.getStore().getAt(index).data.id},
                 success: function(index, response) {
@@ -74,7 +72,7 @@ pimcore.object.tags.reverseManyToManyObjectRelation = Class.create(pimcore.objec
 
                     } else {
                         Ext.Ajax.request({
-                            url: Routing.generate('pimcore_admin_element_lockelement'),
+                            url: "/admin/element/lock-element",
                             method: 'PUT',
                             params: {
                                 id: this.getStore().getAt(index).data.id,
@@ -114,7 +112,7 @@ pimcore.object.tags.reverseManyToManyObjectRelation = Class.create(pimcore.objec
             autoHeight = true;
         }
 
-        var cls = 'object_field object_field_type_' + this.type;
+        var cls = 'object_field';
 
         var classStore = pimcore.globalmanager.get("object_types_store");
         var record = classStore.getAt(classStore.findExact('text', this.fieldConfig.ownerClassName));
@@ -122,7 +120,7 @@ pimcore.object.tags.reverseManyToManyObjectRelation = Class.create(pimcore.objec
         // no class for nonowner is specified
         if(!record) {
             this.component = new Ext.Panel({
-                title: t(this.fieldConfig.title),
+                title: ts(this.fieldConfig.title),
                 cls: cls,
                 html: "There's no class specified in the field-configuration"
             });
@@ -189,8 +187,8 @@ pimcore.object.tags.reverseManyToManyObjectRelation = Class.create(pimcore.objec
                 items: [{
                     xtype: "tbtext",
                     text: ' <span class="warning">' + t('nonownerobject_warning') + " | " + t('owner_class')
-                                    + ':<b>' + t(className) + "</b> " + t('owner_field') + ': <b>'
-                                    + t(this.fieldConfig.ownerFieldName) + '</b></span>'
+                                    + ':<b>' + ts(className) + "</b> " + t('owner_field') + ': <b>'
+                                    + ts(this.fieldConfig.ownerFieldName) + '</b></span>'
                 }],
                 ctCls: "pimcore_force_auto_width",
                 cls: "pimcore_force_auto_width"
@@ -200,13 +198,10 @@ pimcore.object.tags.reverseManyToManyObjectRelation = Class.create(pimcore.objec
             viewConfig: {
                 markDirty: false,
                 listeners: {
-                    afterrender: function (gridview) {
+                    refresh: function (gridview) {
                         this.requestNicePathData(this.store.data);
                     }.bind(this)
                 }
-            },
-            listeners: {
-                rowdblclick: this.gridRowDblClickHandler
             }
         });
 
@@ -340,7 +335,7 @@ pimcore.object.tags.reverseManyToManyObjectRelation = Class.create(pimcore.objec
         if (pimcore.globalmanager.exists("object_" + item.id) == false) {
 
             Ext.Ajax.request({
-                url: Routing.generate('pimcore_admin_dataobject_dataobject_get'),
+                url: "/admin/object/get",
                 params: {id: item.id},
                 success: function(item, response) {
                     this.data = Ext.decode(response.responseText);
@@ -364,7 +359,7 @@ pimcore.object.tags.reverseManyToManyObjectRelation = Class.create(pimcore.objec
 
                     } else {
                         Ext.Ajax.request({
-                            url: Routing.generate('pimcore_admin_element_lockelement'),
+                            url: "/admin/element/lock-element",
                             method: 'PUT',
                             params: {id: item.id, type: 'object'}
                         });

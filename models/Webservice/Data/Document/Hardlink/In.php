@@ -19,17 +19,14 @@ namespace Pimcore\Model\Webservice\Data\Document\Hardlink;
 
 use Pimcore\Model;
 
-/**
- * @deprecated
- */
 class In extends Model\Webservice\Data\Document\Link
 {
     public $sourceId;
 
     /**
-     * @param Model\Document\Hardlink $object
+     * @param $object Model\Document\Link
      * @param bool $disableMappingExceptions
-     * @param Model\Webservice\IdMapperInterface|null $idMapper
+     * @param null $idMapper
      */
     public function reverseMap($object, $disableMappingExceptions = false, $idMapper = null)
     {
@@ -46,6 +43,6 @@ class In extends Model\Webservice\Data\Document\Link
             $idMapper->recordMappingFailure('object', $object->getId(), 'document', $sourceId);
         }
 
-        $object->setSourceId($sourceId);
+        $object->setSourceId = $sourceId;
     }
 }

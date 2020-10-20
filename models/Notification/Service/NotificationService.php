@@ -98,7 +98,7 @@ class NotificationService
         $filter = [
             'id != ?' => $fromUser,
             'active = ?' => 1,
-            'roles LIKE ?' => '%' . $groupId . '%',
+            'roles LIKE ?' => '%' . $groupId . '%'
         ];
 
         $condition = implode(' AND ', array_keys($filter));
@@ -178,15 +178,14 @@ class NotificationService
 
         $listing->setOrderKey('creationDate');
         $listing->setOrder('DESC');
-        $options += ['offset' => 0, 'limit' => 0];
-        $offset = (int) $options['offset'];
-        $limit = (int) $options['limit'];
+        $offset = (int) $options['offset'] ?? 0;
+        $limit = (int) $options['limit'] ?? 0;
 
         $this->beginTransaction();
 
         $result = [
             'total' => $listing->count(),
-            'data' => $listing->getItems($offset, $limit),
+            'data' => $listing->getItems($offset, $limit)
         ];
 
         $this->commit();
@@ -209,7 +208,7 @@ class NotificationService
             'recipient = ? AND `read` = 0 AND creationDate >= ?',
             [
                 $user,
-                date('Y-m-d H:i:s', $lastUpdate),
+                date('Y-m-d H:i:s', $lastUpdate)
             ]
         );
         $listing->setOrderKey('creationDate');
@@ -220,7 +219,7 @@ class NotificationService
 
         $result = [
             'total' => $listing->count(),
-            'data' => $listing->getData(),
+            'data' => $listing->getData()
         ];
 
         $this->commit();

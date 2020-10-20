@@ -32,8 +32,6 @@ pimcore.object.classes.data.block = Class.create(pimcore.object.classes.data.dat
 
         this.initData(initData);
         this.treeNode = treeNode;
-
-        this.availableSettingsFields = ["name","title","noteditable","invisible","style"];
     },
 
     getTypeName: function () {
@@ -66,8 +64,8 @@ pimcore.object.classes.data.block = Class.create(pimcore.object.classes.data.dat
                 xtype: "checkbox",
                 fieldLabel: t("lazy_loading"),
                 name: "lazyLoading",
-                disabled: this.isInCustomLayoutEditor(),
-                checked: this.datax.lazyLoading
+                disabled: this.isInCustomLayoutEditor() || this.lazyLoadingNotPossible(),
+                checked: this.datax.lazyLoading && !this.lazyLoadingNotPossible()
             },
             {
                 xtype: "checkbox",
@@ -133,10 +131,7 @@ pimcore.object.classes.data.block = Class.create(pimcore.object.classes.data.dat
                     disallowAddRemove: source.datax.disallowAddRemove,
                     disallowReorder: source.datax.disallowReorder,
                     collapsible: source.datax.collapsible,
-                    collapsed: source.datax.collapsed,
-                    lazyLoading: source.datax.lazyLoading,
-                    styleElement: source.datax.styleElement
-                    
+                    collapsed: source.datax.collapsed
                 });
         }
     }

@@ -26,7 +26,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class ConfigController extends AdminController
 {
     /**
-     * @Route("/js-config", name="pimcore_ecommerceframework_config_jsconfig", methods={"GET"})
+     * @Route("/js-config", methods={"GET"})
      *
      * @return string
      */

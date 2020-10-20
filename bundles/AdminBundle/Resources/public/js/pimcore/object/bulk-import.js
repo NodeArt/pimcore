@@ -13,11 +13,15 @@
 
 pimcore.registerNS("pimcore.object.bulkimport");
 pimcore.object.bulkimport = Class.create(pimcore.object.bulkbase, {
+
+
+    uploadUrl: '/admin/class/bulk-import',
+
     initialize: function () {
     },
 
     getUploadUrl: function(){
-        return Routing.generate('pimcore_admin_dataobject_class_bulkimport');
+        return this.uploadUrl;
     },
 
     upload: function() {
@@ -175,20 +179,16 @@ pimcore.object.bulkimport = Class.create(pimcore.object.bulkbase, {
         if (idx < this.values.length) {
             if (idx == 0) {
                 this.batchProgressBar = new Ext.ProgressBar({
-                    text: t('initializing'),
+                    text: t('generating'),
                     style: "margin: 10px;",
                     width: 500
                 });
 
                 this.batchProgressWin = new Ext.Window({
-                    title: t("export"),
-                    layout: 'fit',
                     items: [this.batchProgressBar],
-                    width: 200,
-                    plain: true,
-                    bodyStyle: "padding: 10px;",
-                    closable: false,
-                    listeners: pimcore.helpers.getProgressWindowListeners()
+                    modal: true,
+                    bodyStyle: "background: #fff;",
+                    closable: false
                 });
                 this.batchProgressWin.show();
 
@@ -203,10 +203,10 @@ pimcore.object.bulkimport = Class.create(pimcore.object.bulkbase, {
                 });
             }
 
-            this.batchProgressBar.updateText(t('saving') + ' ' + t(this.values[idx].type) + " " + t("definition") + " " + t(this.values[idx].displayName) + " (" + (idx + 1) + "/" + this.values.length + ")");
+            this.batchProgressBar.updateText(t('saving') + ' ' + t(this.values[idx].type) + " " + t("definition") + " " + ts(this.values[idx].displayName) + " (" + (idx + 1) + "/" + this.values.length + ")");
 
             Ext.Ajax.request({
-                url: Routing.generate('pimcore_admin_dataobject_class_bulkcommit'),
+                url: "/admin/class/bulk-commit",
                 method: "post",
                 params: {
                     data: JSON.stringify(this.values[idx]),
@@ -232,6 +232,7 @@ pimcore.object.bulkimport = Class.create(pimcore.object.bulkbase, {
                 }.bind(this),
                 failure: function(transport) {
                     this.batchProgressWin.close();
+                    var response = Ext.decode(transport.responseText);
                     pimcore.helpers.showNotification(t("error"), t("saving_failed") + " " + this.values[idx].displayName);
                 }.bind(this)
             });

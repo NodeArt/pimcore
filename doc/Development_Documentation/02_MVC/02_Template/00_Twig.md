@@ -53,6 +53,7 @@ Alternatively, just use annotations or render the view directly to use twig:
 namespace AppBundle\Controller;
 
 use Pimcore\Controller\FrontendController;
+use Pimcore\Templating\Model\ViewModel;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 
 class MyController extends FrontendController
@@ -66,9 +67,9 @@ class MyController extends FrontendController
     {   
     }
     
-    public function directRenderAction()
+    public function directRenderAction(ViewModel $view)
     {
-        return $this->render('my/custom/action.html.twig', ['param1' => 'value1']);
+        return $this->render('my/custom/action.html.twig', $view->getAllParameters());
     }
 }
 ```
@@ -201,10 +202,7 @@ editable, we introduced a function called `pimcore_iterate_block` to allow walki
 Used to interact with navigations. See [Navigation](../../03_Documents/03_Navigation.md) for details. Simplified example:
 
 ```twig
-{% set navigation = pimcore_build_nav({
-    active: document,
-    root: navRootDocument
-}) %}
+{% set navigation = pimcore_build_nav(document) %}
 {{ pimcore_render_nav(navigation) }}
 
 {# you can also fetch the renderer instance and call custom render methods #}

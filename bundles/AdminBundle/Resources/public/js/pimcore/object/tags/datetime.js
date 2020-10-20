@@ -17,25 +17,25 @@ pimcore.object.tags.datetime = Class.create(pimcore.object.tags.abstract, {
     type:"datetime",
 
     initialize:function (data, fieldConfig) {
-        this.data = data;
-        this.fieldConfig = fieldConfig;
-    },
 
-    applyDefaultValue: function() {
-        if ((typeof this.data === "undefined" || this.data === null) && this.fieldConfig.defaultValue) {
-            this.defaultValue = this.fieldConfig.defaultValue;
-        } else if ((typeof this.data === "undefined" || this.data === null) && this.fieldConfig.useCurrentDate) {
+        if ((typeof data === "undefined" || data === null) && fieldConfig.defaultValue) {
+            this.defaultValue = fieldConfig.defaultValue;
+        } else if ((typeof data === "undefined" || data === null) && fieldConfig.useCurrentDate) {
             this.defaultValue = (new Date().getTime()) / 1000;
         }
 
         if (this.defaultValue) {
-            this.data = this.defaultValue;
+            data = this.defaultValue;
         }
+
+        this.data = data;
+        this.fieldConfig = fieldConfig;
+
     },
 
     getGridColumnConfig:function (field) {
         return {
-            text: t(field.label),
+            text:ts(field.label),
             width:150,
             sortable:true,
             dataIndex:field.key,
@@ -82,22 +82,16 @@ pimcore.object.tags.datetime = Class.create(pimcore.object.tags.abstract, {
         this.datefield = Ext.create('Ext.form.field.Date', date);
         this.timefield = Ext.create('Ext.form.field.Time', time);
 
-        var componentCfg = {
+        this.component = Ext.create('Ext.form.FieldContainer', {
             layout: 'hbox',
             fieldLabel:this.fieldConfig.title,
             combineErrors:false,
             items:[this.datefield, this.timefield],
-            componentCls: "object_field object_field_type_" + this.type,
+            componentCls:"object_field",
             isDirty: function() {
                 return this.datefield.isDirty() || this.timefield.isDirty()
             }.bind(this)
-        };
-
-        if (this.fieldConfig.labelWidth) {
-            componentCfg.labelWidth = this.fieldConfig.labelWidth;
-        }
-
-        this.component = Ext.create('Ext.form.FieldContainer', componentCfg);
+        });
 
         return this.component;
     },
@@ -136,6 +130,15 @@ pimcore.object.tags.datetime = Class.create(pimcore.object.tags.abstract, {
 
     getName:function () {
         return this.fieldConfig.name;
+    },
+
+    isInvalidMandatory:function () {
+
+        // no render check is necessary because the date compontent returns the right values even if it is not rendered
+        if (this.getValue() == false) {
+            return true;
+        }
+        return false;
     },
 
     isDirty:function () {

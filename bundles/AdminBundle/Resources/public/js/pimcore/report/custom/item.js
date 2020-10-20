@@ -420,7 +420,7 @@ pimcore.report.custom.item = Class.create({
                 autoLoad: true,
                 proxy: {
                     type: 'ajax',
-                    url: Routing.generate('pimcore_admin_user_getusersforsharing'),
+                    url: '/admin/user/get-users-for-sharing',
                     extraParams: {
                         include_current_user: true,
                         permission: 'reports'
@@ -456,7 +456,7 @@ pimcore.report.custom.item = Class.create({
                 autoLoad: true,
                 proxy: {
                     type: 'ajax',
-                    url: Routing.generate('pimcore_admin_user_getrolesforsharing'),
+                    url: '/admin/user/get-roles-for-sharing',
                     extraParams: {
                         permission: 'reports'
                     },
@@ -726,7 +726,7 @@ pimcore.report.custom.item = Class.create({
         if (classMenu.length == 1) {
             items.push({
                 cls: "pimcore_block_button_plus",
-                text: t(classMenu[0].text),
+                text: ts(classMenu[0].text),
                 iconCls: "pimcore_icon_plus",
                 handler: classMenu[0].handler
             });
@@ -753,6 +753,8 @@ pimcore.report.custom.item = Class.create({
     addSourceDefinition: function (sourceDefinitionData) {
         this.sourceDefinitionsItems.remove(this.sourceDefinitionsItems.getComponent(0));
 
+        var currentData = {};
+
         if (!this.currentElements) {
             this.currentElements = [];
         }
@@ -775,7 +777,7 @@ pimcore.report.custom.item = Class.create({
     getColumnSettings: function () {
         var m = this.getValues();
         Ext.Ajax.request({
-            url: Routing.generate('pimcore_admin_reports_customreport_columnconfig'),
+            url: "/admin/reports/custom-report/column-config",
             method: "post",
             params: {
                 configuration: Ext.encode(m.dataSourceConfig),
@@ -889,7 +891,7 @@ pimcore.report.custom.item = Class.create({
         var m = this.getValues();
 
         Ext.Ajax.request({
-            url: Routing.generate('pimcore_admin_reports_customreport_update'),
+            url: "/admin/reports/custom-report/update",
             method: "PUT",
             params: {
                 configuration: Ext.encode(m),

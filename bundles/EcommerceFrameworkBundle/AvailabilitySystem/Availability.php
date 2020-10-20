@@ -32,7 +32,6 @@ class Availability implements AvailabilityInterface
     private $available;
 
     /**
-     * @param CheckoutableInterface $product
      * @param bool $available
      */
     public function __construct(CheckoutableInterface $product, bool $available)

@@ -69,7 +69,7 @@ abstract class Adapter
     protected $resource;
 
     /**
-     * @param int $height
+     * @param $height
      *
      * @return $this
      */
@@ -89,7 +89,7 @@ abstract class Adapter
     }
 
     /**
-     * @param int $width
+     * @param $width
      *
      * @return $this
      */
@@ -124,7 +124,7 @@ abstract class Adapter
     }
 
     /**
-     * @param string $colorhex
+     * @param  $colorhex
      *
      * @return array
      */
@@ -138,8 +138,8 @@ abstract class Adapter
     }
 
     /**
-     * @param int $width
-     * @param int $height
+     * @param  $width
+     * @param  $height
      *
      * @return self
      */
@@ -149,8 +149,8 @@ abstract class Adapter
     }
 
     /**
-     * @param int $width
-     * @param bool $forceResize
+     * @param  $width
+     * @param  bool $forceResize
      *
      * @return self
      */
@@ -165,8 +165,8 @@ abstract class Adapter
     }
 
     /**
-     * @param int $height
-     * @param bool $forceResize
+     * @param  $height
+     * @param  bool $forceResize
      *
      * @return self
      */
@@ -181,9 +181,9 @@ abstract class Adapter
     }
 
     /**
-     * @param int $width
-     * @param int $height
-     * @param bool $forceResize
+     * @param  $width
+     * @param  $height
+     * @param  bool $forceResize
      *
      * @return self
      */
@@ -203,10 +203,10 @@ abstract class Adapter
     }
 
     /**
-     * @param int $width
-     * @param int $height
+     * @param  $width
+     * @param  $height
      * @param string $orientation
-     * @param bool $forceResize
+     * @param  bool $forceResize
      *
      * @return self
      */
@@ -277,9 +277,9 @@ abstract class Adapter
     }
 
     /**
-     * @param int $width
-     * @param int $height
-     * @param bool $forceResize
+     * @param $width
+     * @param $height
+     * @param  bool $forceResize
      *
      * @return $this
      */
@@ -289,7 +289,7 @@ abstract class Adapter
     }
 
     /**
-     * @param int $tolerance
+     * @param  int $tolerance
      *
      * @return self
      */
@@ -299,7 +299,7 @@ abstract class Adapter
     }
 
     /**
-     * @param int $angle
+     * @param $angle
      *
      * @return $this
      */
@@ -309,10 +309,10 @@ abstract class Adapter
     }
 
     /**
-     * @param int $x
-     * @param int $y
-     * @param int $width
-     * @param int $height
+     * @param  $x
+     * @param  $y
+     * @param  $width
+     * @param  $height
      *
      * @return self
      */
@@ -322,7 +322,7 @@ abstract class Adapter
     }
 
     /**
-     * @param string $color
+     * @param  $color
      *
      * @return self
      */
@@ -332,7 +332,7 @@ abstract class Adapter
     }
 
     /**
-     * @param string $image
+     * @param  $image
      *
      * @return self
      */
@@ -342,8 +342,8 @@ abstract class Adapter
     }
 
     /**
-     * @param int $width
-     * @param int $height
+     * @param $width
+     * @param $height
      *
      * @return $this
      */
@@ -368,7 +368,7 @@ abstract class Adapter
     }
 
     /**
-     * @param string $image
+     * @param $image
      * @param string $composite
      *
      * @return $this
@@ -379,7 +379,7 @@ abstract class Adapter
     }
 
     /**
-     * @param string $image
+     * @param  $image
      *
      * @return self
      */
@@ -389,10 +389,10 @@ abstract class Adapter
     }
 
     /**
-     * @param int $width
-     * @param int $height
-     * @param int $x
-     * @param int $y
+     * @param $width
+     * @param $height
+     * @param $x
+     * @param $y
      *
      * @return self
      */
@@ -440,7 +440,7 @@ abstract class Adapter
     }
 
     /**
-     * @param string $mode
+     * @param $mode
      *
      * @return self
      */
@@ -475,7 +475,7 @@ abstract class Adapter
     /**
      * @abstract
      *
-     * @param string $imagePath
+     * @param $imagePath
      * @param array $options
      *
      * @return self
@@ -483,11 +483,11 @@ abstract class Adapter
     abstract public function load($imagePath, $options = []);
 
     /**
-     * @param string $path
-     * @param string|null $format
-     * @param int|null $quality
+     * @param $path
+     * @param null $format
+     * @param null $quality
      *
-     * @return $this
+     * @return mixed
      */
     abstract public function save($path, $format = null, $quality = null);
 
@@ -566,7 +566,7 @@ abstract class Adapter
 
         return [
             'width' => $this->getWidth() * $factor,
-            'height' => $this->getHeight() * $factor,
+            'height' => $this->getHeight() * $factor
         ];
     }
 

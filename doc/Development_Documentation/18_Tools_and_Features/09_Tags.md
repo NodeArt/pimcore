@@ -36,8 +36,8 @@ For accessing and working with tags via API, take a look into `Pimcore\Model\Ele
 /**
  * returns all assigned tags for element
  *
- * @param string $cType
- * @param int $cId
+ * @param $cType
+ * @param $cId
  * @return Tag[]
  */
 public static function getTagsForElement($cType, $cId)
@@ -50,8 +50,8 @@ public static function getTagsForElement($cType, $cId)
 /**
  * adds given tag to element
  *
- * @param string $cType
- * @param int $cId
+ * @param $cType
+ * @param $cId
  * @param Tag $tag
  */
 public static function addTagToElement($cType, $cId, Tag $tag)
@@ -62,8 +62,8 @@ public static function addTagToElement($cType, $cId, Tag $tag)
 /**
  * removes given tag from element
  *
- * @param string $cType
- * @param int $cId
+ * @param $cType
+ * @param $cId
  * @param Tag $tag
  */
 public static function removeTagFromElement($cType, $cId, Tag $tag)
@@ -75,9 +75,9 @@ public static function removeTagFromElement($cType, $cId, Tag $tag)
  * sets given tags to element and removes all other tags
  * to remove all tags from element, provide empty array of tags
  *
- * @param string $cType
- * @param int $cId
- * @param Tag[] $tags
+ * @param $cType
+ * @param $cId
+ * @param Tag[] $tag
  */
 public static function setTagsForElement($cType, $cId, array $tags)
 {

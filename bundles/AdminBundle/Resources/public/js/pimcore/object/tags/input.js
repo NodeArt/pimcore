@@ -52,13 +52,9 @@ pimcore.object.tags.input = Class.create(pimcore.object.tags.abstract, {
         var input = {
             fieldLabel: this.fieldConfig.title,
             name: this.fieldConfig.name,
-            labelWidth: 100,
-            labelAlign: "right"
+            componentCls: "object_field",
+            labelWidth: 100
         };
-
-        if (!this.fieldConfig.showCharCount) {
-            input.componentCls = "object_field object_field_type_" + this.type;
-        }
 
         if (this.data) {
             input.value = this.data;
@@ -104,7 +100,7 @@ pimcore.object.tags.input = Class.create(pimcore.object.tags.abstract, {
             this.updateCharCount(this.component, charCount);
 
             return Ext.create("Ext.Panel", {
-                cls: "object_field object_field_type_" + this.type,
+                cls: "object_field",
                 style: "margin-bottom: 10px",
                 layout: {
                     type: 'vbox',

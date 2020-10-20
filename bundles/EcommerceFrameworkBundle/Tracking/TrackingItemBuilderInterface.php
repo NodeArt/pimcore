@@ -18,13 +18,14 @@ use Pimcore\Bundle\EcommerceFrameworkBundle\CartManager\CartInterface;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Model\AbstractOrder;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Model\AbstractOrderItem;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Model\ProductInterface;
+use Pimcore\Model\Element\ElementInterface;
 
 interface TrackingItemBuilderInterface
 {
     /**
      * Build a product view object
      *
-     * @param ProductInterface $product
+     * @param ProductInterface|ElementInterface $product
      *
      * @return ProductAction
      */
@@ -33,22 +34,20 @@ interface TrackingItemBuilderInterface
     /**
      * Build a product action item object
      *
-     * @param ProductInterface $product
-     * @param int $quantity
+     * @param ProductInterface|ElementInterface $product
      *
      * @return ProductAction
      */
-    public function buildProductActionItem(ProductInterface $product, $quantity = 1);
+    public function buildProductActionItem(ProductInterface $product);
 
     /**
      * Build a product impression object
      *
-     * @param ProductInterface $product
-     * @param string $list
+     * @param ProductInterface|ElementInterface $product
      *
      * @return ProductImpression
      */
-    public function buildProductImpressionItem(ProductInterface $product, string $list = 'default');
+    public function buildProductImpressionItem(ProductInterface $product);
 
     /**
      * Build a checkout transaction object

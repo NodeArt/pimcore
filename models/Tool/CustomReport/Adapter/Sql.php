@@ -22,13 +22,13 @@ use Pimcore\Db;
 class Sql extends AbstractAdapter
 {
     /**
-     * @param array|null $filters
-     * @param string|null $sort
-     * @param string|null $dir
-     * @param int|null $offset
-     * @param int|null $limit
-     * @param array|null $fields
-     * @param array|null $drillDownFilters
+     * @param $filters
+     * @param $sort
+     * @param $dir
+     * @param $offset
+     * @param $limit
+     * @param null $fields
+     * @param null $drillDownFilters
      *
      * @return array
      */
@@ -37,8 +37,6 @@ class Sql extends AbstractAdapter
         $db = Db::get();
 
         $baseQuery = $this->getBaseQuery($filters, $fields, false, $drillDownFilters);
-        $data = [];
-        $total = 0;
 
         if ($baseQuery) {
             $total = $db->fetchOne($baseQuery['count']);
@@ -60,9 +58,9 @@ class Sql extends AbstractAdapter
     }
 
     /**
-     * @param \stdClass $configuration
+     * @param $configuration
      *
-     * @return array
+     * @return array|mixed|null
      *
      * @throws \Exception
      */
@@ -90,10 +88,10 @@ class Sql extends AbstractAdapter
     }
 
     /**
-     * @param \stdClass $config
+     * @param $config
      * @param bool $ignoreSelectAndGroupBy
-     * @param array|null $drillDownFilters
-     * @param string|null $selectField
+     * @param null $drillDownFilters
+     * @param null $selectField
      *
      * @return string
      */
@@ -101,8 +99,8 @@ class Sql extends AbstractAdapter
     {
         $config = (array)$config;
         $sql = '';
-        if (!empty($config['sql']) && !$ignoreSelectAndGroupBy) {
-            if (strpos(strtoupper(trim($config['sql'])), 'SELECT') !== 0) {
+        if ($config['sql'] && !$ignoreSelectAndGroupBy) {
+            if (strpos(strtoupper(trim($config['sql'])), 'SELECT') === false || strpos(strtoupper(trim($config['sql'])), 'SELECT') > 5) {
                 $sql .= 'SELECT ';
             }
             $sql .= str_replace("\n", ' ', $config['sql']);
@@ -112,18 +110,15 @@ class Sql extends AbstractAdapter
         } else {
             $sql .= 'SELECT *';
         }
-        if (!empty($config['from'])) {
-            if (strpos(strtoupper(trim($config['from'])), 'FROM') !== 0) {
+        if ($config['from']) {
+            if (strpos(strtoupper(trim($config['from'])), 'FROM') === false) {
                 $sql .= ' FROM ';
             }
             $sql .= ' ' . str_replace("\n", ' ', $config['from']);
         }
-        if (!empty($config['where']) || $drillDownFilters) {
+        if ($config['where'] || $drillDownFilters) {
             $whereParts = [];
-            if (!empty($config['where'])) {
-                if (strpos(strtoupper(trim($config['where'])), 'WHERE') === 0) {
-                    $config['where'] = preg_replace('/^\s*WHERE\s*/', '', $config['where']);
-                }
+            if ($config['where']) {
                 $whereParts[] = '(' . str_replace("\n", ' ', $config['where']) . ')';
             }
 
@@ -137,11 +132,19 @@ class Sql extends AbstractAdapter
             }
 
             if ($whereParts) {
-                $sql .= ' WHERE ' . implode(' AND ', $whereParts);
+                if ($config['where']) {
+                    $sql .= ' WHERE ';
+                } else {
+                    if (strpos(strtoupper(trim($config['where'])), 'WHERE') === false) {
+                        $sql .= ' WHERE ';
+                    }
+                }
+
+                $sql .= ' ' . implode(' AND ', $whereParts);
             }
         }
-        if (!empty($config['groupby']) && !$ignoreSelectAndGroupBy) {
-            if (strpos(strtoupper(trim($config['groupby'])), 'GROUP BY') !== 0) {
+        if ($config['groupby'] && !$ignoreSelectAndGroupBy) {
+            if (strpos(strtoupper($config['groupby']), 'GROUP BY') === false) {
                 $sql .= ' GROUP BY ';
             }
             $sql .= ' ' . str_replace("\n", ' ', $config['groupby']);
@@ -151,13 +154,13 @@ class Sql extends AbstractAdapter
     }
 
     /**
-     * @param array $filters
-     * @param array $fields
+     * @param $filters
+     * @param $fields
      * @param bool $ignoreSelectAndGroupBy
-     * @param array|null $drillDownFilters
-     * @param string|null $selectField
+     * @param null $drillDownFilters
+     * @param null $selectField
      *
-     * @return array|null
+     * @return array
      */
     protected function getBaseQuery($filters, $fields, $ignoreSelectAndGroupBy = false, $drillDownFilters = null, $selectField = null)
     {
@@ -174,7 +177,6 @@ class Sql extends AbstractAdapter
                     $value = $filter['value'] ;
                     $type = $filter['type'];
                     $operator = $filter['operator'];
-                    $maxValue = null;
                     if ($type == 'date') {
                         if ($operator == 'eq') {
                             $maxValue = strtotime($value . '+23 hours 59 minutes');
@@ -192,7 +194,7 @@ class Sql extends AbstractAdapter
                             $compMapping = [
                                 'lt' => '<',
                                 'gt' => '>',
-                                'eq' => '=',
+                                'eq' => '='
                             ];
 
                             if ($type == 'date') {
@@ -222,21 +224,21 @@ class Sql extends AbstractAdapter
                 $data = 'SELECT * FROM (' . $sql . ') AS somerandxyz WHERE ' . $condition;
             }
         } else {
-            return null;
+            return;
         }
 
         return [
             'data' => $data,
-            'count' => $total,
+            'count' => $total
         ];
     }
 
     /**
-     * @param array $filters
-     * @param string $field
-     * @param array $drillDownFilters
+     * @param $filters
+     * @param $field
+     * @param $drillDownFilters
      *
-     * @return array
+     * @return array|mixed
      */
     public function getAvailableOptions($filters, $field, $drillDownFilters)
     {
@@ -258,10 +260,10 @@ class Sql extends AbstractAdapter
         return [
             'data' => array_merge(
                 [
-                    ['value' => null],
-                ],
+                        ['value' => null]
+                      ],
                 $filteredData
-            ),
+            )
         ];
     }
 }

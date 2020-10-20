@@ -54,8 +54,8 @@ class Warming
     /**
      * @static
      *
-     * @param array|null $types
-     * @param array|null $classes
+     * @param array $types
+     * @param null $classes
      */
     public static function objects($types = null, $classes = null)
     {
@@ -94,7 +94,7 @@ class Warming
     /**
      * Adds a Pimcore Object/Asset/Document to the cache
      *
-     * @param Element\ElementInterface $element
+     * @param $element
      */
     public static function loadElementToCache($element)
     {
@@ -103,7 +103,7 @@ class Warming
     }
 
     /**
-     * @param Document\Listing|Asset\Listing|DataObject\Listing $list
+     * @param AbstractListing $list
      */
     protected static function loadToCache(AbstractListing $list)
     {

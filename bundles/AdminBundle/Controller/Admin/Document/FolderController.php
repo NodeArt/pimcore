@@ -15,8 +15,10 @@
 namespace Pimcore\Bundle\AdminBundle\Controller\Admin\Document;
 
 use Pimcore\Controller\Traits\ElementEditLockHelperTrait;
+use Pimcore\Event\AdminEvents;
 use Pimcore\Model\Document;
 use Pimcore\Model\Element;
+use Symfony\Component\EventDispatcher\GenericEvent;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -29,37 +31,7 @@ class FolderController extends DocumentControllerBase
     use ElementEditLockHelperTrait;
 
     /**
-     * @Route("/save-to-session", name="pimcore_admin_document_folder_savetosession", methods={"POST"})
-     *
-     * {@inheritDoc}
-     */
-    public function saveToSessionAction(Request $request)
-    {
-        return parent::saveToSessionAction($request);
-    }
-
-    /**
-     * @Route("/remove-from-session", name="pimcore_admin_document_folder_removefromsession", methods={"DELETE"})
-     *
-     * {@inheritDoc}
-     */
-    public function removeFromSessionAction(Request $request)
-    {
-        return parent::removeFromSessionAction($request);
-    }
-
-    /**
-     * @Route("/change-master-document", name="pimcore_admin_document_folder_changemasterdocument", methods={"PUT"})
-     *
-     * {@inheritDoc}
-     */
-    public function changeMasterDocumentAction(Request $request)
-    {
-        return parent::changeMasterDocumentAction($request);
-    }
-
-    /**
-     * @Route("/get-data-by-id", name="pimcore_admin_document_folder_getdatabyid", methods={"GET"})
+     * @Route("/get-data-by-id", methods={"GET"})
      *
      * @param Request $request
      *
@@ -68,10 +40,6 @@ class FolderController extends DocumentControllerBase
     public function getDataByIdAction(Request $request)
     {
         $folder = Document\Folder::getById($request->get('id'));
-
-        if (!$folder) {
-            throw $this->createNotFoundException('Folder not found');
-        }
 
         // check for lock
         if ($folder->isAllowed('save') || $folder->isAllowed('publish') || $folder->isAllowed('unpublish') || $folder->isAllowed('delete')) {
@@ -82,15 +50,30 @@ class FolderController extends DocumentControllerBase
         }
 
         $folder = clone $folder;
+
+        $folder->idPath = Element\Service::getIdPath($folder);
+        $folder->setUserPermissions($folder->getUserPermissions());
         $folder->setLocked($folder->isLocked());
         $folder->setParent(null);
 
+        $this->addTranslationsData($folder);
+        $this->minimizeProperties($folder);
+
+        //Hook for modifying return value - e.g. for changing permissions based on object data
+        //data need to wrapped into a container in order to pass parameter to event listeners by reference so that they can change the values
         $data = $folder->getObjectVars();
 
-        $this->addTranslationsData($folder, $data);
-        $this->minimizeProperties($folder, $data);
+        $data['php'] = [
+            'classes' => array_merge([get_class($folder)], array_values(class_parents($folder))),
+            'interfaces' => array_values(class_implements($folder))
+        ];
 
-        $this->preSendDataActions($data, $folder);
+        $event = new GenericEvent($this, [
+            'data' => $data,
+            'document' => $folder
+        ]);
+        \Pimcore::getEventDispatcher()->dispatch(AdminEvents::DOCUMENT_GET_PRE_SEND_DATA, $event);
+        $data = $event->getArgument('data');
 
         if ($folder->isAllowed('view')) {
             return $this->adminJson($data);
@@ -100,7 +83,7 @@ class FolderController extends DocumentControllerBase
     }
 
     /**
-     * @Route("/save", name="pimcore_admin_document_folder_save", methods={"PUT", "POST"})
+     * @Route("/save", methods={"PUT", "POST"})
      *
      * @param Request $request
      *
@@ -110,25 +93,22 @@ class FolderController extends DocumentControllerBase
      */
     public function saveAction(Request $request)
     {
-        $folder = Document\Folder::getById($request->get('id'));
+        if ($request->get('id')) {
+            $folder = Document\Folder::getById($request->get('id'));
+            $folder->setModificationDate(time());
+            $folder->setUserModification($this->getAdminUser()->getId());
 
-        if (!$folder) {
-            throw $this->createNotFoundException('Folder not found');
+            if ($folder->isAllowed('publish')) {
+                $this->setValuesToDocument($request, $folder);
+                $folder->save();
+
+                return $this->adminJson(['success' => true]);
+            } else {
+                throw $this->createAccessDeniedHttpException();
+            }
         }
 
-        $folder->setModificationDate(time());
-        $folder->setUserModification($this->getAdminUser()->getId());
-
-        if ($folder->isAllowed('publish')) {
-            $this->setValuesToDocument($request, $folder);
-            $folder->save();
-
-            $treeData = $this->getTreeNodeConfig($folder);
-
-            return $this->adminJson(['success' => true, 'treeData' => $treeData]);
-        } else {
-            throw $this->createAccessDeniedHttpException();
-        }
+        throw $this->createNotFoundException();
     }
 
     /**

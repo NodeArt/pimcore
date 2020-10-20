@@ -147,7 +147,7 @@ trait PimcoreExtensionsTrait
 
             Db::getLogger()->debug('QueryBuilder instance was normalized to string.', [
                 'query' => $query,
-                'params' => $params,
+                'params' => $params
             ]);
         }
 
@@ -245,7 +245,7 @@ trait PimcoreExtensionsTrait
     /**
      * Fetches the first row of the SQL result.
      *
-     * @param string $sql
+     * @param $sql
      * @param array $params
      * @param array $types
      *
@@ -263,7 +263,7 @@ trait PimcoreExtensionsTrait
     /**
      * Fetches the first column of all SQL result rows as an array.
      *
-     * @param string $sql
+     * @param $sql
      * @param array $params
      * @param array $types
      *
@@ -290,7 +290,7 @@ trait PimcoreExtensionsTrait
     /**
      * Fetches the first column of the first row of the SQL result.
      *
-     * @param string $sql
+     * @param $sql
      * @param array $params
      * @param array $types
      *
@@ -309,7 +309,7 @@ trait PimcoreExtensionsTrait
      * The first column is the key, the second column is the
      * value.
      *
-     * @param string $sql
+     * @param $sql
      * @param array $params
      * @param array $types
      *
@@ -330,7 +330,7 @@ trait PimcoreExtensionsTrait
     }
 
     /**
-     * @param string $table
+     * @param $table
      * @param array $data
      *
      * @return int
@@ -504,7 +504,6 @@ trait PimcoreExtensionsTrait
     }
 
     /**
-     * @deprecated
      * Returns a ZF1 compatible query builder
      * To use the standard Doctrine QueryBuilder, please use $dbal->createQueryBuilder() instead
      *
@@ -547,7 +546,7 @@ trait PimcoreExtensionsTrait
     }
 
     /**
-     * @param string $sql
+     * @param $sql
      * @param array $exclusions
      *
      * @return \Doctrine\DBAL\Driver\Statement|int|null
@@ -573,7 +572,7 @@ trait PimcoreExtensionsTrait
     }
 
     /**
-     * @param array $params
+     * @param $params
      *
      * @return array
      */
@@ -587,7 +586,7 @@ trait PimcoreExtensionsTrait
     }
 
     /**
-     * @param array $data
+     * @param $data
      *
      * @return array
      */
@@ -611,39 +610,5 @@ trait PimcoreExtensionsTrait
     public function setAutoQuoteIdentifiers($autoQuoteIdentifiers)
     {
         $this->autoQuoteIdentifiers = $autoQuoteIdentifiers;
-    }
-
-    /**
-     * @param string $table
-     * @param string $idColumn
-     * @param string $where
-     */
-    public function selectAndDeleteWhere($table, $idColumn = 'id', $where = '')
-    {
-        $sql = 'SELECT ' . $this->quoteIdentifier($idColumn) . '  FROM ' . $table;
-
-        if ($where) {
-            $sql .= ' WHERE ' . $where;
-        }
-
-        $idsForDeletion = $this->fetchCol($sql);
-
-        if (!empty($idsForDeletion)) {
-            $chunks = array_chunk($idsForDeletion, 1000);
-            foreach ($chunks as $chunk) {
-                $idString = implode(',', array_map([$this, 'quote'], $chunk));
-                $this->deleteWhere($table, $idColumn . ' IN (' . $idString . ')');
-            }
-        }
-    }
-
-    /**
-     * @param string $like
-     *
-     * @return string
-     */
-    public function escapeLike(string $like): string
-    {
-        return str_replace(['_', '%'], ['\\_', '\\%'], $like);
     }
 }

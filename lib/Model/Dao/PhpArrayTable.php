@@ -31,7 +31,7 @@ abstract class PhpArrayTable implements DaoInterface
     }
 
     /**
-     * @param string $name
+     * @param $name
      */
     protected function setFile($name)
     {

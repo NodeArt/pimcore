@@ -17,5 +17,3 @@ services:
             - []
 
     Pimcore\Bundle\EcommerceFrameworkBundle\FilterService\FilterGroupHelper: ~
-
-    Pimcore\Bundle\EcommerceFrameworkBundle\FilterService\ListHelper: ~

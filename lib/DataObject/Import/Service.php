@@ -20,6 +20,7 @@ declare(strict_types=1);
 
 namespace Pimcore\DataObject\Import;
 
+use DeepCopy\DeepCopy;
 use Pimcore\DataObject\Import\ColumnConfig\ConfigElementInterface;
 use Pimcore\DataObject\Import\ColumnConfig\Operator\Factory\OperatorFactoryInterface;
 use Pimcore\DataObject\Import\ColumnConfig\Operator\OperatorInterface;
@@ -28,10 +29,8 @@ use Pimcore\DataObject\Import\ColumnConfig\Value\ValueInterface;
 use Pimcore\DataObject\Import\Resolver\ResolverInterface;
 use Pimcore\Db;
 use Pimcore\Model\DataObject\ClassDefinition;
-use Pimcore\Model\Element\Service as ElementService;
 use Pimcore\Model\GridConfig;
 use Pimcore\Model\ImportConfig;
-use Pimcore\Model\User;
 use Pimcore\Tool;
 use Psr\Container\ContainerInterface;
 
@@ -87,16 +86,18 @@ class Service
      * @param \stdClass[] $jsonConfigs
      * @param mixed|null $context
      *
-     * @return ConfigElementInterface[]
+     * @return array
      */
     public function buildInputDataConfig(array $jsonConfigs, $context = null): array
     {
-        return $this->doBuildConfig($jsonConfigs, [], $context);
+        $config = $this->doBuildConfig($jsonConfigs, [], $context);
+
+        return $config;
     }
 
     /**
      * @param \stdClass[] $jsonConfigs
-     * @param ConfigElementInterface[] $config
+     * @param $config
      * @param mixed|null $context
      *
      * @return ConfigElementInterface[]
@@ -151,8 +152,8 @@ class Service
     }
 
     /**
-     * @param User $user
-     * @param string $classId
+     * @param $user
+     * @param $classId
      *
      * @return array|ImportConfig\Listing
      */
@@ -190,10 +191,10 @@ class Service
     }
 
     /**
-     * @param User $user
-     * @param string $classId
+     * @param $user
+     * @param $classId
      *
-     * @return ImportConfig[]
+     * @return ImportConfig\Listing
      */
     public function getMyOwnImportConfigs($user, $classId)
     {
@@ -213,16 +214,14 @@ class Service
     }
 
     /**
-     * @param GridConfig $gridConfig
-     *
-     * @return \stdClass
+     * @param $gridConfig GridConfig
      */
     public function createFromExportConfig($gridConfig)
     {
         $importConfigData = new \stdClass();
         $exportConfigData = json_decode($gridConfig->getConfig(), true);
 
-        $importConfigData->classId = $exportConfigData['classId'] ?? null;
+        $importConfigData->classId = $exportConfigData->classId;
         $class = ClassDefinition::getById($exportConfigData['classId']);
 
         $importConfigData->selectedGridColumns = [];
@@ -243,8 +242,8 @@ class Service
     }
 
     /**
-     * @param ClassDefinition $class
-     * @param array $exportColumn
+     * @param $class ClassDefinition
+     * @param $exportColumn
      *
      * @return array|\stdClass
      */
@@ -258,10 +257,10 @@ class Service
         $importColumn->attributes->class = 'Ignore';
 
         $fieldConfig = $exportColumn['fieldConfig'];
-        if ($fieldConfig['isOperator'] ?? null || (isset($fieldConfig['key'])
+        if ($fieldConfig['isOperator'] || (isset($fieldConfig['key'])
                 && (in_array($fieldConfig['key'], self::FORBIDDEN_KEYS) || strpos($fieldConfig['key'], '~') !== false))) {
             $importColumn->attributes->type = 'operator';
-            $importColumn->attributes->label = $fieldConfig['attributes']['label'] ?? null;
+            $importColumn->attributes->label = $fieldConfig['attributes']['label'];
             $importColumn->attributes->childs = [];
 
             $keyParts = explode('~', $fieldConfig['key']);
@@ -274,6 +273,7 @@ class Service
                 $importColumn->attributes->class = 'ObjectBrickSetter';
                 $importColumn->attributes->brickType = $bricktype;
                 $importColumn->attributes->attr = $fieldname;
+//                $importColumn->attributes->label = $fieldname;
 
                 $bricksetter = new \stdClass();
                 $bricksetter->type = 'value';
@@ -283,9 +283,7 @@ class Service
                 $bricksetter->dataType = $fieldConfig['type'];
                 $bricksetter->childs = [];
                 $importColumn->attributes->childs[] = $bricksetter;
-            } elseif (isset($fieldConfig['attributes'])
-                    && $fieldConfig['attributes']['type'] == 'operator'
-                    && $fieldConfig['attributes']['class'] == 'LFExpander') {
+            } elseif ($fieldConfig['attributes']['type'] == 'operator' && $fieldConfig['attributes']['class'] == 'LFExpander') {
                 $childs = $fieldConfig['attributes']['childs'];
                 if (count($childs) == 1) {
                     $importColumns = [];
@@ -297,7 +295,7 @@ class Service
                             $validLanguages = Tool::getValidLanguages();
                         }
                         foreach ($validLanguages as $validLanguage) {
-                            $copier = ElementService::getDeepCopyInstance(null, ['source' => __METHOD__]);
+                            $copier = new DeepCopy();
                             $lfImportColumn = $copier->copy($importColumn);
                             $lfImportColumn->attributes->class = 'LocaleSwitcher';
                             $lfImportColumn->attributes->locale = $validLanguage;

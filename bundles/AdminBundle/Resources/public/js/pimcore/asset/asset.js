@@ -16,7 +16,7 @@ pimcore.asset.asset = Class.create(pimcore.element.abstract, {
 
     getData: function () {
         Ext.Ajax.request({
-            url: Routing.generate('pimcore_admin_asset_getdatabyid'),
+            url: "/admin/asset/get-data-by-id",
             success: this.getDataComplete.bind(this),
             failure: function() {
                 this.forgetOpenTab();
@@ -65,6 +65,11 @@ pimcore.asset.asset = Class.create(pimcore.element.abstract, {
         this.tabPanel = Ext.getCmp("pimcore_panel_tabs");
         var tabId = "asset_" + this.id;
 
+        var iconClass = "pimcore_icon_asset_default pimcore_icon_" + this.data.fileExtension;
+        if (this.data.type == "folder") {
+            iconClass = "pimcore_icon_folder";
+        }
+
         this.tab = new Ext.Panel({
             id: tabId,
             title: htmlspecialchars(tabTitle),
@@ -72,7 +77,7 @@ pimcore.asset.asset = Class.create(pimcore.element.abstract, {
             layout: "border",
             items: [this.getLayoutToolbar(),this.getTabPanel()],
             asset: this,
-            iconCls: this.getIconClass()
+            iconCls: iconClass
         });
 
         this.tab.on("activate", function () {
@@ -83,7 +88,7 @@ pimcore.asset.asset = Class.create(pimcore.element.abstract, {
 
         this.tab.on("beforedestroy", function () {
             Ext.Ajax.request({
-                url: Routing.generate('pimcore_admin_element_unlockelement'),
+                url: "/admin/element/unlock-element",
                 method: 'PUT',
                 params: {
                     id: this.data.id,
@@ -196,7 +201,7 @@ pimcore.asset.asset = Class.create(pimcore.element.abstract, {
                 iconCls: "pimcore_material_icon_download pimcore_material_icon",
                 scale: "medium",
                 handler: function () {
-                    pimcore.helpers.download(Routing.generate('pimcore_admin_asset_download', {id: this.data.id}));
+                    pimcore.helpers.download("/admin/asset/download?id=" + this.data.id);
                 }.bind(this)
             });
 
@@ -233,7 +238,7 @@ pimcore.asset.asset = Class.create(pimcore.element.abstract, {
                     scale: "medium",
                     handler: function () {
                         Ext.Ajax.request({
-                            url: Routing.generate('pimcore_admin_asset_clearthumbnail'),
+                            url: "/admin/asset/clear-thumbnail",
                             method: 'POST',
                             params: {
                                 id: this.data.id
@@ -281,17 +286,6 @@ pimcore.asset.asset = Class.create(pimcore.element.abstract, {
         tabPanel.setActiveItem(tabId);
     },
 
-    saveToSession: function (onCompleteCallback) {
-
-        if (typeof onCompleteCallback != "function") {
-            onCompleteCallback = function () {
-            };
-        }
-
-        this.save(false, onCompleteCallback, "session")
-    },
-
-
     getSaveData : function (only) {
         var parameters = {};
 
@@ -316,15 +310,15 @@ pimcore.asset.asset = Class.create(pimcore.element.abstract, {
             parameters.metadata = Ext.encode(this.metadata.getValues());
         }
         catch (e2) {
-            // console.log(e2);
+            //console.log(e);
         }
 
         // properties
         try {
             parameters.properties = Ext.encode(this.properties.getValues());
         }
-        catch (e3) {
-            //console.log(e3);
+        catch (e2) {
+            //console.log(e);
         }
 
         // scheduler
@@ -333,14 +327,14 @@ pimcore.asset.asset = Class.create(pimcore.element.abstract, {
                 parameters.scheduler = Ext.encode(this.scheduler.getValues());
             }
         }
-        catch (e4) {
-            //console.log(e4);
+        catch (e3) {
+            //console.log(e);
         }
 
         return parameters;
     },
 
-    save : function (only, callback, task) {
+    save : function (only, callback) {
 
         if(this.tab.disabled || this.tab.isMasked()) {
             return;
@@ -348,29 +342,10 @@ pimcore.asset.asset = Class.create(pimcore.element.abstract, {
 
         this.tab.mask();
 
-        try {
-            pimcore.plugin.broker.fireEvent("preSaveAsset", this.id);
-        } catch (e) {
-            if (e instanceof pimcore.error.ValidationException) {
-                this.tab.unmask();
-                pimcore.helpers.showPrettyError('asset', t("error"), t("saving_failed"), e.message);
-                return false;
-            }
-
-            if (e instanceof pimcore.error.ActionCancelledException) {
-                this.tab.unmask();
-                pimcore.helpers.showNotification(t("Info"), 'Asset not saved: ' + e.message, 'info');
-                return false;
-            }
-        }
-
-        let params = this.getSaveData(only);
-        if (task) {
-            params.task = task
-        }
+        pimcore.plugin.broker.fireEvent("preSaveAsset", this.id);
 
         Ext.Ajax.request({
-            url: Routing.generate('pimcore_admin_asset_save'),
+            url: '/admin/asset/save',
             method: "PUT",
             success: function (response) {
                 try{
@@ -381,8 +356,6 @@ pimcore.asset.asset = Class.create(pimcore.element.abstract, {
                         Ext.apply(this.data, rdata.data);
 
                         pimcore.plugin.broker.fireEvent("postSaveAsset", this.id);
-                        pimcore.helpers.updateTreeElementStyle('asset', this.id, rdata.treeData);
-
                     }
                 } catch(e){
                     pimcore.helpers.showNotification(t("error"), t("saving_failed"), "error");
@@ -403,7 +376,7 @@ pimcore.asset.asset = Class.create(pimcore.element.abstract, {
             failure: function () {
                 this.tab.unmask();
             }.bind(this),
-            params: params
+            params: this.getSaveData(only)
         });
     },
 

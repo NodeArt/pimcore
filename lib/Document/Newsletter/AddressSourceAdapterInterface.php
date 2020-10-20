@@ -42,8 +42,8 @@ interface AddressSourceAdapterInterface
     /**
      * returns array of params to be set on mail for single sending
      *
-     * @param int $limit
-     * @param int $offset
+     * @param $limit
+     * @param $offset
      *
      * @return SendingParamContainer[]
      */

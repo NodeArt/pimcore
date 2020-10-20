@@ -14,8 +14,6 @@
 
 namespace Pimcore\Google\Cse;
 
-use Pimcore\Model;
-
 class Item
 {
     /**
@@ -64,12 +62,12 @@ class Item
     public $htmlFormattedUrl;
 
     /**
-     * @var Model\Asset\Image|string|null
+     * @var string
      */
     public $image;
 
     /**
-     * @var Model\Document|null
+     * @var string
      */
     public $document;
 
@@ -103,8 +101,8 @@ class Item
     }
 
     /**
-     * @param string $key
-     * @param mixed $value
+     * @param  $key
+     * @param  $value
      *
      * @return $this
      */
@@ -119,7 +117,7 @@ class Item
     }
 
     /**
-     * @param string $displayLink
+     * @param $displayLink
      *
      * @return $this
      */
@@ -139,7 +137,7 @@ class Item
     }
 
     /**
-     * @param Model\Document $document
+     * @param $document
      *
      * @return $this
      */
@@ -151,7 +149,7 @@ class Item
     }
 
     /**
-     * @return Model\Document|null
+     * @return string
      */
     public function getDocument()
     {
@@ -159,7 +157,7 @@ class Item
     }
 
     /**
-     * @param string $formattedUrl
+     * @param $formattedUrl
      *
      * @return $this
      */
@@ -179,7 +177,7 @@ class Item
     }
 
     /**
-     * @param string $htmlFormattedUrl
+     * @param $htmlFormattedUrl
      *
      * @return $this
      */
@@ -199,7 +197,7 @@ class Item
     }
 
     /**
-     * @param string $htmlSnippet
+     * @param $htmlSnippet
      *
      * @return $this
      */
@@ -219,7 +217,7 @@ class Item
     }
 
     /**
-     * @param string $htmlTitle
+     * @param $htmlTitle
      *
      * @return $this
      */
@@ -239,7 +237,7 @@ class Item
     }
 
     /**
-     * @param Model\Asset\Image|string $image
+     * @param $image
      *
      * @return $this
      */
@@ -251,7 +249,7 @@ class Item
     }
 
     /**
-     * @return Model\Asset\Image|string|null
+     * @return string
      */
     public function getImage()
     {
@@ -259,7 +257,7 @@ class Item
     }
 
     /**
-     * @param string $link
+     * @param $link
      *
      * @return $this
      */
@@ -298,7 +296,7 @@ class Item
     }
 
     /**
-     * @param string $snippet
+     * @param $snippet
      *
      * @return $this
      */
@@ -318,7 +316,7 @@ class Item
     }
 
     /**
-     * @param string $title
+     * @param $title
      *
      * @return $this
      */
@@ -338,7 +336,7 @@ class Item
     }
 
     /**
-     * @param string $type
+     * @param $type
      *
      * @return $this
      */

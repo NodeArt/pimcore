@@ -27,7 +27,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class QuantityValueController extends AdminController
 {
     /**
-     * @Route("/quantity-value/unit-proxy", name="pimcore_admin_dataobject_quantityvalue_unitproxyget", methods={"GET"})
+     * @Route("/quantity-value/unit-proxy", methods={"GET"})
      *
      * @param Request $request
      *
@@ -83,7 +83,7 @@ class QuantityValueController extends AdminController
     }
 
     /**
-     * @Route("/quantity-value/unit-proxy", name="pimcore_admin_dataobject_quantityvalue_unitproxy", methods={"POST", "PUT"})
+     * @Route("/quantity-value/unit-proxy", methods={"POST", "PUT"})
      *
      * @param Request $request
      *
@@ -121,15 +121,10 @@ class QuantityValueController extends AdminController
                 }
             } elseif ($request->get('xaction') == 'create') {
                 $data = json_decode($request->get('data'), true);
-                if (isset($data['baseunit']) && $data['baseunit'] === -1) {
+                if ($data['baseunit'] === -1) {
                     $data['baseunit'] = null;
                 }
-
-                $id = $data['id'];
-                if (Unit::getById($id)) {
-                    throw new \Exception('unit with ID [' . $id . '] already exists');
-                }
-
+                unset($data['id']);
                 $unit = new Unit();
                 $unit->setValues($data);
                 $unit->save();
@@ -137,28 +132,26 @@ class QuantityValueController extends AdminController
                 return $this->adminJson(['data' => get_object_vars($unit), 'success' => true]);
             }
         }
-
-        return $this->adminJson(['success' => false]);
     }
 
     /**
-     * @param string $comparison
+     * @param $comparison
      *
-     * @return string
+     * @return mixed
      */
     private function getOperator($comparison)
     {
         $mapper = [
             'lt' => '<',
             'gt' => '>',
-            'eq' => '=',
+            'eq' => '='
         ];
 
         return $mapper[$comparison];
     }
 
     /**
-     * @Route("/quantity-value/unit-list", name="pimcore_admin_dataobject_quantityvalue_unitlist", methods={"GET"})
+     * @Route("/quantity-value/unit-list", methods={"GET"})
      *
      * @param Request $request
      *
@@ -202,7 +195,7 @@ class QuantityValueController extends AdminController
     }
 
     /**
-     * @Route("/quantity-value/convert", name="pimcore_admin_dataobject_quantityvalue_convert", methods={"GET"})
+     * @Route("/quantity-value/convert", methods={"GET"})
      *
      * @param Request $request
      *
@@ -228,44 +221,5 @@ class QuantityValueController extends AdminController
         }
 
         return $this->adminJson(['value' => $convertedValue->getValue(), 'success' => true]);
-    }
-
-    /**
-     * @Route("/quantity-value/convert-all", name="pimcore_admin_dataobject_quantityvalue_convertall", methods={"GET"})
-     *
-     * @param Request $request
-     *
-     * @return JsonResponse
-     */
-    public function convertAllAction(Request $request)
-    {
-        $unitId = $request->get('unit');
-
-        $fromUnit = Unit::getById($unitId);
-        if (!$fromUnit instanceof Unit) {
-            return $this->adminJson(['success' => false]);
-        }
-
-        $baseUnit = $fromUnit->getBaseunit() ?? $fromUnit;
-
-        $units = new Unit\Listing();
-        $units->setCondition('baseunit = '.$units->quote($baseUnit->getId()).' AND id != '.$units->quote($fromUnit->getId()));
-        $units = $units->load();
-
-        $convertedValues = [];
-        /** @var UnitConversionService $converter */
-        $converter = $this->container->get(UnitConversionService::class);
-        /** @var Unit $targetUnit */
-        foreach ($units as $targetUnit) {
-            try {
-                $convertedValue = $converter->convert(new QuantityValue($request->get('value'), $fromUnit), $targetUnit);
-
-                $convertedValues[] = ['unit' => $targetUnit->getAbbreviation(), 'unitName' => $targetUnit->getLongname(), 'value' => round($convertedValue->getValue(), 4)];
-            } catch (\Exception $e) {
-                return $this->adminJson(['success' => false, 'message' => $e->getMessage()]);
-            }
-        }
-
-        return $this->adminJson(['value' => $request->get('value'), 'fromUnit' => $fromUnit->getAbbreviation(), 'values' => $convertedValues, 'success' => true]);
     }
 }

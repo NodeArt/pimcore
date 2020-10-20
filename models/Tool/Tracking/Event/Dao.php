@@ -20,14 +20,12 @@ namespace Pimcore\Model\Tool\Tracking\Event;
 use Pimcore\Model;
 
 /**
- * @deprecated
- *
  * @property \Pimcore\Model\Tool\Tracking\Event $model
  */
 class Dao extends Model\Dao\AbstractDao
 {
     /**
-     * @param int $id
+     * @param $id
      *
      * @throws \Exception
      */
@@ -41,12 +39,12 @@ class Dao extends Model\Dao\AbstractDao
     }
 
     /**
-     * @param string $category
-     * @param string $action
-     * @param string $label
-     * @param int $day
-     * @param int $month
-     * @param int $year
+     * @param $category
+     * @param $action
+     * @param $label
+     * @param $day
+     * @param $month
+     * @param $year
      *
      * @throws \Exception
      */

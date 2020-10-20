@@ -20,21 +20,17 @@ namespace Pimcore\Model\Tool\Tag\Config;
 use Pimcore\Model;
 
 /**
- * @deprecated
- *
  * @method \Pimcore\Model\Tool\Tag\Config\Listing\Dao getDao()
- * @method  \Pimcore\Model\Tool\Tag\Config[] load()
- * @method int getTotalCount()
  */
 class Listing extends Model\Listing\JsonListing
 {
     /**
-     * @var Model\Tool\Tag\Config[]|null
+     * @var array|null
      */
     protected $tags = null;
 
     /**
-     * @return Model\Tool\Tag\Config[]
+     * @return \Pimcore\Model\Tool\Tag\Config[]
      */
     public function getTags()
     {
@@ -46,7 +42,7 @@ class Listing extends Model\Listing\JsonListing
     }
 
     /**
-     * @param Model\Tool\Tag\Config[] $tags
+     * @param $tags
      *
      * @return $this
      */

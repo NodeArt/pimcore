@@ -81,7 +81,7 @@ class Config extends Model\AbstractModel
     public $creationDate;
 
     /**
-     * @param string $name
+     * @param $name
      *
      * @return null|Config
      */
@@ -122,17 +122,17 @@ class Config extends Model\AbstractModel
                 'method' => 'scaleByWidth',
                 'arguments' =>
                 [
-                    'width' => 500,
-                ],
-            ],
+                    'width' => 500
+                ]
+            ]
         ]);
 
         return $config;
     }
 
     /**
-     * @param string $name
-     * @param array $parameters
+     * @param  $name
+     * @param  $parameters
      *
      * @return bool
      */
@@ -140,16 +140,16 @@ class Config extends Model\AbstractModel
     {
         $this->items[] = [
             'method' => $name,
-            'arguments' => $parameters,
+            'arguments' => $parameters
         ];
 
         return true;
     }
 
     /**
-     * @param int $position
-     * @param string $name
-     * @param array $parameters
+     * @param $position
+     * @param $name
+     * @param $parameters
      *
      * @return bool
      */
@@ -157,7 +157,7 @@ class Config extends Model\AbstractModel
     {
         array_splice($this->items, $position, 0, [[
             'method' => $name,
-            'arguments' => $parameters,
+            'arguments' => $parameters
         ]]);
 
         return true;
@@ -169,7 +169,7 @@ class Config extends Model\AbstractModel
     }
 
     /**
-     * @param string $description
+     * @param $description
      *
      * @return $this
      */
@@ -189,7 +189,7 @@ class Config extends Model\AbstractModel
     }
 
     /**
-     * @param array $items
+     * @param $items
      *
      * @return $this
      */
@@ -209,7 +209,7 @@ class Config extends Model\AbstractModel
     }
 
     /**
-     * @param string $name
+     * @param $name
      *
      * @return $this
      */
@@ -229,7 +229,7 @@ class Config extends Model\AbstractModel
     }
 
     /**
-     * @param int $audioBitrate
+     * @param $audioBitrate
      *
      * @return $this
      */
@@ -249,7 +249,7 @@ class Config extends Model\AbstractModel
     }
 
     /**
-     * @param int $videoBitrate
+     * @param $videoBitrate
      *
      * @return $this
      */

@@ -20,8 +20,6 @@ use GuzzleHttp\Psr7\Uri;
 use Pimcore\Tool\RestClient\AbstractRestClient;
 
 /**
- * @deprecated
- *
  * Standard RestClient working with a Guzzle client
  */
 class RestClient extends AbstractRestClient
@@ -60,7 +58,7 @@ class RestClient extends AbstractRestClient
 
         $request = $this->lastRequest = new Request($method, $uri, $server, $content);
         $response = $this->lastResponse = $this->client->send($request, [
-            'query' => $parameters,
+            'query' => $parameters
         ]);
 
         return $response;

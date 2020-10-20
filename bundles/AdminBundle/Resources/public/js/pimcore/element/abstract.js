@@ -223,15 +223,5 @@ pimcore.element.abstract = Class.create({
                 handler: pimcore.helpers.copyStringToClipboard.bind(this, metainfo.deeplink)
             }
         ];
-    },
-
-    getIconClass: function () {
-        var iconClass;
-        if (this.data.iconCls) {
-            iconClass = this.data.iconCls;
-        } else if (this.data.icon) {
-            iconClass = pimcore.helpers.getClassForIcon(this.data.icon);
-        }
-        return iconClass;
     }
 });

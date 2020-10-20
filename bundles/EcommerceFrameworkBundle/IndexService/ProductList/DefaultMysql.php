@@ -173,7 +173,7 @@ class DefaultMysql implements ProductListInterface
      * Fieldname is optional but highly recommended - needed for resetting condition based on fieldname
      * and exclude functionality in group by results
      *
-     * @param string $condition
+     * @param $condition
      * @param string $fieldname
      */
     public function addQueryCondition($condition, $fieldname = '')
@@ -185,7 +185,9 @@ class DefaultMysql implements ProductListInterface
     /**
      * Reset query condition for fieldname
      *
-     * @param string $fieldname
+     * @param $fieldname
+     *
+     * @return mixed
      */
     public function resetQueryCondition($fieldname)
     {
@@ -241,7 +243,7 @@ class DefaultMysql implements ProductListInterface
     }
 
     /**
-     * @param string|array $orderKey either single field name, or array of field names or array of arrays (field name, direction)
+     * @param $orderKey string | array  - either single field name, or array of field names or array of arrays (field name, direction)
      */
     public function setOrderKey($orderKey)
     {
@@ -377,7 +379,7 @@ class DefaultMysql implements ProductListInterface
         if (count($priceSystemArrays) == 1) {
             $priceSystemName = key($priceSystemArrays);
             $priceSystem = Factory::getInstance()->getPriceSystem($priceSystemName);
-            $objectRaws = $priceSystem->filterProductIds($priceSystemArrays[$priceSystemName], null, null, $this->order, $this->getOffset(), $this->getLimit());
+            $objectRaws = $priceSystem->filterProductIds($priceSystemArrays[$raw['priceSystemName']], null, null, $this->order, $this->getOffset(), $this->getLimit());
         } elseif (count($priceSystemArrays) == 0) {
             //nothing to do
         } else {
@@ -422,7 +424,7 @@ class DefaultMysql implements ProductListInterface
     /**
      * loads element by id
      *
-     * @param int $elementId
+     * @param $elementId
      *
      * @return array|\Pimcore\Model\DataObject\AbstractObject
      */
@@ -483,7 +485,7 @@ class DefaultMysql implements ProductListInterface
     /**
      * loads group by values based on relation fieldname either from local variable if prepared or directly from product index
      *
-     * @param string $fieldname
+     * @param      $fieldname
      * @param bool $countValues
      * @param bool $fieldnameShouldBeExcluded => set to false for and-conditions
      *
@@ -494,11 +496,10 @@ class DefaultMysql implements ProductListInterface
     public function getGroupBySystemValues($fieldname, $countValues = false, $fieldnameShouldBeExcluded = true)
     {
         // not supported with mysql tables
-        return [];
     }
 
     /**
-     * @param string $fieldname
+     * @param $fieldname
      * @param bool $countValues
      * @param bool $fieldnameShouldBeExcluded => set to false for and-conditions
      *
@@ -520,7 +521,7 @@ class DefaultMysql implements ProductListInterface
     }
 
     /**
-     * @param string $fieldname
+     * @param      $fieldname
      * @param bool $countValues
      * @param bool $fieldnameShouldBeExcluded => set to false for and-conditions
      *
@@ -657,7 +658,7 @@ class DefaultMysql implements ProductListInterface
             }
 
             // add sorting for primary id to prevent mysql paging problem...
-            $orderKeys[] = 'a.o_id';
+            $orderKeys[] = 'o_id';
 
             $directionOrderKeys = [];
             foreach ($orderKeys as $key) {
@@ -710,8 +711,8 @@ class DefaultMysql implements ProductListInterface
      * returns order by statement for simularity calculations based on given fields and object ids
      * returns cosine simularity calculation
      *
-     * @param array $fields
-     * @param int $objectId
+     * @param $fields
+     * @param $objectId
      *
      * @return string
      */
@@ -723,8 +724,8 @@ class DefaultMysql implements ProductListInterface
     /**
      * returns where statement for fulltext search index
      *
-     * @param array $fields
-     * @param string $searchstring
+     * @param $fields
+     * @param $searchstring
      *
      * @return string
      */

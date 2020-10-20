@@ -111,7 +111,7 @@ class SelectClassificationStoreAttributes extends AbstractFilterType
 
                 $keyCollection[$keyId] = [
                     'keyConfig' => $key,
-                    'values' => $keyValues,
+                    'values' => $keyValues
                 ];
             }
         }
@@ -135,7 +135,7 @@ class SelectClassificationStoreAttributes extends AbstractFilterType
         $field = $this->getField($filterDefinition);
         $nestedPath = $field . '.values';
 
-        $value = $params[$field] ?? null;
+        $value = $params[$field];
 
         if (is_array($value)) {
             foreach ($value as $keyId => $keyValue) {

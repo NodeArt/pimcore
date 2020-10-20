@@ -47,14 +47,12 @@ class Dao extends Model\Listing\Dao\AbstractDao
     }
 
     /**
-     * @return int
+     * @return mixed
      */
     public function getTotalCount()
     {
-        try {
-            return (int) $this->db->fetchOne('SELECT COUNT(*) FROM '.DataObject\QuantityValue\Unit\Dao::TABLE_NAME.' ' . $this->getCondition(), $this->model->getConditionVariables());
-        } catch (\Exception $e) {
-            return 0;
-        }
+        $amount = $this->db->fetchRow('SELECT COUNT(*) as amount FROM `' . DataObject\QuantityValue\Unit\Dao::TABLE_NAME . '`' . $this->getCondition());
+
+        return $amount['amount'];
     }
 }

@@ -19,9 +19,6 @@ namespace Pimcore\Model\Webservice\Data\Asset;
 
 use Pimcore\Model;
 
-/**
- * @deprecated
- */
 class File extends Model\Webservice\Data\Asset
 {
     /**
@@ -30,8 +27,8 @@ class File extends Model\Webservice\Data\Asset
     public $data;
 
     /**
-     * @param Model\Asset $object
-     * @param array|null $options
+     * @param $object
+     * @param null $options
      */
     public function map($object, $options = null)
     {
@@ -45,9 +42,9 @@ class File extends Model\Webservice\Data\Asset
     }
 
     /**
-     * @param Model\Asset $object
+     * @param $object
      * @param bool $disableMappingExceptions
-     * @param Model\Webservice\IdMapperInterface|null $idMapper
+     * @param null $idMapper
      */
     public function reverseMap($object, $disableMappingExceptions = false, $idMapper = null)
     {

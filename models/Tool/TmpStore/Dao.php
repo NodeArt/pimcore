@@ -25,10 +25,10 @@ use Pimcore\Model;
 class Dao extends Model\Dao\AbstractDao
 {
     /**
-     * @param string $id
-     * @param mixed $data
-     * @param string $tag
-     * @param int $lifetime
+     * @param $id
+     * @param $data
+     * @param $tag
+     * @param $lifetime
      *
      * @return bool
      */
@@ -47,7 +47,7 @@ class Dao extends Model\Dao\AbstractDao
                 'tag' => $tag,
                 'date' => time(),
                 'expiryDate' => (time() + $lifetime),
-                'serialized' => (int) $serialized,
+                'serialized' => (int) $serialized
             ]);
 
             return true;
@@ -57,7 +57,7 @@ class Dao extends Model\Dao\AbstractDao
     }
 
     /**
-     * @param string $id
+     * @param $id
      */
     public function delete($id)
     {
@@ -65,7 +65,7 @@ class Dao extends Model\Dao\AbstractDao
     }
 
     /**
-     * @param string $id
+     * @param $id
      *
      * @return bool
      */
@@ -87,7 +87,7 @@ class Dao extends Model\Dao\AbstractDao
     }
 
     /**
-     * @param string $tag
+     * @param $tag
      *
      * @return array
      */

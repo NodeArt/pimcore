@@ -170,7 +170,7 @@ class RgbaColor implements OwnerAwareFieldInterface
     }
 
     /**
-     * @param string $hexValue
+     * @param $hexValue
      *
      * @throws \Exception
      */
@@ -196,10 +196,10 @@ class RgbaColor implements OwnerAwareFieldInterface
     }
 
     /**
-     * @param int|null $r
-     * @param int|null $g
-     * @param int|null $b
-     * @param int|null $a
+     * @param null $r
+     * @param null $g
+     * @param null $b
+     * @param null $a
      */
     public function setRgba($r = null, $g = null, $b = null, $a = null)
     {

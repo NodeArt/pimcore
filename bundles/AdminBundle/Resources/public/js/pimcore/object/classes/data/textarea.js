@@ -106,10 +106,7 @@ pimcore.object.classes.data.textarea = Class.create(pimcore.object.classes.data.
             Ext.apply(this.datax,
                 {
                     width: source.datax.width,
-                    height: source.datax.height,
-                    maxLength: source.datax.maxLength,
-                    showCharCount: source.datax.showCharCount,
-                    excludeFromSearchIndex: source.datax.excludeFromSearchIndex
+                    height: source.datax.height
                 });
         }
     }

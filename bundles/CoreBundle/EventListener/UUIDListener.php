@@ -14,7 +14,6 @@
 
 namespace Pimcore\Bundle\CoreBundle\EventListener;
 
-use Pimcore\Config;
 use Pimcore\Event\AssetEvents;
 use Pimcore\Event\DataObjectClassDefinitionEvents;
 use Pimcore\Event\DataObjectEvents;
@@ -40,7 +39,7 @@ class UUIDListener implements EventSubscriberInterface
             DataObjectEvents::POST_DELETE => 'onPostDelete',
             DocumentEvents::POST_DELETE => 'onPostDelete',
             AssetEvents::POST_DELETE => 'onPostDelete',
-            DataObjectClassDefinitionEvents::POST_DELETE => 'onPostDelete',
+            DataObjectClassDefinitionEvents::POST_DELETE => 'onPostDelete'
         ];
     }
 
@@ -80,8 +79,8 @@ class UUIDListener implements EventSubscriberInterface
      */
     protected function isEnabled()
     {
-        $config = Config::getSystemConfiguration('general');
-        if (!empty($config['instance_identifier'])) {
+        $conf = \Pimcore\Config::getSystemConfig();
+        if ($conf->general->instanceIdentifier) {
             return true;
         }
 

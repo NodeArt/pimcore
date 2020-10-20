@@ -54,7 +54,7 @@ pimcore.settings.staticroutes = Class.create({
 
     getRowEditor:function () {
 
-        var url = Routing.generate('pimcore_admin_settings_staticroutes');
+        var url = '/admin/settings/staticroutes?';
 
         this.store = pimcore.helpers.grid.buildDefaultStore(
             url,
@@ -70,7 +70,6 @@ pimcore.settings.staticroutes = Class.create({
                 {name:'defaults'},
                 {name:'siteId'},
                 {name:'priority', type:'int'},
-                {name:'methods'},
                 {name:'creationDate'},
                 {name:'modificationDate'}
             ], null, {
@@ -110,7 +109,7 @@ pimcore.settings.staticroutes = Class.create({
                         autoDestroy: true,
                         proxy: {
                             type: 'ajax',
-                            url: Routing.generate('pimcore_admin_misc_getavailablemodules'),
+                            url: "/admin/misc/get-available-modules",
                             reader: {
                                 type: 'json',
                                 rootProperty: 'data'
@@ -128,7 +127,7 @@ pimcore.settings.staticroutes = Class.create({
                         autoDestroy:true,
                         proxy: {
                             type: 'ajax',
-                            url:Routing.generate('pimcore_admin_misc_getavailablecontrollers'),
+                            url:"/admin/misc/get-available-controllers",
                             reader: {
                                 type: 'json',
                                 rootProperty: 'data'
@@ -161,7 +160,7 @@ pimcore.settings.staticroutes = Class.create({
                         autoDestroy:true,
                         proxy: {
                             type: 'ajax',
-                            url:Routing.generate('pimcore_admin_misc_getavailableactions'),
+                            url:"/admin/misc/get-available-actions",
                             reader: {
                                 type: 'json',
                                 rootProperty: 'data'
@@ -201,9 +200,6 @@ pimcore.settings.staticroutes = Class.create({
                 mode:"local",
                 triggerAction:"all"
             })},
-            {text:t("methods"), flex:50, sortable:false, dataIndex:'methods',
-                editor:new Ext.form.TextField({}),
-            },
             {text: t("creationDate"), sortable: true, dataIndex: 'creationDate', editable: false,
                 hidden: true,
                 renderer: function(d) {
@@ -255,12 +251,7 @@ pimcore.settings.staticroutes = Class.create({
             bodyCls: "pimcore_editable_grid",
             trackMouseOver:true,
             stripeRows:true,
-            columns: {
-                items: typesColumns,
-                defaults: {
-                    renderer: Ext.util.Format.htmlEncode
-                },
-            },
+            columns:typesColumns,
             sm: Ext.create('Ext.selection.RowModel', {}),
             plugins: [
                 this.cellEditing

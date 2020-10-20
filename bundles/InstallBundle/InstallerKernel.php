@@ -63,14 +63,6 @@ class InstallerKernel extends Kernel
     /**
      * {@inheritdoc}
      */
-    public function getLogDir()
-    {
-        return $this->projectRoot . '/var/logs';
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function getCacheDir()
     {
         return $this->getRootDir() . '/cache';
@@ -84,7 +76,7 @@ class InstallerKernel extends Kernel
         $bundles = [
             new FrameworkBundle(),
             new MonologBundle(),
-            new PimcoreInstallBundle(),
+            new PimcoreInstallBundle()
         ];
 
         if (in_array($this->getEnvironment(), ['dev', 'test'])) {

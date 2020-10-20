@@ -18,25 +18,19 @@
 
 namespace Pimcore\Model;
 
-use Doctrine\DBAL\Exception\DeadlockException;
 use Pimcore\Event\DocumentEvents;
 use Pimcore\Event\FrontendEvents;
 use Pimcore\Event\Model\DocumentEvent;
 use Pimcore\Logger;
-use Pimcore\Model\Document\Hardlink;
-use Pimcore\Model\Document\Hardlink\Wrapper\WrapperInterface;
 use Pimcore\Model\Document\Listing;
 use Pimcore\Model\Element\ElementInterface;
 use Pimcore\Tool;
 use Pimcore\Tool\Frontend as FrontendTool;
-use Symfony\Cmf\Bundle\RoutingBundle\Routing\DynamicRouter;
 use Symfony\Component\EventDispatcher\GenericEvent;
 
 /**
  * @method \Pimcore\Model\Document\Dao getDao()
  * @method bool __isBasedOnLatestData()
- * @method int getChildAmount($user = null)
- * @method string getCurrentFullPath()
  */
 class Document extends Element\AbstractElement
 {
@@ -53,9 +47,9 @@ class Document extends Element\AbstractElement
     private static $hideUnpublished = false;
 
     /**
-     * @var string|null
+     * @var array
      */
-    protected $fullPathCache;
+    protected static $pathCache = [];
 
     /**
      * ID of the document
@@ -74,7 +68,7 @@ class Document extends Element\AbstractElement
     /**
      * The parent document.
      *
-     * @var Document|null
+     * @var Document
      */
     protected $parent;
 
@@ -143,9 +137,21 @@ class Document extends Element\AbstractElement
     protected $userModification;
 
     /**
+     * Permissions for the user which requested this document in editmode*
+     */
+    protected $userPermissions;
+
+    /**
+     * Dependencies for this document
+     *
+     * @var Dependency
+     */
+    protected $dependencies;
+
+    /**
      * List of Property, concerning the folder
      *
-     * @var array|null
+     * @var array
      */
     protected $properties = null;
 
@@ -154,33 +160,33 @@ class Document extends Element\AbstractElement
      *
      * @var array
      */
-    protected $children = [];
+    protected $children;
 
     /**
      * Indicator of document has children or not.
      *
-     * @var bool[]
+     * @var bool
      */
-    protected $hasChildren = [];
+    protected $hasChildren;
 
     /**
      * Contains a list of sibling documents
      *
      * @var array
      */
-    protected $siblings = [];
+    protected $siblings;
 
     /**
      * Indicator if document has siblings or not
      *
-     * @var bool[]
+     * @var bool
      */
-    protected $hasSiblings = [];
+    protected $hasSiblings;
 
     /**
-     * enum('self','propagate') nullable
+     * Check if the document is locked.
      *
-     * @var string|null
+     * @var string
      */
     protected $locked = null;
 
@@ -203,7 +209,7 @@ class Document extends Element\AbstractElement
      * @param string $path
      * @param bool $force
      *
-     * @return static|null
+     * @return Document|Document\Email|Document\Folder|Document\Hardlink|Document\Link|Document\Page|Document\Printcontainer|Document\Printpage|Document\Snippet
      */
     public static function getByPath($path, $force = false)
     {
@@ -252,16 +258,16 @@ class Document extends Element\AbstractElement
      * @param int $id
      * @param bool $force
      *
-     * @return static|null
+     * @return Document|Document\Email|Document\Folder|Document\Hardlink|Document\Link|Document\Page|Document\Printcontainer|Document\Printpage|Document\Snippet|Document\Newsletter
      */
     public static function getById($id, $force = false)
     {
         if (!is_numeric($id) || $id < 1) {
             return null;
         }
-
         $id = intval($id);
-        $cacheKey = self::getCacheKey($id);
+
+        $cacheKey = 'document_' . $id;
 
         if (!$force && \Pimcore\Cache\Runtime::isRegistered($cacheKey)) {
             $document = \Pimcore\Cache\Runtime::get($cacheKey);
@@ -286,14 +292,10 @@ class Document extends Element\AbstractElement
                     }
                 }
 
-                /** @var Document $document */
                 $document = self::getModelFactory()->build($className);
                 \Pimcore\Cache\Runtime::set($cacheKey, $document);
-
                 $document->getDao()->getById($id);
                 $document->__setDataVersionTimestamp($document->getModificationDate());
-
-                $document->resetDirtyMap();
 
                 \Pimcore\Cache::save($document, $cacheKey);
             } else {
@@ -317,7 +319,7 @@ class Document extends Element\AbstractElement
      * @param array $data
      * @param bool $save
      *
-     * @return static
+     * @return Document
      */
     public static function create($parentId, $data = [], $save = true)
     {
@@ -347,8 +349,8 @@ class Document extends Element\AbstractElement
     public static function getList($config = [])
     {
         if (is_array($config)) {
-            /** @var Listing $list */
-            $list = self::getModelFactory()->build(Listing::class);
+            $listClass = Listing::class;
+            $list = self::getModelFactory()->build($listClass);
             $list->setValues($config);
 
             return $list;
@@ -379,8 +381,6 @@ class Document extends Element\AbstractElement
      */
     public function save()
     {
-        $isUpdate = false;
-
         try {
             // additional parameters (e.g. "versionNote" for the version note)
             $params = [];
@@ -388,6 +388,7 @@ class Document extends Element\AbstractElement
                 $params = func_get_arg(0);
             }
 
+            $isUpdate = false;
             $preEvent = new DocumentEvent($this, $params);
             if ($this->getId()) {
                 $isUpdate = true;
@@ -399,7 +400,6 @@ class Document extends Element\AbstractElement
             $params = $preEvent->getArguments();
 
             $this->correctPath();
-            $differentOldPath = null;
 
             // we wrap the save actions in a loop here, so that we can restart the database transactions in the case it fails
             // if a transaction fails it gets restarted $maxRetries times, then the exception is thrown out
@@ -443,7 +443,7 @@ class Document extends Element\AbstractElement
                     }
 
                     // we try to start the transaction $maxRetries times again (deadlocks, ...)
-                    if ($e instanceof DeadlockException && $retries < ($maxRetries - 1)) {
+                    if ($retries < ($maxRetries - 1)) {
                         $run = $retries + 1;
                         $waitTime = rand(1, 5) * 100000; // microseconds
                         Logger::warn('Unable to finish transaction (' . $run . ". run) because of the following reason '" . $e->getMessage() . "'. --> Retrying in " . $waitTime . ' microseconds ... (' . ($run + 1) . ' of ' . $maxRetries . ')');
@@ -535,7 +535,7 @@ class Document extends Element\AbstractElement
 
         if (Document\Service::pathExists($this->getRealFullPath())) {
             $duplicate = Document::getByPath($this->getRealFullPath());
-            if ($duplicate instanceof Document && $duplicate->getId() != $this->getId()) {
+            if ($duplicate instanceof Document and $duplicate->getId() != $this->getId()) {
                 throw new \Exception('Duplicate full path [ ' . $this->getRealFullPath() . ' ] - cannot save document');
             }
         }
@@ -563,7 +563,7 @@ class Document extends Element\AbstractElement
         // save properties
         $this->getProperties();
         $this->getDao()->deleteAllProperties();
-        if (is_array($this->getProperties()) && count($this->getProperties()) > 0) {
+        if (is_array($this->getProperties()) and count($this->getProperties()) > 0) {
             foreach ($this->getProperties() as $property) {
                 if (!$property->getInherited()) {
                     $property->setDao(null);
@@ -593,7 +593,7 @@ class Document extends Element\AbstractElement
         $this->getDao()->update();
 
         //set document to registry
-        \Pimcore\Cache\Runtime::set(self::getCacheKey($this->getId()), $this);
+        \Pimcore\Cache\Runtime::set('document_' . $this->getId(), $this);
     }
 
     /**
@@ -615,7 +615,7 @@ class Document extends Element\AbstractElement
     public function clearDependentCache($additionalTags = [])
     {
         try {
-            $tags = [$this->getCacheTag(), 'document_properties', 'output'];
+            $tags = ['document_' . $this->getId(), 'document_properties', 'output'];
             $tags = array_merge($tags, $additionalTags);
 
             \Pimcore\Cache::clearTags($tags);
@@ -625,23 +625,37 @@ class Document extends Element\AbstractElement
     }
 
     /**
+     * Returns the dependencies of the document
+     *
+     * @return Dependency
+     */
+    public function getDependencies()
+    {
+        if (!$this->dependencies) {
+            $this->dependencies = Dependency::getBySourceId($this->getId(), 'document');
+        }
+
+        return $this->dependencies;
+    }
+
+    /**
      * set the children of the document
      *
-     * @param self[] $children
-     * @param bool $includingUnpublished
+     * @param $children
      *
-     * @return $this
+     * @return array
+     *
+     * @todo: replace and with &&
      */
-    public function setChildren($children, $includingUnpublished = false)
+    public function setChildren($children)
     {
-        if (empty($children)) {
-            // unset all cached children
-            $this->hasChildren = [];
-            $this->children = [];
-        } elseif (is_array($children)) {
-            $cacheKey = $this->getListingCacheKey([$includingUnpublished]);
-            $this->children[$cacheKey] = $children;
-            $this->hasChildren[$cacheKey] = (bool) count($children);
+        $this->children = $children;
+        if (is_array($children) and count($children) > 0) {
+            $this->hasChildren = true;
+        } elseif ($children === null) {
+            $this->hasChildren = null;
+        } else {
+            $this->hasChildren = false;
         }
 
         return $this;
@@ -650,92 +664,89 @@ class Document extends Element\AbstractElement
     /**
      * Get a list of the children (not recursivly)
      *
-     * @param bool $includingUnpublished
+     * @param bool
      *
      * @return self[]
      */
-    public function getChildren($includingUnpublished = false)
+    public function getChildren($unpublished = false)
     {
-        $cacheKey = $this->getListingCacheKey(func_get_args());
-
-        if (!isset($this->children[$cacheKey])) {
+        if ($this->children === null) {
             $list = new Document\Listing();
-            $list->setUnpublished($includingUnpublished);
+            $list->setUnpublished($unpublished);
             $list->setCondition('parentId = ?', $this->getId());
             $list->setOrderKey('index');
             $list->setOrder('asc');
-            $this->children[$cacheKey] = $list->load();
+            $this->children = $list->load();
         }
 
-        return $this->children[$cacheKey];
+        return $this->children;
     }
 
     /**
      * Returns true if the document has at least one child
      *
-     * @param bool $includingUnpublished
+     * @param $unpublished
      *
      * @return bool
      */
-    public function hasChildren($includingUnpublished = null)
+    public function hasChildren($unpublished = false)
     {
-        $cacheKey = $this->getListingCacheKey(func_get_args());
-
-        if (isset($this->hasChildren[$cacheKey])) {
-            return $this->hasChildren[$cacheKey];
+        if (is_bool($this->hasChildren)) {
+            if (($this->hasChildren and empty($this->children)) or (!$this->hasChildren and !empty($this->children))) {
+                return $this->getDao()->hasChildren($unpublished);
+            } else {
+                return $this->hasChildren;
+            }
         }
 
-        return $this->hasChildren[$cacheKey] = $this->getDao()->hasChildren($includingUnpublished);
+        return $this->getDao()->hasChildren($unpublished);
     }
 
     /**
      * Get a list of the sibling documents
      *
-     * @param bool $includingUnpublished
+     * @param bool $unpublished
      *
      * @return array
      */
-    public function getSiblings($includingUnpublished = false)
+    public function getSiblings($unpublished = false)
     {
-        $cacheKey = $this->getListingCacheKey(func_get_args());
-
-        if (!isset($this->siblings[$cacheKey])) {
+        if ($this->siblings === null) {
             $list = new Document\Listing();
-            $list->setUnpublished($includingUnpublished);
+            $list->setUnpublished($unpublished);
             // string conversion because parentId could be 0
             $list->addConditionParam('parentId = ?', (string)$this->getParentId());
             $list->addConditionParam('id != ?', $this->getId());
             $list->setOrderKey('index');
             $list->setOrder('asc');
-            $this->siblings[$cacheKey] = $list->load();
-            $this->hasSiblings[$cacheKey] = (bool) count($this->siblings[$cacheKey]);
+            $this->siblings = $list->load();
         }
 
-        return $this->siblings[$cacheKey];
+        return $this->siblings;
     }
 
     /**
      * Returns true if the document has at least one sibling
      *
-     * @param bool|null $includingUnpublished
-     *
      * @return bool
      */
-    public function hasSiblings($includingUnpublished = null)
+    public function hasSiblings()
     {
-        $cacheKey = $this->getListingCacheKey(func_get_args());
-
-        if (isset($this->hasSiblings[$cacheKey])) {
-            return $this->hasSiblings[$cacheKey];
+        if (is_bool($this->hasSiblings)) {
+            if (($this->hasSiblings and empty($this->siblings)) or (!$this->hasSiblings and !empty($this->siblings))) {
+                return $this->getDao()->hasSiblings();
+            } else {
+                return $this->hasSiblings;
+            }
         }
 
-        return $this->hasSiblings[$cacheKey] = $this->getDao()->hasSiblings($includingUnpublished);
+        return $this->getDao()->hasSiblings();
     }
 
     /**
-     * enum('self','propagate') nullable
+     * Returns true if the element is locked
      *
-     * @return string|null
+     * @return string
      */
     public function getLocked()
     {
@@ -747,9 +758,9 @@ class Document extends Element\AbstractElement
     }
 
     /**
-     * enum('self','propagate') nullable
+     * Mark the document as locked.
      *
-     * @param string|null $locked
+     * @param  $locked
      *
      * @return Document
      */
@@ -761,66 +772,45 @@ class Document extends Element\AbstractElement
     }
 
     /**
+     * @param bool $isNested
+     *
      * @throws \Exception
      */
-    protected function doDelete()
-    {
-        // remove children
-        if ($this->hasChildren()) {
-            // delete also unpublished children
-            $unpublishedStatus = self::doHideUnpublished();
-            self::setHideUnpublished(false);
-            foreach ($this->getChildren(true) as $child) {
-                if (!$child instanceof WrapperInterface) {
-                    $child->delete();
-                }
-            }
-            self::setHideUnpublished($unpublishedStatus);
-        }
-
-        // remove all properties
-        $this->getDao()->deleteAllProperties();
-
-        // remove permissions
-        $this->getDao()->deleteAllPermissions();
-
-        // remove dependencies
-        $d = $this->getDependencies();
-        $d->cleanAllForElement($this);
-
-        // remove translations
-        $service = new Document\Service;
-        $service->removeTranslation($this);
-    }
-
-    /**
-     * @throws \Exception
-     */
-    public function delete()
+    public function delete(bool $isNested = false)
     {
         \Pimcore::getEventDispatcher()->dispatch(DocumentEvents::PRE_DELETE, new DocumentEvent($this));
 
         $this->beginTransaction();
 
         try {
-            if ($this->getId() == 1) {
-                throw new \Exception('root-node cannot be deleted');
+            // remove children
+            if ($this->hasChildren()) {
+                // delete also unpublished children
+                $unpublishedStatus = self::doHideUnpublished();
+                self::setHideUnpublished(false);
+                foreach ($this->getChildren(true) as $child) {
+                    $child->delete(true);
+                }
+                self::setHideUnpublished($unpublishedStatus);
             }
 
-            $this->doDelete();
+            // remove all properties
+            $this->getDao()->deleteAllProperties();
+
+            // remove permissions
+            $this->getDao()->deleteAllPermissions();
+
+            // remove dependencies
+            $d = $this->getDependencies();
+            $d->cleanAllForElement($this);
+
+            // remove translations
+            $service = new Document\Service;
+            $service->removeTranslation($this);
+
             $this->getDao()->delete();
 
             $this->commit();
-
-            //clear parent data from registry
-            $parentCacheKey = self::getCacheKey($this->getParentId());
-            if (\Pimcore\Cache\Runtime::isRegistered($parentCacheKey)) {
-                /** @var Document $parent * */
-                $parent = \Pimcore\Cache\Runtime::get($parentCacheKey);
-                if ($parent instanceof self) {
-                    $parent->setChildren(null);
-                }
-            }
         } catch (\Exception $e) {
             $this->rollBack();
             $failureEvent = new DocumentEvent($this);
@@ -834,38 +824,34 @@ class Document extends Element\AbstractElement
         $this->clearDependentCache();
 
         //clear document from registry
-        \Pimcore\Cache\Runtime::set(self::getCacheKey($this->getId()), null);
+        \Pimcore\Cache\Runtime::set('document_' . $this->getId(), null);
 
         \Pimcore::getEventDispatcher()->dispatch(DocumentEvents::POST_DELETE, new DocumentEvent($this));
     }
 
     /**
-     * Returns the frontend path to the document respecting the current site and pretty-URLs
-     *
-     * @param bool $force
+     * Returns the full path of the document including the key (path+key)
      *
      * @return string
      */
-    public function getFullPath(bool $force = false)
+    public function getFullPath()
     {
-        $link = $force ? null : $this->fullPathCache;
 
         // check if this document is also the site root, if so return /
         try {
-            if (!$link && \Pimcore\Tool::isFrontend() && Site::isSiteRequest()) {
+            if (\Pimcore\Tool::isFrontend() && Site::isSiteRequest()) {
                 $site = Site::getCurrentSite();
                 if ($site instanceof Site) {
                     if ($site->getRootDocument()->getId() == $this->getId()) {
-                        $link = '/';
+                        $link = $this->prepareFrontendPath('/');
+
+                        return $link;
                     }
                 }
             }
         } catch (\Exception $e) {
             Logger::error($e);
         }
-
-        $requestStack = \Pimcore::getContainer()->get('request_stack');
-        $masterRequest = $requestStack->getMasterRequest();
 
         // @TODO please forgive me, this is the dirtiest hack I've ever made :(
         // if you got confused by this functionality drop me a line and I'll buy you some beers :)
@@ -876,68 +862,67 @@ class Document extends Element\AbstractElement
         // the hardlink there are snippets embedded and this snippets have links pointing to a document which is also
         // inside the hardlink scope, but this is an ID link, so we cannot rewrite the link the usual way because in the
         // snippet / link we don't know anymore that whe a inside a hardlink wrapped document
-        if (!$link && \Pimcore\Tool::isFrontend() && Site::isSiteRequest() && !FrontendTool::isDocumentInCurrentSite($this)) {
-            if ($masterRequest && ($masterDocument = $masterRequest->get(DynamicRouter::CONTENT_KEY))) {
-                if ($masterDocument instanceof WrapperInterface) {
-                    $hardlink = $masterDocument->getHardLinkSource();
-                    $hardlinkTarget = $hardlink->getSourceDocument();
+        if (\Pimcore\Tool::isFrontend() && Site::isSiteRequest() && !FrontendTool::isDocumentInCurrentSite($this)) {
+            $documentService = new Document\Service();
+            $parent = $this;
+            while ($parent) {
+                if ($hardlinkId = $documentService->getDocumentIdFromHardlinkInSameSite(Site::getCurrentSite(), $parent)) {
+                    $hardlink = Document::getById($hardlinkId);
+                    if (FrontendTool::isDocumentInCurrentSite($hardlink)) {
+                        $siteRootPath = Site::getCurrentSite()->getRootPath();
+                        $siteRootPath = preg_quote($siteRootPath);
+                        $hardlinkPath = preg_replace('@^' . $siteRootPath . '@', '', $hardlink->getRealFullPath());
 
-                    if ($hardlinkTarget) {
-                        $hardlinkPath = preg_replace('@^' . preg_quote(Site::getCurrentSite()->getRootPath(), '@') . '@', '', $hardlink->getRealFullPath());
+                        $link = preg_replace('@^' . preg_quote($parent->getRealFullPath()) . '@', $hardlinkPath, $this->getRealFullPath());
+                        $link = $this->prepareFrontendPath($link);
 
-                        $link = preg_replace('@^' . preg_quote($hardlinkTarget->getRealFullPath(), '@') . '@',
-                            $hardlinkPath, $this->getRealFullPath());
+                        return $link;
                     }
+                }
+                $parent = $parent->getParent();
+            }
+
+            $config = \Pimcore\Config::getSystemConfig();
+
+            // TODO using the container directly is discouraged, maybe we find a better way (e.g. moving this into a service)?
+            $request = \Pimcore::getContainer()->get('pimcore.http.request_helper')->getRequest();
+            $scheme = $request->getScheme() . '://';
+
+            /** @var Site $site */
+            if ($site = FrontendTool::getSiteForDocument($this)) {
+                if ($site->getMainDomain()) {
+                    // check if current document is the root of the different site, if so, preg_replace below doesn't work, so just return /
+                    if ($site->getRootDocument()->getId() == $this->getId()) {
+                        $link = $scheme . $site->getMainDomain() . '/';
+                        $link = $this->prepareFrontendPath($link);
+
+                        return $link;
+                    }
+                    $link = $scheme . $site->getMainDomain() . preg_replace('@^' . $site->getRootPath() . '/@', '/', $this->getRealFullPath());
+                    $link = $this->prepareFrontendPath($link);
+
+                    return $link;
                 }
             }
 
-            if (!$link) {
-                $config = \Pimcore\Config::getSystemConfiguration('general');
-                $request = $requestStack->getCurrentRequest();
-                $scheme = 'http://';
-                if ($request) {
-                    $scheme = $request->getScheme() . '://';
-                }
+            if ($config->general->domain) {
+                $link = $scheme . $config->general->domain . $this->getRealFullPath();
+                $link = $this->prepareFrontendPath($link);
 
-                /** @var Site $site */
-                if ($site = FrontendTool::getSiteForDocument($this)) {
-                    if ($site->getMainDomain()) {
-                        // check if current document is the root of the different site, if so, preg_replace below doesn't work, so just return /
-                        if ($site->getRootDocument()->getId() == $this->getId()) {
-                            $link = $scheme . $site->getMainDomain() . '/';
-                        } else {
-                            $link = $scheme . $site->getMainDomain() .
-                                preg_replace('@^' . $site->getRootPath() . '/@', '/', $this->getRealFullPath());
-                        }
-                    }
-                }
-
-                if (!$link && !empty($config['domain'])) {
-                    $link = $scheme . $config['domain'] . $this->getRealFullPath();
-                }
+                return $link;
             }
         }
 
-        if (!$link) {
-            $link = $this->getPath() . $this->getKey();
-        }
+        $path = $this->getPath() . $this->getKey();
+        $path = $this->prepareFrontendPath($path);
 
-        if ($masterRequest) {
-            // caching should only be done when master request is available as it is done for performance reasons
-            // of the web frontend, without a request object there's no need to cache anything
-            // for details also see https://github.com/pimcore/pimcore/issues/5707
-            $this->fullPathCache = $link;
-        }
-
-        $link = $this->prepareFrontendPath($link);
-
-        return $link;
+        return $path;
     }
 
     /**
-     * @param string $path
+     * @param $path
      *
-     * @return string
+     * @return mixed
      */
     protected function prepareFrontendPath($path)
     {
@@ -945,7 +930,7 @@ class Document extends Element\AbstractElement
             $path = urlencode_ignore_slash($path);
 
             $event = new GenericEvent($this, [
-                'frontendPath' => $path,
+                'frontendPath' => $path
             ]);
             \Pimcore::getEventDispatcher()->dispatch(FrontendEvents::DOCUMENT_PATH, $event);
             $path = $event->getArgument('frontendPath');
@@ -1019,7 +1004,7 @@ class Document extends Element\AbstractElement
                 if ($site instanceof Site) {
                     if ($site->getRootDocument() instanceof Document\Page && $site->getRootDocument() !== $this) {
                         $rootPath = $site->getRootPath();
-                        $rootPath = preg_quote($rootPath, '@');
+                        $rootPath = preg_quote($rootPath);
                         $link = preg_replace('@^' . $rootPath . '@', '', $this->path);
 
                         return $link;
@@ -1044,7 +1029,7 @@ class Document extends Element\AbstractElement
     }
 
     /**
-     * Returns the internal real full path of the document. (not for frontend use!)
+     * Returns the full real path of the document.
      *
      * @return string
      */
@@ -1086,7 +1071,7 @@ class Document extends Element\AbstractElement
     /**
      * Set the document key.
      *
-     * @param string $key
+     * @param int $key
      *
      * @return Document
      */
@@ -1106,8 +1091,6 @@ class Document extends Element\AbstractElement
      */
     public function setModificationDate($modificationDate)
     {
-        $this->markFieldDirty('modificationDate');
-
         $this->modificationDate = (int) $modificationDate;
 
         return $this;
@@ -1124,8 +1107,6 @@ class Document extends Element\AbstractElement
     {
         $this->parentId = (int) $parentId;
         $this->parent = null;
-        $this->siblings = [];
-        $this->hasSiblings = [];
 
         return $this;
     }
@@ -1181,7 +1162,7 @@ class Document extends Element\AbstractElement
     /**
      * Set the document type.
      *
-     * @param string $type
+     * @param int $type
      *
      * @return Document
      */
@@ -1221,8 +1202,6 @@ class Document extends Element\AbstractElement
      */
     public function setUserModification($userModification)
     {
-        $this->markFieldDirty('userModification');
-
         $this->userModification = (int) $userModification;
 
         return $this;
@@ -1376,18 +1355,26 @@ class Document extends Element\AbstractElement
 
     public function __sleep()
     {
+        $finalVars = [];
         $parentVars = parent::__sleep();
-        $blockedVars = ['hasChildren', 'versions', 'scheduledTasks', 'parent', 'fullPathCache'];
+        $blockedVars = ['dependencies', 'userPermissions', 'hasChildren', 'versions', 'scheduledTasks', 'parent'];
 
         if ($this->isInDumpState()) {
             // this is if we want to make a full dump of the object (eg. for a new version), including children for recyclebin
+            $finalVars[] = $this->getDumpStateProperty();
             $this->removeInheritedProperties();
         } else {
             // this is if we want to cache the object
             $blockedVars = array_merge($blockedVars, ['children', 'properties']);
         }
 
-        return array_diff($parentVars, $blockedVars);
+        foreach ($parentVars as $key) {
+            if (!in_array($key, $blockedVars)) {
+                $finalVars[] = $key;
+            }
+        }
+
+        return $finalVars;
     }
 
     public function __wakeup()
@@ -1433,7 +1420,7 @@ class Document extends Element\AbstractElement
         $this->removeInheritedProperties();
 
         // add to registry to avoid infinite regresses in the following $this->getDao()->getProperties()
-        $cacheKey = self::getCacheKey($this->getId());
+        $cacheKey = 'document_' . $this->getId();
         if (!\Pimcore\Cache\Runtime::isRegistered($cacheKey)) {
             \Pimcore\Cache\Runtime::set($cacheKey, $this);
         }
@@ -1446,7 +1433,7 @@ class Document extends Element\AbstractElement
     /**
      * Add document type to the $types array. It defines additional document types available in Pimcore.
      *
-     * @param string $type
+     * @param $type
      */
     public static function addDocumentType($type)
     {
@@ -1476,6 +1463,14 @@ class Document extends Element\AbstractElement
     }
 
     /**
+     * @param mixed $userPermissions
+     */
+    public function setUserPermissions($userPermissions): void
+    {
+        $this->userPermissions = $userPermissions;
+    }
+
+    /**
      * @return int
      */
     public function getVersionCount(): int
@@ -1493,22 +1488,5 @@ class Document extends Element\AbstractElement
         $this->versionCount = (int) $versionCount;
 
         return $this;
-    }
-
-    protected function getListingCacheKey(array $args = [])
-    {
-        $unpublished = (bool)($args[0] ?? false);
-        $cacheKey = (string)$unpublished;
-
-        return $cacheKey;
-    }
-
-    public function __clone()
-    {
-        parent::__clone();
-        $this->parent = null;
-        $this->hasSiblings = [];
-        $this->siblings = [];
-        $this->fullPathCache = null;
     }
 }

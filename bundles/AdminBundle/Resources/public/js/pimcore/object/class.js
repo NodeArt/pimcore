@@ -14,10 +14,9 @@
 pimcore.registerNS("pimcore.object.klass");
 pimcore.object.klass = Class.create({
 
-    forbiddenNames: [
-        "abstract", "class", "data", "folder", "list", "permissions", "resource", "concrete", "interface",
-        "service", "fieldcollection", "localizedfield", "objectbrick"
-    ],
+    forbiddennames: ["abstract", "class", "data", "folder", "list", "permissions", "resource", "concrete", "interface",
+        "service", "fieldcollection", "localizedfield", "objectbrick"],
+
 
     initialize: function () {
 
@@ -59,7 +58,7 @@ pimcore.object.klass = Class.create({
                 autoSync: true,
                 proxy: {
                     type: 'ajax',
-                    url: Routing.generate('pimcore_admin_dataobject_class_gettree'),
+                    url: '/admin/class/get-tree',
                     reader: {
                         type: 'json'
 
@@ -108,7 +107,7 @@ pimcore.object.klass = Class.create({
 
     suggestIdentifier: function() {
         Ext.Ajax.request({
-            url: Routing.generate('pimcore_admin_dataobject_class_suggestclassidentifier'),
+            url: "/admin/class/suggest-class-identifier",
             params: {
             },
             success: function (response) {
@@ -173,7 +172,7 @@ pimcore.object.klass = Class.create({
 
         if (id && id.length > 0) {
             Ext.Ajax.request({
-                url: Routing.generate('pimcore_admin_dataobject_class_get'),
+                url: "/admin/class/get",
                 params: {
                     id: id
                 },
@@ -278,34 +277,30 @@ pimcore.object.klass = Class.create({
 
     addClassComplete: function (className, classIdentifier, classes) {
 
-        var isReservedName = /^(query|store|relations)_[^_]+$/;
-        var isValidClassName = /^[a-zA-Z][a-zA-Z0-9_]+$/;
-        var isValidClassIdentifier = /^[a-zA-Z0-9][a-zA-Z0-9_]*$/;
+        var classNameRegresult = className.match(/[a-zA-Z][a-zA-Z0-9_]+/);
+        var underscoresRegresult = className.match(/^(query|store|relations)_[^_]+$/);
 
-        if (className.length <= 2 ||
-            isReservedName.test(className) ||
-            !isValidClassName.test(className) ||
-            in_arrayi(className, this.forbiddenNames)
-        ) {
+        if (className.length <= 2 || classNameRegresult != className ||underscoresRegresult
+            || in_array(className.toLowerCase(), this.forbiddennames)) {
             Ext.Msg.alert(' ', t('invalid_class_name'));
             return false;
         }
 
-        if (classIdentifier.length < 1 ||
-            isReservedName.test(classIdentifier) ||
-            !isValidClassIdentifier.test(classIdentifier)
-        ) {
+        var classIdentifierRegresult = classIdentifier.match(/[a-zA-Z0-9][a-zA-Z0-9_]*/);
+        var underscoresRegresult = classIdentifier.match(/^(query|store|relations)_[^_]+$/);
+
+        if (classIdentifier.length < 1 || classIdentifierRegresult != classIdentifier || underscoresRegresult) {
             Ext.Msg.alert(' ', t('invalid_identifier'));
             return false;
         }
 
-        if (in_arrayi(classIdentifier, classes["existingIds"])) {
+        if (in_array(classIdentifier.toLowerCase(), classes["existingIds"])) {
             Ext.Msg.alert(' ', t('identifier_already_exists'));
             return false;
         }
 
         Ext.Ajax.request({
-            url: Routing.generate('pimcore_admin_dataobject_class_add'),
+            url: "/admin/class/add",
             method: "POST",
             params: {
                 className: className,
@@ -332,10 +327,10 @@ pimcore.object.klass = Class.create({
 
     deleteClass: function (tree, record) {
 
-        Ext.Msg.confirm(t('delete'), sprintf(t('delete_class_message'), record.data.text), function (btn) {
+        Ext.Msg.confirm(t('delete'), t('delete_message'), function (btn) {
             if (btn == 'yes') {
                 Ext.Ajax.request({
-                    url: Routing.generate('pimcore_admin_dataobject_class_delete'),
+                    url: "/admin/class/delete",
                     method: 'DELETE',
                     params: {
                         id: record.data.id

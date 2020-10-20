@@ -90,6 +90,7 @@ class Bootstrap
         // Error reporting is enabled in CLI
         @ini_set('display_errors', 'On');
         @ini_set('display_startup_errors', 'On');
+        error_reporting(E_ALL & ~E_NOTICE & ~E_STRICT);
 
         // Pimcore\Console handles maintenance mode through the AbstractCommand
         if (!$pimcoreConsole) {
@@ -104,7 +105,8 @@ class Bootstrap
 
     public static function setProjectRoot()
     {
-        // this should already be defined at this point, but we include a fallback for backwards compatibility here
+        // this should already be defined at this point, but we include a fallback here
+        // fot backwards compatibility
         if (!defined('PIMCORE_PROJECT_ROOT')) {
             define(
                 'PIMCORE_PROJECT_ROOT',
@@ -117,15 +119,19 @@ class Bootstrap
 
     public static function bootstrap()
     {
-        if (defined('PIMCORE_PROJECT_ROOT') && file_exists(PIMCORE_PROJECT_ROOT . '/vendor/autoload.php')) {
-            // PIMCORE_PROJECT_ROOT is usually always set at this point (self::setProjectRoot()), so it makes sense to check this first
-            $loader = include PIMCORE_PROJECT_ROOT . '/vendor/autoload.php';
-        } elseif (file_exists(__DIR__ . '/../vendor/autoload.php')) {
+        error_reporting(E_ALL & ~E_NOTICE & ~E_STRICT);
+
+        /** @var $loader \Composer\Autoload\ClassLoader */
+        if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
             $loader = include __DIR__ . '/../vendor/autoload.php';
         } elseif (file_exists(__DIR__ . '/../../../../vendor/autoload.php')) {
             $loader = include __DIR__ . '/../../../../vendor/autoload.php';
+        } elseif (getenv('PIMCORE_PROJECT_ROOT') != '' && file_exists(getenv('PIMCORE_PROJECT_ROOT') . '/vendor/autoload.php')) {
+            $loader = include getenv('PIMCORE_PROJECT_ROOT') . '/vendor/autoload.php';
+        } elseif (getenv('PIMCORE_PROJECT_ROOT') != '') {
+            throw new \Exception('Invalid Pimcore project root "' . getenv('PIMCORE_PROJECT_ROOT') . '"');
         } else {
-            throw new \Exception('Unable to locate autoloader! Pimcore project root not found or invalid, please set/check env variable PIMCORE_PROJECT_ROOT.');
+            throw new \Exception('Unknown configuration! Pimcore project root not found, please set env variable PIMCORE_PROJECT_ROOT.');
         }
 
         Config::initDebugDevMode();
@@ -133,7 +139,6 @@ class Bootstrap
 
         error_reporting(PIMCORE_PHP_ERROR_REPORTING);
 
-        /** @var \Composer\Autoload\ClassLoader $loader */
         \Pimcore::setAutoloader($loader);
         self::autoload();
 
@@ -172,9 +177,8 @@ class Bootstrap
     {
         // load .env file if available
         $dotEnvFile = PIMCORE_PROJECT_ROOT . '/.env';
-        $dotEnvLocalPhpFile = PIMCORE_PROJECT_ROOT .'/.env.local.php';
 
-        if (file_exists($dotEnvLocalPhpFile) && is_array($env = include $dotEnvLocalPhpFile)) {
+        if (is_array($env = @include PIMCORE_PROJECT_ROOT .'/.env.local.php')) {
             foreach ($env as $k => $v) {
                 $_ENV[$k] = $_ENV[$k] ?? (isset($_SERVER[$k]) && 0 !== strpos($k, 'HTTP_') ? $_SERVER[$k] : $v);
             }
@@ -209,13 +213,13 @@ class Bootstrap
 
     public static function defineConstants()
     {
-        self::prepareEnvVariables();
-
         // load custom constants
         $customConstantsFile = PIMCORE_PROJECT_ROOT . '/app/constants.php';
         if (file_exists($customConstantsFile)) {
             include_once $customConstantsFile;
         }
+
+        self::prepareEnvVariables();
 
         $resolveConstant = function (string $name, $default, bool $define = true) {
             // return constant if defined
@@ -331,7 +335,7 @@ class Bootstrap
         }
 
         if ($debug) {
-            Debug::enable(PIMCORE_PHP_ERROR_REPORTING);
+            Debug::enable();
             @ini_set('display_errors', 'On');
         }
 

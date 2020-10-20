@@ -60,7 +60,7 @@ pimcore.document.versions = Class.create({
                     }],
                 proxy: {
                     type: 'ajax',
-                    url: Routing.generate('pimcore_admin_element_getversions'),
+                    url: "/admin/element/get-versions",
                     extraParams: {
                         id: this.document.id,
                         elementType: "document"
@@ -136,7 +136,7 @@ pimcore.document.versions = Class.create({
                         },
                         editable: false
                     },
-                    {text: t("note"), sortable: true, dataIndex: 'note', editor: new Ext.form.TextField(), renderer: Ext.util.Format.htmlEncode},
+                    {text: t("note"), sortable: true, dataIndex: 'note', editor: new Ext.form.TextField()},
                     checkPublic,
                     {text: t("public_url"), width: 300, sortable: false, dataIndex: 'publicurl', editable: false}
                 ],
@@ -207,7 +207,7 @@ pimcore.document.versions = Class.create({
     },
 
     compareVersions: function (id1, id2) {
-        var url = Routing.generate('pimcore_admin_document_document_diffversions', {from: id1, to: id2});;
+        var url = "/admin/document/diff-versions/from/" + id1 + "/to/" + id2;
         Ext.get(this.frameId).dom.src = url;
     },
 
@@ -262,7 +262,7 @@ pimcore.document.versions = Class.create({
         var versionId = data.id;
 
         Ext.Ajax.request({
-            url: Routing.generate('pimcore_admin_element_deleteversion'),
+            url: "/admin/element/delete-version",
             method: 'DELETE',
             params: {id: versionId}
         });
@@ -280,7 +280,7 @@ pimcore.document.versions = Class.create({
                     var modificationDate = this.document.data.modificationDate;
 
                     Ext.Ajax.request({
-                        url: Routing.generate('pimcore_admin_element_deleteallversion'),
+                        url: "/admin/element/delete-all-versions",
                         method: 'DELETE',
                         params: {id: elememntId, date: modificationDate}
                     });
@@ -308,7 +308,7 @@ pimcore.document.versions = Class.create({
         var versionId = data.id;
 
         Ext.Ajax.request({
-            url: Routing.generate('pimcore_admin_document_document_versiontosession'),
+            url: "/admin/document/version-to-session",
             method: 'POST',
             params: {id: versionId},
             success: this.reloadEdit.bind(this)
@@ -320,18 +320,12 @@ pimcore.document.versions = Class.create({
         var versionId = data.id;
 
         Ext.Ajax.request({
-            url: Routing.generate('pimcore_admin_document_document_publishversion'),
+            url: "/admin/document/publish-version",
             method: "POST",
             params: {id: versionId},
-            success: function(response) {
-                var rdata = Ext.decode(response.responseText);
-
-                if (rdata.success) {
-                    this.document.reload();
-                    pimcore.helpers.updateTreeElementStyle('document', this.document.id, rdata.treeData);
-                } else {
-                    Ext.MessageBox.alert(t("error"), rdata.message);
-                }
+            success: function () {
+                // reload document
+                this.document.reload();
             }.bind(this)
         });
     },
@@ -341,7 +335,7 @@ pimcore.document.versions = Class.create({
         if (operation == "edit") {
             Ext.Ajax.request({
                 method: "post",
-                url: Routing.generate('pimcore_admin_element_versionupdate'),
+                url: "/admin/element/version-update",
                 method: 'PUT',
                 params: {
                     data: Ext.encode(record.data)

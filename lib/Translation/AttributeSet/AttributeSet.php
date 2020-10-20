@@ -14,6 +14,7 @@
 
 namespace Pimcore\Translation\AttributeSet;
 
+use Pimcore\Model\Element;
 use Pimcore\Model\Element\ElementInterface;
 use Pimcore\Translation\TranslationItemCollection\TranslationItem;
 
@@ -42,7 +43,7 @@ class AttributeSet
     /**
      * DataExtractorResult constructor.
      *
-     * @param TranslationItem $translationItem
+     * @param TranslationItem $element
      */
     public function __construct(TranslationItem $translationItem)
     {
@@ -137,13 +138,12 @@ class AttributeSet
      * @param string $name
      * @param string $content
      * @param bool $isReadonly
-     * @param string[] $targetContent
      *
      * @return AttributeSet
      */
-    public function addAttribute(string $type, string $name, string $content, bool $isReadonly = false, array $targetContent = []): AttributeSet
+    public function addAttribute(string $type, string $name, string $content, bool $isReadonly = false): AttributeSet
     {
-        $this->attributes[] = new Attribute($type, $name, $content, $isReadonly, $targetContent);
+        $this->attributes[] = new Attribute($type, $name, $content, $isReadonly);
 
         return $this;
     }

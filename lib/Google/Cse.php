@@ -23,11 +23,11 @@ use Zend\Paginator\AdapterAggregateInterface;
 class Cse implements \Iterator, AdapterInterface, AdapterAggregateInterface
 {
     /**
-     * @param string $query
+     * @param $query
      * @param int $offset
      * @param int $perPage
      * @param array $config
-     * @param string|null $facet
+     * @param null $facet
      *
      * @return Cse
      */
@@ -81,7 +81,6 @@ class Cse implements \Iterator, AdapterInterface, AdapterAggregateInterface
                 }
 
                 $config['num'] = $perPage;
-                $config['q'] = $query;
 
                 $cacheKey = 'google_cse_' . md5($query . serialize($config));
 
@@ -90,7 +89,7 @@ class Cse implements \Iterator, AdapterInterface, AdapterAggregateInterface
                     $result = \Pimcore\Cache\Runtime::get($cacheKey);
                 } else {
                     if (!$result = Cache::load($cacheKey)) {
-                        $result = $search->cse->listCse($config);
+                        $result = $search->cse->listCse($query, $config);
                         Cache::save($result, $cacheKey, ['google_cse'], 3600, 999);
                         \Pimcore\Cache\Runtime::set($cacheKey, $result);
                     }
@@ -108,7 +107,7 @@ class Cse implements \Iterator, AdapterInterface, AdapterAggregateInterface
     }
 
     /**
-     * @var Item[]
+     * @var array
      */
     public $results = [];
 
@@ -189,7 +188,7 @@ class Cse implements \Iterator, AdapterInterface, AdapterAggregateInterface
                             $regexes = [
                                 '/image-thumb__([0-9]+)__/',
                                 '/([0-9]+)\/thumb__/',
-                                '/thumb_([0-9]+)__/',
+                                '/thumb_([0-9]+)__/'
                             ];
 
                             foreach ($regexes as $regex) {
@@ -230,7 +229,7 @@ class Cse implements \Iterator, AdapterInterface, AdapterAggregateInterface
     }
 
     /**
-     * @param int $offset
+     * @param $offset
      *
      * @return $this
      */
@@ -250,7 +249,7 @@ class Cse implements \Iterator, AdapterInterface, AdapterAggregateInterface
     }
 
     /**
-     * @param array $raw
+     * @param $raw
      *
      * @return $this
      */
@@ -270,7 +269,7 @@ class Cse implements \Iterator, AdapterInterface, AdapterAggregateInterface
     }
 
     /**
-     * @param int $total
+     * @param $total
      *
      * @return $this
      */
@@ -290,7 +289,7 @@ class Cse implements \Iterator, AdapterInterface, AdapterAggregateInterface
     }
 
     /**
-     * @param int $perPage
+     * @param $perPage
      *
      * @return $this
      */
@@ -310,7 +309,7 @@ class Cse implements \Iterator, AdapterInterface, AdapterAggregateInterface
     }
 
     /**
-     * @param array $config
+     * @param $config
      *
      * @return $this
      */
@@ -330,7 +329,7 @@ class Cse implements \Iterator, AdapterInterface, AdapterAggregateInterface
     }
 
     /**
-     * @param string $query
+     * @param $query
      *
      * @return $this
      */
@@ -350,7 +349,7 @@ class Cse implements \Iterator, AdapterInterface, AdapterAggregateInterface
     }
 
     /**
-     * @param Item[] $results
+     * @param $results
      *
      * @return $this
      */
@@ -364,7 +363,7 @@ class Cse implements \Iterator, AdapterInterface, AdapterAggregateInterface
     /**
      * @param bool $retry
      *
-     * @return Item[]
+     * @return array
      */
     public function getResults($retry = true)
     {
@@ -376,7 +375,7 @@ class Cse implements \Iterator, AdapterInterface, AdapterAggregateInterface
     }
 
     /**
-     * @param array $facets
+     * @param $facets
      *
      * @return $this
      */

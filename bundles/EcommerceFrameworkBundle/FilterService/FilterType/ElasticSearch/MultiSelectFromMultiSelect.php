@@ -28,10 +28,10 @@ class MultiSelectFromMultiSelect extends \Pimcore\Bundle\EcommerceFrameworkBundl
 
     /**
      * @param AbstractFilterDefinitionType $filterDefinition
-     * @param ProductListInterface $productList
-     * @param array $currentFilter
-     * @param array $params
-     * @param bool $isPrecondition
+     * @param ProductListInterface                  $productList
+     * @param array                                             $currentFilter
+     * @param                                                   $params
+     * @param bool                                              $isPrecondition
      *
      * @return string[]
      */
@@ -40,10 +40,9 @@ class MultiSelectFromMultiSelect extends \Pimcore\Bundle\EcommerceFrameworkBundl
         $field = $this->getField($filterDefinition);
         $preSelect = $this->getPreSelect($filterDefinition);
 
-        $value = $params[$field] ?? null;
-        $isReload = $params['is_reload'] ?? null;
+        $value = $params[$field];
 
-        if (empty($value) && !$isReload) {
+        if (empty($value) && !$params['is_reload']) {
             if (is_array($preSelect)) {
                 $value = $preSelect;
             } else {

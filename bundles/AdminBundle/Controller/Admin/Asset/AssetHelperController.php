@@ -19,8 +19,6 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Pimcore\Bundle\AdminBundle\Controller\AdminController;
 use Pimcore\Bundle\AdminBundle\Helper\GridHelperService;
 use Pimcore\Db;
-use Pimcore\Event\AdminEvents;
-use Pimcore\Loader\ImplementationLoader\Exception\UnsupportedException;
 use Pimcore\Localization\LocaleServiceInterface;
 use Pimcore\Logger;
 use Pimcore\Model\Asset;
@@ -33,7 +31,6 @@ use Pimcore\Model\User;
 use Pimcore\Tool;
 use Pimcore\Version;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\EventDispatcher\GenericEvent;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -47,11 +44,11 @@ use Symfony\Component\Routing\Annotation\Route;
 class AssetHelperController extends AdminController
 {
     /**
-     * @param int $userId
-     * @param string $classId
-     * @param string $searchType
+     * @param $userId
+     * @param $classId
+     * @param $searchType
      *
-     * @return GridConfig[]
+     * @return GridConfig\Listing
      */
     public function getMyOwnGridColumnConfigs($userId, $classId, $searchType)
     {
@@ -75,15 +72,22 @@ class AssetHelperController extends AdminController
     }
 
     /**
-     * @param User $user
-     * @param string $classId
-     * @param string $searchType
+     * @param $user User
+     * @param $classId
+     * @param $searchType
      *
-     * @return GridConfig[]
+     * @return GridConfig\Listing
      */
     public function getSharedGridColumnConfigs($user, $classId, $searchType = null)
     {
         $db = Db::get();
+        $configListingConditionParts = [];
+        $configListingConditionParts[] = 'sharedWithUserId = ' . $user->getId();
+        $configListingConditionParts[] = 'classId = ' . $db->quote($classId);
+
+        if ($searchType) {
+            $configListingConditionParts[] = 'searchType = ' . $db->quote($searchType);
+        }
 
         $configListing = [];
 
@@ -92,7 +96,7 @@ class AssetHelperController extends AdminController
         $userIds = array_merge($userIds, $user->getRoles());
         $userIds = implode(',', $userIds);
 
-        $query = 'select distinct c1.id from gridconfigs c1, gridconfig_shares s
+        $query = 'select distinct c1.id from gridconfigs c1, gridconfig_shares s 
                     where (c1.searchType = ' . $db->quote($searchType) . ' and ((c1.id = s.gridConfigId and s.sharedWithUserId IN (' . $userIds . '))) and c1.classId = ' . $db->quote($classId) . ')
                             UNION distinct select c2.id from gridconfigs c2 where shareGlobally = 1 and c2.classId = '. $db->quote($classId) . '  and c2.ownerId != ' . $db->quote($user->getId());
 
@@ -111,7 +115,7 @@ class AssetHelperController extends AdminController
     }
 
     /**
-     * @Route("/grid-delete-column-config", name="pimcore_admin_asset_assethelper_griddeletecolumnconfig", methods={"DELETE"})
+     * @Route("/grid-delete-column-config", methods={"DELETE"})
      *
      * @param Request $request
      *
@@ -120,7 +124,6 @@ class AssetHelperController extends AdminController
     public function gridDeleteColumnConfigAction(Request $request)
     {
         $gridConfigId = $request->get('gridConfigId');
-        $gridConfig = null;
         try {
             $gridConfig = GridConfig::getById($gridConfigId);
         } catch (\Exception $e) {
@@ -142,7 +145,7 @@ class AssetHelperController extends AdminController
     }
 
     /**
-     * @Route("/grid-get-column-config", name="pimcore_admin_asset_assethelper_gridgetcolumnconfig", methods={"GET"})
+     * @Route("/grid-get-column-config", methods={"GET"})
      *
      * @param Request $request
      *
@@ -210,14 +213,12 @@ class AssetHelperController extends AdminController
                 $configListingConditionParts[] = 'searchType = ' . $db->quote($searchType);
             }
 
-            $savedGridConfig = null;
             try {
                 $savedGridConfig = GridConfig::getById($requestedGridConfigId);
             } catch (\Exception $e) {
             }
 
             if ($savedGridConfig) {
-                $shared = null;
                 try {
                     $userIds = [$this->getAdminUser()->getId()];
                     if ($this->getAdminUser()->getRoles()) {
@@ -240,8 +241,12 @@ class AssetHelperController extends AdminController
             }
         }
 
+        $language = 'default';
+        if (!empty($gridConfig) && !empty($gridConfig['language'])) {
+            $language = $gridConfig['language'];
+        }
+
         $availableFields = [];
-        $language = '';
 
         if (empty($gridConfig)) {
             $availableFields = $this->getDefaultGridFields(
@@ -269,48 +274,45 @@ class AssetHelperController extends AdminController
             return ($a['position'] < $b['position']) ? -1 : 1;
         });
 
+        $language = 'default';
+        if (!empty($gridConfig) && !empty($gridConfig['language'])) {
+            $language = $gridConfig['language'];
+        }
+
         $availableConfigs = $classId ? $this->getMyOwnGridColumnConfigs($userId, $classId, $searchType) : [];
         $sharedConfigs = $classId ? $this->getSharedGridColumnConfigs($this->getAdminUser(), $classId, $searchType) : [];
         $settings = $this->getShareSettings((int)$gridConfigId);
         $settings['gridConfigId'] = (int)$gridConfigId;
-        $settings['gridConfigName'] = $gridConfigName ?? null;
-        $settings['gridConfigDescription'] = $gridConfigDescription ?? null;
-        $settings['shareGlobally'] = $sharedGlobally ?? null;
-        $settings['isShared'] = !$gridConfigId || ($shared ?? null);
-
-        $context = $gridConfig['context'];
-        if ($context) {
-            $context = json_decode($context, true);
-        }
+        $settings['gridConfigName'] = $gridConfigName;
+        $settings['gridConfigDescription'] = $gridConfigDescription;
+        $settings['shareGlobally'] = $sharedGlobally;
+        $settings['isShared'] = (!$gridConfigId || $shared) ? true : false;
 
         return [
             'sortinfo' => isset($gridConfig['sortinfo']) ? $gridConfig['sortinfo'] : false,
+            'language' => $language,
             'availableFields' => $availableFields,
             'settings' => $settings,
             'onlyDirectChildren' => isset($gridConfig['onlyDirectChildren']) ? $gridConfig['onlyDirectChildren'] : false,
             'onlyUnreferenced' => isset($gridConfig['onlyUnreferenced']) ? $gridConfig['onlyUnreferenced'] : false,
             'pageSize' => isset($gridConfig['pageSize']) ? $gridConfig['pageSize'] : false,
             'availableConfigs' => $availableConfigs,
-            'sharedConfigs' => $sharedConfigs,
-            'context' => $context,
+            'sharedConfigs' => $sharedConfigs
+
         ];
     }
 
     /**
-     * @param array $field
-     * @param string $language
-     * @param string|null $keyPrefix
+     * @param $field
+     * @param $language
+     * @param null $keyPrefix
      *
      * @return array|null
      */
     protected function getFieldGridConfig($field, $language = '', $keyPrefix = null)
     {
         $defaulMetadataFields = ['copyright', 'alt', 'title'];
-        $predefined = null;
-
-        if (isset($field['fieldConfig']['layout']['name'])) {
-            $predefined = Metadata\Predefined::getByName($field['fieldConfig']['layout']['name']);
-        }
+        $predefined = Metadata\Predefined::getByName($field['fieldConfig']['layout']['name']);
 
         $key = $field['name'];
         if ($keyPrefix) {
@@ -320,11 +322,15 @@ class AssetHelperController extends AdminController
         $fieldDef = explode('~', $field['name']);
         $field['name'] = $fieldDef[0];
 
-        if (isset($fieldDef[1]) && $fieldDef[1] === 'system') {
+        if ($fieldDef[1] == 'system') {
             $type = 'system';
         } elseif (in_array($fieldDef[0], $defaulMetadataFields)) {
             $type = 'input';
         } else {
+            //check if predefined metadata exists, otherwise ignore
+            if (empty($predefined) || ($predefined->getType() != $field['fieldConfig']['type'])) {
+                return null;
+            }
             $type = $field['fieldConfig']['type'];
             if (isset($fieldDef[1])) {
                 $field['fieldConfig']['label'] = $field['fieldConfig']['layout']['title'] = $fieldDef[0] . ' (' . $fieldDef[1] . ')';
@@ -338,18 +344,14 @@ class AssetHelperController extends AdminController
             'label' => $field['fieldConfig']['label'] ?? $key,
             'width' => $field['width'],
             'position' => $field['position'],
-            'language' => $field['fieldConfig']['language'] ?? null,
-            'layout' => $field['fieldConfig']['layout'] ?? null,
+            'language' => $field['fieldConfig']['language'],
+            'layout' => $field['fieldConfig']['layout'],
         ];
 
-        if (isset($field['locked'])) {
-            $result['locked'] = $field['locked'];
-        }
-
-        if ($type === 'select' && $predefined) {
+        if ($type == 'select') {
             $field['fieldConfig']['layout']['config'] = $predefined->getConfig();
             $result['layout'] = $field['fieldConfig']['layout'];
-        } elseif ($type === 'document' || $type === 'asset' || $type === 'object') {
+        } elseif ($type == 'document' || $type == 'asset' || $type == 'object') {
             $result['layout']['fieldtype'] = 'manyToOneRelation';
             $result['layout']['subtype'] = $type;
         }
@@ -358,10 +360,10 @@ class AssetHelperController extends AdminController
     }
 
     /**
-     * @param bool $noSystemColumns
-     * @param array $fields
-     * @param array $context
-     * @param array $types
+     * @param $noSystemColumns
+     * @param $fields
+     * @param $context
+     * @param $types
      *
      * @return array
      */
@@ -377,17 +379,20 @@ class AssetHelperController extends AdminController
                         'key' => $sc . '~system',
                         'type' => 'system',
                         'label' => $sc,
-                        'position' => $count, ];
+                        'position' => $count];
                     $count++;
                 }
             }
+        }
+
+        if (is_array($fields)) { //TODO required?
         }
 
         return $availableFields;
     }
 
     /**
-     * @Route("/prepare-helper-column-configs", name="pimcore_admin_asset_assethelper_preparehelpercolumnconfigs", methods={"POST"})
+     * @Route("/prepare-helper-column-configs", methods={"POST"})
      *
      * @param Request $request
      *
@@ -398,9 +403,8 @@ class AssetHelperController extends AdminController
         $helperColumns = [];
         $newData = [];
         $data = json_decode($request->get('columns'));
-        /** @var \stdClass $item */
         foreach ($data as $item) {
-            if (!empty($item->isOperator)) {
+            if ($item->isOperator) {
                 $itemKey = '#' . uniqid();
 
                 $item->key = $itemKey;
@@ -421,7 +425,7 @@ class AssetHelperController extends AdminController
     }
 
     /**
-     * @Route("/grid-mark-favourite-column-config", name="pimcore_admin_asset_assethelper_gridmarkfavouritecolumnconfig", methods={"POST"})
+     * @Route("/grid-mark-favourite-column-config", methods={"POST"})
      *
      * @param Request $request
      *
@@ -443,7 +447,6 @@ class AssetHelperController extends AdminController
             $favourite->setClassId($classId);
             $favourite->setSearchType($searchType);
             $favourite->setType($type);
-            $specializedConfigs = false;
 
             try {
                 if ($gridConfigId != 0) {
@@ -453,6 +456,8 @@ class AssetHelperController extends AdminController
 
                 $favourite->setObjectId(0);
                 $favourite->save();
+
+                $specializedConfigs = false;
             } catch (\Exception $e) {
                 $favourite->delete();
             }
@@ -464,7 +469,7 @@ class AssetHelperController extends AdminController
     }
 
     /**
-     * @param int $gridConfigId
+     * @param $gridConfigId
      *
      * @return array
      */
@@ -472,11 +477,11 @@ class AssetHelperController extends AdminController
     {
         $result = [
             'sharedUserIds' => [],
-            'sharedRoleIds' => [],
+            'sharedRoleIds' => []
         ];
 
         $db = Db::get();
-        $allShares = $db->fetchAll('select s.sharedWithUserId, u.type from gridconfig_shares s, users u
+        $allShares = $db->fetchAll('select s.sharedWithUserId, u.type from gridconfig_shares s, users u 
                       where s.sharedWithUserId = u.id and s.gridConfigId = ' . $gridConfigId);
 
         if ($allShares) {
@@ -496,7 +501,7 @@ class AssetHelperController extends AdminController
     }
 
     /**
-     * @Route("/grid-save-column-config", name="pimcore_admin_asset_assethelper_gridsavecolumnconfig", methods={"POST"})
+     * @Route("/grid-save-column-config", methods={"POST"})
      *
      * @param Request $request
      *
@@ -509,8 +514,6 @@ class AssetHelperController extends AdminController
         if ($asset->isAllowed('list')) {
             try {
                 $classId = $request->get('class_id');
-                $context = $request->get('context');
-
                 $searchType = $request->get('searchType');
                 $type = $request->get('type');
 
@@ -518,14 +521,12 @@ class AssetHelperController extends AdminController
                 $gridConfigData = $this->decodeJson($request->get('gridconfig'));
                 $gridConfigData['pimcore_version'] = Version::getVersion();
                 $gridConfigData['pimcore_revision'] = Version::getRevision();
-                $gridConfigData['context'] = $context;
                 unset($gridConfigData['settings']['isShared']);
 
                 $metadata = $request->get('settings');
                 $metadata = json_decode($metadata, true);
 
                 $gridConfigId = $metadata['gridConfigId'];
-                $gridConfig = null;
                 if ($gridConfigId) {
                     try {
                         $gridConfig = GridConfig::getById($gridConfigId);
@@ -585,8 +586,8 @@ class AssetHelperController extends AdminController
     }
 
     /**
-     * @param GridConfig $gridConfig
-     * @param array $metadata
+     * @param $gridConfig GridConfig
+     * @param $metadata
      *
      * @throws \Exception
      */
@@ -626,10 +627,10 @@ class AssetHelperController extends AdminController
     }
 
     /**
-     * @Route("/get-export-jobs", name="pimcore_admin_asset_assethelper_getexportjobs", methods={"GET"})
+     * @Route("/get-export-jobs", methods={"GET"})
      *
      * @param Request $request
-     * @param GridHelperService $gridHelperService
+     * @param EventDispatcherInterface $eventDispatcher
      *
      * @return JsonResponse
      */
@@ -638,7 +639,7 @@ class AssetHelperController extends AdminController
         $allParams = array_merge($request->request->all(), $request->query->all());
         $list = $gridHelperService->prepareAssetListingForGrid($allParams, $this->getAdminUser());
 
-        if (empty($ids = $allParams['ids'] ?? '')) {
+        if (empty($ids = $allParams['ids'])) {
             $ids = $list->loadIdList();
         }
 
@@ -651,7 +652,7 @@ class AssetHelperController extends AdminController
     }
 
     /**
-     * @Route("/do-export", name="pimcore_admin_asset_assethelper_doexport", methods={"POST"})
+     * @Route("/do-export", methods={"POST"})
      *
      * @param Request $request
      * @param LocaleServiceInterface $localeService
@@ -667,7 +668,9 @@ class AssetHelperController extends AdminController
         $delimiter = $settings['delimiter'] ? $settings['delimiter'] : ';';
         $language = str_replace('default', '', $request->get('language'));
 
-        /** @var \Pimcore\Model\Asset\Listing $list */
+        /**
+         * @var $list \Pimcore\Model\Asset\Listing
+         */
         $list = new Asset\Listing();
 
         $quotedIds = [];
@@ -693,7 +696,7 @@ class AssetHelperController extends AdminController
                 $line = implode($delimiter, $line) . "\r\n";
                 fwrite($fp, $line);
             } else {
-                fwrite($fp, implode($delimiter, array_map([$this, 'encodeFunc'], $line)) . "\r\n");
+                fputs($fp, implode($delimiter, array_map([$this, 'encodeFunc'], $line)) . "\r\n");
             }
         }
 
@@ -711,12 +714,12 @@ class AssetHelperController extends AdminController
 
     /**
      * @param Request $request
-     * @param string $language
-     * @param Asset\Listing $list
-     * @param array $fields
+     * @param LocaleServiceInterface $localeService
+     * @param $list
+     * @param $fields
      * @param bool $addTitles
      *
-     * @return array
+     * @return string
      */
     protected function getCsvData(Request $request, $language, $list, $fields, $addTitles = true)
     {
@@ -736,28 +739,27 @@ class AssetHelperController extends AdminController
 
         foreach ($list->load() as $asset) {
             if ($fields) {
-                $dataRows = [];
+                $a = [];
                 foreach ($fields as $field) {
                     $fieldDef = explode('~', $field);
                     $getter = 'get' . ucfirst($fieldDef[0]);
 
-                    if (isset($fieldDef[1])) {
-                        if ($fieldDef[1] == 'system' && method_exists($asset, $getter)) {
-                            $data = $asset->$getter($language);
-                        } else {
-                            $fieldDef[1] = str_replace('none', '', $fieldDef[1]);
-                            $data = $asset->getMetadata($fieldDef[0], $fieldDef[1], true);
-                        }
+                    if ($fieldDef[1] == 'system' && method_exists($asset, $getter)) {
+                        $a[] = $asset->$getter($language);
                     } else {
-                        $data = $asset->getMetadata($field, $language, true);
-                    }
+                        if (isset($fieldDef[1])) {
+                            $fieldDef[1] = str_replace('none', '', $fieldDef[1]);
+                            $a[] = $asset->getMetadata($fieldDef[0], $fieldDef[1], true);
+                        } else {
+                            $a[] = $asset->getMetadata($field, $language, true);
+                        }
 
-                    if ($data instanceof Element\AbstractElement) {
-                        $data = $data->getFullPath();
+                        if ($a instanceof Element\AbstractElement) {
+                            $a = $a->getFullPath();
+                        }
                     }
-                    $dataRows[] = $data;
                 }
-                $csv[] = $dataRows;
+                $csv[] = $a;
             }
         }
 
@@ -784,7 +786,7 @@ class AssetHelperController extends AdminController
     }
 
     /**
-     * @param string $fileHandle
+     * @param $fileHandle
      *
      * @return string
      */
@@ -794,7 +796,7 @@ class AssetHelperController extends AdminController
     }
 
     /**
-     * @Route("/download-csv-file", name="pimcore_admin_asset_assethelper_downloadcsvfile", methods={"GET"})
+     * @Route("/download-csv-file", methods={"GET"})
      *
      * @param Request $request
      *
@@ -812,12 +814,10 @@ class AssetHelperController extends AdminController
 
             return $response;
         }
-
-        throw $this->createNotFoundException('CSV file not found');
     }
 
     /**
-     * @Route("/download-xlsx-file", name="pimcore_admin_asset_assethelper_downloadxlsxfile", methods={"GET"})
+     * @Route("/download-xlsx-file", methods={"GET"})
      *
      * @param Request $request
      *
@@ -845,12 +845,10 @@ class AssetHelperController extends AdminController
 
             return $response;
         }
-
-        throw $this->createNotFoundException('XLSX file not found');
     }
 
     /**
-     * @Route("/get-metadata-for-column-config", name="pimcore_admin_asset_assethelper_getmetadataforcolumnconfig", methods={"GET"})
+     * @Route("/get-metadata-for-column-config", methods={"GET"})
      *
      * @param Request $request
      *
@@ -873,12 +871,11 @@ class AssetHelperController extends AdminController
         $list = Metadata\Predefined\Listing::getByTargetType('asset', null);
         $metadataItems = [];
         $tmp = [];
-        /** @var Metadata\Predefined $item */
         foreach ($list as $item) {
-            //only allow unique metadata columns with subtypes
-            $uniqueKey = $item->getName().'_'.$item->getTargetSubtype();
-            if (!in_array($uniqueKey, $tmp) && !in_array($item->getName(), $defaultMetadataNames)) {
-                $tmp[] = $uniqueKey;
+            //only allow unique metadata columns
+            if (!in_array($item->getName(), $tmp) && !in_array($item->getName(), $defaultMetadataNames)) {
+                $tmp[] = $item->getName();
+                /** @var $item Metadata\Predefined */
                 $item->expand();
                 $metadataItems[] = [
                     'title' => $item->getName(),
@@ -886,7 +883,7 @@ class AssetHelperController extends AdminController
                     'subtype' => $item->getTargetSubtype(),
                     'datatype' => 'data',
                     'fieldtype' => $item->getType(),
-                    'config' => $item->getConfig(),
+                    'config' => $item->getConfig()
                 ];
             }
         }
@@ -909,7 +906,7 @@ class AssetHelperController extends AdminController
     }
 
     /**
-     * @Route("/get-batch-jobs", name="pimcore_admin_asset_assethelper_getbatchjobs", methods={"GET"})
+     * @Route("/get-batch-jobs", methods={"GET"})
      *
      * @param Request $request
      *
@@ -930,70 +927,44 @@ class AssetHelperController extends AdminController
     }
 
     /**
-     * @Route("/batch", name="pimcore_admin_asset_assethelper_batch", methods={"PUT"})
+     * @Route("/batch", methods={"PUT"})
      *
      * @param Request $request
-     * @param EventDispatcherInterface $eventDispatcher
      *
      * @return JsonResponse
      */
-    public function batchAction(Request $request, EventDispatcherInterface $eventDispatcher)
+    public function batchAction(Request $request)
     {
         try {
             if ($request->get('data')) {
-                $loader = \Pimcore::getContainer()->get('pimcore.implementation_loader.asset.metadata.data');
+                $params = $this->decodeJson($request->get('data'), true);
+                $language = $params['language'] != 'default' ? $params['language'] : null;
 
-                $data = $this->decodeJson($request->get('data'), true);
-
-                $updateEvent = new GenericEvent($this, [
-                    'data' => $data,
-                    'processed' => false,
-                ]);
-
-                $eventDispatcher->dispatch(AdminEvents::ASSET_LIST_BEFORE_BATCH_UPDATE, $updateEvent);
-
-                $processed = $updateEvent->getArgument('processed');
-
-                if ($processed) {
-                    return $this->adminJson(['success' => true]);
-                }
-
-                $language = null;
-                if (isset($data['language'])) {
-                    $language = $data['language'] != 'default' ? $data['language'] : null;
-                }
-
-                $asset = Asset::getById($data['job']);
+                $asset = Asset::getById($params['job']);
 
                 if ($asset) {
                     if (!$asset->isAllowed('publish')) {
                         throw new \Exception("Permission denied. You don't have the rights to save this asset.");
                     }
 
-                    $metadata = $asset->getMetadata(null, null, false, true);
+                    $metadata = $asset->getMetadata();
                     $dirty = false;
 
-                    $name = $data['name'];
-                    $value = $data['value'];
+                    $name = $params['name'];
+                    $value = $params['value'];
 
-                    if ($data['valueType'] == 'object') {
+                    if ($params['valueType'] == 'object') {
                         $value = $this->decodeJson($value);
                     }
 
                     $fieldDef = explode('~', $name);
                     $name = $fieldDef[0];
-                    if (count($fieldDef) > 1) {
+                    if ($fieldDef[1]) {
                         $language = ($fieldDef[1] == 'none' ? '' : $fieldDef[1]);
                     }
 
                     foreach ($metadata as $idx => &$em) {
                         if ($em['name'] == $name && $em['language'] == $language) {
-                            try {
-                                $dataImpl = $loader->build($em['type']);
-                                $value = $dataImpl->getDataFromListfolderGrid($value, $em);
-                            } catch (UnsupportedException $le) {
-                                Logger::error('could not resolve metadata implementation for ' . $em['type']);
-                            }
                             $em['data'] = $value;
                             $dirty = true;
                             break;
@@ -1003,42 +974,23 @@ class AssetHelperController extends AdminController
                     if (!$dirty) {
                         $defaulMetadata = ['title', 'alt', 'copyright'];
                         if (in_array($name, $defaulMetadata)) {
-                            $newEm = [
+                            $metadata[] = [
                                 'name' => $name,
                                 'language' => $language,
                                 'type' => 'input',
-                                'data' => $value,
+                                'data' => $value
                             ];
-
-                            try {
-                                $dataImpl = $loader->build($newEm['type']);
-                                $newEm['data'] = $dataImpl->getDataFromListfolderGrid($value, $newEm);
-                            } catch (UnsupportedException $le) {
-                                Logger::error('could not resolve metadata implementation for ' . $newEm['type']);
-                            }
-
-                            $metadata[] = $newEm;
                             $dirty = true;
                         } else {
                             $predefined = Metadata\Predefined::getByName($name);
                             if ($predefined && (empty($predefined->getTargetSubtype())
                                     || $predefined->getTargetSubtype() == $asset->getType())) {
-                                $newEm = [
+                                $metadata[] = [
                                     'name' => $name,
                                     'language' => $language,
                                     'type' => $predefined->getType(),
-                                    'data' => $value,
+                                    'data' => $value
                                 ];
-
-                                try {
-                                    $dataImpl = $loader->build($newEm['type']);
-                                    $newEm['data'] = $dataImpl->getDataFromListfolderGrid($value, $newEm);
-                                } catch (UnsupportedException $le) {
-                                    Logger::error('could not resolve metadata implementation for ' . $newEm['type']);
-                                }
-
-                                $metadata[] = $newEm;
-
                                 $dirty = true;
                             }
                         }
@@ -1046,8 +998,8 @@ class AssetHelperController extends AdminController
 
                     try {
                         if ($dirty) {
-                            // $metadata = Asset\Service::minimizeMetadata($metadata, "grid");
-                            $asset->setMetadataRaw($metadata);
+                            $metadata = Asset\Service::minimizeMetadata($metadata);
+                            $asset->setMetadata($metadata);
                             $asset->save();
 
                             return $this->adminJson(['success' => true]);

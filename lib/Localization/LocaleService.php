@@ -45,7 +45,7 @@ class LocaleService implements LocaleServiceInterface
     }
 
     /**
-     * @param string $locale
+     * @param $locale
      *
      * @return bool
      */
@@ -101,7 +101,7 @@ class LocaleService implements LocaleServiceInterface
     }
 
     /**
-     * @param string|null $locale
+     * @param null $locale
      *
      * @return array
      */

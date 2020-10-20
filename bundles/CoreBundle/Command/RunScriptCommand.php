@@ -57,7 +57,5 @@ class RunScriptCommand extends AbstractCommand
         }
 
         $output->writeln($this->dryRunMessage('Done'));
-
-        return 0;
     }
 }

@@ -22,9 +22,9 @@ interface MockupConfigInterface
     /**
      * creates object mockup for given data
      *
-     * @param int $objectId
-     * @param mixed $data
-     * @param array $relations
+     * @param $objectId
+     * @param $data
+     * @param $relations
      *
      * @return mixed
      */

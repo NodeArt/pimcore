@@ -14,7 +14,6 @@ The textarea editable is very similar to the [Input](./16_Input.md) editable, th
 | `placeholder`      | string  | A placeholder that is displayed when the field is empty                               |
 | `width`            | integer | Width of the textarea in pixel                                                        |
 | `class`            | string  | A CSS class that is added to the surrounding container of this element in editmode    |
-| `required`         | boolean | set to true to make field value required for publish                                  |
 
 ## Methods
 
@@ -47,7 +46,6 @@ The textarea editable is very similar to the [Input](./16_Input.md) editable, th
     }) }}
 </p>
 ```
-
 </div>
 
 In the editmode, you can see the textarea and the predefined `placeholder`.

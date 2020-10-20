@@ -123,42 +123,46 @@ class AbstractOrderItem extends \Pimcore\Model\DataObject\Concrete
     }
 
     /**
-     * Should return a float
+     * @throws UnsupportedException
      *
-     * @return void
+     * @return float
      */
     public function getTotalNetPrice()
     {
-        // @TODO Throw UnsupportedException or change to abstract method in v7.0
+        //prevent throwing an exception for backward compatibility
         Logger::err('getTotalNetPrice not implemented for ' . get_class($this));
     }
 
     /**
+     * @throws UnsupportedException
+     *
      * @param float $totalNetPrice
      */
     public function setTotalNetPrice($totalNetPrice)
     {
-        // @TODO Throw UnsupportedException or change to abstract method in v7.0
+        //prevent throwing an exception for backward compatibility
         Logger::err('setTotalNetPrice not implemented for ' . get_class($this));
     }
 
     /**
-     * Should return an array
+     * @throws UnsupportedException
      *
-     * @return void
+     * @return array
      */
     public function getTaxInfo()
     {
-        // @TODO Throw UnsupportedException or change to abstract method in v7.0
+        //prevent throwing an exception for backward compatibility
         Logger::err('getTaxInfo not implemented for ' . get_class($this));
     }
 
     /**
+     * @throws UnsupportedException
+     *
      * @param array $taxInfo
      */
     public function setTaxInfo($taxInfo)
     {
-        // @TODO Throw UnsupportedException or change to abstract method in v7.0
+        //prevent throwing an exception for backward compatibility
         Logger::err('setTaxInfo not implemented for ' . get_class($this));
     }
 
@@ -233,7 +237,7 @@ class AbstractOrderItem extends \Pimcore\Model\DataObject\Concrete
      */
     public function isCancelAble()
     {
-        return !$this->isCanceled();
+        return true && !$this->isCanceled();
     }
 
     /**
@@ -243,7 +247,7 @@ class AbstractOrderItem extends \Pimcore\Model\DataObject\Concrete
      */
     public function isEditAble()
     {
-        return !$this->isCanceled();
+        return true && !$this->isCanceled();
     }
 
     /**

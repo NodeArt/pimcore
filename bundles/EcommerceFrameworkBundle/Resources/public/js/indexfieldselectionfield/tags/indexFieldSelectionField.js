@@ -31,7 +31,7 @@ pimcore.object.tags.indexFieldSelectionField = Class.create(pimcore.object.tags.
             autoLoad: true,
             proxy: {
                 type: 'ajax',
-                url: Routing.generate('pimcore_ecommerceframework_index_getfields'),
+                url: '/admin/ecommerceframework/index/get-fields',
                 reader: {
                     rootProperty: 'data',
                     idProperty: 'key'
@@ -50,7 +50,7 @@ pimcore.object.tags.indexFieldSelectionField = Class.create(pimcore.object.tags.
                             if(store.find('key', values[i]) < 0) {
                                 var defaultData = {
                                     'key': values[i],
-                                    'name': t(values[i])
+                                    'name': ts(values[i])
                                 };
                                 store.add(defaultData);
                             }
@@ -85,7 +85,7 @@ pimcore.object.tags.indexFieldSelectionField = Class.create(pimcore.object.tags.
                 autoLoad: true,
                 proxy: {
                     type: 'ajax',
-                    url: Routing.generate('pimcore_ecommerceframework_index_getalltenants'),
+                    url: '/admin/ecommerceframework/index/get-all-tenants',
                     reader: {
                         rootProperty: 'data',
                         idProperty: 'key'
@@ -160,7 +160,7 @@ pimcore.object.tags.indexFieldSelectionField = Class.create(pimcore.object.tags.
                     tenantCombobox,
                     this.fieldsCombobox
                 ],
-                cls: "object_field object_field_type_" + this.type,
+                cls: "object_field",
                 isDirty: function() {
                     return tenantCombobox.isDirty() || this.fieldsCombobox.isDirty()
                 }.bind(this)

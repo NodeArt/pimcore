@@ -20,15 +20,10 @@ namespace Pimcore\Controller\Traits;
 use Pimcore\Controller\TemplateControllerInterface;
 use Symfony\Component\HttpFoundation\Request;
 
-/**
- * @deprecated
- */
 trait TemplateControllerTrait
 {
     /**
      * @inheritDoc
-     *
-     * @deprecated
      */
     public function setViewAutoRender(Request $request, bool $autoRender, string $engine = null)
     {
@@ -41,7 +36,7 @@ trait TemplateControllerTrait
         } else {
             $attributes = [
                 TemplateControllerInterface::ATTRIBUTE_AUTO_RENDER,
-                TemplateControllerInterface::ATTRIBUTE_AUTO_RENDER_ENGINE,
+                TemplateControllerInterface::ATTRIBUTE_AUTO_RENDER_ENGINE
             ];
 
             foreach ($attributes as $attribute) {

@@ -29,6 +29,8 @@ class Tree extends DAV\Tree
      *
      * @param string $sourcePath
      * @param string $destinationPath
+     *
+     * @return null
      */
     public function move($sourcePath, $destinationPath)
     {

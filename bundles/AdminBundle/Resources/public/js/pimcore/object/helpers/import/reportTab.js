@@ -93,14 +93,11 @@ pimcore.object.helpers.import.reportTab = Class.create({
             dataGridCols.push({
                 text: t("success"), width: 80, sortable: true, dataIndex: 'success',
                 renderer: function (value, metaData, record, rowIndex, colIndex, store) {
-                    var status = "error";
                     if (record.get('success')) {
-                        status = "success";
-                    } else if (record.get('messageType') == 'warning') {
-                        status = "import_warning";
+                        return '<div style="height: 16px;" class="pimcore_icon_success">&nbsp;</div>';
+                    } else {
+                        return '<div style="height: 16px;" class="pimcore_icon_error">&nbsp;</div>';
                     }
-
-                    return '<div style="height: 16px;" class="pimcore_icon_' + status + '">&nbsp;</div>';
                 },
                 filter: 'boolean'
             });
@@ -127,8 +124,7 @@ pimcore.object.helpers.import.reportTab = Class.create({
             this.importProgressBar = new Ext.ProgressBar({
                 text: t('initializing'),
                 style: "margin: 10px;",
-                width: 500,
-                height: 25
+                width: 500
             });
 
             this.stopButton = new Ext.button.Button(
@@ -152,11 +148,9 @@ pimcore.object.helpers.import.reportTab = Class.create({
 
             this.reportPanel = new Ext.panel.Panel({
                 disabled: true,
-                autoScroll: true,
                 title: t("import_report"),
                 iconCls: 'pimcore_icon_import_report',
-                items: [this.statusBar, dataGrid],
-                overflowY: 'scroll'
+                items: [this.statusBar, dataGrid]
             });
         }
 
@@ -168,13 +162,12 @@ pimcore.object.helpers.import.reportTab = Class.create({
         this.dataStore.removeAll();
     },
 
-    logData: function (data) {
+    logData: function (rowId, message, success, objectId) {
         this.dataStore.insert(0, {
-                rowId: data.rowId,
-                message: data.message,
-                success: data.success,
-                objectId: data.objectId,
-                messageType: data.messageType,
+                rowId: rowId,
+                message: message,
+                success: success,
+                objectId: objectId
             }
         );
     }

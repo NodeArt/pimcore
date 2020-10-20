@@ -21,13 +21,11 @@ use Pimcore\Bundle\EcommerceFrameworkBundle\Exception\OrderUpdateNotPossibleExce
 use Pimcore\Bundle\EcommerceFrameworkBundle\Exception\UnsupportedException;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Model\AbstractOrder;
 use Pimcore\Bundle\EcommerceFrameworkBundle\OrderManager\OrderAgentFactoryInterface;
-use Pimcore\Bundle\EcommerceFrameworkBundle\PriceSystem\ModificatedPrice;
 use Pimcore\Bundle\EcommerceFrameworkBundle\VoucherService\VoucherServiceInterface;
 use Pimcore\Event\Ecommerce\OrderManagerEvents;
 use Pimcore\Event\Model\Ecommerce\OrderManagerEvent;
 use Pimcore\Event\Model\Ecommerce\OrderManagerItemEvent;
 use Pimcore\File;
-use Pimcore\Model\DataObject\AbstractObject;
 use Pimcore\Model\DataObject\Fieldcollection;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -88,13 +86,7 @@ class OrderManager extends \Pimcore\Bundle\EcommerceFrameworkBundle\OrderManager
 
             $order->setOrdernumber($tempOrdernumber);
             $order->setOrderdate(new \DateTime());
-
-            $cartId = $this->createCartId($cart);
-            if (strlen($cartId) > 190) {
-                throw new \Exception('CartId cannot be longer than 190 characters');
-            }
-
-            $order->setCartId($cartId);
+            $order->setCartId($this->createCartId($cart));
         }
 
         // check if pending payment. if one, do not update order from cart
@@ -104,7 +96,7 @@ class OrderManager extends \Pimcore\Bundle\EcommerceFrameworkBundle\OrderManager
 
         $event = new OrderManagerEvent($cart, $order, $this, [
             'cartIsLockedDueToPayments' => $cartIsLockedDueToPayments,
-            'orderNeedsUpdate' => $orderNeedsUpdate,
+            'orderNeedsUpdate' => $orderNeedsUpdate
         ]);
         $this->eventDispatcher->dispatch(OrderManagerEvents::PRE_UPDATE_ORDER, $event);
 
@@ -132,13 +124,6 @@ class OrderManager extends \Pimcore\Bundle\EcommerceFrameworkBundle\OrderManager
             $modificationItem->setName($modification->getDescription() ? $modification->getDescription() : $name);
             $modificationItem->setAmount($modification->getGrossAmount()->asString());
             $modificationItem->setNetAmount($modification->getNetAmount()->asString());
-
-            if ($modification instanceof ModificatedPrice && $rule = $modification->getRule()) {
-                $modificationItem->setPricingRuleId($rule->getId());
-            } else {
-                $modificationItem->setPricingRuleId(null);
-            }
-
             $modificationItems->add($modificationItem);
         }
 
@@ -232,7 +217,7 @@ class OrderManager extends \Pimcore\Bundle\EcommerceFrameworkBundle\OrderManager
     }
 
     /**
-     * @param CartInterface $cart
+     * @param AbstractOrder $sourceOrder
      *
      * @return AbstractOrder
      */
@@ -346,7 +331,7 @@ class OrderManager extends \Pimcore\Bundle\EcommerceFrameworkBundle\OrderManager
 
     /**
      * @param CartItemInterface $item
-     * @param AbstractObject $parent
+     * @param $parent
      * @param bool $isGiftItem
      *
      * @return \Pimcore\Bundle\EcommerceFrameworkBundle\Model\AbstractOrderItem

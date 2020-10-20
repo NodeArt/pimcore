@@ -1,7 +1,7 @@
 # CLI and Pimcore Console
 
 Pimcore can be executed headless and has a very powerful PHP API. As a consequence of these two aspects, 
-it is possible to automate pretty much every task within Pimcore. 
+it is possible to automate pretty every task within Pimcore. 
 
 Pimcore implements the `Symfony\Console` component and provides `bin/console` as single 
 entry point to console commands registered to the `Symfony\Console` application. 
@@ -72,7 +72,7 @@ a command, use `bin/console <subcommand>`.
 > Be sure to run the console with the PHP user to prevent writing permissions issues later, either by calling `php bin/console` or by switching to the appropriate user, for instance on Debian system `su -l www-data -s /bin/bash`.
 
 ##### Examples:
-```php
+```php 
 # get a list of all registered commands
 $ ./bin/console list
  

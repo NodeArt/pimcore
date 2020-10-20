@@ -127,7 +127,7 @@ changed by the user in the frontend.
 - `Filters` that are visible in the frontend. 
 
 
-![FilterDefinition](../../img/filter-definitions.jpg)
+![FilterDefinition](../img/filter-definitions.jpg)
 
 
 The configuration of preconditions and filters is done by field collection entries, whereby the field collection types 
@@ -140,9 +140,9 @@ Pimcore documents to set up manual landing pages etc.
 Both is demonstrated at our [Demo](https://demo.pimcore.fun) and also available as 
 [source code](https://github.com/pimcore/demo). 
 
-In case that a filter contains relational objects (`FilterMultiRelation`, `FilterRelation`, etc.), 
-the `getName()` method of the object is used to render the text in pre-select lists and filters. 
-Implement the `getNameForFilterDefinition()` method in your data objects to show customized (HTML) texts, including icons. 
+In case that a filter contains relational objects (```FilterMultiRelation```, ```FilterRelation```, etc.), 
+the ```getName()``` method of the object is used to render the text in pre-select lists and filters. 
+Implement the ```getNameForFilterDefinition()``` method in your data objects to show customized (HTML) texts, including icons. 
 
 ## 3 - Putting it all together
 Once Filter Types and Filter Definitions are set up, it is quite easy to put it all together and use the *Filter Service* 
@@ -152,35 +152,34 @@ in controller actions.
 For setting up the *Filter Service* (including Product List with `Zend\Paginator`) within the controller use following 
 sample: 
 
-```php
+```php 
 <?php 
-$ecommerceFactory = \Pimcore\Bundle\EcommerceFrameworkBundle\Factory::getInstance();
 
-$viewModel = new ViewModel();
+$factory = Factory::getInstance();
+
 $params = array_merge($request->query->all(), $request->attributes->all());
 
-$indexService = $ecommerceFactory->getIndexService();
-$productListing = $indexService->getProductListForCurrentTenant();
-$viewModel->productListing = $productListing;
-
 //get filter definition from document, category or global settings
-$filterDefinition = //TODO ...get from somewhere;
+$this->view->filterDefinitionObject = $filterDefinition;
+
+// create product list
+$products = $factory->getIndexService()->getProductListForCurrentTenant();
+$this->view->products = $products;
 
 // create and init filter service
-$filterService = $ecommerceFactory->getFilterService();
-\Pimcore\Bundle\EcommerceFrameworkBundle\FilterService\Helper::setupProductList($filterDefinition, $productListing, $params, $viewModel, $filterService, true);
-$viewModel->filterService = $filterService;
-$viewModel->filterDefinition = $filterDefinition;
+$filterService = $factory->getFilterService();
+
+\Pimcore\Bundle\EcommerceFrameworkBundle\FilterService\Helper::setupProductList($filterDefinition, $products, $params, $this->view, $filterService, true);
+$this->view->filterService = $filterService;
+
 
 // init pagination
-$paginator = new Paginator($productListing);
-$paginator->setCurrentPageNumber($request->get('page'));
-$paginator->setItemCountPerPage(18);
-$paginator->setPageRange(5);
-$viewModel->results = $paginator;
-$viewModel->paginationVariables = $paginator->getPages('Sliding');
+$paginator = new Paginator($products);
+$paginator->setCurrentPageNumber( $this->getParam('page') );
+$paginator->setItemCountPerPage( $filterDefinition->getPageLimit() );
+$paginator->setPageRange(10);
+$this->view->paginator = $paginator;
 
-return $viewModel->getAllParameters();
 ```
 
 For a sample of a controller see our demo [here](https://github.com/pimcore/demo/blob/master/src/AppBundle/Controller/ProductController.php#L118). 
@@ -188,8 +187,6 @@ For a sample of a controller see our demo [here](https://github.com/pimcore/demo
 ### View
 For putting all filters to the frontend use following sample. It is important that this sample is inside a form in order 
 to get the parameter of changed filters delivered back to the controller. 
-
-<div class="code-section">
 
 ```php
 <?php if($this->filterDefinitionObject->getFilters()): ?>
@@ -200,14 +197,3 @@ to get the parameter of changed filters delivered back to the controller.
 	</div>
 <?php endif; ?>
 ```
-
-```twig
-{% if(filterDefinition.filters|length > 0) %}
-    {% for filter in filterDefinition.filters %}
-        {% set filterMarkup = filterService.filterFrontend(filter, productListing, currentFilter) %}
-        {{ filterMarkup | raw  }}
-    {% endfor %}
-{% endif %}
-```
-
-</div>

@@ -23,7 +23,6 @@ use Pimcore\Logger;
 use Pimcore\Model;
 use Pimcore\Model\Asset\Image;
 use Symfony\Component\EventDispatcher\GenericEvent;
-use Symfony\Component\Lock\Factory as LockFactory;
 
 class ImageThumbnail
 {
@@ -35,8 +34,8 @@ class ImageThumbnail
     protected $page = 1;
 
     /**
-     * @param Model\Asset\Document $asset
-     * @param string|array|Image\Thumbnail\Config $config
+     * @param $asset
+     * @param $config
      * @param int $page
      * @param bool $deferred
      */
@@ -51,16 +50,17 @@ class ImageThumbnail
     /**
      * @param bool $deferredAllowed
      *
-     * @return string
+     * @return mixed|string
      */
     public function getPath($deferredAllowed = true)
     {
         $fsPath = $this->getFileSystemPath($deferredAllowed);
-        $path = $this->convertToWebPath($fsPath);
+        $path = str_replace(PIMCORE_TEMPORARY_DIRECTORY . '/image-thumbnails', '', $fsPath);
+        $path = urlencode_ignore_slash($path);
 
         $event = new GenericEvent($this, [
             'filesystemPath' => $fsPath,
-            'frontendPath' => $path,
+            'frontendPath' => $path
         ]);
         \Pimcore::getEventDispatcher()->dispatch(FrontendEvents::ASSET_DOCUMENT_IMAGE_THUMBNAIL, $event);
         $path = $event->getArgument('frontendPath');
@@ -70,6 +70,8 @@ class ImageThumbnail
 
     /**
      * @param bool $deferredAllowed
+     *
+     * @return string
      */
     public function generate($deferredAllowed = true)
     {
@@ -81,10 +83,10 @@ class ImageThumbnail
         } elseif (!$this->filesystemPath) {
             $config = $this->getConfig();
             $config->setFilenameSuffix('page-' . $this->page);
-            $path = null;
-            $deferred = $deferredAllowed && $this->deferred;
 
             try {
+                $path = null;
+                $deferred = ($deferredAllowed && $this->deferred) ? true : false;
                 if (!$deferred) {
                     $converter = \Pimcore\Document::getInstance();
                     $converter->load($this->asset->getFileSystemPath());
@@ -93,17 +95,15 @@ class ImageThumbnail
                         \Pimcore\File::mkdir(dirname($path));
                     }
 
-                    $lock = \Pimcore::getContainer()->get(LockFactory::class)->createLock('document-thumbnail-' . $this->asset->getId() . '-' . $this->page);
+                    $lockKey = 'document-thumbnail-' . $this->asset->getId() . '-' . $this->page;
 
-                    if (!is_file($path) && !$lock->isAcquired()) {
-                        $lock->acquire();
+                    if (!is_file($path) && !Model\Tool\Lock::isLocked($lockKey)) {
+                        Model\Tool\Lock::lock($lockKey);
                         $converter->saveImage($path, $this->page);
                         $generated = true;
-                        $lock->release();
-                    } elseif ($lock->isAcquired()) {
-                        $this->filesystemPath = PIMCORE_WEB_ROOT . '/bundles/pimcoreadmin/img/please-wait.png';
-
-                        return;
+                        Model\Tool\Lock::release($lockKey);
+                    } elseif (Model\Tool\Lock::isLocked($lockKey)) {
+                        return '/bundles/pimcoreadmin/img/please-wait.png';
                     }
                 }
 
@@ -120,7 +120,7 @@ class ImageThumbnail
 
             \Pimcore::getEventDispatcher()->dispatch(AssetEvents::DOCUMENT_IMAGE_THUMBNAIL, new GenericEvent($this, [
                 'deferred' => $deferred,
-                'generated' => $generated,
+                'generated' => $generated
             ]));
         }
     }
@@ -138,9 +138,9 @@ class ImageThumbnail
     }
 
     /**
-     * @param string|array|Image\Thumbnail\Config $selector
+     * @param $selector
      *
-     * @return Image\Thumbnail\Config
+     * @return bool|static
      */
     protected function createConfig($selector)
     {

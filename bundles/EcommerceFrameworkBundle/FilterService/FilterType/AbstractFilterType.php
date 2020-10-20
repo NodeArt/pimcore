@@ -47,7 +47,7 @@ abstract class AbstractFilterType
     protected $request;
 
     /**
-     * @param TranslatorInterface $translator
+     * @param $translator TranslatorInterface
      * @param EngineInterface $templatingEngine
      * @param string $template for rendering the filter frontend
      * @param array $options for additional options
@@ -112,7 +112,7 @@ abstract class AbstractFilterType
      *
      * @param AbstractFilterDefinitionType $filterDefinition
      * @param ProductListInterface $productList
-     * @param array $currentFilter
+     * @param $currentFilter
      *
      * @return string
      */
@@ -125,8 +125,8 @@ abstract class AbstractFilterType
      *
      * @param AbstractFilterDefinitionType $filterDefinition
      * @param ProductListInterface $productList
-     * @param array $currentFilter
-     * @param array $params
+     * @param $currentFilter
+     * @param $params
      * @param bool $isPrecondition
      *
      * @return array

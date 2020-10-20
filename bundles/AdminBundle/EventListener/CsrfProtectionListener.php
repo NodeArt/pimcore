@@ -41,7 +41,7 @@ class CsrfProtectionListener implements EventSubscriberInterface
     protected $phpTemplatingEngine;
 
     /**
-     * @param array $excludedRoutes
+     * @param $excludedRoutes
      * @param PhpEngine $phpTemplatingEngine
      */
     public function __construct($excludedRoutes, PhpEngine $phpTemplatingEngine)
@@ -56,7 +56,7 @@ class CsrfProtectionListener implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            KernelEvents::REQUEST => ['handleRequest', 11],
+            KernelEvents::REQUEST => ['handleRequest', 11]
         ];
     }
 
@@ -108,7 +108,7 @@ class CsrfProtectionListener implements EventSubscriberInterface
 
         if (!$csrfToken || $csrfToken !== $requestCsrfToken) {
             $this->logger->error('Detected CSRF attack on {request}', [
-                'request' => $request->getPathInfo(),
+                'request' => $request->getPathInfo()
             ]);
 
             throw new AccessDeniedHttpException('Detected CSRF Attack! Do not do evil things with pimcore ... ;-)');
@@ -134,17 +134,5 @@ class CsrfProtectionListener implements EventSubscriberInterface
         }
 
         return $this->csrfToken;
-    }
-
-    public function regenerateCsrfToken()
-    {
-        $this->csrfToken = Session::useSession(function (AttributeBagInterface $adminSession) {
-            $token = sha1(generateRandomSymfonySecret());
-            $adminSession->set('csrfToken', $token);
-
-            return $token;
-        });
-
-        $this->phpTemplatingEngine->addGlobal('csrfToken', $this->csrfToken);
     }
 }

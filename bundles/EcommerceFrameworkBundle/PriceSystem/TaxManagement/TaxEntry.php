@@ -45,7 +45,7 @@ class TaxEntry
     protected $taxId;
 
     /**
-     * @param float $percent
+     * @param $percent
      * @param Decimal $amount
      * @param string|null $taxId
      * @param TaxEntryFieldcollection|null $entry

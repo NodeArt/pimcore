@@ -34,7 +34,7 @@ abstract class AbstractTranslation extends Model\AbstractModel implements Transl
     public $key;
 
     /**
-     * @var string[]
+     * @var array
      */
     public $translations;
 
@@ -65,7 +65,7 @@ abstract class AbstractTranslation extends Model\AbstractModel implements Transl
     }
 
     /**
-     * @param string $key
+     * @param $key
      *
      * @return $this
      */
@@ -77,7 +77,7 @@ abstract class AbstractTranslation extends Model\AbstractModel implements Transl
     }
 
     /**
-     * @return string[]
+     * @return array
      */
     public function getTranslations()
     {
@@ -85,7 +85,7 @@ abstract class AbstractTranslation extends Model\AbstractModel implements Transl
     }
 
     /**
-     * @param string[] $translations
+     * @param $translations
      *
      * @return $this
      */
@@ -97,7 +97,7 @@ abstract class AbstractTranslation extends Model\AbstractModel implements Transl
     }
 
     /**
-     * @param int $date
+     * @param $date
      *
      * @return $this
      */
@@ -117,7 +117,7 @@ abstract class AbstractTranslation extends Model\AbstractModel implements Transl
     }
 
     /**
-     * @param int $date
+     * @param $date
      *
      * @return $this
      */
@@ -137,7 +137,7 @@ abstract class AbstractTranslation extends Model\AbstractModel implements Transl
     }
 
     /**
-     * @param int $date
+     * @param $date
      *
      * @return $this
      */
@@ -158,9 +158,9 @@ abstract class AbstractTranslation extends Model\AbstractModel implements Transl
     }
 
     /**
-     * @param string $language
+     * @param  $language
      *
-     * @return string
+     * @return array
      */
     public function getTranslation($language)
     {
@@ -183,7 +183,7 @@ abstract class AbstractTranslation extends Model\AbstractModel implements Transl
     }
 
     /**
-     * @param string $id
+     * @param $id
      * @param bool $create
      * @param bool $returnIdIfEmpty
      *
@@ -240,7 +240,7 @@ abstract class AbstractTranslation extends Model\AbstractModel implements Transl
      *
      * @static
      *
-     * @param string $id - translation key
+     * @param $id - translation key
      * @param bool $create - creates an empty translation entry if the key doesn't exists
      * @param bool $returnIdIfEmpty - returns $id if no translation is available
      * @param string $language
@@ -256,12 +256,7 @@ abstract class AbstractTranslation extends Model\AbstractModel implements Transl
             }
         }
 
-        $translationItem = self::getByKey($id, $create, $returnIdIfEmpty);
-        if ($translationItem instanceof self) {
-            return $translationItem->getTranslation($language);
-        }
-
-        return null;
+        return self::getByKey($id, $create, $returnIdIfEmpty)->getTranslation($language);
     }
 
     public function save()
@@ -299,7 +294,7 @@ abstract class AbstractTranslation extends Model\AbstractModel implements Transl
      *
      * @static
      *
-     * @param string $file - path to the csv file
+     * @param $file - path to the csv file
      * @param bool $replaceExistingTranslations
      * @param array $languages
      * @param array $dialect
@@ -339,7 +334,6 @@ abstract class AbstractTranslation extends Model\AbstractModel implements Transl
             }
 
             //read data
-            $data = [];
             if (($handle = fopen(PIMCORE_SYSTEM_TEMP_DIRECTORY . '/import_translations', 'r')) !== false) {
                 while (($rowData = fgetcsv($handle, 0, $dialect->delimiter, $dialect->quotechar, $dialect->escapechar)) !== false) {
                     $data[] = $rowData;
@@ -386,7 +380,7 @@ abstract class AbstractTranslation extends Model\AbstractModel implements Transl
                                                 'lg' => $key,
                                                 'key' => $textKey,
                                                 'text' => $t->getTranslation($key),
-                                                'csv' => $value,
+                                                'csv' => $value
                                             ];
                                     }
                                 }
@@ -414,9 +408,7 @@ abstract class AbstractTranslation extends Model\AbstractModel implements Transl
     }
 
     /**
-     * @deprecated
-     *
-     * @param array $data
+     * @param $data
      */
     public function getFromWebserviceImport($data)
     {
@@ -427,8 +419,6 @@ abstract class AbstractTranslation extends Model\AbstractModel implements Transl
     }
 
     /**
-     * @deprecated
-     *
      * @return array
      */
     public function getForWebserviceExport()

@@ -27,7 +27,7 @@ pimcore.object.tags.objectbricks = Class.create(pimcore.object.tags.abstract, {
         this.data = [];
         this.currentElements = {};
         this.layoutDefinitions = {};
-        this.dataFields = {};
+        this.dataFields = [];
         this.layoutIds = [];
 
         if (data) {
@@ -40,7 +40,7 @@ pimcore.object.tags.objectbricks = Class.create(pimcore.object.tags.abstract, {
     loadFieldDefinitions: function () {
 
         Ext.Ajax.request({
-            url: Routing.generate('pimcore_admin_dataobject_class_objectbricktree'),
+            url: "/admin/class/objectbrick-tree",
             params: {
                 class_id: this.object.data.general.o_classId,
                 object_id: this.object.id,
@@ -68,7 +68,7 @@ pimcore.object.tags.objectbricks = Class.create(pimcore.object.tags.abstract, {
             autoHeight: true,
             border: this.fieldConfig.border,
             style: "margin-bottom: 10px",
-            componentCls: "object_field object_field_type_" + this.type,
+            componentCls: "object_field",
             items: [this.tabpanel]
         };
 
@@ -88,7 +88,7 @@ pimcore.object.tags.objectbricks = Class.create(pimcore.object.tags.abstract, {
             for (var i = 0; i < this.data.length; i++) {
                 if (this.data[i] != null) {
                     this.preventDelete[this.data[i].type] = this.data[i].inherited;
-                    this.addBlockElement(i, this.data[i].type, this.data[i], true, this.data[i].title, false);
+                    this.addBlockElement(i, this.data[i].type, this.data[i], true, this.data[i].title);
                 }
             }
         }
@@ -110,7 +110,7 @@ pimcore.object.tags.objectbricks = Class.create(pimcore.object.tags.abstract, {
                 }
 
                 var menuItem = {
-                    text: elementData.title ? t(elementData.title) : t(elementData.text),
+                    text: elementData.title ? ts(elementData.title) : ts(elementData.text),
                     iconCls: elementData.iconCls
                 };
                 if (elementData.group) {
@@ -168,7 +168,7 @@ pimcore.object.tags.objectbricks = Class.create(pimcore.object.tags.abstract, {
 
             items.push({
                 xtype: "tbtext",
-                text: t(this.fieldConfig.title)
+                text: ts(this.fieldConfig.title)
             });
 
             var toolbar = new Ext.Toolbar({
@@ -183,7 +183,7 @@ pimcore.object.tags.objectbricks = Class.create(pimcore.object.tags.abstract, {
 
             var index = 0;
 
-            this.addBlockElement(index, type, null, false, title, true);
+            this.addBlockElement(index, type, null, false, title);
         }
     ,
 
@@ -224,7 +224,7 @@ pimcore.object.tags.objectbricks = Class.create(pimcore.object.tags.abstract, {
         }
     ,
 
-        addBlockElement: function (index, type, blockData, ignoreChange, title, manuallyAdded) {
+        addBlockElement: function (index, type, blockData, ignoreChange, title) {
             if (!type) {
                 return;
             }
@@ -236,7 +236,7 @@ pimcore.object.tags.objectbricks = Class.create(pimcore.object.tags.abstract, {
                 return;
             }
 
-            var dataFields = {};
+            var dataFields = [];
             var currentData = {};
             var currentMetaData = {};
 
@@ -257,16 +257,7 @@ pimcore.object.tags.objectbricks = Class.create(pimcore.object.tags.abstract, {
                 },
 
                 addToDataFields: function (field, name) {
-                    if(dataFields[name]) {
-                        // this is especially for localized fields which get aggregated here into one field definition
-                        // in the case that there are more than one localized fields in the class definition
-                        // see also Object_Class::extractDataDefinitions();
-                        if(typeof dataFields[name]["addReferencedField"]){
-                            dataFields[name].addReferencedField(field);
-                        }
-                    } else {
-                        dataFields[name] = field;
-                    }
+                    dataFields.push(field);
                 }
             };
 
@@ -279,18 +270,17 @@ pimcore.object.tags.objectbricks = Class.create(pimcore.object.tags.abstract, {
                 closable: !this.fieldConfig.noteditable,
                 autoHeight: true,
                 border: false,
-                title: title ? t(title) : t(type),
+                title: title ? ts(title) : ts(type),
                 // items: items
                 items: [],
                 listeners: {
-                    afterrender: function (childConfig, dataProvider, manuallyAdded, panel) {
+                    afterrender: function (childConfig, dataProvider, panel) {
                         if (!panel.__tabpanel_initialized) {
                             var copy = Ext.decode(Ext.encode(childConfig));
                             var children = this.getRecursiveLayout(copy, null, {
                                 containerType: "objectbrick",
                                 containerKey: type,
-                                ownerName: this.fieldConfig.name,
-                                applyDefaults: manuallyAdded
+                                ownerName: this.fieldConfig.name
                             }, false, true, dataProvider);
                             if (this.fieldConfig.noteditable && children) {
                                 children.forEach(function (record) {
@@ -316,7 +306,7 @@ pimcore.object.tags.objectbricks = Class.create(pimcore.object.tags.abstract, {
 
 
                         }
-                    }.bind(this, childConfig, dataProvider, manuallyAdded)
+                    }.bind(this, childConfig, dataProvider)
 
                 }
             });
@@ -374,10 +364,9 @@ pimcore.object.tags.objectbricks = Class.create(pimcore.object.tags.abstract, {
                     if (element.action == "deleted") {
                         elementData = "deleted";
                     } else {
-                        var elementFieldNames = Object.keys(element.fields);
-                        for (var u = 0; u < elementFieldNames.length; u++) {
-                            var elementFieldName = elementFieldNames[u];
-                            var field = element.fields[elementFieldName];
+                        for (var u = 0; u < element.fields.length; u++) {
+
+                            var field = element.fields[u];
                             try {
                                 if (field.isDirty()) {
                                     field.unmarkInherited();
@@ -417,10 +406,8 @@ pimcore.object.tags.objectbricks = Class.create(pimcore.object.tags.abstract, {
                 if (this.currentElements[types[t]]) {
                     var element = this.currentElements[types[t]];
                     if (element.action != "deleted") {
-                        var elementFieldNames = Object.keys(element.fields);
-                        for (var u = 0; u < elementFieldNames.length; u++) {
-                            var elementFieldName = elementFieldNames[u];
-                            var field = element.fields[elementFieldName];
+                        for (var u = 0; u < element.fields.length; u++) {
+                            var field = element.fields[u];
                             if (field.isDirty()) {
 
                                 this.dirty = true;
@@ -455,10 +442,8 @@ pimcore.object.tags.objectbricks = Class.create(pimcore.object.tags.abstract, {
                 if (this.currentElements[types[t]]) {
                     var element = this.currentElements[types[t]];
                     if (element.action != "deleted") {
-                        var elementFieldNames = Object.keys(element.fields);
-                        for (var u = 0; u < elementFieldNames.length; u++) {
-                            var elementFieldName = elementFieldNames[u];
-                            var field = element.fields[elementFieldName];
+                        for (var u = 0; u < element.fields.length; u++) {
+                            var field = element.fields[u];
                             if (field.isDirty()) {
                                 if (field.fieldConfig.fieldtype == "localizedfields") {
                                     field.dataIsNotInherited(true);
@@ -481,10 +466,8 @@ pimcore.object.tags.objectbricks = Class.create(pimcore.object.tags.abstract, {
                 if (this.currentElements[types[t]]) {
                     element = this.currentElements[types[t]];
                     if (element.action != "deleted") {
-                        var elementFieldNames = Object.keys(element.fields);
-                        for (var u = 0; u < elementFieldNames.fields.length; u++) {
-                            var elementFieldName = elementFieldNames[u];
-                            if (element.fields[elementFieldName].isMandatory()) {
+                        for (var u = 0; u < element.fields.length; u++) {
+                            if (element.fields[u].isMandatory()) {
                                 return true;
                             }
                         }
@@ -493,6 +476,38 @@ pimcore.object.tags.objectbricks = Class.create(pimcore.object.tags.abstract, {
             }
 
             return false;
+        }
+    ,
+
+        isInvalidMandatory: function () {
+            var element;
+            var isInvalid = false;
+            var invalidMandatoryFields = [];
+
+            var types = Object.keys(this.currentElements);
+            for (var t = 0; t < types.length; t++) {
+                if (this.currentElements[types[t]]) {
+                    element = this.currentElements[types[t]];
+                    if (element.action != "deleted") {
+                        for (var u = 0; u < element.fields.length; u++) {
+                            if (element.fields[u].isMandatory()) {
+                                if (element.fields[u].isInvalidMandatory()) {
+                                    invalidMandatoryFields.push(element.fields[u].getTitle()
+                                        + " (" + element.fields[u].getName() + "|" + types[t] + ")");
+                                    isInvalid = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // return the error messages not bool, this is handled in object/edit.js
+            if (isInvalid) {
+                return invalidMandatoryFields;
+            }
+
+            return isInvalid;
         }
 
     });

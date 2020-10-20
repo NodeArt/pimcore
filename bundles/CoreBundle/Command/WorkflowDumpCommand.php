@@ -70,7 +70,5 @@ EOF
         }
 
         $output->writeln($dumper->dump($workflow->getDefinition(), $marking, ['workflowName' => $workflow->getName()]));
-
-        return 0;
     }
 }

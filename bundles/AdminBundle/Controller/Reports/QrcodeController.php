@@ -25,13 +25,12 @@ use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * @deprecated
  * @Route("/qrcode")
  */
 class QrcodeController extends ReportsControllerBase implements EventedControllerInterface
 {
     /**
-     * @Route("/tree", name="pimcore_admin_reports_qrcode_tree", methods={"GET", "POST"})
+     * @Route("/tree", methods={"GET", "POST"})
      *
      * @param Request $request
      *
@@ -47,7 +46,7 @@ class QrcodeController extends ReportsControllerBase implements EventedControlle
         foreach ($items as $item) {
             $codes[] = [
                 'id' => $item->getName(),
-                'text' => $item->getName(),
+                'text' => $item->getName()
             ];
         }
 
@@ -55,7 +54,7 @@ class QrcodeController extends ReportsControllerBase implements EventedControlle
     }
 
     /**
-     * @Route("/add", name="pimcore_admin_reports_qrcode_add", methods={"POST"})
+     * @Route("/add", methods={"POST"})
      *
      * @param Request $request
      *
@@ -79,7 +78,7 @@ class QrcodeController extends ReportsControllerBase implements EventedControlle
     }
 
     /**
-     * @Route("/delete", name="pimcore_admin_reports_qrcode_delete", methods={"DELETE"})
+     * @Route("/delete", methods={"DELETE"})
      *
      * @param Request $request
      *
@@ -94,7 +93,7 @@ class QrcodeController extends ReportsControllerBase implements EventedControlle
     }
 
     /**
-     * @Route("/get", name="pimcore_admin_reports_qrcode_get", methods={"GET"})
+     * @Route("/get", methods={"GET"})
      *
      * @param Request $request
      *
@@ -108,7 +107,7 @@ class QrcodeController extends ReportsControllerBase implements EventedControlle
     }
 
     /**
-     * @Route("/update", name="pimcore_admin_reports_qrcode_update", methods={"PUT"})
+     * @Route("/update", methods={"PUT"})
      *
      * @param Request $request
      *
@@ -132,7 +131,7 @@ class QrcodeController extends ReportsControllerBase implements EventedControlle
     }
 
     /**
-     * @Route("/code", name="pimcore_admin_reports_qrcode_code", methods={"GET"})
+     * @Route("/code", methods={"GET"})
      *
      * @param Request $request
      *

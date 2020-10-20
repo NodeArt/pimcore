@@ -5,11 +5,11 @@
 Pimcore comes with a standard navigation implementation in the form of a templating helper (`$this->navigation()`). 
 It builds a navigation container based on the existing document structure. The process of rendering is divided into 2 steps:
 
-1. Build the navigation: `$nav = $this->navigation()->build(['active' => $activeDocument, 'root' => $navigationRootDocument])`
+1. Build the navigation: `$nav = $this->navigation()->buildNavigation($activeDocument, $navigationRootDocument)`
 2. Render the navigation: `$this->navigation()->render($nav)` or `$this->navigation()->getRenderer('menu')->render($nav)`
 
 > The building step does not necessarily need to happen in the view script. In fact the view helper just forwards the
- `build()` or `buildNavigation()` call to the `Pimcore\Navigation\Builder` service. You can also build the navigation in your controller
+ `buildNavigation()` call to the `Pimcore\Navigation\Builder` service. You can also build the navigation in your controller
  or a service and pass the navigation object to the view.
 
 **Only documents are included** in this structure, Folders are ignored, regardless of their navigation properties.
@@ -31,7 +31,7 @@ if(!$mainNavStartNode instanceof \Pimcore\Model\Document\Page) {
 }
 
 // this returns us the navigation container we can use to render the navigation
-$mainNavigation = $this->navigation()->build(['active' => $document, 'root' => $mainNavStartNode]);
+$mainNavigation = $this->navigation()->buildNavigation($document, $mainNavStartNode);
 
 // later you can render the navigation
 echo $this->navigation()->render($mainNavigation);
@@ -49,10 +49,7 @@ echo $this->navigation()->render($mainNavigation);
     {% set navStartNode = pimcore_document(1) %}
 {% endif %}
 
-{% set mainNavigation = pimcore_build_nav({
-    active: document,
-    root: navStartNode
-}) %}
+{% set mainNavigation = pimcore_build_nav(document, navStartNode) %}
 
 {# later you can render the navigation #}
 {{ pimcore_render_nav(mainNavigation) }}
@@ -148,12 +145,9 @@ Having set up the navigation container as shown above, you can easily use it to 
         }) }}
 </div>
 ```
-
 </div>
 
 ### Breadcrumbs
-
-<div class="code-section">
 
 ```php
 <div class="my-breadcrumbs">
@@ -161,14 +155,6 @@ Having set up the navigation container as shown above, you can easily use it to 
     <?= $this->navigation()->breadcrumbs()->setMinDepth(null)->render($mainNavigation); ?>
 </div>
 ```
-
-```twig
-<div class="my-breadcrumbs">
-    <a href="/">{{ 'Home'|trans }}</a> >
-    {{ pimcore_render_nav(mainNavigation, 'breadcrumbs') }}
-</div>
-```
-</div>
 
 ### Sidebar Navigation
 
@@ -183,7 +169,7 @@ Having set up the navigation container as shown above, you can easily use it to 
 ```php
 <div class="my-sidebar-menu">
     <?php
-    $sideNav = $this->navigation()->build(['active' => $this->document, 'root' => $navStartNode, 'htmlMenuPrefix' => 'my-nav-']);
+    $sideNav = $this->navigation()->buildNavigation($this->document, $navStartNode, 'my-nav-');
 
     echo $this->navigation()->menu()->renderMenu($sideNav, [
         'ulClass' => 'nav my-sidenav',
@@ -200,27 +186,27 @@ The example CSS below shows how to do that (includes 3 Levels):
 
 ```css
 #navigation ul li ul {
-    display:none;
+    display:none;
 }
-
+ 
 #navigation ul li.active ul {
-    display:block;
+    display:block;
 }
-
+ 
 #navigation ul li.active ul li ul {
-    display:none;
+    display:none;
 }
-
+ 
 #navigation ul li.active ul li.active ul {
-    display:block;
+    display:block;
 }
-
+ 
 #navigation ul li.active ul li.active ul li ul {
-    display:none;
+    display:none;
 }
-
+ 
 #navigation ul li.active ul li.active ul li.active ul{
-    display:block;
+    display:block;
 }
 ```
 
@@ -297,7 +283,7 @@ if(!$navStartNode instanceof Document\Page) {
     }
 }
 
-$navigation = $this->navigation()->build(['active' => $this->document, 'root' => $navStartNode]);
+$navigation = $this->navigation()->buildNavigation($this->document, $navStartNode);
 echo $this->navigation()->menu()->renderMenu($navigation, [
     "maxDepth" => 1,
     "ulClass" => "nav navbar-nav"
@@ -321,7 +307,7 @@ if(!$navStartNode instanceof Document\Page) {
     }
 }
 
-$mainNavigation = $this->navigation()->build(['active' => $this->document, 'root' => $navStartNode]);
+$mainNavigation = $this->navigation()->buildNavigation($this->document, $navStartNode);
 
 /** @var \Pimcore\Navigation\Renderer\Menu $menuRenderer */
 $menuRenderer = $this->navigation()->menu();
@@ -338,7 +324,7 @@ $menuRenderer = $this->navigation()->menu();
     <div class="collapse navbar-collapse" id="bs-navbar-collapse-1">
         <ul class="nav navbar-nav">
         <?php foreach ($mainNavigation as $page) { ?>
-            <?php /* @var \Pimcore\Navigation\Page\Document $page */ ?>
+            <?php /* @var $page \Pimcore\Navigation\Page\Document */ ?>
             <?php // here need to manually check for ACL conditions ?>
             <?php if (!$page->isVisible() || !$menuRenderer->accept($page)) { continue; } ?>
             <?php $hasChildren = $page->hasPages(); ?>
@@ -376,32 +362,28 @@ In the following example we're adding news items (objects) to the navigation usi
 
 ```php
 <?php
-$navigation = $this->navigation()->build([
-    'active' => $this->document,
-    'root' => $navStartNode, 
-    'pageCallback' => function($page, $document) {
-        /** @var \Pimcore\Model\Document $document */
-        /** @var \Pimcore\Navigation\Page\Document $page */
-        if($document->getProperty("templateType") == "news") {
-            $list = new \Pimcore\Model\DataObject\News\Listing;
-            $list->load();
-            foreach($list as $news) {
-                $detailLink = $this->url([
-                    "id" => $news->getId(),
-                    "text" => $news->getTitle(),
-                    "prefix" => $this->document->getFullPath()
-                ], "news", true);
-    
-                $uri = new Pimcore\Navigation\Page\Document([
-                    "label" => $news->getTitle(),
-                    "id" => "object-" . $news->getId(),
-                    "uri" => $detailLink
-                ]);
-                $page->addPage($uri);
-            }
+$navigation = $this->navigation()->buildNavigation($this->document, $navStartNode, null, function($page, $document) {
+    /** @var $document \Pimcore\Model\Document */
+    /** @var \Pimcore\Navigation\Page\Document $page */
+    if($document->getProperty("templateType") == "news") {
+        $list = new \Pimcore\Model\DataObject\News\Listing;
+        $list->load();
+        foreach($list as $news) {
+            $detailLink = $this->url([
+                "id" => $news->getId(),
+                "text" => $news->getTitle(),
+                "prefix" => $this->document->getFullPath()
+            ], "news", true);
+
+            $uri = new Pimcore\Navigation\Page\Document([
+                "label" => $news->getTitle(),
+                "id" => "object-" . $news->getId(),
+                "uri" => $detailLink
+            ]);
+            $page->addPage($uri);
         }
-    }]
-);
+    }
+});
 
 ?>
 
@@ -426,16 +408,12 @@ For that we've introduced a new parameter for the navigation view helper, which 
 
 ```php
 <?php
-$mainNavigation = $this->navigation()->build([
-    'active' => $this->document,
-    'root' => $mainNavStartNode, 
-    'pageCallback' => function ($page, $document) {
-        $page->setCustomSetting("myCustomProperty", $document->getProperty("myCustomProperty"));
-        $page->setCustomSetting("subListClass", $document->getProperty("subListClass"));
-        $page->setCustomSetting("title", $document->getTitle());
-        $page->setCustomSetting("headline", $document->getEditable("headline")->getData());
-    }]
-);
+$mainNavigation = $this->navigation()->buildNavigation($this->document, $mainNavStartNode, null, function ($page, $document) {
+    $page->setCustomSetting("myCustomProperty", $document->getProperty("myCustomProperty"));
+    $page->setCustomSetting("subListClass", $document->getProperty("subListClass"));
+    $page->setCustomSetting("title", $document->getTitle());
+    $page->setCustomSetting("headline", $document->getElement("headline")->getData());
+});
 
 $this->navigation()->menu()->setPartial("Navigation/partials/navigation.html.php");
 echo $this->navigation()->menu()->render($mainNavigation);
@@ -464,7 +442,7 @@ Using this method will dramatically improve the performance of your navigation.
 Sometimes it's necessary to manually set the key for the navigation cache. 
 
 ```php
-$this->navigation()->build(['active' => $this->document, 'root' => $mainNavStartNode, 'cache' => 'yourindividualkey']);
+$this->navigation()->buildNavigation($this->document, $mainNavStartNode, null, null, "yourindividualkey");
 ```
 
 ### Disabling the Navigation Cache
@@ -472,7 +450,7 @@ $this->navigation()->build(['active' => $this->document, 'root' => $mainNavStart
 You can disable the navigation cache by setting the 5th argument to `false`.
 
 ```php
-$this->navigation()->build(['active' => $this->document, 'root' => $mainNavStartNode, 'cache' => false]);
+$this->navigation()->buildNavigation($this->document, $mainNavStartNode, null, null, false);
 ```
 
 ## FAQ
@@ -490,8 +468,6 @@ See the above question. If none of the documents have a navigation title set the
 
 The homepage will not appear in the navigation by default. You can add the homepage (and any other page) manually:
 
-<div class="code-section">
-
 ```php
 $navigation->addPage([
    'order' => -1, // put it in front of all the others
@@ -500,17 +476,6 @@ $navigation->addPage([
    'title' => 'Homepage' //tooltip text
 ]);
 ```
-
-```twig
-{% do navigation.addPage({
-    'order': -1,
-    'uri': '/',
-    'label': 'Home'|trans,
-    'title': 'Home'|trans,
-}) %}
-```
-
-</div>
 
 If you retrieve the **home** document (which always has the ID 1) you can also retrieve its navigation properties so that they can be edited from the Pimcore admin interface like all the other documents.
 

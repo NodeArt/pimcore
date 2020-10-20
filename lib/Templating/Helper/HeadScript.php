@@ -53,8 +53,6 @@ use Symfony\Component\EventDispatcher\GenericEvent;
  * @method $this prependScript($script, $type = 'text/javascript', array $attrs = array())
  * @method $this setFile($src, $type = 'text/javascript', array $attrs = array())
  * @method $this setScript($script, $type = 'text/javascript', array $attrs = array())
- *
- * @deprecated
  */
 class HeadScript extends CacheBusterAware
 {
@@ -98,13 +96,13 @@ class HeadScript extends CacheBusterAware
      * @var array
      */
     protected $_optionalAttributes = [
-        'charset', 'defer', 'language', 'src', 'type',
+        'charset', 'defer', 'language', 'src', 'type'
     ];
 
     /**
      * Required attributes for script tag
      *
-     * @var array
+     * @var string
      */
     protected $_requiredAttributes = ['type'];
 
@@ -187,9 +185,8 @@ class HeadScript extends CacheBusterAware
     /**
      * Start capture action
      *
-     * @param string $captureType
-     * @param string $type
-     * @param array $attrs
+     * @param  mixed $captureType
+     * @param  string $typeOrAttrs
      *
      * @return void
      */
@@ -264,7 +261,6 @@ class HeadScript extends CacheBusterAware
             $mode = strtolower($matches['mode']);
             $type = 'text/javascript';
             $attrs = [];
-            $index = null;
 
             if ('offsetSet' == $action) {
                 $index = array_shift($args);
@@ -334,7 +330,8 @@ class HeadScript extends CacheBusterAware
     /**
      * Is the script provided valid?
      *
-     * @param mixed $value
+     * @param  mixed $value
+     * @param  string $method
      *
      * @return bool
      */
@@ -362,7 +359,7 @@ class HeadScript extends CacheBusterAware
             throw new Exception('Invalid argument passed to append(); please use one of the helper methods, appendScript() or appendFile()');
         }
 
-        $this->getContainer()->append($value);
+        return $this->getContainer()->append($value);
     }
 
     /**
@@ -378,7 +375,7 @@ class HeadScript extends CacheBusterAware
             throw new Exception('Invalid argument passed to prepend(); please use one of the helper methods, prependScript() or prependFile()');
         }
 
-        $this->getContainer()->prepend($value);
+        return $this->getContainer()->prepend($value);
     }
 
     /**
@@ -394,7 +391,7 @@ class HeadScript extends CacheBusterAware
             throw new Exception('Invalid argument passed to set(); please use one of the helper methods, setScript() or setFile()');
         }
 
-        $this->getContainer()->set($value);
+        return $this->getContainer()->set($value);
     }
 
     /**
@@ -411,7 +408,7 @@ class HeadScript extends CacheBusterAware
             throw new Exception('Invalid argument passed to offsetSet(); please use one of the helper methods, offsetSetScript() or offsetSetFile()');
         }
 
-        $this->getContainer()->offsetSet($index, $value);
+        return $this->getContainer()->offsetSet($index, $value);
     }
 
     /**
@@ -441,10 +438,10 @@ class HeadScript extends CacheBusterAware
     /**
      * Create script HTML
      *
-     * @param \stdClass $item
-     * @param string $indent
-     * @param string $escapeStart
-     * @param string $escapeEnd
+     * @param  string $type
+     * @param  array $attributes
+     * @param  string $content
+     * @param  string|int $indent
      *
      * @return string
      */
@@ -520,7 +517,11 @@ class HeadScript extends CacheBusterAware
             ? $this->getWhitespace($indent)
             : $this->getIndent();
 
-        $useCdata = $this->useCdata ? true : false;
+        if ($this->view) {
+            $useCdata = $this->view->doctype()->isXhtml() ? true : false;
+        } else {
+            $useCdata = $this->useCdata ? true : false;
+        }
         $escapeStart = ($useCdata) ? '//<![CDATA[' : '//<!--';
         $escapeEnd = ($useCdata) ? '//]]>' : '//-->';
 
@@ -559,7 +560,7 @@ class HeadScript extends CacheBusterAware
             }
 
             \Pimcore::getEventDispatcher()->dispatch(FrontendEvents::VIEW_HELPER_HEAD_SCRIPT, new GenericEvent($this, [
-                'item' => $item,
+                'item' => $item
             ]));
 
             if (isset($item->attributes) && is_array($item->attributes)) {

@@ -49,7 +49,6 @@ class AssetsInstaller
     public function install(array $options = []): Process
     {
         $process = $this->buildProcess($options);
-        $process->setTimeout(240);
         $process->run($this->runCallback);
 
         if (!$process->isSuccessful()) {
@@ -72,7 +71,7 @@ class AssetsInstaller
             Console::getPhpCli(),
             PIMCORE_PROJECT_ROOT . '/bin/console',
             'assets:install',
-            'web',
+            'web'
         ];
 
         $options = $this->resolveOptions($options);
@@ -125,12 +124,12 @@ class AssetsInstaller
             if ('symlink' === $composerJsonSetting) {
                 $defaults = array_merge([
                     'symlink' => true,
-                    'relative' => false,
+                    'relative' => false
                 ], $defaults);
             } elseif ('relative' === $composerJsonSetting) {
                 $defaults = array_merge([
                     'symlink' => true,
-                    'relative' => true,
+                    'relative' => true
                 ], $defaults);
             }
         }

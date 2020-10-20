@@ -122,8 +122,8 @@ class AbstractSetProduct extends AbstractProduct
      *
      * @throws UnsupportedException
      *
-     * @param int $quantityScale
-     * @param array|null $products
+     * @param null $quantityScale
+     * @param null $products
      *
      * @return PriceInterface
      */
@@ -142,7 +142,7 @@ class AbstractSetProduct extends AbstractProduct
      * @throws UnsupportedException
      *
      * @param int $quantityScale
-     * @param array|null $products
+     * @param null $products
      *
      * @return PriceInfoInterface|AbstractPriceInfo
      */
@@ -157,7 +157,7 @@ class AbstractSetProduct extends AbstractProduct
 
     /**
      * @param int $quantity
-     * @param AbstractSetProductEntry[] $products
+     * @param $products AbstractSetProductEntry[]
      *
      * @return AvailabilityInterface
      */

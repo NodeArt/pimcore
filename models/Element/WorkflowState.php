@@ -20,9 +20,7 @@ namespace Pimcore\Model\Element;
 use Pimcore\Model;
 
 /**
- * @method void delete()
  * @method \Pimcore\Model\Element\WorkflowState\Dao getDao()
- * @method void save()
  */
 class WorkflowState extends Model\AbstractModel
 {

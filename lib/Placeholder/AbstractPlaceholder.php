@@ -67,7 +67,7 @@ abstract class AbstractPlaceholder
     protected $locale = null;
 
     /**
-     * @param string $string
+     * @param $string
      *
      * @return $this
      */
@@ -87,7 +87,7 @@ abstract class AbstractPlaceholder
     }
 
     /**
-     * @param string $key
+     * @param $key
      *
      * @return $this
      */
@@ -131,7 +131,7 @@ abstract class AbstractPlaceholder
     }
 
     /**
-     * @param array $params
+     * @param $params
      *
      * @return $this
      */
@@ -171,7 +171,7 @@ abstract class AbstractPlaceholder
     }
 
     /**
-     * @param string $contentString
+     * @param $contentString
      *
      * @return $this
      */
@@ -205,7 +205,7 @@ abstract class AbstractPlaceholder
     }
 
     /**
-     * @param Document $document
+     * @param $document
      *
      * @return $this
      */
@@ -245,7 +245,7 @@ abstract class AbstractPlaceholder
     /**
      * Try to set the locale from different sources
      *
-     * @param string|null $locale
+     * @param $locale
      *
      * @return $this
      */

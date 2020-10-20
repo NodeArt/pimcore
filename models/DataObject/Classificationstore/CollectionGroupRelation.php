@@ -21,8 +21,6 @@ use Pimcore\Model;
 
 /**
  * @method \Pimcore\Model\DataObject\Classificationstore\CollectionGroupRelation\Dao getDao()
- * @method void save()
- * @method void delete()
  */
 class CollectionGroupRelation extends Model\AbstractModel
 {
@@ -41,10 +39,8 @@ class CollectionGroupRelation extends Model\AbstractModel
      */
     public $name;
 
-    /**
-     * The key description.
-     *
-     * @var string
+    /** The key description.
+     * @var
      */
     public $description;
 
@@ -95,7 +91,7 @@ class CollectionGroupRelation extends Model\AbstractModel
     }
 
     /**
-     * @return string
+     * @return mixed
      */
     public function getDescription()
     {
@@ -103,7 +99,7 @@ class CollectionGroupRelation extends Model\AbstractModel
     }
 
     /**
-     * @param string $description
+     * @param mixed $description
      */
     public function setDescription($description)
     {

@@ -14,8 +14,6 @@
 
 namespace Pimcore\Image\Optimizer;
 
-use Pimcore\Exception\ImageOptimizationFailedException;
-
 interface OptimizerInterface
 {
     /**
@@ -24,7 +22,7 @@ interface OptimizerInterface
      *
      * @return string
      *
-     * @throws ImageOptimizationFailedException
+     * @throws
      */
     public function optimizeImage(string $input, string $output): string;
 

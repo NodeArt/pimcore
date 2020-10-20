@@ -26,7 +26,7 @@ use Pimcore\Model\Element;
 class Dao extends Model\User\AbstractUser\Dao
 {
     /**
-     * @param int $id
+     * @param $id
      *
      * @throws \Exception
      */
@@ -40,7 +40,7 @@ class Dao extends Model\User\AbstractUser\Dao
     }
 
     /**
-     * @param string $name
+     * @param $name
      *
      * @throws \Exception
      */

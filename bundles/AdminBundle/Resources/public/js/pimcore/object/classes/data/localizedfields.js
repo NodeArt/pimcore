@@ -193,11 +193,7 @@ pimcore.object.classes.data.localizedfields = Class.create(pimcore.object.classe
                     width: source.datax.width,
                     height: source.datax.height,
                     maxTabs: source.datax.maxTabs,
-                    labelWidth: source.datax.labelWidth,
-                    border: source.datax.border,
-                    tabPosition: source.datax.tabPosition,
-                    hideLabelsWhenTabsReached: source.datax.hideLabelsWhenTabsReached,
-                    provideSplitView: source.datax.provideSplitView
+                    labelWidth: source.datax.labelWidth
                 });
         }
     }

@@ -21,8 +21,6 @@ use Pimcore\Model;
 
 /**
  * @method \Pimcore\Model\Tool\UUID\Dao getDao()
- * @method void delete()
- * @method void save()
  */
 class UUID extends Model\AbstractModel
 {
@@ -52,7 +50,7 @@ class UUID extends Model\AbstractModel
     protected $item;
 
     /**
-     * @param string $instanceIdentifier
+     * @param $instanceIdentifier
      *
      * @return $this
      */
@@ -64,7 +62,7 @@ class UUID extends Model\AbstractModel
     }
 
     /**
-     * @return string
+     * @return mixed
      */
     public function getInstanceIdentifier()
     {
@@ -78,8 +76,8 @@ class UUID extends Model\AbstractModel
      */
     public function setSystemInstanceIdentifier()
     {
-        $instanceIdentifier = \Pimcore\Config::getSystemConfiguration('general')['instance_identifier'] ?? null;
-        if (empty($instanceIdentifier)) {
+        $instanceIdentifier = \Pimcore\Config::getSystemConfig()->general->instanceIdentifier;
+        if (!$instanceIdentifier) {
             throw new \Exception('No instance identifier set in system config!');
         }
         $this->setInstanceIdentifier($instanceIdentifier);
@@ -88,7 +86,7 @@ class UUID extends Model\AbstractModel
     }
 
     /**
-     * @param int $id
+     * @param $id
      *
      * @return $this
      */
@@ -100,7 +98,7 @@ class UUID extends Model\AbstractModel
     }
 
     /**
-     * @return int
+     * @return mixed
      */
     public function getItemId()
     {
@@ -108,7 +106,7 @@ class UUID extends Model\AbstractModel
     }
 
     /**
-     * @param string $type
+     * @param $type
      *
      * @return $this
      */
@@ -120,7 +118,7 @@ class UUID extends Model\AbstractModel
     }
 
     /**
-     * @return string
+     * @return mixed
      */
     public function getType()
     {
@@ -138,14 +136,14 @@ class UUID extends Model\AbstractModel
             throw new \Exception('No instance identifier specified.');
         }
 
-        $this->uuid = \Ramsey\Uuid\Uuid::uuid5(\Ramsey\Uuid\Uuid::NAMESPACE_DNS, $this->getInstanceIdentifier() . '~' . $this->getType() . '~' . $this->getItemId())->toString();
-        $this->getDao()->save();
+        $this->uuid = \Ramsey\Uuid\Uuid::uuid5(\Ramsey\Uuid\Uuid::NAMESPACE_DNS, $this->getInstanceIdentifier() . '~' . $this->getType() . '~' . $this->getItemId());
+        $this->save();
 
         return $this->uuid;
     }
 
     /**
-     * @return string
+     * @return mixed
      */
     public function getUuid()
     {
@@ -153,7 +151,7 @@ class UUID extends Model\AbstractModel
     }
 
     /**
-     * @param string $uuid
+     * @param $uuid
      */
     public function setUuid($uuid)
     {
@@ -161,7 +159,7 @@ class UUID extends Model\AbstractModel
     }
 
     /**
-     * @param mixed $item
+     * @param $item
      *
      * @return $this
      */
@@ -181,7 +179,7 @@ class UUID extends Model\AbstractModel
     }
 
     /**
-     * @param int $item
+     * @param $item
      *
      * @return UUID
      *
@@ -197,7 +195,7 @@ class UUID extends Model\AbstractModel
     }
 
     /**
-     * @param string $uuid
+     * @param $uuid
      *
      * @return mixed
      */
@@ -209,7 +207,7 @@ class UUID extends Model\AbstractModel
     }
 
     /**
-     * @param mixed $item
+     * @param $item
      *
      * @return static
      *

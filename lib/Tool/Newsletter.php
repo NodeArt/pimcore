@@ -55,9 +55,8 @@ class Newsletter
     ): Mail {
         $mail = new Mail();
         $mail->setIgnoreDebugMode(true);
-        $config = Config::getSystemConfiguration('newsletter');
 
-        if ($config['use_specific']) {
+        if (Config::getSystemConfig()->newsletter->usespecific) {
             $mail->init('newsletter');
         }
 
@@ -136,7 +135,6 @@ class Newsletter
     public static function sendNewsletterDocumentBasedMail(Mail $mail, SendingParamContainer $sendingContainer): void
     {
         $mailAddress = $sendingContainer->getEmail();
-        $config = Config::getSystemConfiguration('newsletter');
 
         if (!self::to_domain_exists($mailAddress)) {
             Logger::err('E-Mail address invalid: ' . self::obfuscateEmail($mailAddress));
@@ -148,7 +146,7 @@ class Newsletter
 
             $mailer = null;
             // check if newsletter specific mailer is needed
-            if ($config['use_specific']) {
+            if (Config::getSystemConfig()->newsletter->usespecific) {
                 $mailer = Pimcore::getContainer()->get('swiftmailer.mailer.newsletter_mailer');
             }
 
@@ -156,7 +154,7 @@ class Newsletter
                 'mail' => $mail,
                 'document' => $mail->getDocument(),
                 'sendingContainer' => $sendingContainer,
-                'mailer' => $mailer,
+                'mailer' => $mailer
             ]);
 
             Pimcore::getEventDispatcher()->dispatch(DocumentEvents::NEWSLETTER_PRE_SEND, $event);
@@ -181,9 +179,9 @@ class Newsletter
     }
 
     /**
-     * @param string $email
+     * @param $email
      *
-     * @return string
+     * @return mixed
      */
     protected static function obfuscateEmail($email)
     {
@@ -195,8 +193,8 @@ class Newsletter
     /**
      * @param Model\Document\Newsletter $newsletter
      * @param DataObject\Concrete $object
-     * @param string|null $emailAddress
-     * @param string|null $hostUrl
+     * @param null $emailAddress
+     * @param null $hostUrl
      *
      * @throws Exception
      *
@@ -215,21 +213,19 @@ class Newsletter
             E_USER_DEPRECATED
         );
 
-        $config = Config::getSystemConfiguration('newsletter');
-
         $params = [
             'gender' => $object->getGender(),
             'firstname' => $object->getFirstname(),
             'lastname' => $object->getLastname(),
             'email' => $object->getEmail(),
             'token' => $object->getProperty('token'),
-            'object' => $object,
+            'object' => $object
         ];
 
         $mail = new Mail();
         $mail->setIgnoreDebugMode(true);
 
-        if ($config['use_specific']) {
+        if (Config::getSystemConfig()->newsletter->usespecific) {
             $mail->init('newsletter');
         }
 
@@ -276,11 +272,11 @@ class Newsletter
     }
 
     /**
-     * @param string $classId
+     * @param null $classId
      *
      * @throws Exception
      */
-    public function __construct($classId)
+    public function __construct($classId = null)
     {
         $class = null;
         if (is_numeric($classId)) {
@@ -327,9 +323,9 @@ class Newsletter
     }
 
     /**
-     * @param array $params
+     * @param $params
      *
-     * @return DataObject\Concrete
+     * @return mixed
      *
      * @throws Exception
      */
@@ -375,7 +371,7 @@ class Newsletter
         $token = base64_encode(json_encode([
             'salt' => md5(microtime()),
             'email' => $object->getEmail(),
-            'id' => $object->getId(),
+            'id' => $object->getId()
         ]));
         $token = str_replace('=', '~', $token); // base64 can contain = which isn't safe in URL's
         $object->setProperty('token', 'text', $token);
@@ -392,8 +388,8 @@ class Newsletter
     }
 
     /**
-     * @param DataObject\Concrete $object
-     * @param Document $mailDocument
+     * @param $object
+     * @param $mailDocument
      * @param array $params
      *
      * @throws Exception
@@ -406,7 +402,7 @@ class Newsletter
             'lastname' => $object->getLastname(),
             'email' => $object->getEmail(),
             'token' => $object->getProperty('token'),
-            'object' => $object,
+            'object' => $object
         ];
 
         $params = array_merge($defaultParameters, $params);
@@ -419,7 +415,7 @@ class Newsletter
     }
 
     /**
-     * @param string $token
+     * @param $token
      *
      * @return DataObject\Concrete|null
      */
@@ -429,8 +425,8 @@ class Newsletter
         $token = str_replace('~', '=', $token); // base64 can contain = which isn't safe in URL's
 
         $data = json_decode(base64_decode($token), true);
-
-        if ($data && $object = DataObject\Concrete::getById($data['id'])) {
+        /** @var DataObject\Concrete $object */
+        if ($data && $object = DataObject::getById($data['id'])) {
             if ($version = $object->getLatestVersion()) {
                 $object = $version->getData();
             }
@@ -532,8 +528,8 @@ class Newsletter
     }
 
     /**
-     * @param DataObject\Concrete $object
-     * @param string $title
+     * @param $object
+     * @param $title
      */
     public function addNoteOnObject($object, $title): void
     {
@@ -546,8 +542,8 @@ class Newsletter
         $note->setData([
             'ip' => [
                 'type' => 'text',
-                'data' => Tool::getClientIp(),
-            ],
+                'data' => Tool::getClientIp()
+            ]
         ]);
         $note->save();
     }

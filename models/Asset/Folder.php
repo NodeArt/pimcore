@@ -33,7 +33,7 @@ class Folder extends Model\Asset
     /**
      * Contains the child elements
      *
-     * @var Asset[]
+     * @var array
      */
     protected $children;
 
@@ -47,7 +47,7 @@ class Folder extends Model\Asset
     /**
      * set the children of the document
      *
-     * @param Asset[] $children
+     * @param $children
      *
      * @return Folder
      */

@@ -17,7 +17,6 @@
 namespace Pimcore\Model\DataObject\ClassDefinition\Data;
 
 use Pimcore\Model\DataObject\AbstractObject;
-use Pimcore\Model\DataObject\Concrete;
 
 interface DataInterface
 {
@@ -34,8 +33,8 @@ interface DataInterface
     public function getForCsvExport($object, $params = []);
 
     /**
-     * @param string $importValue
-     * @param null|Concrete $object
+     * @param $importValue
+     * @param null $object
      * @param array $params
      *
      * @return mixed

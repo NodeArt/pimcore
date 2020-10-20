@@ -34,14 +34,14 @@ pimcore.document.page_snippet = Class.create(pimcore.document.document, {
                 this.getLayoutToolbar(),
                 this.getTabPanel()
             ],
-            iconCls: this.getIconClass(),
+            iconCls: "pimcore_icon_" + this.data.type,
             document: this
         });
 
         // remove this instance when the panel is closed
         this.tab.on("beforedestroy", function () {
             Ext.Ajax.request({
-                url: Routing.generate('pimcore_admin_element_unlockelement'),
+                url: "/admin/element/unlock-element",
                 method: 'PUT',
                 params: {
                     id: this.data.id,
@@ -111,20 +111,12 @@ pimcore.document.page_snippet = Class.create(pimcore.document.document, {
                 iconCls: "pimcore_icon_save_white",
                 cls: "pimcore_save_button",
                 scale: "medium",
-                handler: this.save.bind(this, null),
-                menu: [
-                    {
-                        text: t('save_close'),
-                        iconCls: "pimcore_icon_save",
-                        handler: this.saveClose.bind(this)
-                    },
-                    {
-                        text: t('save_only_scheduled_tasks'),
-                        iconCls: "pimcore_icon_save",
-                        handler: this.save.bind(this, "scheduler","scheduler"),
-                        hidden: !this.isAllowed("settings") || this.data.published
-                    }
-                ]
+                handler: this.unpublish.bind(this),
+                menu: [{
+                    text: t('save_close'),
+                    iconCls: "pimcore_icon_save",
+                    handler: this.save.bind(this)
+                }]
             });
 
 
@@ -142,14 +134,14 @@ pimcore.document.page_snippet = Class.create(pimcore.document.document, {
                     },{
                         text: t('save_only_new_version'),
                         iconCls: "pimcore_icon_save",
-                        handler: this.save.bind(this, null),
-                        hidden: !this.isAllowed("save") || !this.data.published
+                        handler: this.save.bind(this),
+                        hidden: !this.isAllowed("save")
                     },
                     {
                         text: t('save_only_scheduled_tasks'),
                         iconCls: "pimcore_icon_save",
                         handler: this.save.bind(this, "scheduler","scheduler"),
-                        hidden: !this.isAllowed("settings") || !this.data.published
+                        hidden: !this.isAllowed("settings")
                     }
                 ]
             });
@@ -304,7 +296,7 @@ pimcore.document.page_snippet = Class.create(pimcore.document.document, {
 
             // check for newer version than the published
             if (this.data.versions.length > 0) {
-                if (this.data.documentFromVersion) {
+                if (this.data.modificationDate < this.data.versions[0].date) {
                     this.newerVersionNotification.show();
                 }
             }
@@ -337,7 +329,7 @@ pimcore.document.page_snippet = Class.create(pimcore.document.document, {
         }
 
         Ext.Ajax.request({
-            url: Routing.getBaseUrl() + '/admin/' + this.getType() + '/save-to-session',
+            url: this.urlprefix + this.getType() + '/save-to-session',
             method: "post",
             params: this.getSaveData(),
             success: onComplete
@@ -346,7 +338,7 @@ pimcore.document.page_snippet = Class.create(pimcore.document.document, {
 
     removeFromSession: function () {
         Ext.Ajax.request({
-            url: Routing.getBaseUrl() + '/admin/' + this.getType() + '/remove-from-session',
+            url: this.urlprefix + this.getType() + '/remove-from-session',
             method: 'DELETE',
             params: {id: this.data.id}
         });
@@ -445,60 +437,5 @@ pimcore.document.page_snippet = Class.create(pimcore.document.document, {
                 pimcore.globalmanager.get("new_notifications").getWindow().destroy();
             }
             pimcore.globalmanager.add("new_notifications", new pimcore.notification.modal(elementData));        }
-    },
-
-    publish: function($super, only, callback) {
-        /* It is needed to have extra validateRequiredEditables check here
-         * so as to stop propagating Admin UI changes in case of required content = true */
-        if (this.validateRequiredEditables()) {
-            return false;
-        }
-
-        $super(only, callback);
-    },
-
-    save: function ($super, task, only, callback, successCallback) {
-        if (task !== "publish") {
-            this.validateRequiredEditables(true);
-        }
-
-        $super(task, only, callback, successCallback);
-    },
-
-    validateRequiredEditables: function (dismissAlert) {
-        //validate required editables against missing values
-        try {
-            /* No validation in case of changing system settings as template can be changed
-             * if template is changed, then document editables be validated on server side
-             */
-            var settingsForm = Ext.getCmp("pimcore_document_settings_" + this.id);
-            if(settingsForm.dirty) {
-                this.data.missingRequiredEditable = null;
-                return;
-            }
-
-            var emptyRequiredEditables = this.edit.getEmptyRequiredEditables();
-            if (emptyRequiredEditables.length > 0) {
-                if (!dismissAlert) {
-                    Ext.MessageBox.show({
-                        title: t("error"),
-                        width: 500,
-                        msg: t("complete_required_fields")
-                            + '<br /><br /><textarea style="width:100%; min-height:100px; resize:none" readonly="readonly">'
-                            + emptyRequiredEditables.join(", ") + "</textarea>",
-                        buttons: Ext.Msg.OK
-                    });
-                }
-
-                this.data.missingRequiredEditable = true;
-
-                return true;
-            }
-
-            if(this.data.missingRequiredEditable == true) {
-                this.data.missingRequiredEditable = false;
-            }
-        } catch(e) {
-        }
     }
 });

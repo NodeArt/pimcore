@@ -27,7 +27,7 @@ class Dao extends Model\Dao\AbstractDao
     /**
      * @param int $cid
      * @param string $ctype
-     * @param string $workflow
+     * @param string $workflowId
      *
      * @throws \Exception
      */
@@ -71,7 +71,7 @@ class Dao extends Model\Dao\AbstractDao
     {
         $this->db->delete('element_workflow_state', [
             'cid' => $this->model->getCid(),
-            'ctype' => $this->model->getCtype(),
+            'ctype' => $this->model->getCtype()
         ]);
     }
 }

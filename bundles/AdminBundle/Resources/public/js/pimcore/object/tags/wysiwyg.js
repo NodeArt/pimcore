@@ -68,7 +68,7 @@ pimcore.object.tags.wysiwyg = Class.create(pimcore.object.tags.abstract, {
         }.bind(this, field.key);
 
         return {
-            text: t(field.label), sortable: true, dataIndex: field.key, renderer: renderer,
+            text: ts(field.label), sortable: true, dataIndex: field.key, renderer: renderer,
             getEditor: this.getWindowCellEditor.bind(this, field)
         };
     },
@@ -94,7 +94,7 @@ pimcore.object.tags.wysiwyg = Class.create(pimcore.object.tags.abstract, {
             bodyStyle: 'background: #fff',
             style: "margin-bottom: 10px",
             manageHeight: false,
-            cls: "object_field object_field_type_" + this.type
+            cls: "object_field"
         };
 
         if(this.fieldConfig.width) {
@@ -215,18 +215,6 @@ pimcore.object.tags.wysiwyg = Class.create(pimcore.object.tags.abstract, {
                     urlField.getParent().getParent().getParent().show();
                 }
             });
-
-            // force paste dialog to prevent security message on various browsers
-            this.ckeditor.on('beforeCommandExec', function(event) {
-                if (event.data.name === 'paste') {
-                    event.editor._.forcePasteDialog = true;
-                }
-
-                if (event.data.name === 'pastetext' && event.data.commandData.from === 'keystrokeHandler') {
-                    event.cancel();
-                }
-            });
-
         } catch (e) {
             console.log(e);
         }
@@ -297,7 +285,7 @@ pimcore.object.tags.wysiwyg = Class.create(pimcore.object.tags.abstract, {
                 // converted by the pimcore thumbnailing service so that they can be displayed in the editor
                 var defaultWidth = 600;
                 var additionalAttributes = "";
-                uri = Routing.generate('pimcore_admin_asset_getimagethumbnail', {id: id, width: defaultWidth, aspectration: true});
+                uri = "/admin/asset/get-image-thumbnail?id=" + id + "&width=" + defaultWidth + "&aspectratio=true";
 
                 if(typeof node.data.imageWidth != "undefined") {
                     if(node.data.imageWidth < defaultWidth

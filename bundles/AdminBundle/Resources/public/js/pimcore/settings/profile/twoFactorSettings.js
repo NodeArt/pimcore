@@ -22,10 +22,14 @@ pimcore.settings.profile.twoFactorSettings = Class.create({
 
     getPanel: function () {
 
+        var that = this;
+        var twoFactorData = this.data;
+
         var buttonLabel = t('setup_two_factor');
         if(this.data['isActive']) {
             buttonLabel = t('renew_2fa_secret');
         }
+
 
         var panelConf = {
             xtype: "fieldset",
@@ -43,7 +47,7 @@ pimcore.settings.profile.twoFactorSettings = Class.create({
                 hidden: this.data['required'] || !this.data['isActive'],
                 handler: function () {
                     Ext.Ajax.request({
-                        url: Routing.generate('pimcore_admin_user_disable2fasecret'),
+                        url: "/admin/user/disable-2fa",
                         method: 'DELETE',
                         success: function (response) {
                             window.location.reload();
@@ -72,7 +76,7 @@ pimcore.settings.profile.twoFactorSettings = Class.create({
             items: [
                 {
                     xtype: "container",
-                    html: '<img src="'+Routing.generate('pimcore_admin_user_renew2fasecret')+'"/>',
+                    html: '<img src="/admin/user/renew-2fa-qr-secret"/>',
                     width: 230,
                     height: 230
                 },

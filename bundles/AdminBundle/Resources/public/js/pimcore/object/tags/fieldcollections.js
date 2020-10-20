@@ -39,7 +39,7 @@ pimcore.object.tags.fieldcollections = Class.create(pimcore.object.tags.abstract
 
 
     getGridColumnConfig: function(field) {
-        return {text: t(field.label), width: 150, sortable: false, dataIndex: field.key,
+        return {text: ts(field.label), width: 150, sortable: false, dataIndex: field.key,
                 renderer: function (key, value, metaData, record) {
                     this.applyPermissionStyle(key, value, metaData, record);
 
@@ -66,7 +66,7 @@ pimcore.object.tags.fieldcollections = Class.create(pimcore.object.tags.abstract
         }
 
         Ext.Ajax.request({
-            url: Routing.generate('pimcore_admin_dataobject_class_fieldcollectiontree'),
+            url: "/admin/class/fieldcollection-tree",
             params: extraParams,
             success: this.initData.bind(this)
         });
@@ -82,7 +82,7 @@ pimcore.object.tags.fieldcollections = Class.create(pimcore.object.tags.abstract
             border: this.fieldConfig.border,
             style: "margin-bottom: 10px",
             bodyStyle: 'padding-top: 5px',
-            componentCls: "object_field object_field_type_" + this.type,
+            componentCls: "object_field",
             collapsible: this.fieldConfig.collapsible,
             collapsed: this.fieldConfig.collapsed
         };
@@ -136,7 +136,7 @@ pimcore.object.tags.fieldcollections = Class.create(pimcore.object.tags.abstract
         this.component.updateLayout();
     },
 
-    buildMenu: function(data, blockElement, position) {
+    buildMenu: function(data, blockElement) {
         var collectionMenu = [];
 
         if (data) {
@@ -144,14 +144,14 @@ pimcore.object.tags.fieldcollections = Class.create(pimcore.object.tags.abstract
                 var elementData = data[i];
 
                 var menuItem = {
-                    text: elementData.title ? t(elementData.title) : t(elementData.text),
+                    text: elementData.title ? ts(elementData.title) : ts(elementData.text),
                     iconCls: elementData.iconCls
                 };
                 if (elementData.group) {
-                    var subMenu = this.buildMenu(elementData.children, blockElement, position);
+                    var subMenu = this.buildMenu(elementData.children, blockElement);
                     menuItem.menu = subMenu;
                 } else {
-                    menuItem.handler = this.addBlock.bind(this, blockElement, elementData.key, elementData.title, position);
+                    menuItem.handler = this.addBlock.bind(this, blockElement, elementData.key, elementData.title);
                 }
 
                 collectionMenu.push(menuItem);
@@ -165,71 +165,30 @@ pimcore.object.tags.fieldcollections = Class.create(pimcore.object.tags.abstract
 
     getControls: function (blockElement, title) {
 
-        if (this.fieldConfig.noteditable) {
-            return new Ext.Toolbar({
-                items: {
-                    xtype: "tbtext",
-                    text: t(title)
-                }
-            });
-        }
-
         var menuData = this.fieldcollections;
-        var collectionMenuBefore = this.buildMenu(menuData, blockElement, 'before');
-        var collectionMenuAfter = this.buildMenu(menuData, blockElement, 'after');
+        var collectionMenu = this.buildMenu(menuData, blockElement, true);
 
         var items = [];
 
-        if(collectionMenuBefore.length == 0) {
+        if(collectionMenu.length == 0) {
             items.push({
                 xtype: "tbtext",
                 text: t("no_collections_allowed")
             });
-        } else if(collectionMenuBefore.length == 1 && !collectionMenuBefore[0].menu) {
-            if(blockElement) {
-                items.push({
-                    disabled: this.fieldConfig.disallowAddRemove,
-                    cls: "pimcore_block_button_plus",
-                    iconCls: "pimcore_icon_plus_up",
-                    handler: collectionMenuBefore[0].handler
-                });
-
-                items.push({
-                    disabled: this.fieldConfig.disallowAddRemove,
-                    cls: "pimcore_block_button_plus",
-                    iconCls: "pimcore_icon_plus_down",
-                    handler: collectionMenuAfter[0].handler
-                });
-            } else {
-                items.push({
-                    disabled: this.fieldConfig.disallowAddRemove,
-                    cls: "pimcore_block_button_plus",
-                    iconCls: "pimcore_icon_plus",
-                    handler: collectionMenuAfter[0].handler
-                });
-            }
+        } else if(collectionMenu.length == 1 && !collectionMenu[0].menu) {
+            items.push({
+                disabled: this.fieldConfig.disallowAddRemove,
+                cls: "pimcore_block_button_plus",
+                iconCls: "pimcore_icon_plus",
+                handler: collectionMenu[0].handler
+            });
         } else  {
-            if(blockElement) {
-                items.push({
-                    disabled: this.fieldConfig.disallowAddRemove,
-                    cls: "pimcore_block_button_plus",
-                    iconCls: "pimcore_icon_plus_up",
-                    menu: collectionMenuBefore
-                });
-                items.push({
-                    disabled: this.fieldConfig.disallowAddRemove,
-                    cls: "pimcore_block_button_plus",
-                    iconCls: "pimcore_icon_plus_down",
-                    menu: collectionMenuAfter
-                });
-            } else {
-                items.push({
-                    disabled: this.fieldConfig.disallowAddRemove,
-                    cls: "pimcore_block_button_plus",
-                    iconCls: "pimcore_icon_plus",
-                    menu: collectionMenuAfter
-                });
-            }
+            items.push({
+                disabled: this.fieldConfig.disallowAddRemove,
+                cls: "pimcore_block_button_plus",
+                iconCls: "pimcore_icon_plus",
+                menu: collectionMenu
+            });
         }
 
         if(blockElement) {
@@ -263,7 +222,7 @@ pimcore.object.tags.fieldcollections = Class.create(pimcore.object.tags.abstract
             if (title) {
                 items.push({
                     xtype: "tbtext",
-                    text: t(title)
+                    text: ts(title)
                 });
             }
         }
@@ -302,7 +261,7 @@ pimcore.object.tags.fieldcollections = Class.create(pimcore.object.tags.abstract
         }
     },
 
-    addBlock: function (blockElement, type, title, position) {
+    addBlock: function (blockElement, type, title) {
 
         this.closeOpenEditors();
 
@@ -325,11 +284,7 @@ pimcore.object.tags.fieldcollections = Class.create(pimcore.object.tags.abstract
             index = this.detectBlockIndex(blockElement);
         }
 
-        if (position !== 'before') {
-            index++;
-        }
-
-        this.addBlockElement(index, {
+        this.addBlockElement(index + 1, {
             type: type,
             title: title
         });
@@ -403,21 +358,14 @@ pimcore.object.tags.fieldcollections = Class.create(pimcore.object.tags.abstract
             this.currentData = blockData;
         }
 
-        var items =  this.getRecursiveLayout(
-            this.layoutDefinitions[type],
-            this.fieldConfig.noteditable,
+        var items =  this.getRecursiveLayout(this.layoutDefinitions[type], null,
             {
                 containerType: "fieldcollection",
                 containerName: this.fieldConfig.name,
                 containerKey: type,
                 index: index,
-                applyDefaults: true,
-            },
-            false,
-            false,
-            this,
-            true
-        ).items;
+            }, false, false, this, true).items;
+
 
         var blockElement = new Ext.Panel({
             pimcore_oIndex: oIndex,
@@ -426,7 +374,8 @@ pimcore.object.tags.fieldcollections = Class.create(pimcore.object.tags.abstract
             style: "margin: 0 0 10px 0;",
             manageHeight: false,
             border: true,
-            items: items
+            items: items,
+            disabled: this.fieldConfig.noteditable
         });
 
         blockElement.insert(0, this.getControls(blockElement, title));
@@ -590,6 +539,38 @@ pimcore.object.tags.fieldcollections = Class.create(pimcore.object.tags.abstract
         }
 
         return false;
+    },
+
+    isInvalidMandatory: function () {
+        var element;
+        var isInvalid = false;
+        var invalidMandatoryFields = [];
+
+        for(var s=0; s<this.component.items.items.length; s++) {
+            if(this.currentElements[this.component.items.items[s].key]) {
+                element = this.currentElements[this.component.items.items[s].key];
+
+                var elementFieldNames = Object.keys(element.fields);
+
+                for (var u=0; u < elementFieldNames.length; u++) {
+                    var elementFieldName = elementFieldNames[u];
+                    if(element.fields[elementFieldName].isMandatory()) {
+                        if(element.fields[elementFieldName].isInvalidMandatory()) {
+                            invalidMandatoryFields.push(element.fields[elementFieldName].getTitle() + " ("
+                                                                    + element.fields[elementFieldName].getName() + ")");
+                            isInvalid = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        // return the error messages not bool, this is handled in object/edit.js
+        if(isInvalid) {
+            return invalidMandatoryFields;
+        }
+
+        return isInvalid;
     }
 });
 

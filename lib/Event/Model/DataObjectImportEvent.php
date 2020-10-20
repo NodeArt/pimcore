@@ -25,12 +25,12 @@ use Symfony\Component\EventDispatcher\Event;
 class DataObjectImportEvent extends Event
 {
     /**
-     * @var mixed
+     * @var
      */
     protected $config;
 
     /**
-     * @var string
+     * @var
      */
     protected $originalFile;
 
@@ -40,25 +40,25 @@ class DataObjectImportEvent extends Event
     protected $object;
 
     /**
-     * @var mixed
+     * @var
      */
     protected $rowData;
 
     /**
-     * @var mixed
+     * @var
      */
     protected $additionalData;
 
     /**
-     * @var mixed
+     * @var
      */
     protected $context;
 
     /**
      * DataObjectImportEvent constructor.
      *
-     * @param mixed $config
-     * @param string $originalFile
+     * @param $config
+     * @param $originalFile
      */
     public function __construct($config, $originalFile)
     {
@@ -83,7 +83,7 @@ class DataObjectImportEvent extends Event
     }
 
     /**
-     * @return string
+     * @return mixed
      */
     public function getOriginalFile()
     {
@@ -91,7 +91,7 @@ class DataObjectImportEvent extends Event
     }
 
     /**
-     * @param string $originalFile
+     * @param mixed $originalFile
      */
     public function setOriginalFile($originalFile)
     {

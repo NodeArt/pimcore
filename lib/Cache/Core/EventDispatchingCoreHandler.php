@@ -45,8 +45,6 @@ class EventDispatchingCoreHandler extends CoreHandler
         parent::enable();
 
         $this->setEnabled(false);
-
-        return $this;
     }
 
     /**
@@ -57,8 +55,6 @@ class EventDispatchingCoreHandler extends CoreHandler
         parent::disable();
 
         $this->setEnabled(false);
-
-        return $this;
     }
 
     /**

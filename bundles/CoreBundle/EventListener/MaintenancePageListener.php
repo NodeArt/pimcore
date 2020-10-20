@@ -43,7 +43,7 @@ class MaintenancePageListener
     }
 
     /**
-     * @param string $code
+     * @param $code
      */
     public function setTemplateCode($code)
     {

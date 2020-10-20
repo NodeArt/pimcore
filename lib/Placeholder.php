@@ -33,7 +33,7 @@ class Placeholder
     /**
      * Prefixes for the Placeholder Classes
      *
-     * @var array
+     * @var string
      */
     protected static $placeholderClassPrefixes = ['Pimcore_Placeholder_', 'Website_Placeholder_', '\\Pimcore\\Placeholder\\', '\\Website\\Placeholder\\', '\\AppBundle\\Placeholder\\'];
 
@@ -45,7 +45,7 @@ class Placeholder
     protected $document;
 
     /**
-     * @param string $classPrefix
+     * @param $classPrefix
      *
      * @throws \Exception
      */
@@ -59,7 +59,7 @@ class Placeholder
     }
 
     /**
-     * @param string $classPrefix
+     * @param $classPrefix
      *
      * @return bool
      *
@@ -115,7 +115,7 @@ class Placeholder
     }
 
     /**
-     * @param string $suffix
+     * @param $suffix
      *
      * @throws \Exception
      */
@@ -176,7 +176,7 @@ class Placeholder
                     'placeholderConfig' => $placeholderConfig,
                     'document' => $document,
                     'params' => $params,
-                    'contentString' => $contentString, ];
+                    'contentString' => $contentString];
             }
         }
 
@@ -195,7 +195,6 @@ class Placeholder
      */
     public function replacePlaceholders($mixed, $params = [], $document = null, $enableLayoutOnPlaceholderReplacement = true)
     {
-        $contentString = null;
         if (is_string($mixed)) {
             $contentString = $mixed;
         } elseif ($mixed instanceof Model\Document) {
@@ -258,6 +257,9 @@ class Placeholder
                     $placeholderObject->setLocale();
 
                     $replaceWith = $placeholderObject->getReplacement();
+                    if (!isset($replaceWith)) {
+                        $replaceWith = $placeholderObject->getEmptyValue();
+                    }
                     $stringReplaced = str_replace($placeholderObject->getPlaceholderString(), $replaceWith, $stringReplaced);
                 } else {
                     Logger::warn('Ignoring Placeholder "' . $placeholder['placeholderClass'] . '" -> Class not Found or not an instance of Pimcore_Placeholder_Abstract!');

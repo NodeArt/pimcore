@@ -17,6 +17,7 @@
 namespace Pimcore\Model\DataObject\ClassDefinition\Layout;
 
 use Pimcore\Model;
+use Pimcore\Tool;
 
 class Text extends Model\DataObject\ClassDefinition\Layout
 {
@@ -56,7 +57,7 @@ class Text extends Model\DataObject\ClassDefinition\Layout
     }
 
     /**
-     * @param string $html
+     * @param $html
      *
      * @return $this
      */
@@ -68,7 +69,7 @@ class Text extends Model\DataObject\ClassDefinition\Layout
     }
 
     /**
-     * @return string
+     * @return mixed
      */
     public function getRenderingClass()
     {
@@ -76,7 +77,7 @@ class Text extends Model\DataObject\ClassDefinition\Layout
     }
 
     /**
-     * @param string $renderingClass
+     * @param mixed $renderingClass
      */
     public function setRenderingClass($renderingClass)
     {
@@ -84,7 +85,7 @@ class Text extends Model\DataObject\ClassDefinition\Layout
     }
 
     /**
-     * @return string
+     * @return mixed
      */
     public function getRenderingData()
     {
@@ -92,7 +93,7 @@ class Text extends Model\DataObject\ClassDefinition\Layout
     }
 
     /**
-     * @param string $renderingData
+     * @param mixed $renderingData
      */
     public function setRenderingData($renderingData)
     {
@@ -115,33 +116,21 @@ class Text extends Model\DataObject\ClassDefinition\Layout
         $this->border = $border;
     }
 
-    /**
-     * Override point for Enriching the layout definition before the layout is returned to the admin interface.
-     *
-     * @param Model\DataObject\Concrete|null $object
+    /** Override point for Enriching the layout definition before the layout is returned to the admin interface.
+     * @param $object Model\DataObject\Concrete
      * @param array $context additional contextual data
-     *
-     * @return self
      */
     public function enrichLayoutDefinition($object, $context = [])
     {
-        $renderer = Model\DataObject\ClassDefinition\Helper\DynamicTextResolver::resolveRenderingClass(
-            $this->getRenderingClass()
-        );
+        $renderingClass = $this->getRenderingClass();
 
-        if ($renderer === null) {
-            $renderer = $this->getRenderingClass();
-        }
-
-        if (!$renderer instanceof DynamicTextLabelInterface) {
-            @trigger_error('Using a text renderer class which does not implement ' . DynamicTextLabelInterface::class.' is deprecated', \E_USER_DEPRECATED);
-        }
-
-        if (method_exists($renderer, 'renderLayoutText') && $object) {
-            $context['fieldname'] = $this->getName();
-            $context['layout'] = $this;
-            $result = call_user_func([$renderer, 'renderLayoutText'], $this->renderingData, $object, $context);
-            $this->html = $result;
+        if (Tool::classExists($renderingClass)) {
+            if (method_exists($renderingClass, 'renderLayoutText')) {
+                $context['fieldname'] = $this->getName();
+                $context['layout'] = $this;
+                $result = call_user_func($renderingClass . '::renderLayoutText', $this->renderingData, $object, $context);
+                $this->html = $result;
+            }
         }
 
         return $this;

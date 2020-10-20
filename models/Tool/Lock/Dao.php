@@ -21,14 +21,12 @@ use Pimcore\Logger;
 use Pimcore\Model;
 
 /**
- * @deprecated use Symfony Lock component instead
- *
  * @property \Pimcore\Model\Tool\Lock $model
  */
 class Dao extends Model\Dao\AbstractDao
 {
     /**
-     * @param string $key
+     * @param $key
      * @param int $expire
      *
      * @return bool
@@ -57,7 +55,7 @@ class Dao extends Model\Dao\AbstractDao
     }
 
     /**
-     * @param string $key
+     * @param $key
      * @param int $expire
      * @param int $refreshInterval
      *
@@ -87,7 +85,7 @@ class Dao extends Model\Dao\AbstractDao
     }
 
     /**
-     * @param string $key
+     * @param $key
      */
     public function release($key)
     {
@@ -96,7 +94,7 @@ class Dao extends Model\Dao\AbstractDao
     }
 
     /**
-     * @param string $key
+     * @param $key
      * @param bool $force
      */
     public function lock($key, $force = true)
@@ -107,12 +105,12 @@ class Dao extends Model\Dao\AbstractDao
 
         $this->db->$updateMethod('locks', [
             'id' => $key,
-            'date' => time(),
+            'date' => time()
         ]);
     }
 
     /**
-     * @param string $key
+     * @param $key
      */
     public function getById($key)
     {

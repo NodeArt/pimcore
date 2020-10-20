@@ -75,7 +75,5 @@ class MysqlToolsCommand extends AbstractCommand
                 }
             }
         }
-
-        return 0;
     }
 }

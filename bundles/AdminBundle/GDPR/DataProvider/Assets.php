@@ -17,6 +17,7 @@ namespace Pimcore\Bundle\AdminBundle\GDPR\DataProvider;
 
 use Pimcore\Db;
 use Pimcore\Model\Asset;
+use Pimcore\Model\Element\AbstractElement;
 use Pimcore\Model\Element\ElementInterface;
 use Pimcore\Model\Element\Service;
 use Pimcore\Model\Search\Backend\Data;
@@ -30,7 +31,7 @@ class Assets extends Elements implements DataProviderInterface
     protected $service;
 
     /**
-     * @var bool[]
+     * @var string[]
      */
     protected $exportIds = [];
 
@@ -64,7 +65,7 @@ class Assets extends Elements implements DataProviderInterface
     /**
      * Exports data of given asset as json
      *
-     * @param Asset $asset
+     * @param Asset $object
      *
      * @return Response
      */
@@ -83,6 +84,7 @@ class Assets extends Elements implements DataProviderInterface
 
         foreach (array_keys($this->exportIds) as $id) {
             $theAsset = Asset::getById($id);
+            /** @var $theAsset */
             $webAsset = $this->service->getAssetFileById($id);
 
             $resultItem = json_decode(json_encode($webAsset), true);
@@ -199,7 +201,7 @@ class Assets extends Elements implements DataProviderInterface
         $hits = $searcherList->load();
 
         $elements = [];
-        /** @var Data $hit */
+        /** @var $hit AbstractElement */
         foreach ($hits as $hit) {
             $element = Service::getElementById($hit->getId()->getType(), $hit->getId()->getId());
 

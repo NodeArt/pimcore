@@ -18,7 +18,7 @@ pimcore.report.custom.definition.analytics = Class.create({
     sourceDefinitionData: null,
 
     initialize: function (sourceDefinitionData, key, deleteControl, columnSettingsCallback) {
-        sourceDefinitionData = sourceDefinitionData ? sourceDefinitionData : {filters: '', sort: '', startDate: '', relativeStartDate: '', relativeEndDate: '', endDate: '', dimension: '', metric: '', segment: '', profileId: ''};
+        sourceDefinitionData = sourceDefinitionData ? sourceDefinitionData : {filters: '', sort: '', startDate: '', relativeStartDate: '', relativeEndDate: '', endDate: '', relativeStartDate: '', dimension: '', metric: '', segment: '', profileId: ''};
 
         if (sourceDefinitionData.startDate) {
             var startDate = new Date();
@@ -34,6 +34,7 @@ pimcore.report.custom.definition.analytics = Class.create({
 
         this.sourceDefinitionData = sourceDefinitionData;
 
+        var profileLoaded = false;
         var dimensionLoaded = false;
         var metricLoaded = false;
         var segmentLoaded = false;
@@ -42,7 +43,7 @@ pimcore.report.custom.definition.analytics = Class.create({
             autoDestroy: true,
             proxy: {
                 type: 'ajax',
-                url: Routing.generate('pimcore_admin_reports_analytics_getdimensions'),
+                url: "/admin/reports/analytics/get-dimensions",
                 reader: {
                     type: 'json',
                     rootProperty: "data",
@@ -87,7 +88,7 @@ pimcore.report.custom.definition.analytics = Class.create({
             autoDestroy: true,
             proxy: {
                 type: 'ajax',
-                url: Routing.generate('pimcore_admin_reports_analytics_getmetrics'),
+                url: "/admin/reports/analytics/get-metrics",
                 reader: {
                     type: 'json',
                     rootProperty: "data",
@@ -134,7 +135,7 @@ pimcore.report.custom.definition.analytics = Class.create({
             autoLoad: true,
             proxy: {
                 type: 'ajax',
-                url: Routing.generate('pimcore_admin_reports_analytics_getsegments'),
+                url: "/admin/reports/analytics/get-segments",
                 reader: {
                     rootProperty: "data",
                     idProperty: "id"
@@ -206,7 +207,7 @@ pimcore.report.custom.definition.analytics = Class.create({
                         autoLoad: true,
                         proxy: {
                             type: 'ajax',
-                            url: Routing.generate('pimcore_admin_reports_analytics_getprofiles'),
+                            url: "/admin/reports/analytics/get-profiles",
                             reader: {
                                 type: 'json',
                                 rootProperty: "data",

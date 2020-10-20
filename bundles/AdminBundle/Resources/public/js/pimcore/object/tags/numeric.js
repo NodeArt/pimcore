@@ -17,16 +17,15 @@ pimcore.object.tags.numeric = Class.create(pimcore.object.tags.abstract, {
     type: "numeric",
 
     initialize: function (data, fieldConfig) {
+
+        this.defaultValue = null;
+        if ((typeof data === "undefined" || data === null) && fieldConfig.defaultValue) {
+            data = fieldConfig.defaultValue;
+            this.defaultValue = data;
+        }
+
         this.data = data;
         this.fieldConfig = fieldConfig;
-    },
-
-    applyDefaultValue: function() {
-        this.defaultValue = null;
-        if ((typeof this.data === "undefined" || this.data === null) && this.fieldConfig.defaultValue) {
-            this.data = this.fieldConfig.defaultValue;
-            this.defaultValue = this.fieldConfig.defaultValue;
-        }
     },
 
     getGridColumnEditor: function (field) {
@@ -83,7 +82,7 @@ pimcore.object.tags.numeric = Class.create(pimcore.object.tags.abstract, {
         var input = {
             fieldLabel: this.fieldConfig.title,
             name: this.fieldConfig.name,
-            componentCls: "object_field object_field_type_" + this.type
+            componentCls: "object_field"
         };
 
         if (!isNaN(this.data)) {
@@ -131,7 +130,7 @@ pimcore.object.tags.numeric = Class.create(pimcore.object.tags.abstract, {
         var input = {
             fieldLabel: this.fieldConfig.title,
             name: this.fieldConfig.name,
-            componentCls: "object_field object_field_type_" + this.type,
+            componentCls: "object_field"
         };
 
         if (!isNaN(this.data)) {
@@ -169,6 +168,20 @@ pimcore.object.tags.numeric = Class.create(pimcore.object.tags.abstract, {
 
     getName: function () {
         return this.fieldConfig.name;
+    },
+
+    isInvalidMandatory: function () {
+
+        if (!this.isRendered() && (!empty(this.getInitialData() || this.getInitialData() === 0))) {
+            return false;
+        } else if (!this.isRendered()) {
+            return true;
+        }
+
+        if (this.getValue()) {
+            return false;
+        }
+        return true;
     },
 
     isDirty: function () {

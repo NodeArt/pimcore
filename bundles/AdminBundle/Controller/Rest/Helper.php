@@ -16,9 +16,6 @@ namespace Pimcore\Bundle\AdminBundle\Controller\Rest;
 
 use Pimcore\Db;
 
-/**
- * @deprecated
- */
 class Helper
 {
     public static function buildSqlCondition($q, $op = null, $subject = null)
@@ -49,7 +46,7 @@ class Helper
             $op = 'AND';
         }
         $mappingTable = ['$gt' => '>', '$gte' => '>=', '$lt' => '<', '$lte' => '<=', '$like' => 'LIKE', '$notlike' => 'NOT LIKE', '$notnull' => 'IS NOT NULL',
-                '$not' => 'NOT', ];
+                '$not' => 'NOT'];
         $ops = array_keys($mappingTable);
 
         $db = Db::get();
@@ -64,11 +61,9 @@ class Helper
                 $childOp = strtolower($key) == '$and' ? 'AND' : 'OR';
 
                 if (is_array($value)) {
-                    $childParts = [];
                     foreach ($value as $arrItem) {
-                        $childParts[] = self::buildSqlCondition($arrItem, $childOp);
+                        $parts[] = self::buildSqlCondition($arrItem, $childOp);
                     }
-                    $parts[] = implode(' ' . $childOp . ' ', $childParts);
                 } else {
                     $parts[] = self::buildSqlCondition($value, $childOp);
                 }

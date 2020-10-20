@@ -19,9 +19,6 @@ namespace Pimcore\Model\Webservice\Data\Document\Hardlink;
 
 use Pimcore\Model;
 
-/**
- * @deprecated
- */
 class Out extends Model\Webservice\Data\Document\Link
 {
     /**

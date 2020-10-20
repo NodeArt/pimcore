@@ -31,7 +31,7 @@ class Dao extends Model\Dao\PhpArrayTable
     }
 
     /**
-     * @param int|null $id
+     * @param null $id
      *
      * @throws \Exception
      */

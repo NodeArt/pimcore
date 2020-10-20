@@ -19,10 +19,8 @@ namespace Pimcore\Model\DataObject\ClassDefinition\Data\Geo;
 use Pimcore\Model;
 use Pimcore\Tool\Serialize;
 
-abstract class AbstractGeo extends Model\DataObject\ClassDefinition\Data implements Model\DataObject\ClassDefinition\Data\TypeDeclarationSupportInterface
+abstract class AbstractGeo extends Model\DataObject\ClassDefinition\Data
 {
-    use Model\DataObject\ClassDefinition\NullablePhpdocReturnTypeTrait;
-
     /**
      * @var float
      */
@@ -39,16 +37,6 @@ abstract class AbstractGeo extends Model\DataObject\ClassDefinition\Data impleme
     public $zoom = 1;
 
     /**
-     * @var int
-     */
-    public $width;
-
-    /**
-     * @var int
-     */
-    public $height;
-
-    /**
      * @var string
      */
     public $mapType = 'roadmap';
@@ -62,7 +50,7 @@ abstract class AbstractGeo extends Model\DataObject\ClassDefinition\Data impleme
     }
 
     /**
-     * @param float $lat
+     * @param $lat
      *
      * @return $this
      */
@@ -82,7 +70,7 @@ abstract class AbstractGeo extends Model\DataObject\ClassDefinition\Data impleme
     }
 
     /**
-     * @param float $lng
+     * @param $lng
      *
      * @return $this
      */
@@ -102,7 +90,7 @@ abstract class AbstractGeo extends Model\DataObject\ClassDefinition\Data impleme
     }
 
     /**
-     * @param int $zoom
+     * @param $zoom
      *
      * @return $this
      */
@@ -114,48 +102,8 @@ abstract class AbstractGeo extends Model\DataObject\ClassDefinition\Data impleme
     }
 
     /**
-     * @return int
-     */
-    public function getWidth()
-    {
-        return $this->width;
-    }
-
-    /**
-     * @param int $width
-     *
-     * @return $this
-     */
-    public function setWidth($width)
-    {
-        $this->width = $width;
-
-        return $this;
-    }
-
-    /**
-     * @return int
-     */
-    public function getHeight()
-    {
-        return $this->height;
-    }
-
-    /**
-     * @param int $height
-     *
-     * @return $this
-     */
-    public function setHeight($height)
-    {
-        $this->height = $height;
-
-        return $this;
-    }
-
-    /**
-     * @param mixed $value
-     * @param Model\DataObject\AbstractObject|null $object
+     * @param $value
+     * @param null $object
      * @param array $params
      *
      * @return string
@@ -166,8 +114,8 @@ abstract class AbstractGeo extends Model\DataObject\ClassDefinition\Data impleme
     }
 
     /**
-     * @param string $value
-     * @param Model\DataObject\AbstractObject|null $object
+     * @param $value
+     * @param null $object
      * @param array $params
      *
      * @return mixed

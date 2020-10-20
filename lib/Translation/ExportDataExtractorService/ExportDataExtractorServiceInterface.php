@@ -39,7 +39,7 @@ interface ExportDataExtractorServiceInterface
     public function registerDataExtractor(string $type, DataExtractorInterface $dataExtractor): ExportDataExtractorServiceInterface;
 
     /**
-     * @param string $type
+     * @param DataExtractorInterface $dataExtractor
      *
      * @return DataExtractorInterface
      *

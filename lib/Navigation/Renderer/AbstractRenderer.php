@@ -84,7 +84,7 @@ abstract class AbstractRenderer implements RendererInterface
     protected $_skipPrefixForId = false;
 
     /**
-     * Whether invisible items should be rendered by this helper
+     * Wheter invisible items should be rendered by this helper
      *
      * @var bool
      */
@@ -131,7 +131,7 @@ abstract class AbstractRenderer implements RendererInterface
     }
 
     /**
-     * @param int|null $maxDepth
+     * @param null $maxDepth
      *
      * @return $this
      */
@@ -155,7 +155,7 @@ abstract class AbstractRenderer implements RendererInterface
     }
 
     /**
-     * @param string $indent
+     * @param $indent
      *
      * @return $this
      */
@@ -183,7 +183,7 @@ abstract class AbstractRenderer implements RendererInterface
     }
 
     /**
-     * @param string $prefix
+     * @param $prefix
      *
      * @return $this
      */
@@ -247,7 +247,7 @@ abstract class AbstractRenderer implements RendererInterface
 
     /**
      * @param Container $container
-     * @param int|null $minDepth
+     * @param null $minDepth
      * @param int $maxDepth
      *
      * @return array
@@ -323,7 +323,7 @@ abstract class AbstractRenderer implements RendererInterface
                 'title' => $title,
                 'class' => $page->getClass(),
                 'href' => $page->getHref(),
-                'target' => $page->getTarget(),
+                'target' => $page->getTarget()
             ],
             $page->getCustomHtmlAttribs()
         );

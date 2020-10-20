@@ -37,7 +37,7 @@ class Printcontainer extends Document\PrintAbstract
     protected $action = 'container';
 
     /**
-     * @var array
+     * @var
      */
     private $allChildren = [];
 
@@ -56,7 +56,7 @@ class Printcontainer extends Document\PrintAbstract
             'settings' => $this->isAllowed('settings'),
             'rename' => $this->isAllowed('rename'),
             'publish' => $this->isAllowed('publish'),
-            'create' => $this->isAllowed('create'),
+            'create' => $this->isAllowed('create')
         ];
 
         return $tmpDocument;
@@ -105,7 +105,7 @@ class Printcontainer extends Document\PrintAbstract
     {
         $dirty = parent::pdfIsDirty();
         if (!$dirty) {
-            $dirty = ($this->getLastGenerated() < $this->getDao()->getLastedChildModificationDate());
+            $dirty = ($this->getLastGenerated() < $this->getLastedChildModificationDate());
         }
 
         return $dirty;

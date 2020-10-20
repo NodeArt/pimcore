@@ -28,7 +28,6 @@ services:
         tags:
             - { name: container.service_locator }
 
-
     #
     # PIWIK
     #

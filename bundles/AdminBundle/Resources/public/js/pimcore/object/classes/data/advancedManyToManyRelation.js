@@ -32,6 +32,10 @@ pimcore.object.classes.data.advancedManyToManyRelation = Class.create(pimcore.ob
 
         this.initData(initData);
 
+        if (typeof this.datax.lazyLoading == "undefined") {
+            this.datax.lazyLoading = true;
+        }
+
         pimcore.helpers.sanitizeAllowedTypes(this.datax, "classes");
         pimcore.helpers.sanitizeAllowedTypes(this.datax, "assetTypes");
         pimcore.helpers.sanitizeAllowedTypes(this.datax, "documentTypes");
@@ -100,27 +104,24 @@ pimcore.object.classes.data.advancedManyToManyRelation = Class.create(pimcore.ob
         var classesStore = new Ext.data.Store({
             proxy: {
                 type: 'ajax',
-                url: Routing.generate('pimcore_admin_dataobject_class_gettree')
+                url: '/admin/class/get-tree'
             },
             autoDestroy: true,
             fields: ["text"]
         });
         classesStore.load({
-            "callback": function (classesStore, allowedClasses, success) {
-                if (!classesStore.destroyed) {
-                    // not handled correctly by insert
-                    classesStore.insert(0, {'id': 'folder', 'text': 'folder'});
-                    if (success) {
-                        Ext.getCmp('class_allowed_object_classes_' + this.uniqeFieldId).setValue(allowedClasses.join(","));
-                    }
+            "callback": function (allowedClasses, success) {
+                classesStore.insert(0, {'id': 'folder', 'text': 'folder'});
+                if (success) {
+                    Ext.getCmp('class_allowed_object_classes_' + this.uniqeFieldId).setValue(allowedClasses.join(","));
                 }
-            }.bind(this, classesStore, allowedClasses)
+            }.bind(this, allowedClasses)
         });
 
         var documentTypeStore = new Ext.data.Store({
             proxy: {
                 type: 'ajax',
-                url: Routing.generate('pimcore_admin_dataobject_class_getdocumenttypes')
+                url: '/admin/class/get-document-types'
             },
             autoDestroy: true,
             fields: ["text"]
@@ -136,7 +137,7 @@ pimcore.object.classes.data.advancedManyToManyRelation = Class.create(pimcore.ob
         var assetTypeStore = new Ext.data.Store({
             proxy: {
                 type: 'ajax',
-                url: Routing.generate('pimcore_admin_dataobject_class_getassettypes')
+                url: '/admin/class/get-asset-types'
             },
             autoDestroy: true,
             fields: ["text"]
@@ -170,6 +171,27 @@ pimcore.object.classes.data.advancedManyToManyRelation = Class.create(pimcore.ob
                 value: this.datax.maxItems,
                 disabled: this.isInCustomLayoutEditor(),
                 minValue: 0
+            },
+            {
+                xtype: "checkbox",
+                fieldLabel: t("lazy_loading"),
+                name: "lazyLoading",
+                checked: this.datax.lazyLoading && !this.lazyLoadingNotPossible(),
+                disabled: this.isInCustomLayoutEditor() || this.lazyLoadingNotPossible()
+            },
+            {
+                xtype: "displayfield",
+                hideLabel: true,
+                value: t('lazy_loading_description'),
+                cls: "pimcore_extra_label_bottom",
+                style: "padding-bottom:0;"
+            },
+            {
+                xtype: "displayfield",
+                hideLabel: true,
+                value: t('lazy_loading_warning_block'),
+                cls: "pimcore_extra_label_bottom",
+                style: "color:red; font-weight: bold;"
             },
             {
                 xtype: 'textfield',
@@ -568,6 +590,7 @@ pimcore.object.classes.data.advancedManyToManyRelation = Class.create(pimcore.ob
                     maxItems: source.datax.maxItems,
                     columns: source.datax.columns,
                     remoteOwner: source.datax.remoteOwner,
+                    lazyLoading: source.datax.lazyLoading,
                     assetUploadPath: source.datax.assetUploadPath,
                     relationType: source.datax.relationType,
                     objectsAllowed: source.datax.objectsAllowed,
@@ -575,11 +598,7 @@ pimcore.object.classes.data.advancedManyToManyRelation = Class.create(pimcore.ob
                     assetsAllowed: source.datax.assetsAllowed,
                     assetTypes: source.datax.assetTypes,
                     documentsAllowed: source.datax.documentsAllowed,
-                    documentTypes: source.datax.documentTypes,
-                    pathFormatterClass: source.datax.pathFormatterClass,
-                    enableBatchEdit: source.datax.enableBatchEdit,
-                    allowMultipleAssignments: source.datax.allowMultipleAssignments,
-                    optimizedAdminLoading: source.datax.optimizedAdminLoading
+                    documentTypes: source.datax.documentTypes
                 });
         }
     }

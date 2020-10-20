@@ -19,9 +19,6 @@ namespace Pimcore\Model\Webservice\Data\Document;
 
 use Pimcore\Model\Webservice\Data\Document;
 
-/**
- * @deprecated
- */
 class Printpage extends Document\PageSnippet
 {
     /**

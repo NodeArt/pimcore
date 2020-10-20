@@ -54,10 +54,8 @@ class StatusCommand extends MigrationsStatusDoctrineCommand
             } else {
                 throw new \InvalidArgumentException('Unsupported option `' . $input->getOption('only') . '` for option --only');
             }
-
-            return 0;
+        } else {
+            return parent::execute($input, $output);
         }
-
-        return parent::execute($input, $output);
     }
 }

@@ -17,8 +17,8 @@ namespace Pimcore\Tool;
 class Cast
 {
     /**
-     * @param string $class
-     * @param object $object
+     * @param $class
+     * @param $object
      *
      * @return mixed
      */

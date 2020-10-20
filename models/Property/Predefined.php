@@ -84,7 +84,7 @@ class Predefined extends Model\AbstractModel
     /**
      * @param int $id
      *
-     * @return self|null
+     * @return self
      */
     public static function getById($id)
     {
@@ -101,7 +101,7 @@ class Predefined extends Model\AbstractModel
     /**
      * @param string $key
      *
-     * @return self|null
+     * @return self
      */
     public static function getByKey($key)
     {
@@ -277,7 +277,7 @@ class Predefined extends Model\AbstractModel
     }
 
     /**
-     * @return bool
+     * @return string
      */
     public function getInheritable()
     {
@@ -285,7 +285,7 @@ class Predefined extends Model\AbstractModel
     }
 
     /**
-     * @param bool $inheritable
+     * @param string $inheritable
      *
      * @return $this
      */
@@ -318,8 +318,6 @@ class Predefined extends Model\AbstractModel
 
     /**
      * @param int $creationDate
-     *
-     * @return self
      */
     public function setCreationDate($creationDate)
     {
@@ -338,8 +336,6 @@ class Predefined extends Model\AbstractModel
 
     /**
      * @param int $modificationDate
-     *
-     * @return self
      */
     public function setModificationDate($modificationDate)
     {

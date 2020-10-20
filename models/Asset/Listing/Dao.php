@@ -57,13 +57,11 @@ class Dao extends Model\Listing\Dao\AbstractDao
     }
 
     /**
-     * @deprecated
-     *
-     * @param array|string|Expression $columns
+     * @param $columns
      *
      * @return \Pimcore\Db\ZendCompatibility\QueryBuilder
      */
-    public function getQuery($columns = '*')
+    public function getQuery($columns)
     {
         $select = $this->db->select();
         $select->from(
@@ -90,7 +88,7 @@ class Dao extends Model\Listing\Dao\AbstractDao
      */
     public function loadIdList()
     {
-        $select = $this->getQuery(['id']);
+        $select = $this->getQuery(['id', 'type']);
         $assetIds = $this->db->fetchCol($select, $this->model->getConditionVariables(), $this->model->getConditionVariableTypes());
 
         return array_map('intval', $assetIds);
@@ -101,13 +99,10 @@ class Dao extends Model\Listing\Dao\AbstractDao
      */
     public function getCount()
     {
-        if ($this->model->isLoaded()) {
-            return count($this->model->getAssets());
-        } else {
-            $idList = $this->loadIdList();
+        $select = $this->getQuery([new Expression('COUNT(*)')]);
+        $amount = (int) $this->db->fetchOne($select, $this->model->getConditionVariables(), $this->model->getConditionVariableTypes());
 
-            return count($idList);
-        }
+        return $amount;
     }
 
     /**

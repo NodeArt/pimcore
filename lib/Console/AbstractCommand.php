@@ -90,7 +90,7 @@ abstract class AbstractCommand extends Command
     }
 
     /**
-     * @param string $message
+     * @param $message
      */
     protected function writeError($message)
     {

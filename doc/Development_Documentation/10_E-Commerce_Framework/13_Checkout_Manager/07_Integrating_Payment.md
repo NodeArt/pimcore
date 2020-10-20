@@ -1,12 +1,11 @@
 # Payment Integration
 
-To integrate payment into the checkout process, instead of calling `$manager->commitOrder();` like described 
+To integrate payment into the checkout process, instead of calling ```$manager->commitOrder();``` like described 
 in [Committing Orders](./05_Committing_Orders.md), a few more steps are necessary. 
 
 
 ## Initialize Payment in Controller
 After all checkout steps are completed, the payment can be started. This is done as follows: 
-
 ```php
 <?php
 /**
@@ -16,7 +15,9 @@ public function initPaymentAction(Request $request, Factory $factory) {
     
     // ... do some stuff, and get $cart
  
-    /** @var CheckoutManagerInterface $checkoutManager */
+    /**
+     * @var $checkoutManager CheckoutManagerInterface
+     */
     $checkoutManager = $factory->getCheckoutManager($cart);
  
     //optional - init payment and get Pimcore internal payment ID (e.g. if needed for config of payment provider)
@@ -43,7 +44,6 @@ payment provider, also other data structures can be created:
 <p>{{ 'Starting Payment' }}</p>
 {{ form(form) }}
 ```
-
 For more samples see [E-Commerce Demo](https://github.com/pimcore/demo-ecommerce/blob/master/app/Resources/views/Payment/paymentFrame.html.php)
 
 
@@ -52,7 +52,6 @@ When the user finishes the payment, the given response (either via redirect or v
 as follows. If payment handling was successful, the order needs to be committed.
 
 A client side handling could look like as follows: 
-
 ```php
 <?php
 /**
@@ -119,7 +118,9 @@ A server side handling could look as follows:
 
         exit("success");
     }
+
 ```
+
 
 ## Dealing with Pending Payments (Starting with Pimcore 6.1)
 

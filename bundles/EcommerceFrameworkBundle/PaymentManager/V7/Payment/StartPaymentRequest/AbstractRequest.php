@@ -24,8 +24,8 @@ class AbstractRequest implements \ArrayAccess
     }
 
     /**
-     * @param string $name
-     * @param mixed $value
+     * @param $name
+     * @param $value
      */
     public function set($name, $value)
     {
@@ -33,7 +33,7 @@ class AbstractRequest implements \ArrayAccess
     }
 
     /**
-     * @param string $name
+     * @param $name
      *
      * @return mixed
      */

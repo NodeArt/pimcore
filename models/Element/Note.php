@@ -74,9 +74,9 @@ class Note extends Model\AbstractModel
     /**
      * @static
      *
-     * @param int $id
+     * @param $id
      *
-     * @return self|null
+     * @return Note
      */
     public static function getById($id)
     {
@@ -99,7 +99,7 @@ class Note extends Model\AbstractModel
     {
         $this->data[$name] = [
             'type' => $type,
-            'data' => $data,
+            'data' => $data
         ];
     }
 
@@ -138,7 +138,7 @@ class Note extends Model\AbstractModel
     }
 
     /**
-     * @param int $cid
+     * @param $cid
      *
      * @return $this
      */
@@ -158,7 +158,7 @@ class Note extends Model\AbstractModel
     }
 
     /**
-     * @param string $ctype
+     * @param $ctype
      *
      * @return $this
      */
@@ -178,7 +178,7 @@ class Note extends Model\AbstractModel
     }
 
     /**
-     * @param array $data
+     * @param $data
      *
      * @return $this
      */
@@ -198,7 +198,7 @@ class Note extends Model\AbstractModel
     }
 
     /**
-     * @param int $date
+     * @param $date
      *
      * @return $this
      */
@@ -218,7 +218,7 @@ class Note extends Model\AbstractModel
     }
 
     /**
-     * @param string $description
+     * @param $description
      *
      * @return $this
      */
@@ -238,7 +238,7 @@ class Note extends Model\AbstractModel
     }
 
     /**
-     * @param int $id
+     * @param $id
      *
      * @return $this
      */
@@ -258,7 +258,7 @@ class Note extends Model\AbstractModel
     }
 
     /**
-     * @param string $title
+     * @param $title
      *
      * @return $this
      */
@@ -278,7 +278,7 @@ class Note extends Model\AbstractModel
     }
 
     /**
-     * @param string $type
+     * @param $type
      *
      * @return $this
      */
@@ -298,7 +298,7 @@ class Note extends Model\AbstractModel
     }
 
     /**
-     * @param int $user
+     * @param $user
      *
      * @return $this
      */

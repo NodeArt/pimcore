@@ -105,8 +105,7 @@ pimcore.object.classes.data.hotspotimage = Class.create(pimcore.object.classes.d
                     height: source.datax.height,
                     uploadPath: source.datax.uploadPath,
                     ratioX: source.datax.ratioX,
-                    ratioY: source.datax.ratioY,
-                    predefinedDataTemplates: source.datax.predefinedDataTemplates
+                    ratioY: source.datax.ratioY
                 });
         }
     }

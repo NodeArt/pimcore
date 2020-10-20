@@ -38,7 +38,7 @@ class AdminExceptionListener implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            KernelEvents::EXCEPTION => 'onKernelException',
+            KernelEvents::EXCEPTION => 'onKernelException'
         ];
     }
 
@@ -74,12 +74,12 @@ class AdminExceptionListener implements EventSubscriberInterface
 
             if (\Pimcore::inDebugMode()) {
                 $data['trace'] = $ex->getTrace();
-                $data['traceString'] = 'in ' . $ex->getFile() . ':' . $ex->getLine() . "\n" . $ex->getTraceAsString();
+                $data['traceString'] = $ex->getTraceAsString();
             }
 
             if ($ex instanceof ValidationException) {
                 $data['type'] = 'ValidationException';
-                $code = 422;
+                $code = 403;
 
                 $this->recursiveAddValidationExceptionSubItems($ex->getSubItems(), $message, $data['traceString']);
             }
@@ -97,7 +97,7 @@ class AdminExceptionListener implements EventSubscriberInterface
 
             $data = [
                 'success' => false,
-                'msg' => $message,
+                'msg' => $message
             ];
 
             if (\Pimcore::inDebugMode()) {
@@ -132,15 +132,16 @@ class AdminExceptionListener implements EventSubscriberInterface
     }
 
     /**
-     * @param ValidationException[] $items
-     * @param string $message
-     * @param string $detailedInfo
+     * @param $items
+     * @param $message
+     * @param $detailedInfo
      */
     protected function recursiveAddValidationExceptionSubItems($items, &$message, &$detailedInfo)
     {
         if (!$items) {
             return;
         }
+        /** @var $items ValidationException[] */
         foreach ($items as $e) {
             if ($e->getMessage()) {
                 $message .= '<b>' . $e->getMessage() . '</b>';
@@ -160,7 +161,7 @@ class AdminExceptionListener implements EventSubscriberInterface
 
     /**
      * @param ValidationException $e
-     * @param string $message
+     * @param $message
      */
     protected function addContext(ValidationException $e, &$message)
     {

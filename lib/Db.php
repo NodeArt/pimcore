@@ -14,7 +14,6 @@
 
 namespace Pimcore;
 
-use Pimcore\Db\Connection;
 use Psr\Log\LoggerInterface;
 
 class Db
@@ -42,7 +41,7 @@ class Db
     /**
      * @static
      *
-     * @return \Pimcore\Db\ConnectionInterface|Connection
+     * @return \Pimcore\Db\ConnectionInterface
      */
     public static function get()
     {

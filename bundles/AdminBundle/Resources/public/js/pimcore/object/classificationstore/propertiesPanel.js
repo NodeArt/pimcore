@@ -61,6 +61,7 @@ pimcore.object.classificationstore.propertiespanel = Class.create({
             var allowed = false;
 
             if('object' !== typeof dataComp) {
+                var tt = typeof dataComp;
                 if (dataComp.prototype.allowIn['classificationstore']) {
                     allowed = true;
                 }
@@ -77,7 +78,7 @@ pimcore.object.classificationstore.propertiespanel = Class.create({
         });
 
         var proxy = {
-            url: Routing.generate('pimcore_admin_dataobject_classificationstore_propertiesget'),
+            url: "/admin/classificationstore/properties",
             batchActions: false,
             type: 'ajax',
             reader: {
@@ -196,7 +197,7 @@ pimcore.object.classificationstore.propertiespanel = Class.create({
                         var id = data.data.id;
 
                         Ext.Ajax.request({
-                            url: Routing.generate('pimcore_admin_dataobject_classificationstore_deleteproperty'),
+                            url: "/admin/classificationstore/delete-property",
                             method: 'DELETE',
                             params: {
                                 id: id
@@ -281,6 +282,8 @@ pimcore.object.classificationstore.propertiespanel = Class.create({
 
     showDetailedConfig: function (grid, rowIndex) {
         var data = grid.getStore().getAt(rowIndex);
+        var id = data.data.id;
+
         var type = data.data.type;
         var definition = data.data.definition;
         if (definition) {
@@ -324,7 +327,7 @@ pimcore.object.classificationstore.propertiespanel = Class.create({
         value = value.trim();
         if (button == "ok" && value.length > 1) {
             Ext.Ajax.request({
-                url: Routing.generate('pimcore_admin_dataobject_classificationstore_addproperty'),
+                url: "/admin/classificationstore/add-property",
                 method: 'POST',
                 params: {
                     name: value,
@@ -380,6 +383,7 @@ pimcore.object.classificationstore.propertiespanel = Class.create({
 
    openConfig: function(id) {
 
+       var sorters = this.store.getSorters();
        var pageSize = pimcore.helpers.grid.getDefaultPageSize(-1);
 
        var params = {
@@ -405,7 +409,7 @@ pimcore.object.classificationstore.propertiespanel = Class.create({
        this.store.clearFilter(true);
 
        Ext.Ajax.request({
-           url: Routing.generate('pimcore_admin_dataobject_classificationstore_getpage'),
+           url: "/admin/classificationstore/get-page",
            params: params,
            success: function(response) {
                try {

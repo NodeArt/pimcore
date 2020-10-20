@@ -28,7 +28,7 @@ class Iterator extends AbstractOperator
         if (!$childs) {
             return;
         } else {
-            /** @var AbstractConfigElement $child */
+            /** @var $child AbstractConfigElement */
             foreach ($childs as $child) {
                 $child->process($element, $target, $rowData, $colIndex, $context);
             }

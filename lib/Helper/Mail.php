@@ -22,7 +22,7 @@ use TijsVerkoyen\CssToInlineStyles\CssToInlineStyles;
 class Mail
 {
     /**
-     * @param string $type
+     * @param $type
      * @param MailClient $mail
      *
      * @return string
@@ -144,7 +144,7 @@ CSS;
 
     /**
      * @param MailClient $mail
-     * @param array $recipients
+     * @param $recipients array
      *
      * @return Model\Tool\Email\Log
      */
@@ -206,11 +206,11 @@ CSS;
     }
 
     /**
-     * @param string $string
-     * @param Model\Document $document
-     * @param string|null $hostUrl
+     * @param $string
+     * @param null $document
+     * @param null $hostUrl
      *
-     * @return string
+     * @return mixed
      *
      * @throws \Exception
      */
@@ -256,7 +256,7 @@ CSS;
                     $absolutePath = $netUrl->getNormalizedURL();
                 }
 
-                $path = preg_quote($path, '!');
+                $path = preg_quote($path);
                 $string = preg_replace("!([\"'])$path([\"'])!is", '\\1' . $absolutePath . '\\2', $string);
             }
         }
@@ -282,10 +282,10 @@ CSS;
     }
 
     /**
-     * @param string $string
-     * @param Model\Document $document
+     * @param $string
+     * @param null $document
      *
-     * @return string
+     * @return mixed
      *
      * @throws \Exception
      */
@@ -318,7 +318,7 @@ CSS;
                 } elseif (strpos($path, 'http') === 0) {
                     $fileContent = \Pimcore\Tool::getHttpData($path);
                     $fileInfo = [
-                        'fileUrlNormalized' => $path,
+                        'fileUrlNormalized' => $path
                     ];
                 }
 
@@ -376,8 +376,8 @@ CSS;
     }
 
     /**
-     * @param string $path
-     * @param Model\Document $document
+     * @param $path
+     * @param null $document
      *
      * @return array
      *
@@ -408,7 +408,7 @@ CSS;
     /**
      * parses an email string in the following name/mail list annotation: 'Name 1 <address1@mail.com>, Name 2 <address2@mail.com>, ...'
      *
-     * @param string $emailString
+     * @param $emailString
      *
      * @return array
      */

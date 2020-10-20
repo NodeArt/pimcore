@@ -20,6 +20,8 @@ use Pimcore\Model;
 
 class Gender extends Model\DataObject\ClassDefinition\Data\Select
 {
+    use Model\DataObject\Traits\SimpleComparisonTrait;
+
     /**
      * Static type of this element
      *
@@ -35,7 +37,6 @@ class Gender extends Model\DataObject\ClassDefinition\Data\Select
         $options = [
             ['key' => 'male', 'value' => 'male'],
             ['key' => 'female', 'value' => 'female'],
-            ['key' => 'other', 'value' => 'other'],
             ['key' => '', 'value' => 'unknown'],
         ];
 

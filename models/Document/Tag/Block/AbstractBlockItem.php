@@ -15,17 +15,66 @@
 
 namespace Pimcore\Model\Document\Tag\Block;
 
-use Pimcore\Model\Document\Editable\Block\AbstractBlockItem as EditableAbstractBlockItem;
+use Pimcore\Model\Document;
 
-@trigger_error(sprintf('Class "%s" is deprecated since v6.8 and will be removed in 7. Use "%s" instead.', AbstractBlockItem::class, EditableAbstractBlockItem::class), E_USER_DEPRECATED);
-
-class_exists(EditableAbstractBlockItem::class);
-
-if (false) {
+abstract class AbstractBlockItem
+{
     /**
-     * @deprecated use \Pimcore\Model\Document\Tag\Block\AbstractBlockItem instead.
+     * @var Document\PageSnippet
      */
-    abstract class AbstractBlockItem extends EditableAbstractBlockItem
+    protected $document;
+
+    /**
+     * @var array
+     */
+    protected $parentBlockNames;
+
+    /**
+     * @var int
+     */
+    protected $index;
+
+    public function __construct(Document\PageSnippet $document, array $parentBlockNames, int $index)
     {
+        $this->document = $document;
+        $this->parentBlockNames = $parentBlockNames;
+        $this->index = $index;
+    }
+
+    abstract protected function getItemType(): string;
+
+    /**
+     * @param string $name
+     *
+     * @return Document\Tag|null
+     */
+    public function getElement(string $name)
+    {
+        $namingStrategy = \Pimcore::getContainer()->get('pimcore.document.tag.naming.strategy');
+
+        $id = $namingStrategy->buildChildElementTagName($name, $this->getItemType(), $this->parentBlockNames, $this->index);
+        $element = $this->document->getElement($id);
+
+        if ($element) {
+            $element->setParentBlockNames($this->parentBlockNames);
+        }
+
+        return $element;
+    }
+
+    /**
+     * @param $func
+     * @param $args
+     *
+     * @return Document\Tag|null
+     */
+    public function __call($func, $args)
+    {
+        $element = $this->getElement($args[0]);
+        $class = 'Pimcore\\Model\\Document\\Tag\\' . str_replace('get', '', $func);
+
+        if (!strcasecmp(get_class($element), $class)) {
+            return $element;
+        }
     }
 }

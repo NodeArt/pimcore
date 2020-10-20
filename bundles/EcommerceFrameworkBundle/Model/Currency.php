@@ -51,26 +51,26 @@ class Currency
     protected $patternStore = [
         self::NO_SYMBOL => [
             self::LEFT => '#,##0.00',
-            self::RIGHT => '#,##0.00',
+            self::RIGHT => '#,##0.00'
         ],
         self::USE_SYMBOL => [
             self::LEFT => '¤ #,##0.00',
-            self::RIGHT => '#,##0.00 ¤',
+            self::RIGHT => '#,##0.00 ¤'
         ],
         self::USE_SHORTNAME => [
             self::LEFT => '¤¤ #,##0.00',
-            self::RIGHT => '#,##0.00 ¤¤',
+            self::RIGHT => '#,##0.00 ¤¤'
         ],
         self::USE_NAME => [
             self::LEFT => '¤¤¤ #,##0.00',
-            self::RIGHT => '#,##0.00 ¤¤¤',
-        ],
+            self::RIGHT => '#,##0.00 ¤¤¤'
+        ]
     ];
 
     /**
      * Currency constructor.
      *
-     * @param string $currencyShortName
+     * @param $currencyShortName string
      */
     public function __construct($currencyShortName)
     {

@@ -12,10 +12,6 @@
  */
 
 pimcore.registerNS("pimcore.report.qrcode.panel");
-
-/**
- * @deprecated
- */
 pimcore.report.qrcode.panel = Class.create({
 
     initialize: function () {
@@ -54,7 +50,7 @@ pimcore.report.qrcode.panel = Class.create({
 
         return this.panel;
     },
-
+    
     getTree: function () {
         if (!this.tree) {
             var store = Ext.create('Ext.data.TreeStore', {
@@ -62,7 +58,7 @@ pimcore.report.qrcode.panel = Class.create({
                 autoSync: true,
                 proxy: {
                     type: 'ajax',
-                    url: Routing.generate('pimcore_admin_reports_qrcode_tree'),
+                    url: "/admin/reports/qrcode/tree",
                     reader: {
                         type: 'json'
                     }
@@ -92,9 +88,6 @@ pimcore.report.qrcode.panel = Class.create({
                             text: t("add"),
                             iconCls: "pimcore_icon_add",
                             handler: this.addField.bind(this)
-                        }, '->', {
-                            xtype: 'tbtext',
-                            text: '<b>(' + t('deprecated') + ')</b>'
                         }
                     ]
                 },
@@ -154,7 +147,7 @@ pimcore.report.qrcode.panel = Class.create({
         }
 
         Ext.Ajax.request({
-            url: Routing.generate('pimcore_admin_reports_qrcode_get'),
+            url: "/admin/reports/qrcode/get",
             params: {
                 name: id
             },
@@ -204,7 +197,7 @@ pimcore.report.qrcode.panel = Class.create({
             }
 
             Ext.Ajax.request({
-                url: Routing.generate('pimcore_admin_reports_qrcode_add'),
+                url: "/admin/reports/qrcode/add",
                 method: 'POST',
                 params: {
                     name: value
@@ -232,7 +225,7 @@ pimcore.report.qrcode.panel = Class.create({
 
     deleteField: function (tree, record) {
         Ext.Ajax.request({
-            url: Routing.generate('pimcore_admin_reports_qrcode_delete'),
+            url: "/admin/reports/qrcode/delete",
             method: 'DELETE',
             params: {
                 name: record.data.id

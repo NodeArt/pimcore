@@ -53,7 +53,7 @@ class ResetPasswordCommand extends AbstractCommand
 
         $method = is_numeric($userArgument) ? 'getById' : 'getByName';
 
-        /** @var User $user */
+        /** @var $user User */
         $user = User::$method($userArgument);
 
         if (!$user) {
@@ -72,8 +72,6 @@ class ResetPasswordCommand extends AbstractCommand
         $user->save();
 
         $this->output->writeln('Password for user ' . $user->getName() . ' reset successfully.');
-
-        return 0;
     }
 
     protected function askForPassword(InputInterface $input, OutputInterface $output)

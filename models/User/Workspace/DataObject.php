@@ -17,6 +17,9 @@
 
 namespace Pimcore\Model\User\Workspace;
 
+/**
+ * @method \Pimcore\Model\User\Workspace\Dao getDao()
+ */
 class DataObject extends AbstractWorkspace
 {
     /**
@@ -45,7 +48,7 @@ class DataObject extends AbstractWorkspace
     public $layouts = null;
 
     /**
-     * @param bool $save
+     * @param $save
      *
      * @return $this
      */
@@ -65,7 +68,7 @@ class DataObject extends AbstractWorkspace
     }
 
     /**
-     * @param bool $unpublish
+     * @param $unpublish
      *
      * @return $this
      */

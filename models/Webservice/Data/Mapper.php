@@ -20,14 +20,11 @@ namespace Pimcore\Model\Webservice\Data;
 use Pimcore\Model;
 use Pimcore\Tool;
 
-/**
- * @deprecated
- */
 abstract class Mapper
 {
     /**
-     * @param mixed $object
-     * @param string $type
+     * @param $object
+     * @param $type
      *
      * @return null|string
      *
@@ -45,7 +42,7 @@ abstract class Mapper
             'Document\\Hardlink',
             'Document\\Email',
             'DataObject\\Folder',
-            'DataObject\\Concrete',
+            'DataObject\\Concrete'
         ];
 
         $retVal = null;
@@ -76,12 +73,12 @@ abstract class Mapper
     }
 
     /**
-     * @param mixed $object
-     * @param string $apiclass
-     * @param string $type
-     * @param array|null $options
+     * @param $object
+     * @param $apiclass
+     * @param $type
+     * @param null $options
      *
-     * @return mixed
+     * @return array|string
      *
      * @throws \Exception
      */
@@ -112,7 +109,7 @@ abstract class Mapper
     }
 
     /**
-     * @param object|array $el
+     * @param $el
      *
      * @return \stdClass
      */

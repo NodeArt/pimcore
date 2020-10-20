@@ -30,12 +30,12 @@ class ImportConfigListener implements EventSubscriberInterface
     {
         return [
             DataObjectClassDefinitionEvents::POST_DELETE => 'onClassDelete',
-            UserRoleEvents::POST_DELETE => 'onUserDelete',
+            UserRoleEvents::POST_DELETE => 'onUserDelete'
         ];
     }
 
     /**
-     * @param ClassDefinitionEvent $event
+     * @param $event ClassDefinitionEvent
      */
     public function onClassDelete($event)
     {
@@ -53,7 +53,7 @@ class ImportConfigListener implements EventSubscriberInterface
     }
 
     /**
-     * @param UserRoleEvent $event
+     * @param $event UserRoleEvent
      */
     public function onUserDelete($event)
     {

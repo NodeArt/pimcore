@@ -20,11 +20,7 @@ namespace Pimcore\Model\Tool\Qrcode;
 use Pimcore\Model;
 
 /**
- * @deprecated
- *
  * @method \Pimcore\Model\Tool\Qrcode\Config\Dao getDao()
- * @method void delete()
- * @method void save()
  */
 class Config extends Model\AbstractModel
 {
@@ -44,7 +40,7 @@ class Config extends Model\AbstractModel
     public $url = '';
 
     /**
-     * @var string
+     * @var
      */
     public $foreColor = '';
 
@@ -69,9 +65,9 @@ class Config extends Model\AbstractModel
     public $creationDate;
 
     /**
-     * @param string $name
+     * @param $name
      *
-     * @return self|null
+     * @return Config
      *
      * @throws \Exception
      */
@@ -88,7 +84,7 @@ class Config extends Model\AbstractModel
     }
 
     /**
-     * @param string $description
+     * @param $description
      *
      * @return $this
      */
@@ -108,7 +104,7 @@ class Config extends Model\AbstractModel
     }
 
     /**
-     * @param string $name
+     * @param $name
      *
      * @return $this
      */
@@ -128,7 +124,7 @@ class Config extends Model\AbstractModel
     }
 
     /**
-     * @param string $url
+     * @param $url
      *
      * @return $this
      */
@@ -148,7 +144,7 @@ class Config extends Model\AbstractModel
     }
 
     /**
-     * @param string $backgroundColor
+     * @param $backgroundColor
      *
      * @return $this
      */
@@ -168,7 +164,7 @@ class Config extends Model\AbstractModel
     }
 
     /**
-     * @param string $foreColor
+     * @param $foreColor
      *
      * @return $this
      */
@@ -188,7 +184,7 @@ class Config extends Model\AbstractModel
     }
 
     /**
-     * @param bool $googleAnalytics
+     * @param $googleAnalytics
      *
      * @return $this
      */

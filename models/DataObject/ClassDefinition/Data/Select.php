@@ -20,14 +20,11 @@ use Pimcore\Model;
 use Pimcore\Model\DataObject;
 use Pimcore\Model\DataObject\ClassDefinition\Data;
 
-class Select extends Data implements ResourcePersistenceAwareInterface, QueryResourcePersistenceAwareInterface, TypeDeclarationSupportInterface, EqualComparisonInterface
+class Select extends Data implements ResourcePersistenceAwareInterface, QueryResourcePersistenceAwareInterface
 {
     use Model\DataObject\Traits\SimpleComparisonTrait;
     use Extension\ColumnType;
     use Extension\QueryColumnType;
-
-    use DataObject\Traits\DefaultValueTrait;
-    use DataObject\ClassDefinition\NullablePhpdocReturnTypeTrait;
 
     /**
      * Static type of this element
@@ -39,7 +36,7 @@ class Select extends Data implements ResourcePersistenceAwareInterface, QueryRes
     /**
      * Available options to select
      *
-     * @var array|null
+     * @var array
      */
     public $options;
 
@@ -49,7 +46,7 @@ class Select extends Data implements ResourcePersistenceAwareInterface, QueryRes
     public $width;
 
     /**
-     * @var string|null
+     * @var string
      */
     public $defaultValue;
 
@@ -105,7 +102,7 @@ class Select extends Data implements ResourcePersistenceAwareInterface, QueryRes
     }
 
     /**
-     * @param int|null $columnLength
+     * @param $columnLength
      *
      * @return $this
      */
@@ -121,7 +118,7 @@ class Select extends Data implements ResourcePersistenceAwareInterface, QueryRes
     /**
      * Correct old column definitions (e.g varchar(255)) to the new format
      *
-     * @param string $type
+     * @param $type
      */
     protected function correctColumnDefinition($type)
     {
@@ -183,7 +180,7 @@ class Select extends Data implements ResourcePersistenceAwareInterface, QueryRes
     }
 
     /**
-     * @param string|int|null $width
+     * @param $width
      *
      * @return $this
      */
@@ -198,15 +195,13 @@ class Select extends Data implements ResourcePersistenceAwareInterface, QueryRes
      * @see ResourcePersistenceAwareInterface::getDataForResource
      *
      * @param string $data
-     * @param null|DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return string
      */
     public function getDataForResource($data, $object = null, $params = [])
     {
-        $data = $this->handleDefaultValue($data, $object, $params);
-
         return $data;
     }
 
@@ -214,7 +209,7 @@ class Select extends Data implements ResourcePersistenceAwareInterface, QueryRes
      * @see ResourcePersistenceAwareInterface::getDataFromResource
      *
      * @param string $data
-     * @param null|DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return string
@@ -228,21 +223,21 @@ class Select extends Data implements ResourcePersistenceAwareInterface, QueryRes
      * @see QueryResourcePersistenceAwareInterface::getDataForQueryResource
      *
      * @param string $data
-     * @param null|DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return string
      */
     public function getDataForQueryResource($data, $object = null, $params = [])
     {
-        return $this->getDataForResource($data, $object, $params);
+        return $data;
     }
 
     /**
      * @see Data::getDataForEditmode
      *
      * @param string $data
-     * @param null|DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return string
@@ -256,7 +251,7 @@ class Select extends Data implements ResourcePersistenceAwareInterface, QueryRes
      * @see Data::getDataFromEditmode
      *
      * @param string $data
-     * @param null|DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return string
@@ -270,7 +265,7 @@ class Select extends Data implements ResourcePersistenceAwareInterface, QueryRes
      * @see Data::getVersionPreview
      *
      * @param string $data
-     * @param null|DataObject\Concrete $object
+     * @param null|DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return string
@@ -281,7 +276,7 @@ class Select extends Data implements ResourcePersistenceAwareInterface, QueryRes
     }
 
     /** True if change is allowed in edit mode.
-     * @param DataObject\Concrete $object
+     * @param string $object
      * @param mixed $params
      *
      * @return bool
@@ -293,7 +288,7 @@ class Select extends Data implements ResourcePersistenceAwareInterface, QueryRes
 
     /** See parent class.
      * @param mixed $data
-     * @param DataObject\Concrete|null $object
+     * @param null $object
      * @param mixed $params
      *
      * @return array|null
@@ -341,7 +336,7 @@ class Select extends Data implements ResourcePersistenceAwareInterface, QueryRes
     }
 
     /**
-     * @param string|null $data
+     * @param $data
      *
      * @return bool
      */
@@ -351,7 +346,7 @@ class Select extends Data implements ResourcePersistenceAwareInterface, QueryRes
     }
 
     /**
-     * @param DataObject\ClassDefinition\Data\Select $masterDefinition
+     * @param DataObject\ClassDefinition\Data $masterDefinition
      */
     public function synchronizeWithMasterDefinition(DataObject\ClassDefinition\Data $masterDefinition)
     {
@@ -363,7 +358,7 @@ class Select extends Data implements ResourcePersistenceAwareInterface, QueryRes
     }
 
     /**
-     * @return string|null
+     * @return string
      */
     public function getDefaultValue()
     {
@@ -371,7 +366,7 @@ class Select extends Data implements ResourcePersistenceAwareInterface, QueryRes
     }
 
     /**
-     * @param string|null $defaultValue
+     * @param string $defaultValue
      */
     public function setDefaultValue($defaultValue)
     {
@@ -426,13 +421,9 @@ class Select extends Data implements ResourcePersistenceAwareInterface, QueryRes
         return $this;
     }
 
-    /**
-     * Override point for Enriching the layout definition before the layout is returned to the admin interface.
-     *
-     * @param DataObject\Concrete $object
+    /** Override point for Enriching the layout definition before the layout is returned to the admin interface.
+     * @param $object DataObject\Concrete
      * @param array $context additional contextual data
-     *
-     * @return self
      */
     public function enrichLayoutDefinition($object, $context = [])
     {
@@ -468,11 +459,11 @@ class Select extends Data implements ResourcePersistenceAwareInterface, QueryRes
     }
 
     /**
-     * @param string|null $data
-     * @param DataObject\Concrete|null $object
+     * @param $data
+     * @param null $object
      * @param array $params
      *
-     * @return array|string
+     * @return array
      */
     public function getDataForGrid($data, $object = null, $params = [])
     {
@@ -499,66 +490,27 @@ class Select extends Data implements ResourcePersistenceAwareInterface, QueryRes
             }
 
             return $result;
+        } else {
+            return $data;
         }
-
-        return $data;
     }
 
     /**
      * returns sql query statement to filter according to this data types value(s)
      *
-     * @param string $value
-     * @param string $operator
+     * @param $value
+     * @param $operator
      * @param array $params optional params used to change the behavior
      *
-     * @return string|null
+     * @return string
      */
     public function getFilterConditionExt($value, $operator, $params = [])
     {
-        $value = is_array($value) ? current($value) : $value;
-        $name = $params['name'] ?: $this->name;
-
         if ($operator === '=') {
-            return '`'.$name.'` = '."\"$value\"".' ';
-        } elseif ($operator === 'LIKE') {
-            return '`'.$name.'` LIKE '."\"%$value%\"".' ';
+            $value = is_array($value) ? current($value) : $value;
+            $name = $params['name'] ?: $this->name;
+
+            return '`'.$name.'` LIKE '."'$value'".' ';
         }
-
-        return null;
-    }
-
-    public function isFilterable(): bool
-    {
-        return true;
-    }
-
-    /**
-     * @param DataObject\Concrete $object
-     * @param array $context
-     *
-     * @return null|string
-     */
-    protected function doGetDefaultValue($object, $context = [])
-    {
-        /** @var DataObject\ClassDefinition\DynamicOptionsProvider\SelectOptionsProviderInterface $optionsProvider */
-        $optionsProvider = DataObject\ClassDefinition\Helper\OptionsProviderResolver::resolveProvider(
-            $this->getOptionsProviderClass(),
-            DataObject\ClassDefinition\Helper\OptionsProviderResolver::MODE_SELECT
-        );
-        if ($optionsProvider) {
-            $context['object'] = $object;
-            if ($object) {
-                $context['class'] = $object->getClass();
-            }
-
-            $context['fieldname'] = $this->getName();
-            if (!isset($context['purpose'])) {
-                $context['purpose'] = 'layout';
-            }
-
-            return $optionsProvider->getDefaultValue($context, $this);
-        }
-
-        return $this->getDefaultValue();
     }
 }

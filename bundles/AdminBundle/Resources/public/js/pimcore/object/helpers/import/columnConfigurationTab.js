@@ -49,6 +49,7 @@ pimcore.object.helpers.import.columnConfigurationTab = Class.create({
                 this.getOperatorTree()
             ];
 
+            this.brickKeys = [];
             this.leftPanel = new Ext.Panel({
                 layout: "border",
                 region: "center",
@@ -201,6 +202,7 @@ pimcore.object.helpers.import.columnConfigurationTab = Class.create({
 
                             if (target != source) {
                                 var record = data.records[0];
+                                var isOperator = record.data.isOperator;
                                 var realOverModel = overModel;
                                 var isOverwrite = false;
                                 if (dropPosition == "before" || dropPosition == "after") {
@@ -415,7 +417,11 @@ pimcore.object.helpers.import.columnConfigurationTab = Class.create({
 
     getClassDefinitionTreePanel: function () {
         if (!this.classDefinitionTreePanel) {
-            this.classDefinitionTreePanel = this.getClassTree(Routing.generate('pimcore_admin_dataobject_class_getclassdefinitionforcolumnconfig'),
+
+            var items = [];
+
+            this.brickKeys = [];
+            this.classDefinitionTreePanel = this.getClassTree("/admin/class/get-class-definition-for-column-config",
                 this.config.classId, 0);
         }
 

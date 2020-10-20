@@ -125,7 +125,7 @@ interface EnvironmentInterface
     /**
      * sets execution mode of system - either product or cart
      *
-     * @param string $executionMode
+     * @param $executionMode
      */
     public function setExecutionMode($executionMode);
 

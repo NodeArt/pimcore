@@ -17,9 +17,6 @@ namespace Pimcore\Templating\Helper;
 use Pimcore\Tool\Glossary\Processor;
 use Symfony\Component\Templating\Helper\Helper;
 
-/**
- * @deprecated
- */
 class Glossary extends Helper
 {
     /**

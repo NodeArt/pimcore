@@ -14,11 +14,6 @@
 
 namespace Pimcore\Bundle\EcommerceFrameworkBundle\VoucherService\Token\Listing;
 
-use Pimcore\Bundle\EcommerceFrameworkBundle\VoucherService\Token\Listing;
-
-/**
- * @property Listing $model
- */
 class Dao extends \Pimcore\Model\Listing\Dao\AbstractDao
 {
     public function load()
@@ -42,20 +37,19 @@ class Dao extends \Pimcore\Model\Listing\Dao\AbstractDao
         return $tokens;
     }
 
-    /**
-     * @return int
-     */
     public function getTotalCount()
     {
         try {
-            return (int)$this->db->fetchOne(
+            $amount = (int)$this->db->fetchOne(
                 'SELECT COUNT(*) as amount FROM ' .
                 \Pimcore\Bundle\EcommerceFrameworkBundle\VoucherService\Token\Dao::TABLE_NAME .
                 $this->getCondition(),
                 $this->model->getConditionVariables()
             );
         } catch (\Exception $e) {
-            return 0;
+            return false;
         }
+
+        return $amount;
     }
 }

@@ -16,14 +16,11 @@ namespace Pimcore\Tool;
 
 use Pimcore\File;
 
-/**
- * @deprecated
- */
 class Archive
 {
     /**
-     * @param string $sourceDir
-     * @param string $destinationFile
+     * @param $sourceDir
+     * @param $destinationFile
      * @param array $excludeFilePattern
      * @param array $options
      *
@@ -33,8 +30,6 @@ class Archive
      */
     public static function createZip($sourceDir, $destinationFile, $excludeFilePattern = [], $options = [])
     {
-        @trigger_error(sprintf('Method "%s" is deprecated since v6.8 and will be removed in 7. ', __METHOD__), E_USER_DEPRECATED);
-
         list($sourceDir, $destinationFile, $items) = self::prepareArchive($sourceDir, $destinationFile);
         $mode = $options['mode'];
 
@@ -93,8 +88,8 @@ class Archive
     }
 
     /**
-     * @param string $sourceDir
-     * @param string $destinationFile
+     * @param $sourceDir
+     * @param $destinationFile
      * @param array $excludeFilePattern
      * @param array $options
      *
@@ -104,8 +99,6 @@ class Archive
      */
     public static function createPhar($sourceDir, $destinationFile, $excludeFilePattern = [], $options = [])
     {
-        @trigger_error(sprintf('Method "%s" is deprecated since v6.8 and will be removed in 7. ', __METHOD__), E_USER_DEPRECATED);
-
         list($sourceDir, $destinationFile, $items) = self::prepareArchive($sourceDir, $destinationFile);
 
         $alias = $options['alias'] ? $options['alias'] : 'archive.phar';
@@ -140,8 +133,8 @@ class Archive
     }
 
     /**
-     * @param string $sourceDir
-     * @param string $destinationFile
+     * @param $sourceDir
+     * @param $destinationFile
      *
      * @return array
      *

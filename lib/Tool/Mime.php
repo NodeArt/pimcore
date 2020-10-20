@@ -17,8 +17,8 @@ namespace Pimcore\Tool;
 class Mime
 {
     /**
-     * @param string $file
-     * @param string|null $filename
+     * @param $file
+     * @param null $filename
      *
      * @return mixed|string
      *

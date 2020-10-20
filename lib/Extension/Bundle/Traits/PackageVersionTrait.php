@@ -18,7 +18,6 @@ declare(strict_types=1);
 namespace Pimcore\Extension\Bundle\Traits;
 
 use PackageVersions\Versions;
-use Pimcore\Composer\PackageInfo;
 
 /**
  * Exposes a simple getVersion() implementation by looking up the installed versions via ocramius/package-versions
@@ -43,18 +42,5 @@ trait PackageVersionTrait
         $version = preg_replace('/@(.+)$/', '', $version);
 
         return $version;
-    }
-
-    public function getDescription()
-    {
-        $packageInfo = new PackageInfo();
-
-        foreach ($packageInfo->getInstalledPackages('pimcore-bundle') as $bundle) {
-            if ($bundle['name'] === $this->getComposerPackageName()) {
-                return $bundle['description'] ?? '';
-            }
-        }
-
-        return '';
     }
 }

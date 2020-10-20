@@ -36,23 +36,20 @@ class ListCommand extends AbstractBundleCommand
                 InputOption::VALUE_NONE,
                 'Show fully qualified class names instead of short names'
             )
-            ->addOption('json', null, InputOption::VALUE_NONE, 'Return data as JSON')
         ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $returnData = [
-            'headers' => [
-                'Bundle',
-                'Enabled',
-                'Installed',
-                $input->hasOption('json') ? 'Installable' : 'I?',
-                $input->hasOption('json') ? 'Uninstallable' : 'UI?',
-                $input->hasOption('json') ? 'Updatable' : 'UP?',
-                'Priority',
-            ],
-        ];
+        $table = new Table($output);
+        $table->setHeaders([
+            'Bundle',
+            'Enabled',
+            'Installed',
+            'I?',
+            'UI?',
+            'UP?',
+        ]);
 
         foreach ($this->bundleManager->getAvailableBundles() as $bundleClass) {
             $enabled = $this->bundleManager->isEnabled($bundleClass);
@@ -71,59 +68,32 @@ class ListCommand extends AbstractBundleCommand
                 $row[] = $this->getShortClassName($bundleClass);
             }
 
-            $row[] = $enabled;
+            $row[] = $this->formatBool($enabled);
 
             if ($enabled) {
-                $row[] = $this->bundleManager->isInstalled($bundle);
-                $row[] = $this->bundleManager->canBeInstalled($bundle);
-                $row[] = $this->bundleManager->canBeUninstalled($bundle);
-                $row[] = $this->bundleManager->canBeUpdated($bundle);
-
-                $bundleState = $this->bundleManager->getState($bundle);
-                $row[] = $bundleState['priority'];
+                $row[] = $this->formatBool($this->bundleManager->isInstalled($bundle));
+                $row[] = $this->formatBool($this->bundleManager->canBeInstalled($bundle));
+                $row[] = $this->formatBool($this->bundleManager->canBeUninstalled($bundle));
+                $row[] = $this->formatBool($this->bundleManager->canBeUpdated($bundle));
             } else {
-                $row[] = false;
-                $row[] = false;
-                $row[] = false;
-                $row[] = false;
-                $row[] = 0;
+                $row[] = $this->formatBool(false);
+                $row[] = $this->formatBool(false);
+                $row[] = $this->formatBool(false);
+                $row[] = $this->formatBool(false);
             }
 
-            $returnData['rows'][] = $row;
+            $table->addRow($row);
         }
 
-        if ($input->getOption('json')) {
-            $jsonData = array_map(static function ($row) use ($returnData) {
-                return array_combine($returnData['headers'], $row);
-            }, $returnData['rows']);
-            $output->write(\json_encode($jsonData, \JSON_PRETTY_PRINT));
-        } else {
-            $table = new Table($output);
+        $table->render();
 
-            $table->setHeaders($returnData['headers']);
-
-            $returnData['rows'] = array_map(function ($row) {
-                for ($i = 1; $i <= 5; $i++) {
-                    $row[$i] = $this->formatBool($row[$i]);
-                }
-
-                return $row;
-            }, $returnData['rows']);
-
-            $table->addRows($returnData['rows']);
-
-            $table->render();
-
-            $this->io->newLine();
-            $this->io->writeln(implode(' ', [
-                'Legend:',
-                '<comment>I?</comment>: Can be installed?',
-                '<comment>UI?</comment>: Can be uninstalled?',
-                '<comment>UP?</comment>: Can be updated?',
-            ]));
-        }
-
-        return 0;
+        $this->io->newLine();
+        $this->io->writeln(implode(' ', [
+            'Legend:',
+            '<comment>I?</comment>: Can be installed?',
+            '<comment>UI?</comment>: Can be uninstalled?',
+            '<comment>UP?</comment>: Can be updated?',
+        ]));
     }
 
     private function formatBool($state): string

@@ -67,7 +67,7 @@ class Tool
     /**
      * @static
      *
-     * @param string $path
+     * @param  $path
      *
      * @return bool
      */
@@ -117,13 +117,14 @@ class Tool
     public static function getValidLanguages()
     {
         if (empty(self::$validLanguages)) {
-            $config = Config::getSystemConfiguration('general');
+            $config = Config::getSystemConfig();
+            $validLanguages = strval($config->general->validLanguages);
 
-            if (empty($config['valid_languages'])) {
+            if (empty($validLanguages)) {
                 return [];
             }
 
-            $validLanguages = str_replace(' ', '', strval($config['valid_languages']));
+            $validLanguages = str_replace(' ', '', $validLanguages);
             $languages = explode(',', $validLanguages);
 
             if (!is_array($languages)) {
@@ -137,7 +138,7 @@ class Tool
     }
 
     /**
-     * @param string $language
+     * @param $language
      *
      * @return array
      */
@@ -145,9 +146,9 @@ class Tool
     {
         $languages = [];
 
-        $config = Config::getSystemConfiguration('general');
-        if (!empty($config['fallback_languages'][$language])) {
-            $fallbackLanguages = explode(',', $config['fallback_languages'][$language]);
+        $conf = Config::getSystemConfig();
+        if ($conf->general->fallbackLanguages && $conf->general->fallbackLanguages->$language) {
+            $fallbackLanguages = explode(',', $conf->general->fallbackLanguages->$language);
             foreach ($fallbackLanguages as $l) {
                 if (self::isValidLanguage($l)) {
                     $languages[] = trim($l);
@@ -167,8 +168,8 @@ class Tool
      */
     public static function getDefaultLanguage()
     {
-        $config = Config::getSystemConfiguration('general');
-        $defaultLanguage = $config['default_language'] ?? null;
+        $config = Config::getSystemConfig();
+        $defaultLanguage = $config->general->defaultLanguage;
         $languages = self::getValidLanguages();
 
         if (!empty($languages) && in_array($defaultLanguage, $languages)) {
@@ -219,8 +220,8 @@ class Tool
     }
 
     /**
-     * @param string $language
-     * @param bool $absolutePath
+     * @param $language
+     * @param $absolutePath
      *
      * @return string
      */
@@ -266,7 +267,7 @@ class Tool
             'cy' => 'gb-wls', 'cy-gb' => 'gb-wls', 'fy' => 'nl', 'xh' => 'za', 'yo' => 'bj', 'zu' => 'za',
             'ta' => 'lk', 'te' => 'in', 'ss' => 'za', 'sw' => 'ke', 'so' => 'so', 'si' => 'lk', 'ii' => 'cn',
             'zh-hans' => 'cn', 'sn' => 'zw', 'rm' => 'ch', 'pa' => 'in', 'fa' => 'ir', 'lv' => 'lv', 'gl' => 'es',
-            'fil' => 'ph',
+            'fil' => 'ph'
         ];
 
         if (array_key_exists($code, $languageCountryMapping)) {
@@ -400,7 +401,7 @@ class Tool
      *
      * @param Request|null $request
      *
-     * @return null|string
+     * @return string
      */
     public static function getHostname(Request $request = null)
     {
@@ -454,8 +455,8 @@ class Tool
 
         // get it from System settings
         if (!$hostname || $hostname == 'localhost') {
-            $systemConfig = Config::getSystemConfiguration('general');
-            $hostname = $systemConfig['domain'] ?? null;
+            $systemConfig = Config::getSystemConfig()->toArray();
+            $hostname = $systemConfig['general']['domain'];
 
             if (!$hostname) {
                 Logger::warn('Couldn\'t determine HTTP Host. No Domain set in "Settings" -> "System" -> "Website" -> "Domain"');
@@ -476,7 +477,7 @@ class Tool
      *
      * @param Request|null $request
      *
-     * @return string|null
+     * @return string
      */
     public static function getClientIp(Request $request = null)
     {
@@ -490,10 +491,8 @@ class Tool
             $ip = $_SERVER['HTTP_CLIENT_IP'];
         } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
             $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-        } elseif (!empty($_SERVER['REMOTE_ADDR'])) {
-            $ip = $_SERVER['REMOTE_ADDR'];
         } else {
-            return null;
+            $ip = $_SERVER['REMOTE_ADDR'];
         }
 
         $ips = explode(',', $ip);
@@ -505,7 +504,7 @@ class Tool
     /**
      * @param Request|null $request
      *
-     * @return null|string
+     * @return string
      */
     public static function getAnonymizedClientIp(Request $request = null)
     {
@@ -537,9 +536,9 @@ class Tool
 
             foreach ($confArray['views'] as $tmp) {
                 if (isset($tmp['name'])) {
-                    $tmp['showroot'] = !empty($tmp['showroot']);
+                    $tmp['showroot'] = (bool) $tmp['showroot'];
 
-                    if (!empty($tmp['hidden'])) {
+                    if ((bool) $tmp['hidden']) {
                         continue;
                     }
 
@@ -552,9 +551,9 @@ class Tool
     }
 
     /**
-     * @param array|string|null $recipients
-     * @param string|null $subject
-     * @param string|null $charset
+     * @param null $recipients
+     * @param null $subject
+     * @param null $charset
      *
      * @return Mail
      *
@@ -585,7 +584,7 @@ class Tool
     /**
      * @static
      *
-     * @param string $url
+     * @param $url
      * @param array $paramsGet
      * @param array $paramsPost
      * @param array $options
@@ -633,7 +632,9 @@ class Tool
     }
 
     /**
-     * @param string $class
+     * @static
+     *
+     * @param $class
      *
      * @return bool
      */
@@ -643,7 +644,9 @@ class Tool
     }
 
     /**
-     * @param string $class
+     * @static
+     *
+     * @param $class
      *
      * @return bool
      */
@@ -653,18 +656,8 @@ class Tool
     }
 
     /**
-     * @param string $class
-     *
-     * @return bool
-     */
-    public static function traitExists($class)
-    {
-        return self::classInterfaceExists($class, 'trait');
-    }
-
-    /**
-     * @param string $class
-     * @param string $type (e.g. 'class', 'interface', 'trait')
+     * @param $class
+     * @param $type
      *
      * @return bool
      */
@@ -705,21 +698,7 @@ class Tool
     }
 
     /**
-     * @return array
-     */
-    public static function getCachedSymfonyEnvironments(): array
-    {
-        $dirs = glob(PIMCORE_SYMFONY_CACHE_DIRECTORY . '/*', GLOB_ONLYDIR);
-        if (($key = array_search(PIMCORE_CACHE_DIRECTORY, $dirs)) !== false) {
-            unset($dirs[$key]);
-        }
-        $dirs = array_map('basename', $dirs);
-
-        return array_values($dirs);
-    }
-
-    /**
-     * @param string $message
+     * @param $message
      */
     public static function exitWithError($message)
     {

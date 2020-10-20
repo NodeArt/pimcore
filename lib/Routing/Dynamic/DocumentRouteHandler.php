@@ -62,29 +62,21 @@ class DocumentRouteHandler implements DynamicRouteHandlerInterface
     private $directRouteDocumentTypes = ['page', 'snippet', 'email', 'newsletter', 'printpage', 'printcontainer'];
 
     /**
-     * @var Config
-     */
-    private $config;
-
-    /**
      * @param Document\Service $documentService
      * @param SiteResolver $siteResolver
      * @param RequestHelper $requestHelper
      * @param ConfigNormalizer $configNormalizer
-     * @param Config $config
      */
     public function __construct(
         Document\Service $documentService,
         SiteResolver $siteResolver,
         RequestHelper $requestHelper,
-        ConfigNormalizer $configNormalizer,
-        Config $config
+        ConfigNormalizer $configNormalizer
     ) {
         $this->documentService = $documentService;
         $this->siteResolver = $siteResolver;
         $this->requestHelper = $requestHelper;
         $this->configNormalizer = $configNormalizer;
-        $this->config = $config;
     }
 
     public function setForceHandleUnpublishedDocuments(bool $handle)
@@ -151,7 +143,7 @@ class DocumentRouteHandler implements DynamicRouteHandlerInterface
             }
         }
 
-        // check for a parent hardlink with children
+        // check for a parent hardlink with childs
         if (!$document instanceof Document) {
             $hardlinkedParentDocument = $this->documentService->getNearestDocumentByPath($context->getPath(), true);
             if ($hardlinkedParentDocument instanceof Document\Hardlink) {
@@ -300,9 +292,13 @@ class DocumentRouteHandler implements DynamicRouteHandlerInterface
         // use $originalPath because of the sites
         // only do redirecting with GET requests
         if ($context->getRequest()->getMethod() === 'GET') {
-            if (($this->config['documents']['allow_trailing_slash'] ?? null) === 'no') {
-                if ($redirectTargetUrl !== '/' && substr($redirectTargetUrl, -1) === '/') {
-                    $redirectTargetUrl = rtrim($redirectTargetUrl, '/');
+            $config = Config::getSystemConfig();
+
+            if ($config->documents->allowtrailingslash) {
+                if ($config->documents->allowtrailingslash === 'no') {
+                    if ($redirectTargetUrl !== '/' && substr($redirectTargetUrl, -1) === '/') {
+                        $redirectTargetUrl = rtrim($redirectTargetUrl, '/');
+                    }
                 }
             }
 
@@ -319,8 +315,6 @@ class DocumentRouteHandler implements DynamicRouteHandlerInterface
 
             return $route;
         }
-
-        return null;
     }
 
     /**
@@ -352,7 +346,7 @@ class DocumentRouteHandler implements DynamicRouteHandlerInterface
     /**
      * Check if document is can be used to generate a route
      *
-     * @param Document\PageSnippet $document
+     * @param $document
      *
      * @return bool
      */

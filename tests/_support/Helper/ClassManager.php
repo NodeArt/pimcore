@@ -132,7 +132,7 @@ class ClassManager extends Module
     }
 
     /**
-     * @param string $name
+     * @param $name
      *
      * @return ObjectbrickDefinition|null
      */
@@ -201,33 +201,13 @@ class ClassManager extends Module
     }
 
     /**
-     * Saves JSON to file
-     *
-     * @param string $filename
-     * @param string $json
-     *
-     * @return string
-     */
-    public function saveJson($filename, $json)
-    {
-        $this->assertNotEmpty($json);
-
-        $path = $this->resolveFilePath($filename, false);
-
-        file_put_contents($path, $json);
-
-        return $path;
-    }
-
-    /**
      * Resolve filename to reource path
      *
      * @param string $filename
-     * @param bool $assert
      *
      * @return string
      */
-    protected function resolveFilePath($filename, $assert = true)
+    protected function resolveFilePath($filename)
     {
         $fs = new Filesystem();
         $path = $filename;
@@ -237,9 +217,7 @@ class ClassManager extends Module
             $path = __DIR__ . '/../Resources/objects/' . $filename;
         }
 
-        if ($assert) {
-            $this->assertFileExists($path);
-        }
+        $this->assertFileExists($path);
 
         return $path;
     }

@@ -20,12 +20,11 @@ use Pimcore\Model;
 use Pimcore\Model\DataObject;
 use Pimcore\Model\DataObject\ClassDefinition\Data;
 
-class Slider extends Data implements ResourcePersistenceAwareInterface, QueryResourcePersistenceAwareInterface, TypeDeclarationSupportInterface, EqualComparisonInterface
+class Slider extends Data implements ResourcePersistenceAwareInterface, QueryResourcePersistenceAwareInterface
 {
     use Model\DataObject\Traits\SimpleComparisonTrait;
     use Extension\ColumnType;
     use Extension\QueryColumnType;
-    use DataObject\ClassDefinition\NullablePhpdocReturnTypeTrait;
 
     /**
      * Static type of this element
@@ -159,7 +158,7 @@ class Slider extends Data implements ResourcePersistenceAwareInterface, QueryRes
     }
 
     /**
-     * @param string|int|null $maxValue
+     * @param $maxValue
      *
      * @return $this
      *
@@ -181,7 +180,7 @@ class Slider extends Data implements ResourcePersistenceAwareInterface, QueryRes
     }
 
     /**
-     * @return null
+     * @return int
      */
     public function getDefaultValue()
     {
@@ -244,7 +243,7 @@ class Slider extends Data implements ResourcePersistenceAwareInterface, QueryRes
      * @see ResourcePersistenceAwareInterface::getDataForResource
      *
      * @param float|null $data
-     * @param null|DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return float|null
@@ -262,7 +261,7 @@ class Slider extends Data implements ResourcePersistenceAwareInterface, QueryRes
      * @see ResourcePersistenceAwareInterface::getDataFromResource
      *
      * @param float|null $data
-     * @param null|DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return float|null
@@ -280,7 +279,7 @@ class Slider extends Data implements ResourcePersistenceAwareInterface, QueryRes
      * @see QueryResourcePersistenceAwareInterface::getDataForQueryResource
      *
      * @param float|null $data
-     * @param null|DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return float|null
@@ -294,7 +293,7 @@ class Slider extends Data implements ResourcePersistenceAwareInterface, QueryRes
      * @see Data::getDataForEditmode
      *
      * @param float|null $data
-     * @param null|DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return float|null
@@ -308,7 +307,7 @@ class Slider extends Data implements ResourcePersistenceAwareInterface, QueryRes
      * @see Data::getDataFromEditmode
      *
      * @param float|null $data
-     * @param null|DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return float|null
@@ -334,14 +333,14 @@ class Slider extends Data implements ResourcePersistenceAwareInterface, QueryRes
      * @see Data::getVersionPreview
      *
      * @param float|null $data
-     * @param null|DataObject\Concrete $object
+     * @param null|DataObject\AbstractObject $object
      * @param mixed $params
      *
-     * @return string
+     * @return float|null
      */
     public function getVersionPreview($data, $object = null, $params = [])
     {
-        return (string)$data;
+        return $data;
     }
 
     /**
@@ -364,7 +363,7 @@ class Slider extends Data implements ResourcePersistenceAwareInterface, QueryRes
     }
 
     /** True if change is allowed in edit mode.
-     * @param DataObject\Concrete $object
+     * @param string $object
      * @param mixed $params
      *
      * @return bool
@@ -375,7 +374,7 @@ class Slider extends Data implements ResourcePersistenceAwareInterface, QueryRes
     }
 
     /**
-     * @param DataObject\ClassDefinition\Data\Slider $masterDefinition
+     * @param DataObject\ClassDefinition\Data $masterDefinition
      */
     public function synchronizeWithMasterDefinition(DataObject\ClassDefinition\Data $masterDefinition)
     {
@@ -384,27 +383,5 @@ class Slider extends Data implements ResourcePersistenceAwareInterface, QueryRes
         $this->vertical = $masterDefinition->vertical;
         $this->increment = $masterDefinition->increment;
         $this->decimalPrecision = $masterDefinition->decimalPrecision;
-    }
-
-    public function isFilterable(): bool
-    {
-        return true;
-    }
-
-    /**
-     * @param float|null $oldValue
-     * @param float|null $newValue
-     *
-     * @return bool
-     */
-    public function isEqual($oldValue, $newValue): bool
-    {
-        $oldValue = (float) $oldValue;
-        $newValue = (float) $newValue;
-        if (abs($oldValue - $newValue) < 0.00001) {
-            return true;
-        }
-
-        return false;
     }
 }

@@ -15,6 +15,7 @@
 namespace Pimcore\Event\Model;
 
 use Pimcore\Event\Traits\ArgumentsAwareTrait;
+use Pimcore\Model\AbstractModel;
 use Symfony\Component\EventDispatcher\Event;
 
 class ResolveElementEvent extends Event
@@ -34,8 +35,7 @@ class ResolveElementEvent extends Event
     /**
      * ElementEvent constructor.
      *
-     * @param string $type
-     * @param string $id
+     * @param AbstractModel $element
      * @param array $arguments
      */
     public function __construct($type, $id, array $arguments = [])

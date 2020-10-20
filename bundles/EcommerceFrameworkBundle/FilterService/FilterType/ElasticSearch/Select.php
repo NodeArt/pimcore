@@ -30,12 +30,11 @@ class Select extends \Pimcore\Bundle\EcommerceFrameworkBundle\FilterService\Filt
         $field = $this->getField($filterDefinition);
         $preSelect = $this->getPreSelect($filterDefinition);
 
-        $value = $params[$field] ?? null;
-        $isReload = $params['is_reload'] ?? null;
+        $value = $params[$field];
 
         if ($value == AbstractFilterType::EMPTY_STRING) {
             $value = null;
-        } elseif (empty($value) && !$isReload) {
+        } elseif (empty($value) && !$params['is_reload']) {
             $value = $preSelect;
         }
 

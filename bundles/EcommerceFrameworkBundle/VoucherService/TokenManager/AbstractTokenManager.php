@@ -56,7 +56,7 @@ abstract class AbstractTokenManager implements TokenManagerInterface
     /**
      * @param array $filter
      *
-     * @return bool
+     * @return mixed
      */
     abstract public function cleanUpCodes($filter = []);
 
@@ -89,7 +89,7 @@ abstract class AbstractTokenManager implements TokenManagerInterface
         if (!$token) {
             throw new VoucherServiceException("No token found for code '" . $code . "'", VoucherServiceException::ERROR_CODE_NO_TOKEN_FOR_THIS_CODE_EXISTS);
         }
-        /** @var OnlineShopVoucherSeries $series */
+        /** @var OnlineShopVoucherSeries $voucherSeries */
         $series = OnlineShopVoucherSeries::getById($token->getVoucherSeriesId());
         if (!$series) {
             throw new VoucherServiceException("No voucher series found for token '" . $token->getToken() . "' (ID " . $token->getId() . ')', VoucherServiceException::ERROR_CODE_NO_TOKEN_FOR_THIS_CODE_EXISTS);
@@ -102,7 +102,7 @@ abstract class AbstractTokenManager implements TokenManagerInterface
     /**
      * Once per cart setting
      *
-     * @param string $code
+     * @param $code
      * @param CartInterface $cart
      *
      * @throws VoucherServiceException
@@ -133,14 +133,13 @@ abstract class AbstractTokenManager implements TokenManagerInterface
     protected function checkOnlyToken(CartInterface $cart)
     {
         $cartCodes = $cart->getVoucherTokenCodes();
-        $cartVoucherCount = count($cartCodes);
+        $cartVoucherCount = sizeof($cartCodes);
         if ($cartVoucherCount && method_exists($this->configuration, 'getOnlyTokenPerCart')) {
             if ($this->configuration->getOnlyTokenPerCart()) {
                 throw new VoucherServiceException('OnlyTokenPerCart: This token is only allowed as only token in this cart.', VoucherServiceException::ERROR_CODE_ONLY_TOKEN_PER_CART_CANNOT_BE_ADDED);
             }
 
             $cartToken = Token::getByCode($cartCodes[0]);
-            /** @var OnlineShopVoucherSeries $cartTokenSettings */
             $cartTokenSettings = OnlineShopVoucherSeries::getById($cartToken->getVoucherSeriesId())->getTokenSettings()->getItems()[0];
             if ($cartTokenSettings->getOnlyTokenPerCart()) {
                 throw new VoucherServiceException('OnlyTokenPerCart: There is a token of type onlyToken in your this cart already.', VoucherServiceException::ERROR_CODE_ONLY_TOKEN_PER_CART_ALREADY_ADDED);
@@ -151,7 +150,7 @@ abstract class AbstractTokenManager implements TokenManagerInterface
     /**
      * Export tokens to CSV
      *
-     * @param array $params
+     * @param $params
      *
      * @return mixed
      * @implements IExportableTokenManager
@@ -183,7 +182,7 @@ abstract class AbstractTokenManager implements TokenManagerInterface
                     $tokenInfo['token'],
                     (int) $tokenInfo['usages'],
                     (int) $tokenInfo['length'],
-                    $tokenInfo['timestamp'],
+                    $tokenInfo['timestamp']
                 ]);
             }
         }
@@ -198,7 +197,7 @@ abstract class AbstractTokenManager implements TokenManagerInterface
     /**
      * Export tokens to plain text list
      *
-     * @param array $params
+     * @param $params
      *
      * @return mixed
      * @implements IExportableTokenManager
@@ -216,6 +215,7 @@ abstract class AbstractTokenManager implements TokenManagerInterface
         }
 
         if (null !== $data && is_array($data)) {
+            /** @var Token $token */
             foreach ($data as $tokenInfo) {
                 $result[] = $tokenInfo['token'];
             }
@@ -264,7 +264,7 @@ abstract class AbstractTokenManager implements TokenManagerInterface
     abstract public function releaseToken($code, CartInterface $cart);
 
     /**
-     * @param array|null $filter
+     * @param null $filter
      *
      * @return array|bool
      */
@@ -302,7 +302,7 @@ abstract class AbstractTokenManager implements TokenManagerInterface
     abstract public function cleanUpReservations($duration = 0);
 
     /**
-     * @param array $viewParamsBag
+     * @param $viewParamsBag
      * @param array $params
      *
      * @return string The path of the template to display

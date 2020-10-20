@@ -90,11 +90,6 @@ pimcore.settings.targeting.conditions = (function () {
         }),
 
         country: Class.create(pimcore.settings.targeting.condition.abstract, {
-
-            isAvailable : function () {
-                return pimcore.settings['maxmind_geoip_installed'];
-            },
-
             getName: function () {
                 return t("country");
             },
@@ -122,7 +117,7 @@ pimcore.settings.targeting.conditions = (function () {
                             autoDestroy: true,
                             proxy: {
                                 type: 'ajax',
-                                url: Routing.generate('pimcore_admin_misc_countrylist'),
+                                url: "/admin/misc/country-list",
                                 reader: {
                                     type: 'json',
                                     rootProperty: 'data'
@@ -179,7 +174,7 @@ pimcore.settings.targeting.conditions = (function () {
                             autoDestroy: true,
                             proxy: {
                                 type: 'ajax',
-                                url: Routing.generate('pimcore_admin_misc_languagelist'),
+                                url: "/admin/misc/language-list",
                                 reader: {
                                     type: 'json',
                                     rootProperty: 'data'
@@ -209,11 +204,6 @@ pimcore.settings.targeting.conditions = (function () {
         }),
 
         geopoint: Class.create(pimcore.settings.targeting.condition.abstract, {
-
-            isAvailable : function () {
-                return pimcore.settings['maxmind_geoip_installed'];
-            },
-
             getName: function () {
                 return t("geopoint");
             },
@@ -431,10 +421,9 @@ pimcore.settings.targeting.conditions = (function () {
                     tbar: pimcore.settings.targeting.conditions.getTopBar(this, id, panel, data),
                     items: [{
                         xtype: 'textfield',
-                        fieldLabel: t('referrer') + ' (' + t("regex") + ')',
+                        fieldLabel: t('referrer'),
                         name: "referrer",
                         value: data.referrer,
-                        labelWidth: 170,
                         width: 450
                     }, {
                         xtype: "hidden",

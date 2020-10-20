@@ -61,7 +61,7 @@ class ConfigProvider
     {
         $reportConfig = \Pimcore\Config::getReportConfig();
 
-        $config = $reportConfig->get('piwik');
+        $config = $reportConfig->piwik;
         if (!$config instanceof ConfigObject) {
             $config = new ConfigObject([]);
         }

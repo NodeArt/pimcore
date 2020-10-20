@@ -25,7 +25,6 @@ class ChangePublishedStateSubscriber implements EventSubscriberInterface
     const NO_CHANGE = 'no_change';
     const FORCE_PUBLISHED = 'force_published';
     const FORCE_UNPUBLISHED = 'force_unpublished';
-    const SAVE_VERSION = 'save_version';
 
     public function onWorkflowCompleted(Event $event)
     {
@@ -33,17 +32,23 @@ class ChangePublishedStateSubscriber implements EventSubscriberInterface
             return;
         }
 
-        /** @var Transition $transition */
+        /**
+         * @var $transition Transition
+         */
         $transition = $event->getTransition();
 
-        /** @var Document|Concrete $subject */
+        /**
+         * @var $subject Document | Concrete
+         */
         $subject = $event->getSubject();
 
         $changePublishedState = $transition->getChangePublishedState();
 
-        if ($changePublishedState === self::FORCE_UNPUBLISHED) {
+        if ($subject->isPublished() && $changePublishedState == self::FORCE_UNPUBLISHED) {
             $subject->setPublished(false);
-        } elseif ($changePublishedState === self::FORCE_PUBLISHED) {
+        }
+
+        if (!$subject->isPublished() && $changePublishedState == self::FORCE_PUBLISHED) {
             $subject->setPublished(true);
         }
     }
@@ -64,7 +69,7 @@ class ChangePublishedStateSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            'workflow.completed' => 'onWorkflowCompleted',
+            'workflow.completed' => 'onWorkflowCompleted'
         ];
     }
 }

@@ -19,18 +19,16 @@ namespace Pimcore\DataObject\GridColumnConfig\Operator;
 
 class StringContains extends AbstractOperator
 {
-    /** @var string */
     private $search;
 
-    /** @var bool */
     private $insensitive;
 
     public function __construct(\stdClass $config, $context = null)
     {
         parent::__construct($config, $context);
 
-        $this->search = $config->search ?? '';
-        $this->insensitive = $config->insensitive ?? false;
+        $this->search = $config->search;
+        $this->insensitive = $config->insensitive;
     }
 
     public function getLabeledValue($element)
@@ -51,8 +49,6 @@ class StringContains extends AbstractOperator
                     $childValues = [$childValues];
                 }
 
-                $newValue = null;
-
                 if (is_array($childValues)) {
                     foreach ($childValues as $value) {
                         if (is_array($value)) {
@@ -66,6 +62,8 @@ class StringContains extends AbstractOperator
                             $newValue = $this->contains($value);
                         }
                     }
+                } else {
+                    $newValue = null;
                 }
 
                 $newChildsResult[] = $newValue;
@@ -82,9 +80,9 @@ class StringContains extends AbstractOperator
     }
 
     /**
-     * @param string $value
+     * @param $value
      *
-     * @return bool
+     * @return mixed
      */
     public function contains($value)
     {
@@ -100,7 +98,7 @@ class StringContains extends AbstractOperator
     }
 
     /**
-     * @return string
+     * @return mixed
      */
     public function getSearch()
     {
@@ -108,7 +106,7 @@ class StringContains extends AbstractOperator
     }
 
     /**
-     * @param string $search
+     * @param mixed $search
      */
     public function setSearch($search)
     {
@@ -116,7 +114,7 @@ class StringContains extends AbstractOperator
     }
 
     /**
-     * @return bool
+     * @return mixed
      */
     public function getInsensitive()
     {
@@ -124,7 +122,7 @@ class StringContains extends AbstractOperator
     }
 
     /**
-     * @param bool $insensitive
+     * @param mixed $insensitive
      */
     public function setInsensitive($insensitive)
     {

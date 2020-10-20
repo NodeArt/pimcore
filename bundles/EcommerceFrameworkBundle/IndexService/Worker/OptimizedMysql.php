@@ -18,7 +18,6 @@ use Pimcore\Bundle\EcommerceFrameworkBundle\IndexService\Config\OptimizedMysql a
 use Pimcore\Bundle\EcommerceFrameworkBundle\Model\IndexableInterface;
 use Pimcore\Db\ConnectionInterface;
 use Pimcore\Logger;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * @method OptimizedMysqlConfig getTenantConfig()
@@ -35,15 +34,9 @@ class OptimizedMysql extends AbstractMockupCacheWorker implements BatchProcessin
      */
     protected $mySqlHelper;
 
-    /**
-     * @param OptimizedMysqlConfig $tenantConfig
-     * @param ConnectionInterface $db
-     * @param EventDispatcherInterface $eventDispatcher
-     * @param string|null $workerMode
-     */
-    public function __construct(OptimizedMysqlConfig $tenantConfig, ConnectionInterface $db, EventDispatcherInterface $eventDispatcher, string $workerMode = null)
+    public function __construct(OptimizedMysqlConfig $tenantConfig, ConnectionInterface $db)
     {
-        parent::__construct($tenantConfig, $db, $eventDispatcher, $workerMode);
+        parent::__construct($tenantConfig, $db);
 
         $this->mySqlHelper = new Helper\MySql($tenantConfig, $db);
     }
@@ -98,26 +91,24 @@ class OptimizedMysql extends AbstractMockupCacheWorker implements BatchProcessin
             return;
         }
 
-        $subObjectIds = $this->prepareDataForIndex($object);
+        $this->prepareDataForIndex($object);
 
         //updates data for all subentries
+        $subObjectIds = $this->tenantConfig->createSubIdsForObject($object);
         foreach ($subObjectIds as $subObjectId => $object) {
             $this->doUpdateIndex($subObjectId);
         }
 
-        if (count($subObjectIds) > 0) {
-            $this->fillupPreparationQueue($object);
-        }
+        $this->fillupPreparationQueue($object);
     }
 
     /**
      * updates all index tables, delegates subtenant updates to tenant config and updates mockup cache
      *
-     * @param int $objectId
-     * @param array|null $data
-     * @param array|null $metadata
+     * @param $objectId
+     * @param null $data
      */
-    public function doUpdateIndex($objectId, $data = null, $metadata = null)
+    public function doUpdateIndex($objectId, $data = null)
     {
         if (empty($data)) {
             $data = $this->db->fetchOne('SELECT data FROM ' . self::STORE_TABLE_NAME . ' WHERE o_id = ? AND tenant = ?', [$objectId, $this->name]);

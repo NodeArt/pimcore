@@ -67,23 +67,24 @@ class Discount implements DiscountInterface
      */
     public function modify(PriceInterface $currentSubTotal, CartInterface $cart)
     {
-        $amount = $this->getAmount();
-        if ($currentSubTotal->getAmount()->lessThan($amount->mul(-1))) {
-            $amount = $currentSubTotal->getAmount()->mul(-1);
+        if ($this->getAmount() != 0) {
+            $amount = $this->getAmount();
+            if ($currentSubTotal->getAmount()->lessThan($amount->mul(-1))) {
+                $amount = $currentSubTotal->getAmount()->mul(-1);
+            }
+
+            $modificatedPrice = new ModificatedPrice($amount, $currentSubTotal->getCurrency(), false, $this->rule->getLabel());
+
+            $taxClass = Factory::getInstance()->getPriceSystem('default')->getTaxClassForPriceModification($this);
+            if ($taxClass) {
+                $modificatedPrice->setTaxEntryCombinationMode($taxClass->getTaxEntryCombinationType());
+                $modificatedPrice->setTaxEntries(TaxEntry::convertTaxEntries($taxClass));
+
+                $modificatedPrice->setGrossAmount($amount, true);
+            }
+
+            return $modificatedPrice;
         }
-
-        $modificatedPrice = new ModificatedPrice($amount, $currentSubTotal->getCurrency(), false, $this->rule->getLabel());
-        $modificatedPrice->setRule($this->rule);
-
-        $taxClass = Factory::getInstance()->getPriceSystem('default')->getTaxClassForPriceModification($this);
-        if ($taxClass) {
-            $modificatedPrice->setTaxEntryCombinationMode($taxClass->getTaxEntryCombinationType());
-            $modificatedPrice->setTaxEntries(TaxEntry::convertTaxEntries($taxClass));
-
-            $modificatedPrice->setGrossAmount($amount, true);
-        }
-
-        return $modificatedPrice;
     }
 
     /**

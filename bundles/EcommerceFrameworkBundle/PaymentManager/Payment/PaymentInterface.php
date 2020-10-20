@@ -66,8 +66,8 @@ interface PaymentInterface
     /**
      * Executes payment
      *
-     * @param PriceInterface|null $price
-     * @param string|null $reference
+     * @param PriceInterface $price
+     * @param string $reference
      *
      * @return StatusInterface
      */
@@ -78,7 +78,7 @@ interface PaymentInterface
      *
      * @param PriceInterface $price
      * @param string $reference
-     * @param string $transactionId
+     * @param $transactionId
      *
      * @return StatusInterface
      */
@@ -95,7 +95,7 @@ interface PaymentInterface
 
     /**
      * @param AbstractOrder $sourceOrder
-     * @param object $paymentBrick
+     * @param $paymentBrick
      *
      * @todo Pimcore 7 remove this method as it moved to RecurringPaymentInterface
      *

@@ -20,9 +20,6 @@ namespace Pimcore\Templating\Helper;
 use Symfony\Bridge\Twig\Extension\WebLinkExtension;
 use Symfony\Component\Templating\Helper\Helper;
 
-/**
- * @deprecated
- */
 class WebLink extends Helper
 {
     /**

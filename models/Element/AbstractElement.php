@@ -17,33 +17,20 @@
 
 namespace Pimcore\Model\Element;
 
-use Pimcore\Event\AdminEvents;
-use Pimcore\Event\Model\ElementEvent;
 use Pimcore\Model;
-use Pimcore\Model\DataObject\AbstractObject;
-use Pimcore\Model\Element\Traits\DirtyIndicatorTrait;
 
 /**
- * @method Model\Document\Dao|Model\Asset|Dao|Model\DataObject\AbstractObject\Dao getDao()
+ * @method \Pimcore\Model\Element\Dao getDao()
  */
-abstract class AbstractElement extends Model\AbstractModel implements ElementInterface, ElementDumpStateInterface, DirtyIndicatorInterface
+abstract class AbstractElement extends Model\AbstractModel implements ElementInterface, ElementDumpStateInterface
 {
     use ElementDumpStateTrait;
-    use DirtyIndicatorTrait;
-
-    /**
-     * @var Model\Dependency|null
-     */
-    protected $dependencies;
 
     /**
      * @var int
      */
     protected $__dataVersionTimestamp = null;
 
-    /**
-     * @internal
-     */
     protected function updateModificationInfos()
     {
         $this->setVersionCount($this->getDao()->getVersionCountForUpdate() + 1);
@@ -52,29 +39,23 @@ abstract class AbstractElement extends Model\AbstractModel implements ElementInt
             $this->setVersionCount(1);
         }
 
-        $modificationDateKey = $this instanceof AbstractObject ? 'o_modificationDate' : 'modificationDate';
-        if (!$this->isFieldDirty($modificationDateKey)) {
-            $updateTime = time();
-            $this->setModificationDate($updateTime);
-        }
+        $updateTime = time();
+        $this->setModificationDate($updateTime);
 
         if (!$this->getCreationDate()) {
-            $this->setCreationDate($this->getModificationDate());
+            $this->setCreationDate($updateTime);
         }
 
-        // auto assign user if possible, if not changed explicitly, if no user present, use ID=0 which represents the "system" user
-        $userModificationKey = $this instanceof AbstractObject ? 'o_userModification' : 'userModification';
-        if (!$this->isFieldDirty($userModificationKey)) {
-            $userId = 0;
-            $user = \Pimcore\Tool\Admin::getCurrentUser();
-            if ($user instanceof Model\User) {
-                $userId = $user->getId();
-            }
-            $this->setUserModification($userId);
+        // auto assign user if possible, if no user present, use ID=0 which represents the "system" user
+        $userId = 0;
+        $user = \Pimcore\Tool\Admin::getCurrentUser();
+        if ($user instanceof Model\User) {
+            $userId = $user->getId();
         }
+        $this->setUserModification($userId);
 
         if ($this->getUserOwner() === null) {
-            $this->setUserOwner($this->getUserModification());
+            $this->setUserOwner($userId);
         }
     }
 
@@ -102,7 +83,7 @@ abstract class AbstractElement extends Model\AbstractModel implements ElementInt
     }
 
     /**
-     * @param string $name
+     * @param  $name
      *
      * @return bool
      */
@@ -114,12 +95,7 @@ abstract class AbstractElement extends Model\AbstractModel implements ElementInt
     }
 
     /**
-     * @param Model\Property[] $properties
-     */
-    abstract public function setProperties($properties);
-
-    /**
-     * @param string $name
+     * @param  $name
      */
     public function removeProperty($name)
     {
@@ -138,18 +114,6 @@ abstract class AbstractElement extends Model\AbstractModel implements ElementInt
         $elementType = Service::getElementType($this);
 
         return $elementType . '_' . $this->getId();
-    }
-
-    /**
-     * @param string|int $id
-     *
-     * @return string
-     */
-    protected static function getCacheKey($id): string
-    {
-        $elementType = Service::getElementTypeByClassName(static::class);
-
-        return $elementType . '_' . $id;
     }
 
     /**
@@ -229,41 +193,23 @@ abstract class AbstractElement extends Model\AbstractModel implements ElementInt
      * This is used for user-permissions, pass a permission type (eg. list, view, save) an you know if the current user is allowed to perform the requested action
      *
      * @param string $type
-     * @param null|Model\User $user
      *
      * @return bool
      */
-    public function isAllowed($type, ?Model\User $user = null)
+    public function isAllowed($type)
     {
-        if (null === $user) {
-            $user = \Pimcore\Tool\Admin::getCurrentUser();
-        }
-
-        if (!$user) {
-            if (php_sapi_name() === 'cli') {
-                return true;
-            }
-
-            return false;
-        }
-
+        $currentUser = \Pimcore\Tool\Admin::getCurrentUser();
         //everything is allowed for admin
-        if ($user->isAdmin()) {
+        if ($currentUser->isAdmin()) {
             return true;
         }
 
-        $isAllowed = $this->getDao()->isAllowed($type, $user);
-
-        $event = new ElementEvent($this, ['isAllowed' => $isAllowed, 'permissionType' => $type, 'user' => $user]);
-        \Pimcore::getEventDispatcher()->dispatch(AdminEvents::ELEMENT_PERMISSION_IS_ALLOWED, $event);
-
-        return (bool) $event->getArgument('isAllowed');
+        return $this->getDao()->isAllowed($type, $currentUser);
     }
 
     public function unlockPropagate()
     {
         $type = Service::getType($this);
-
         $ids = $this->getDao()->unlockPropagate();
 
         // invalidate cache items
@@ -315,15 +261,14 @@ abstract class AbstractElement extends Model\AbstractModel implements ElementInt
     }
 
     /**
-     * @param string|null $versionNote
+     * @param null $versionNote
      * @param bool $saveOnlyVersion
-     * @param bool $saveStackTrace
      *
      * @return Model\Version
      *
      * @throws \Exception
      */
-    protected function doSaveVersion($versionNote = null, $saveOnlyVersion = true, $saveStackTrace = true)
+    protected function doSaveVersion($versionNote = null, $saveOnlyVersion = true)
     {
         /**
          * @var Model\Version $version
@@ -335,7 +280,6 @@ abstract class AbstractElement extends Model\AbstractModel implements ElementInt
         $version->setUserId($this->getUserModification());
         $version->setData($this);
         $version->setNote($versionNote);
-        $version->setGenerateStackTrace($saveStackTrace);
 
         if ($saveOnlyVersion) {
             $versionCount = $this->getDao()->getVersionCountForUpdate();
@@ -348,50 +292,5 @@ abstract class AbstractElement extends Model\AbstractModel implements ElementInt
         $version->save();
 
         return $version;
-    }
-
-    /**
-     * @return Model\Dependency
-     */
-    public function getDependencies()
-    {
-        if (!$this->dependencies) {
-            $this->dependencies = Model\Dependency::getBySourceId($this->getId(), Service::getElementType($this));
-        }
-
-        return $this->dependencies;
-    }
-
-    /**
-     * @return Model\Schedule\Task[]
-     */
-    public function getScheduledTasks()
-    {
-        return [];
-    }
-
-    /**
-     * @return Model\Version[]
-     */
-    public function getVersions()
-    {
-        return [];
-    }
-
-    /**
-     * @return array
-     */
-    public function __sleep()
-    {
-        $parentVars = parent::__sleep();
-        $blockedVars = ['dependencies'];
-
-        return array_diff($parentVars, $blockedVars);
-    }
-
-    public function __clone()
-    {
-        parent::__clone();
-        $this->dependencies = null;
     }
 }

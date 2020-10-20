@@ -25,7 +25,7 @@ interface SelectOptionsProviderInterface extends MultiSelectOptionsProviderInter
      * @param array $context
      * @param Data $fieldDefinition
      *
-     * @return string|null
+     * @return mixed
      */
     public function getDefaultValue($context, $fieldDefinition);
 }

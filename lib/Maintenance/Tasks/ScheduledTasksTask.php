@@ -19,7 +19,6 @@ use Pimcore\Model\Asset;
 use Pimcore\Model\DataObject;
 use Pimcore\Model\Document;
 use Pimcore\Model\Schedule\Task\Listing;
-use Pimcore\Model\User;
 use Pimcore\Model\Version;
 use Psr\Log\LoggerInterface;
 
@@ -48,13 +47,11 @@ final class ScheduledTasksTask implements TaskInterface
         $tasks = $list->load();
 
         foreach ($tasks as $task) {
-            $taskUser = User::getById($task->getUserId());
-
             try {
                 if ($task->getCtype() === 'document') {
                     $document = Document::getById($task->getCid());
                     if ($document instanceof Document) {
-                        if ($task->getAction() === 'publish-version' && $task->getVersion() && $document->isAllowed('publish', $taskUser) && $document->isAllowed('versions', $taskUser)) {
+                        if ($task->getAction() === 'publish-version' && $task->getVersion()) {
                             if ($version = Version::getById($task->getVersion())) {
                                 $document = $version->getData();
                                 if ($document instanceof Document) {
@@ -66,13 +63,13 @@ final class ScheduledTasksTask implements TaskInterface
                             } else {
                                 $this->logger->error('Schedule\\Task\\Executor: Version [ '.$task->getVersion().' ] does not exist.');
                             }
-                        } elseif ($task->getAction() === 'publish' && $document->isAllowed('publish', $taskUser)) {
+                        } elseif ($task->getAction() === 'publish') {
                             $document->setPublished(true);
                             $document->save();
-                        } elseif ($task->getAction() === 'unpublish' && $document->isAllowed('unpublish', $taskUser)) {
+                        } elseif ($task->getAction() === 'unpublish') {
                             $document->setPublished(false);
                             $document->save();
-                        } elseif ($task->getAction() === 'delete' && $document->isAllowed('delete', $taskUser)) {
+                        } elseif ($task->getAction() === 'delete') {
                             $document->delete();
                         }
                     }
@@ -80,7 +77,7 @@ final class ScheduledTasksTask implements TaskInterface
                     $asset = Asset::getById($task->getCid());
 
                     if ($asset instanceof Asset) {
-                        if ($task->getAction() === 'publish-version' && $task->getVersion() && $asset->isAllowed('publish', $taskUser) && $asset->isAllowed('versions', $taskUser)) {
+                        if ($task->getAction() === 'publish-version' && $task->getVersion()) {
                             if ($version = Version::getById($task->getVersion())) {
                                 $asset = $version->getData();
                                 if ($asset instanceof Asset) {
@@ -91,7 +88,7 @@ final class ScheduledTasksTask implements TaskInterface
                             } else {
                                 $this->logger->error('Schedule\\Task\\Executor: Version [ '.$task->getVersion().' ] does not exist.');
                             }
-                        } elseif ($task->getAction() === 'delete' && $asset->isAllowed('delete', $taskUser)) {
+                        } elseif ($task->getAction() === 'delete') {
                             $asset->delete();
                         }
                     }
@@ -99,7 +96,7 @@ final class ScheduledTasksTask implements TaskInterface
                     $object = DataObject::getById($task->getCid());
 
                     if ($object instanceof DataObject) {
-                        if ($task->getAction() === 'publish-version' && $task->getVersion() && $object->isAllowed('publish', $taskUser) && $object->isAllowed('versions', $taskUser)) {
+                        if ($task->getAction() === 'publish-version' && $task->getVersion()) {
                             if ($version = Version::getById($task->getVersion())) {
                                 $object = $version->getData();
                                 if ($object instanceof DataObject\AbstractObject) {
@@ -111,13 +108,13 @@ final class ScheduledTasksTask implements TaskInterface
                             } else {
                                 $this->logger->error('Schedule\\Task\\Executor: Version [ '.$task->getVersion().' ] does not exist.');
                             }
-                        } elseif ($task->getAction() === 'publish' && $object->isAllowed('publish', $taskUser)) {
+                        } elseif ($task->getAction() === 'publish') {
                             $object->setPublished(true);
                             $object->save();
-                        } elseif ($task->getAction() === 'unpublish' && $object->isAllowed('unpublish', $taskUser)) {
+                        } elseif ($task->getAction() === 'unpublish') {
                             $object->setPublished(false);
                             $object->save();
-                        } elseif ($task->getAction() === 'delete' && $object->isAllowed('delete', $taskUser)) {
+                        } elseif ($task->getAction() === 'delete') {
                             $object->delete();
                         }
                     }

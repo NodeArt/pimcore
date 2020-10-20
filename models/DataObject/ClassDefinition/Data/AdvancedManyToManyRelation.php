@@ -27,9 +27,8 @@ use Pimcore\Model\Element;
 class AdvancedManyToManyRelation extends ManyToManyRelation
 {
     use DataObject\Traits\ElementWithMetadataComparisonTrait;
-
     /**
-     * @var array
+     * @var string[]
      */
     public $columns;
 
@@ -106,7 +105,7 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
     {
         $list = [
             'dirty' => false,
-            'data' => [],
+            'data' => []
         ];
 
         if (is_array($data) && count($data) > 0) {
@@ -144,7 +143,7 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
                     }
 
                     if ($source instanceof DataObject\Concrete) {
-                        /** @var DataObject\Data\ElementMetadata $metaData */
+                        /** @var $metaData DataObject\Data\ElementMetadata */
                         $metaData = \Pimcore::getContainer()->get('pimcore.model.factory')
                             ->build(
                                 'Pimcore\Model\DataObject\Data\ElementMetadata',
@@ -187,16 +186,15 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
     }
 
     /**
-     * @param DataObject\Data\ElementMetadata[]|null $data
-     * @param null|DataObject\Concrete $object
+     * @param $data
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
-     *
-     * @return string|null
      *
      * @throws \Exception
      */
     public function getDataForQueryResource($data, $object = null, $params = [])
     {
+
         //return null when data is not set
         if (!$data) {
             return null;
@@ -225,10 +223,10 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
      * @see Data::getDataForEditmode
      *
      * @param array $data
-     * @param null|DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
-     * @return array|null
+     * @return array
      */
     public function getDataForEditmode($data, $object = null, $params = [])
     {
@@ -240,7 +238,7 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
             $targets = [];
             $existingTargets = [];
 
-            /** @var DataObject\Data\ElementMetadata $metaObject */
+            /** @var $metaObject DataObject\Data\ElementMetadata */
             foreach ($data as $metaObject) {
                 $targetType = $metaObject->getElementType();
                 $targetId = $metaObject->getElementId();
@@ -284,7 +282,7 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
                 $existingTargets[$targetType] = $resultMap;
             }
 
-            /** @var DataObject\Data\ElementMetadata $metaObject */
+            /** @var $metaObject DataObject\Data\ElementMetadata */
             foreach ($data as $key => $metaObject) {
                 $targetType = $metaObject->getElementType();
                 $targetId = $metaObject->getElementId();
@@ -306,7 +304,6 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
                     } else {
                         $className = $elementData['className'];
                         $itemData = ['id' => $id, 'path' => $fullpath, 'type' => 'object', 'subtype' => $className];
-                        /** @var DataObject\Concrete $obj */
                         $obj = Element\Service::getElementById('object', $id);
                         $itemData['published'] = $obj->getPublished();
                     }
@@ -339,18 +336,16 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
 
             return $return;
         }
-
-        return null;
     }
 
     /**
      * @see Data::getDataFromEditmode
      *
      * @param array $data
-     * @param null|DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
-     * @return array|null
+     * @return array
      */
     public function getDataFromEditmode($data, $object = null, $params = [])
     {
@@ -362,7 +357,6 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
         $multihrefMetadata = [];
         if (is_array($data) && count($data) > 0) {
             foreach ($data as $element) {
-                $e = null;
                 if ($element['type'] == 'object') {
                     $e = DataObject::getById($element['id']);
                 } elseif ($element['type'] == 'asset') {
@@ -372,7 +366,6 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
                 }
 
                 if ($e instanceof Element\ElementInterface) {
-                    /** @var DataObject\Data\ElementMetadata $metaData */
                     $metaData = \Pimcore::getContainer()->get('pimcore.model.factory')
                         ->build(
                             'Pimcore\Model\DataObject\Data\ElementMetadata',
@@ -388,11 +381,15 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
                     foreach ($this->getColumns() as $columnConfig) {
                         $key = $columnConfig['key'];
                         $setter = 'set' . ucfirst($key);
-                        $value = $element[$key] ?? null;
+                        $value = $element[$key];
 
                         if ($columnConfig['type'] == 'multiselect') {
-                            if (is_array($value) && count($value)) {
-                                $value = implode(',', $value);
+                            if ($value) {
+                                if (is_array($value) && count($value)) {
+                                    $value = implode(',', $value);
+                                }
+                            } else {
+                                $value = null;
                             }
                         }
 
@@ -410,8 +407,8 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
     }
 
     /**
-     * @param array|null $data
-     * @param DataObject\Concrete|null $object
+     * @param $data
+     * @param null $object
      * @param array $params
      *
      * @return array
@@ -424,11 +421,11 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
     /**
      * @see Data::getVersionPreview
      *
-     * @param array|null $data
-     * @param null|DataObject\Concrete $object
-     * @param array $params
+     * @param array $data
+     * @param null|DataObject\AbstractObject $object
+     * @param mixed $params
      *
-     * @return string|null
+     * @return string
      */
     public function getVersionPreview($data, $object = null, $params = [])
     {
@@ -438,7 +435,7 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
                 $o = $metaObject->getElement();
                 $item = Element\Service::getElementType($o) . ' ' . $o->getRealFullPath();
 
-                if (count($metaObject->getData())) {
+                if (sizeof($metaObject->getData())) {
                     $subItems = [];
                     foreach ($metaObject->getData() as $key => $value) {
                         if (!$value) {
@@ -447,7 +444,7 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
                         $subItems[] = $key . ': ' . $value;
                     }
 
-                    if (count($subItems)) {
+                    if (sizeof($subItems)) {
                         $item .= ' <br/><span class="preview-metadata">[' . implode(' | ', $subItems) . ']</span>';
                     }
                 }
@@ -457,8 +454,6 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
 
             return implode('<br />', $items);
         }
-
-        return null;
     }
 
     /**
@@ -506,7 +501,7 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
      *
      * @abstract
      *
-     * @param DataObject\Concrete $object
+     * @param DataObject\AbstractObject $object
      * @param array $params
      *
      * @return string
@@ -524,14 +519,14 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
             }
 
             return implode(',', $paths);
+        } else {
+            return null;
         }
-
-        return '';
     }
 
     /**
-     * @param string $importValue
-     * @param null|DataObject\Concrete $object
+     * @param $importValue
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return array|mixed
@@ -549,7 +544,6 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
             $el = Element\Service::getElementByPath($type, $path);
 
             if ($el) {
-                /** @var DataObject\Data\ElementMetadata $metaObject */
                 $metaObject = \Pimcore::getContainer()->get('pimcore.model.factory')
                     ->build(
                         'Pimcore\Model\DataObject\Data\ElementMetadata',
@@ -569,9 +563,35 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
     }
 
     /**
-     * @deprecated
+     * This is a dummy and is mostly implemented by relation types
      *
-     * @param DataObject\Concrete $object
+     * @param mixed $data
+     * @param array $tags
+     *
+     * @return array
+     */
+    public function getCacheTags($data, $tags = [])
+    {
+        $tags = is_array($tags) ? $tags : [];
+
+        if ($this->getLazyLoading()) {
+            return $tags;
+        }
+
+        if (is_array($data) && count($data) > 0) {
+            foreach ($data as $metaObject) {
+                $element = $metaObject->getElement();
+                if ($element instanceof Element\ElementInterface && !array_key_exists($element->getCacheTag(), $tags)) {
+                    $tags = $element->getCacheTags($tags);
+                }
+            }
+        }
+
+        return $tags;
+    }
+
+    /**
+     * @param DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return array|mixed|null
@@ -590,13 +610,7 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
 
                     foreach ($this->getColumns() as $c) {
                         $getter = 'get' . ucfirst($c['key']);
-                        $value = $metaObject->$getter();
-
-                        if ($c['type'] == 'bool' || $c['type'] == 'columnbool') {
-                            $value = (int)$value;
-                        }
-
-                        $item[$c['key']] = $value;
+                        $item[$c['key']] = $metaObject->$getter();
                     }
                     $items[] = $item;
                 }
@@ -609,12 +623,10 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
     }
 
     /**
-     * @deprecated
-     *
      * @param mixed $value
-     * @param Element\AbstractElement $relatedObject
+     * @param null $relatedObject
      * @param mixed $params
-     * @param Model\Webservice\IdMapperInterface|null $idMapper
+     * @param null $idMapper
      *
      * @return mixed|void
      *
@@ -669,14 +681,14 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
     }
 
     /**
-     * @param DataObject\Concrete|DataObject\Localizedfield|DataObject\Objectbrick\Data\AbstractData|\Pimcore\Model\DataObject\Fieldcollection\Data\AbstractData $object
+     * @param DataObject\Concrete $object
      * @param array $params
      */
     public function save($object, $params = [])
     {
-        if (!DataObject\AbstractObject::isDirtyDetectionDisabled() && $object instanceof Element\DirtyIndicatorInterface) {
+        if (!DataObject\AbstractObject::isDirtyDetectionDisabled() && $object instanceof DataObject\DirtyIndicatorInterface) {
             if ($object instanceof DataObject\Localizedfield) {
-                if ($object->getObject() instanceof Element\DirtyIndicatorInterface) {
+                if ($object->getObject() instanceof DataObject\DirtyIndicatorInterface) {
                     if (!$object->hasDirtyFields()) {
                         return;
                     }
@@ -691,8 +703,6 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
         }
 
         $multihrefMetadata = $this->getDataFromObjectParam($object, $params);
-        //TODO: move validation to checkValidity & throw exception in Pimcore 7
-        $multihrefMetadata = $this->filterMultipleAssignments($multihrefMetadata, $object, $params);
 
         $classId = null;
         $objectId = null;
@@ -718,19 +728,19 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
         $table = 'object_metadata_' . $classId;
         $db = Db::get();
 
-        $this->enrichDataRow($object, $params, $classId, $relation);
+        $this->enrichRelation($object, $params, $classId, $relation);
 
         $position = (isset($relation['position']) && $relation['position']) ? $relation['position'] : '0';
-        $context = $params['context'] ?? null;
 
-        if (isset($context['containerType'], $context['subContainerType']) && ($context['containerType'] === 'fieldcollection' || $context['containerType'] === 'objectbrick') && $context['subContainerType'] === 'localizedfield') {
-            $index = $context['index'] ?? null;
+        if ($params && $params['context'] && ($params['context']['containerType'] == 'fieldcollection' || $params['context']['containerType'] == 'objectbrick') && $params['context']['subContainerType'] == 'localizedfield') {
+            $context = $params['context'];
+            $index = $context['index'];
             $containerName = $context['fieldname'];
 
-            if ($context['containerType'] === 'fieldcollection') {
-                $ownerName = '/' . $context['containerType'] . '~' . $containerName . '/' . $index . '/%';
+            if ($params['context']['containerType'] == 'fieldcollection') {
+                $ownerName = '/' . $params['context']['containerType'] . '~' . $containerName . '/' . $index . '/%';
             } else {
-                $ownerName = '/' . $context['containerType'] . '~' . $containerName . '/%';
+                $ownerName = '/' . $params['context']['containerType'] . '~' . $containerName . '/%';
             }
 
             $sql = $db->quoteInto('o_id = ?', $objectId) . " AND ownertype = 'localizedfield' AND "
@@ -741,14 +751,14 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
             $sql = $db->quoteInto('o_id = ?', $objectId) . ' AND ' . $db->quoteInto('fieldname = ?', $this->getName())
                 . ' AND ' . $db->quoteInto('position = ?', $position);
 
-            if ($context) {
-                if (!empty($context['fieldname'])) {
-                    $sql .= ' AND ' . $db->quoteInto('ownername = ?', $context['fieldname']);
+            if ($params && $params['context']) {
+                if ($params['context']['fieldname']) {
+                    $sql .= ' AND ' . $db->quoteInto('ownername = ?', $params['context']['fieldname']);
                 }
 
-                if (!DataObject\AbstractObject::isDirtyDetectionDisabled() && $object instanceof Element\DirtyIndicatorInterface) {
-                    if ($context['containerType']) {
-                        $sql .= ' AND ' . $db->quoteInto('ownertype = ?', $context['containerType']);
+                if (!DataObject\AbstractObject::isDirtyDetectionDisabled() && $object instanceof DataObject\DirtyIndicatorInterface) {
+                    if ($params['context']['containerType']) {
+                        $sql .= ' AND ' . $db->quoteInto('ownertype = ?', $params['context']['containerType']);
                     }
                 }
             }
@@ -778,7 +788,7 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
     }
 
     /**
-     * @param DataObject\Concrete|DataObject\Localizedfield|DataObject\Objectbrick\Data\AbstractData|DataObject\Fieldcollection\Data\AbstractData $object
+     * @param $object
      * @param array $params
      *
      * @return array
@@ -788,8 +798,9 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
         $data = null;
         if ($object instanceof DataObject\Concrete) {
             $data = $object->getObjectVar($this->getName());
-            if (!$object->isLazyKeyLoaded($this->getName())) {
-                $data = $this->load($object);
+            if ($this->getLazyLoading() && !$object->isLazyKeyLoaded($this->getName())) {
+                //$data = $this->getDataFromResource($object->getRelationData($this->getName(),true,null));
+                $data = $this->load($object, ['force' => true]);
 
                 $object->setObjectVar($this->getName(), $data);
                 $this->markLazyloadedFieldAsLoaded($object);
@@ -816,16 +827,16 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
     public function delete($object, $params = [])
     {
         $db = Db::get();
-        $context = $params['context'] ?? null;
 
-        if (isset($context['containerType'], $context['subContainerType']) && ($context['containerType'] === 'fieldcollection' || $context['containerType'] === 'objectbrick') && $context['subContainerType'] === 'localizedfield') {
-            $containerName = $context['fieldname'] ?? null;
+        if ($params && $params['context'] && ($params['context']['containerType'] == 'fieldcollection' || $params['context']['containerType'] == 'objectbrick') && $params['context']['subContainerType'] == 'localizedfield') {
+            $context = $params['context'];
+            $containerName = $context['fieldname'];
 
-            if ($context['containerType'] === 'objectbrick') {
+            if ($params['context']['containerType'] == 'objectbrick') {
                 $db->deleteWhere(
                     'object_metadata_' . $object->getClassId(),
                     $db->quoteInto('o_id = ?', $object->getId()) . " AND ownertype = 'localizedfield' AND "
-                    . $db->quoteInto('ownername LIKE ?', '/' . $context['containerType'] . '~' . $containerName . '/%')
+                    . $db->quoteInto('ownername LIKE ?', '/' . $params['context']['containerType'] . '~' . $containerName . '/%')
                     . ' AND ' . $db->quoteInto('fieldname = ?', $this->getName())
                 );
             } else {
@@ -834,7 +845,7 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
                 $db->deleteWhere(
                     'object_metadata_' . $object->getClassId(),
                     $db->quoteInto('o_id = ?', $object->getId()) . " AND ownertype = 'localizedfield' AND "
-                    . $db->quoteInto('ownername LIKE ?', '/' . $context['containerType'] . '~' . $containerName . '/' . $index . '/%')
+                    . $db->quoteInto('ownername LIKE ?', '/' . $params['context']['containerType'] . '~' . $containerName . '/' . $index . '/%')
                     . ' AND ' . $db->quoteInto('fieldname = ?', $this->getName())
                 );
             }
@@ -844,14 +855,14 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
                 'fieldname' => $this->getName(),
             ];
 
-            if ($context) {
-                if (!empty($context['fieldname'])) {
-                    $deleteCondition['ownername'] = $context['fieldname'];
+            if ($params && $params['context']) {
+                if ($params['context']['fieldname']) {
+                    $deleteCondition['ownername'] = $params['context']['fieldname'];
                 }
 
-                if (!DataObject\AbstractObject::isDirtyDetectionDisabled() && $object instanceof Element\DirtyIndicatorInterface) {
-                    if (!empty($context['containerType'])) {
-                        $deleteCondition['ownertype'] = $context['containerType'];
+                if (!DataObject\AbstractObject::isDirtyDetectionDisabled() && $object instanceof DataObject\DirtyIndicatorInterface) {
+                    if ($params['context']['containerType']) {
+                        $deleteCondition['ownertype'] = $params['context']['containerType'];
                     }
                 }
             }
@@ -861,7 +872,7 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
     }
 
     /**
-     * @param array $columns
+     * @param $columns
      *
      * @return $this
      */
@@ -875,6 +886,7 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
         $this->columns = [];
         $this->columnKeys = [];
         foreach ($columns as $c) {
+            $c['key'] = strtolower($c['key']);
             $this->columns[] = $c;
             $this->columnKeys[] = $c['key'];
         }
@@ -883,7 +895,7 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
     }
 
     /**
-     * @return array
+     * @return mixed
      */
     public function getColumns()
     {
@@ -904,8 +916,8 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
     }
 
     /**
-     * @param array|null $a
-     * @param array|null $b
+     * @param $a
+     * @param $b
      *
      * @return int
      */
@@ -919,11 +931,10 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
     }
 
     /**
-     * @param DataObject\ClassDefinition $class
+     * @param $class
      */
     public function classSaved($class)
     {
-        /** @var DataObject\Data\ElementMetadata $temp */
         $temp = \Pimcore::getContainer()->get('pimcore.model.factory')
             ->build(
                 'Pimcore\Model\DataObject\Data\ElementMetadata',
@@ -950,7 +961,7 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
      * @param array $idMapping
      * @param array $params
      *
-     * @return DataObject\Data\ElementMetadata[]
+     * @return Element\ElementInterface
      */
     public function rewriteIds($object, $idMapping, $params = [])
     {
@@ -975,7 +986,7 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
     }
 
     /**
-     * @param DataObject\ClassDefinition\Data\AdvancedManyToManyRelation $masterDefinition
+     * @param DataObject\ClassDefinition\Data $masterDefinition
      */
     public function synchronizeWithMasterDefinition(DataObject\ClassDefinition\Data $masterDefinition)
     {
@@ -984,7 +995,7 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
     }
 
     /** Override point for Enriching the layout definition before the layout is returned to the admin interface.
-     * @param DataObject\Concrete $object
+     * @param $object DataObject\Concrete
      * @param array $context additional contextual data
      */
     public function enrichLayoutDefinition($object, $context = [])
@@ -993,7 +1004,7 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
     }
 
     /**
-     * @param DataObject\Data\ElementMetadata[]|null $data
+     * @param $data
      *
      * @return array
      */
@@ -1019,7 +1030,7 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
 
     /** Encode value for packing it into a single column.
      * @param mixed $value
-     * @param DataObject\Concrete $object
+     * @param Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return mixed
@@ -1028,7 +1039,7 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
     {
         if (is_array($value)) {
             $result = [];
-            /** @var DataObject\Data\ElementMetadata $elementMetadata */
+            /** @var $elementMetadata DataObject\Data\ElementMetadata */
             foreach ($value as $elementMetadata) {
                 $element = $elementMetadata->getElement();
 
@@ -1053,7 +1064,7 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
 
     /** See marshal
      * @param mixed $value
-     * @param DataObject\Concrete|null $object
+     * @param Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return mixed
@@ -1114,7 +1125,7 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
                         'title' => $item['path'],
                         'raw' => $raw,
                         'gridrow' => $item,
-                        'unique' => $unique,
+                        'unique' => $unique
                     ];
                 }
                 $data['data'] = $newItems;
@@ -1124,14 +1135,14 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
                 'type' => 'grid',
                 'columnConfig' => [
                     'id' => [
-                        'width' => 60,
+                        'width' => 60
                     ],
                     'path' => [
-                        'flex' => 2,
-                    ],
+                        'flex' => 2
+                    ]
 
                 ],
-                'html' => $this->getVersionPreview($originalData, $object, $params),
+                'html' => $this->getVersionPreview($originalData, $object, $params)
             ];
 
             $newData = [];
@@ -1154,8 +1165,8 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
     }
 
     /** See parent class.
-     * @param array $data
-     * @param DataObject\Concrete|null $object
+     * @param $data
+     * @param null $object
      * @param mixed $params
      *
      * @return mixed
@@ -1180,7 +1191,7 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
     }
 
     /**
-     * @param DataObject\Data\ElementMetadata $item
+     * @param $item
      *
      * @return string
      */
@@ -1218,15 +1229,11 @@ class AdvancedManyToManyRelation extends ManyToManyRelation
     }
 
     /**
-     * @param int|bool|null $allowMultipleAssignments
-     *
-     * @return $this
+     * @param bool $allowMultipleAssignments
      */
     public function setAllowMultipleAssignments($allowMultipleAssignments)
     {
         $this->allowMultipleAssignments = $allowMultipleAssignments;
-
-        return $this;
     }
 
     /**

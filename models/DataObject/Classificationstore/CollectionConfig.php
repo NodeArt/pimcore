@@ -43,10 +43,8 @@ class CollectionConfig extends Model\AbstractModel
      */
     public $name;
 
-    /**
-     * The collection description.
-     *
-     * @var string
+    /** The collection description.
+     * @var
      */
     public $description;
 
@@ -78,7 +76,7 @@ class CollectionConfig extends Model\AbstractModel
     }
 
     /**
-     * @param string $name
+     * @param $name
      * @param int $storeId
      *
      * @return self|null
@@ -148,20 +146,16 @@ class CollectionConfig extends Model\AbstractModel
         return $this->name;
     }
 
-    /**
-     * Returns the description.
-     *
-     * @return string
+    /** Returns the description.
+     * @return mixed
      */
     public function getDescription()
     {
         return $this->description;
     }
 
-    /**
-     * Sets the description.
-     *
-     * @param string $description
+    /** Sets the description.
+     * @param $description
      *
      * @return Model\DataObject\Classificationstore\CollectionConfig
      */
@@ -208,7 +202,7 @@ class CollectionConfig extends Model\AbstractModel
     }
 
     /**
-     * @param int $modificationDate
+     * @param $modificationDate
      *
      * @return $this
      */
@@ -228,7 +222,7 @@ class CollectionConfig extends Model\AbstractModel
     }
 
     /**
-     * @param int $creationDate
+     * @param $creationDate
      *
      * @return $this
      */

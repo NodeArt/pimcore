@@ -25,31 +25,31 @@ class QuantityValue implements OwnerAwareFieldInterface
     use OwnerAwareFieldTrait;
 
     /**
-     * @var float
+     * @var float | string
      */
     protected $value;
 
     /**
-     * @var string
+     * @var int
      */
     protected $unitId;
 
     /**
-     * @var \Pimcore\Model\DataObject\QuantityValue\Unit|null
+     * @var \Pimcore\Model\DataObject\QuantityValue\Unit
      */
     protected $unit;
 
     /**
      * QuantityValue constructor.
      *
-     * @param float|null $value
+     * @param null $value
      * @param int|Unit|null $unitId
      */
     public function __construct($value = null, $unitId = null)
     {
         $this->value = $value;
         $this->unitId = $unitId;
-        $this->unit = null;
+        $this->unit = '';
 
         if ($unitId instanceof Unit) {
             $this->unit = $unitId;
@@ -61,7 +61,7 @@ class QuantityValue implements OwnerAwareFieldInterface
     }
 
     /**
-     * @param string $unitId
+     * @param  $unitId
      */
     public function setUnitId($unitId)
     {
@@ -71,7 +71,7 @@ class QuantityValue implements OwnerAwareFieldInterface
     }
 
     /**
-     * @return string
+     * @return int
      */
     public function getUnitId()
     {
@@ -91,7 +91,7 @@ class QuantityValue implements OwnerAwareFieldInterface
     }
 
     /**
-     * @param float $value
+     * @param  $value
      */
     public function setValue($value)
     {

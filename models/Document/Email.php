@@ -76,11 +76,6 @@ class Email extends Model\Document\PageSnippet
     protected $bcc = '';
 
     /**
-     * @inheritdoc
-     */
-    protected $supportsContentMaster = false;
-
-    /**
      * Contains the email subject
      *
      * @param string $subject
@@ -133,7 +128,7 @@ class Email extends Model\Document\PageSnippet
      *
      * @static
      *
-     * @param string $emailAddress
+     * @param $emailAddress
      *
      * @return string | null - returns "null" if the email address is invalid otherwise the email address is returned
      */

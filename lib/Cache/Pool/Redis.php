@@ -164,7 +164,7 @@ class Redis extends AbstractCacheItemPool implements PurgeableCacheItemPoolInter
         $fields = [
             static::FIELD_DATA,
             static::FIELD_TAGS,
-            static::FIELD_MTIME,
+            static::FIELD_MTIME
         ];
 
         foreach ($ids as $id) {
@@ -199,7 +199,7 @@ class Redis extends AbstractCacheItemPool implements PurgeableCacheItemPoolInter
 
             yield $ids[$idx] => [
                 'value' => $value,
-                'tags' => $tags,
+                'tags' => $tags
             ];
         }
     }
@@ -361,8 +361,8 @@ LUA;
 
         // TODO implement a better way for multiple items!
 
+        /** @var CacheItem $item */
         while ($item = array_shift($this->deferred)) {
-            /** @var CacheItem $item */
             try {
                 $res = $this->commitItem($item);
             } catch (\Throwable $e) {
@@ -373,7 +373,7 @@ LUA;
                     'Failed to commit key "{key}"',
                     [
                         'key' => $item->getKey(),
-                        'exception' => $e,
+                        'exception' => $e
                     ]
                 );
             }
@@ -416,7 +416,7 @@ LUA;
             $staticKeys = [
                 self::SET_IDS,
                 self::SET_TAGS,
-                self::PREFIX_KEY . $id,
+                self::PREFIX_KEY . $id
             ];
 
             $args = [
@@ -580,6 +580,8 @@ LUA;
      *
      * @param string[] $tags An array of tags to invalidate
      *
+     * @throws \Psr\Cache\InvalidArgumentException When $tags is not valid
+     *
      * @return bool True on success
      */
     protected function doInvalidateTags(array $tags)
@@ -587,7 +589,7 @@ LUA;
         if ($this->useLua) {
             $staticKeys = [
                 self::SET_IDS,
-                self::SET_TAGS,
+                self::SET_TAGS
             ];
 
             $args = [
@@ -695,7 +697,7 @@ LUA;
         if ($this->useLua) {
             $staticKeys = [
                 self::SET_IDS,
-                self::SET_TAGS,
+                self::SET_TAGS
             ];
 
             $args = [
@@ -877,9 +879,9 @@ LUA;
     }
 
     /**
-     * @param string $item
-     * @param int $index
-     * @param string $prefix
+     * @param $item
+     * @param $index
+     * @param $prefix
      */
     protected function preprocess(&$item, $index, $prefix)
     {
@@ -887,7 +889,7 @@ LUA;
     }
 
     /**
-     * @param array $ids
+     * @param $ids
      *
      * @return array
      */
@@ -899,7 +901,7 @@ LUA;
     }
 
     /**
-     * @param array $tags
+     * @param $tags
      *
      * @return array
      */

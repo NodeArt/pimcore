@@ -16,7 +16,6 @@ namespace Pimcore\Image;
 
 use Pimcore\Tool\Console;
 use Pimcore\Tool\Session;
-use Symfony\Component\HttpFoundation\Session\Attribute\AttributeBagInterface;
 
 class HtmlToImage
 {
@@ -44,8 +43,8 @@ class HtmlToImage
     }
 
     /**
-     * @param string $url
-     * @param string $outputFile
+     * @param $url
+     * @param $outputFile
      * @param int $screenWidth
      * @param string $format
      *
@@ -59,15 +58,11 @@ class HtmlToImage
 
         $options = [
             '--width ' . $screenWidth,
-            '--format ' . $format,
+            '--format ' . $format
         ];
 
-        if (php_sapi_name() !== 'cli') {
-            $sessionData = Session::useSession(function (AttributeBagInterface $session) {
-                return ['name' => Session::getSessionName(), 'id' => Session::getSessionId()];
-            });
-
-            $options[] = sprintf('--cookie %s %s', $sessionData['name'], $sessionData['id']);
+        if (php_sapi_name() != 'cli') {
+            $options[] = '--cookie ' .  Session::getSessionName() . ' ' . Session::getSessionId();
         }
 
         $arguments = ' ' . implode(' ', $options) . ' "' . $url . '" ' . $outputFile;

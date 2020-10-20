@@ -14,9 +14,6 @@
 
 namespace Pimcore\Db\ZendCompatibility;
 
-/**
- * @deprecated
- */
 class Expression
 {
     /**

@@ -17,18 +17,23 @@
 
 namespace Pimcore\Model;
 
+use DeepCopy\DeepCopy;
 use Pimcore\Event\Model\VersionEvent;
 use Pimcore\Event\VersionEvents;
 use Pimcore\File;
 use Pimcore\Logger;
 use Pimcore\Model\DataObject\ClassDefinition\Data;
 use Pimcore\Model\DataObject\Concrete;
-use Pimcore\Model\Element\DeepCopy\PimcoreClassDefinitionMatcher;
-use Pimcore\Model\Element\DeepCopy\PimcoreClassDefinitionReplaceFilter;
 use Pimcore\Model\Element\ElementDumpStateInterface;
+use Pimcore\Model\Element\ElementDumpStateTrait;
 use Pimcore\Model\Element\ElementInterface;
 use Pimcore\Model\Element\Service;
+use Pimcore\Model\Version\ElementDescriptor;
+use Pimcore\Model\Version\MarshalMatcher;
+use Pimcore\Model\Version\PimcoreClassDefinitionMatcher;
+use Pimcore\Model\Version\PimcoreClassDefinitionReplaceFilter;
 use Pimcore\Model\Version\SetDumpStateFilter;
+use Pimcore\Model\Version\UnmarshalMatcher;
 use Pimcore\Tool\Serialize;
 
 /**
@@ -36,6 +41,9 @@ use Pimcore\Tool\Serialize;
  */
 class Version extends AbstractModel
 {
+    /** @var bool for now&testing, make it possible to disable it */
+    protected static $condenseVersion = true;
+
     /**
      * @var int
      */
@@ -87,14 +95,9 @@ class Version extends AbstractModel
     public $serialized = false;
 
     /**
-     * @var string|null
+     * @var string
      */
     public $stackTrace = '';
-
-    /**
-     * @var bool
-     */
-    protected $generateStackTrace = true;
 
     /**
      * @var int
@@ -174,13 +177,11 @@ class Version extends AbstractModel
             $this->setDate(time());
         }
 
-        // get stack trace, if enabled
-        if ($this->getGenerateStackTrace()) {
-            try {
-                throw new \Exception('not a real exception ... ;-)');
-            } catch (\Exception $e) {
-                $this->stackTrace = $e->getTraceAsString();
-            }
+        // get stack trace
+        try {
+            throw new \Exception('not a real exception ... ;-)');
+        } catch (\Exception $e) {
+            $this->stackTrace = $e->getTraceAsString();
         }
 
         $data = $this->getData();
@@ -262,13 +263,29 @@ class Version extends AbstractModel
      */
     public function marshalData($data)
     {
-        $context = [
-            'source' => __METHOD__,
-            'conversion' => 'marshal',
-            'defaultFilters' => true,
-        ];
+        if (!self::isCondenseVersionEnabled()) {
+            return $data;
+        }
 
-        $copier = Service::getDeepCopyInstance($data, $context);
+        $sourceType = Service::getType($data);
+        $sourceId = $data->getId();
+
+        $copier = new DeepCopy();
+        $copier->addTypeFilter(
+            new \DeepCopy\TypeFilter\ReplaceFilter(
+                function ($currentValue) {
+                    if ($currentValue instanceof ElementInterface) {
+                        $elementType = Service::getType($currentValue);
+                        $descriptor = new ElementDescriptor($elementType, $currentValue->getId());
+
+                        return $descriptor;
+                    }
+
+                    return $currentValue;
+                }
+            ),
+            new MarshalMatcher($sourceType, $sourceId)
+        );
 
         if ($data instanceof Concrete) {
             $copier->addFilter(
@@ -281,29 +298,41 @@ class Version extends AbstractModel
                         return $currentValue;
                     }
                 ),
-                new PimcoreClassDefinitionMatcher(Data\CustomVersionMarshalInterface::class)
+                new PimcoreClassDefinitionMatcher()
             );
         }
 
-        $copier->addFilter(new SetDumpStateFilter(true), new \DeepCopy\Matcher\PropertyMatcher(ElementDumpStateInterface::class, ElementDumpStateInterface::DUMP_STATE_PROPERTY_NAME));
+        $copier->addFilter(new \DeepCopy\Filter\Doctrine\DoctrineCollectionFilter(), new \DeepCopy\Matcher\PropertyTypeMatcher('Doctrine\Common\Collections\Collection'));
+        $copier->addFilter(new \DeepCopy\Filter\SetNullFilter(), new \DeepCopy\Matcher\PropertyTypeMatcher('Pimcore\Templating\Model\ViewModelInterface'));
+        $copier->addFilter(new \DeepCopy\Filter\SetNullFilter(), new \DeepCopy\Matcher\PropertyTypeMatcher('Psr\Container\ContainerInterface'));
+        $copier->addFilter(new SetDumpStateFilter(true), new \DeepCopy\Matcher\PropertyMatcher(ElementDumpStateInterface::class, ElementDumpStateTrait::$dumpStateProperty));
         $newData = $copier->copy($data);
 
         return $newData;
     }
 
     /**
-     * @param ElementInterface $data
+     * @param $data
      *
      * @return mixed
      */
     public function unmarshalData($data)
     {
-        $context = [
-            'source' => __METHOD__,
-            'conversion' => 'unmarshal',
-            'defaultFilters' => false,
-        ];
-        $copier = Service::getDeepCopyInstance($data, $context);
+        $copier = new DeepCopy();
+        $copier->addTypeFilter(
+            new \DeepCopy\TypeFilter\ReplaceFilter(
+                function ($currentValue) {
+                    if ($currentValue instanceof ElementDescriptor) {
+                        $value = Service::getElementById($currentValue->getType(), $currentValue->getId());
+
+                        return $value;
+                    }
+
+                    return $currentValue;
+                }
+            ),
+            new UnmarshalMatcher()
+        );
 
         if ($data instanceof Concrete) {
             $copier->addFilter(
@@ -316,7 +345,7 @@ class Version extends AbstractModel
                         return $currentValue;
                     }
                 ),
-                new PimcoreClassDefinitionMatcher(Data\CustomVersionMarshalInterface::class)
+                new PimcoreClassDefinitionMatcher()
             );
         }
 
@@ -352,7 +381,7 @@ class Version extends AbstractModel
     /**
      * Object
      *
-     * @param bool $renewReferences
+     * @param $renewReferences
      *
      * @return mixed
      */
@@ -360,7 +389,6 @@ class Version extends AbstractModel
     {
         $data = null;
         $zipped = false;
-        $filePath = null;
 
         // check both the legacy file path and the new structure
         foreach ([$this->getFilePath(), $this->getLegacyFilePath()] as $path) {
@@ -405,11 +433,11 @@ class Version extends AbstractModel
         }
 
         if ($data instanceof Asset && file_exists($this->getBinaryFilePath())) {
-            $binaryHandle = fopen($this->getBinaryFilePath(), 'rb', false, File::getContext());
+            $binaryHandle = fopen($this->getBinaryFilePath(), 'r+', false, File::getContext());
             $data->setStream($binaryHandle);
-        } elseif ($data instanceof Asset && $data->getObjectVar('data')) {
+        } elseif ($data instanceof Asset && $data->data) {
             // this is for backward compatibility
-            $data->setData($data->getObjectVar('data'));
+            $data->setData($data->data);
         }
 
         if ($renewReferences) {
@@ -506,7 +534,7 @@ class Version extends AbstractModel
     }
 
     /**
-     * @param int $cid
+     * @param $cid
      *
      * @return $this
      */
@@ -733,32 +761,16 @@ class Version extends AbstractModel
     /**
      * @return bool
      */
-    public function getGenerateStackTrace()
+    public static function isCondenseVersionEnabled()
     {
-        return (bool) $this->generateStackTrace;
+        return self::$condenseVersion;
     }
 
     /**
-     * @param bool $generateStackTrace
+     * @param bool $condenseVersion
      */
-    public function setGenerateStackTrace(bool $generateStackTrace): void
+    public static function setCondenseVersion($condenseVersion)
     {
-        $this->generateStackTrace = $generateStackTrace;
-    }
-
-    /**
-     * @param string|null $stackTrace
-     */
-    public function setStackTrace(?string $stackTrace): void
-    {
-        $this->stackTrace = $stackTrace;
-    }
-
-    /**
-     * @return string
-     */
-    public function getStackTrace(): ?string
-    {
-        return $this->stackTrace;
+        self::$condenseVersion = $condenseVersion;
     }
 }

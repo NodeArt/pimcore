@@ -33,10 +33,10 @@ class Admin extends AbstractTranslation
     }
 
     /**
-     * @param string $id
+     * @param $id
      * @param bool $create
      * @param bool $returnIdIfEmpty
-     * @param string|null $language
+     * @param null $language
      *
      * @return string
      *
@@ -57,10 +57,10 @@ class Admin extends AbstractTranslation
         }
 
         if (!in_array($language, Tool\Admin::getLanguages())) {
-            $config = \Pimcore\Config::getSystemConfiguration('general');
-            $language = $config['language'] ?? null;
+            $config = \Pimcore\Config::getSystemConfig();
+            $language = $config->general->language;
         }
 
-        return parent::getByKeyLocalized($id, $create, $returnIdIfEmpty, $language);
+        return self::getByKey($id, $create, $returnIdIfEmpty)->getTranslation($language);
     }
 }

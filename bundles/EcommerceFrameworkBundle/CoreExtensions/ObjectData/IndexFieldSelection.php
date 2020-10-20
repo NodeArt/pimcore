@@ -32,9 +32,9 @@ class IndexFieldSelection
     public $preSelect;
 
     /**
-     * @param string $tenant
-     * @param string $field
-     * @param string|string[] $preSelect
+     * @param $field
+     * @param $preSelect
+     * @param $tenant
      */
     public function __construct($tenant, $field, $preSelect)
     {

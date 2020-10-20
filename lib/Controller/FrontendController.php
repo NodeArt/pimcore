@@ -21,7 +21,6 @@ use Pimcore\Http\Request\Resolver\ResponseHeaderResolver;
 use Pimcore\Http\Request\Resolver\ViewModelResolver;
 use Pimcore\Model\Document;
 use Pimcore\Templating\Model\ViewModel;
-use Pimcore\Templating\Renderer\EditableRenderer;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
@@ -96,8 +95,6 @@ abstract class FrontendController extends Controller implements EventedControlle
      *
      * @param Request $request
      * @param string $engine
-     *
-     * @deprecated
      */
     protected function enableViewAutoRender(Request $request = null, $engine = 'php')
     {
@@ -112,8 +109,6 @@ abstract class FrontendController extends Controller implements EventedControlle
      * Disable view autorendering for the current request
      *
      * @param Request $request
-     *
-     * @deprecated
      */
     protected function disableViewAutoRender(Request $request = null)
     {
@@ -153,39 +148,20 @@ abstract class FrontendController extends Controller implements EventedControlle
      * @param Document\PageSnippet|null $document
      *
      * @return null|Document\Tag
-     *
-     * @deprecated since v6.8 and will be removed in 7. Use getDocumentEditable() instead.
      */
     public function getDocumentTag($type, $inputName, array $options = [], Document\PageSnippet $document = null)
-    {
-        return $this->getDocumentEditable($type, $inputName, $options, $document);
-    }
-
-    /**
-     * Loads a document editable
-     *
-     * e.g. `$this->getDocumentEditable('input', 'foobar')`
-     *
-     * @param string $type
-     * @param string $inputName
-     * @param array $options
-     * @param Document\PageSnippet|null $document
-     *
-     * @return null|Document\Tag
-     */
-    public function getDocumentEditable($type, $inputName, array $options = [], Document\PageSnippet $document = null)
     {
         if (null === $document) {
             $document = $this->document;
         }
 
-        $editableRenderer = $this->container->get(EditableRenderer::class);
+        $tagRenderer = $this->container->get('pimcore.templating.tag_renderer');
 
-        return $editableRenderer->getEditable($document, $type, $inputName, $options);
+        return $tagRenderer->getTag($document, $type, $inputName, $options);
     }
 
     /**
-     * @param string $view
+     * @param $view
      * @param array $parameters
      * @param Response|null $response
      *

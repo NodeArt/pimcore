@@ -35,7 +35,7 @@ pimcore.object.tags.time = Class.create(pimcore.object.tags.abstract, {
             allowBlank: (!this.fieldConfig.mandatory),
             minValue: (this.fieldConfig.minValue) ? this.fieldConfig.minValue : null,
             maxValue: (this.fieldConfig.maxValue) ? this.fieldConfig.maxValue : null,
-            componentCls: "object_field object_field_type_" + this.type,
+            componentCls: "object_field",
             increment: (this.fieldConfig.increment) ? this.fieldConfig.increment : 15
         });
 
@@ -59,6 +59,13 @@ pimcore.object.tags.time = Class.create(pimcore.object.tags.abstract, {
         return this.fieldConfig.name;
     },
 
+    isInvalidMandatory: function () {
+        if (this.getValue() == false) {
+            return true;
+        }
+        return false;
+    },
+
     getGridColumnConfig: function (field) {
         var renderer = function (key, value, metaData, record) {
             this.applyPermissionStyle(key, value, metaData, record);
@@ -75,7 +82,7 @@ pimcore.object.tags.time = Class.create(pimcore.object.tags.abstract, {
         }.bind(this, field.key);
 
         return {
-            text: t(field.label), sortable: true, dataIndex: field.key, renderer: renderer,
+            text: ts(field.label), sortable: true, dataIndex: field.key, renderer: renderer,
             getEditor:this.getWindowCellEditor.bind(this, field)
         };
     },

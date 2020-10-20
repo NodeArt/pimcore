@@ -139,7 +139,7 @@ class Log extends Model\AbstractModel
     public $subject;
 
     /**
-     * @param int $id
+     * @param $id
      *
      * @return $this
      */
@@ -151,7 +151,7 @@ class Log extends Model\AbstractModel
     }
 
     /**
-     * @param string $requestUri
+     * @param $requestUri
      *
      * @return $this
      */
@@ -183,7 +183,7 @@ class Log extends Model\AbstractModel
     }
 
     /**
-     * @param int $id
+     * @param $id
      *
      * @return $this
      */
@@ -195,7 +195,7 @@ class Log extends Model\AbstractModel
     }
 
     /**
-     * @param string $subject
+     * @param $subject
      *
      * @return $this
      */
@@ -251,7 +251,7 @@ class Log extends Model\AbstractModel
     }
 
     /**
-     * @param array $params
+     * @param $params
      *
      * @return $this
      */
@@ -265,7 +265,7 @@ class Log extends Model\AbstractModel
     /**
      * Returns the dynamic parameter
      *
-     * @return array
+     * @return string
      */
     public function getParams()
     {
@@ -372,8 +372,6 @@ class Log extends Model\AbstractModel
         if ($this->getEmailLogExistsHtml()) {
             return file_get_contents(PIMCORE_LOG_MAIL_PERMANENT . '/email-' . $this->getId() . '-html.log');
         }
-
-        return false;
     }
 
     /**
@@ -386,8 +384,6 @@ class Log extends Model\AbstractModel
         if ($this->getEmailLogExistsText()) {
             return file_get_contents(PIMCORE_LOG_MAIL_PERMANENT . '/email-' . $this->getId() . '-text.log');
         }
-
-        return false;
     }
 
     /**
@@ -421,7 +417,7 @@ class Log extends Model\AbstractModel
     }
 
     /**
-     * @param string $to
+     * @param $to
      *
      * @return $this
      */
@@ -443,7 +439,7 @@ class Log extends Model\AbstractModel
     }
 
     /**
-     * @param string $cc
+     * @param $cc
      *
      * @return $this
      */
@@ -465,7 +461,7 @@ class Log extends Model\AbstractModel
     }
 
     /**
-     * @param string $bcc
+     * @param $bcc
      *
      * @return $this
      */
@@ -487,7 +483,7 @@ class Log extends Model\AbstractModel
     }
 
     /**
-     * @param string $from
+     * @param $from
      *
      * @return $this
      */
@@ -509,7 +505,7 @@ class Log extends Model\AbstractModel
     }
 
     /**
-     * @param string $replyTo
+     * @param $replyTo
      *
      * @return $this
      */
@@ -531,7 +527,7 @@ class Log extends Model\AbstractModel
     }
 
     /**
-     * @param string $html
+     * @param $html
      *
      * @return $this
      */
@@ -553,7 +549,7 @@ class Log extends Model\AbstractModel
     }
 
     /**
-     * @param string $text
+     * @param $text
      *
      * @return $this
      */

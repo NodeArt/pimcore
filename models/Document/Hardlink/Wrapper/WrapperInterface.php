@@ -17,28 +17,13 @@
 
 namespace Pimcore\Model\Document\Hardlink\Wrapper;
 
-use Pimcore\Model\Document;
-use Pimcore\Model\Element\ElementInterface;
-
-interface WrapperInterface extends ElementInterface
+interface WrapperInterface
 {
-    /**
-     * @param Document $hardLinkSource
-     */
     public function setHardLinkSource($hardLinkSource);
 
-    /**
-     * @return Document\Hardlink
-     */
     public function getHardLinkSource();
 
-    /**
-     * @param Document $sourceDocument
-     */
     public function setSourceDocument($sourceDocument);
 
-    /**
-     * @return Document
-     */
     public function getSourceDocument();
 }

@@ -30,10 +30,7 @@ use Pimcore\Bundle\EcommerceFrameworkBundle\Tracking\ProductAction;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Tracking\ProductImpression;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Tracking\ProductImpressionInterface;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Tracking\ProductViewInterface;
-use Pimcore\Bundle\EcommerceFrameworkBundle\Tracking\TrackEventInterface;
-use Pimcore\Bundle\EcommerceFrameworkBundle\Tracking\TrackingCodeAwareInterface;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Tracking\Transaction;
-use Pimcore\Bundle\EcommerceFrameworkBundle\Type\Decimal;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class EnhancedEcommerce extends AbstractAnalyticsTracker implements
@@ -45,9 +42,7 @@ class EnhancedEcommerce extends AbstractAnalyticsTracker implements
     CartProductActionRemoveInterface,
     CheckoutInterface,
     CheckoutStepInterface,
-    CheckoutCompleteInterface,
-    TrackEventInterface,
-    TrackingCodeAwareInterface
+    CheckoutCompleteInterface
 {
     /**
      * Dependencies to include before any tracking actions
@@ -61,17 +56,12 @@ class EnhancedEcommerce extends AbstractAnalyticsTracker implements
      */
     protected $dependenciesIncluded = false;
 
-    /**
-     * @var string[]
-     */
-    protected $trackedCodes = [];
-
     protected function configureOptions(OptionsResolver $resolver)
     {
         parent::configureOptions($resolver);
 
         $resolver->setDefaults([
-            'template_prefix' => 'PimcoreEcommerceFrameworkBundle:Tracking/analytics/enhanced',
+            'template_prefix' => 'PimcoreEcommerceFrameworkBundle:Tracking/analytics/enhanced'
         ]);
     }
 
@@ -93,27 +83,28 @@ class EnhancedEcommerce extends AbstractAnalyticsTracker implements
         unset($parameters['productData']['quantity']);
 
         $result = $this->renderTemplate('product_view', $parameters);
-        $this->trackCode($result);
+
+        $this->tracker->addCodePart($result, GoogleTracker::BLOCK_BEFORE_TRACK);
     }
 
     /**
      * Track product view
      *
      * @param ProductInterface $product
-     * @param string $list
      */
-    public function trackProductImpression(ProductInterface $product, string $list = 'default')
+    public function trackProductImpression(ProductInterface $product)
     {
         $this->ensureDependencies();
 
-        $item = $this->trackingItemBuilder->buildProductImpressionItem($product, $list);
+        $item = $this->trackingItemBuilder->buildProductImpressionItem($product);
 
         $parameters = [
-            'productData' => $this->transformProductImpression($item),
+            'productData' => $this->transformProductImpression($item)
         ];
 
         $result = $this->renderTemplate('product_impression', $parameters);
-        $this->trackCode($result);
+
+        $this->tracker->addCodePart($result, GoogleTracker::BLOCK_BEFORE_TRACK);
     }
 
     /**
@@ -133,6 +124,7 @@ class EnhancedEcommerce extends AbstractAnalyticsTracker implements
     public function trackProductActionAdd(ProductInterface $product, $quantity = 1)
     {
         $this->ensureDependencies();
+
         $this->trackProductAction($product, 'add', $quantity);
     }
 
@@ -153,12 +145,13 @@ class EnhancedEcommerce extends AbstractAnalyticsTracker implements
     public function trackProductActionRemove(ProductInterface $product, $quantity = 1)
     {
         $this->ensureDependencies();
+
         $this->trackProductAction($product, 'remove', $quantity);
     }
 
     /**
-     * @param ProductInterface $product
-     * @param string $action
+     * @param $product
+     * @param $action
      * @param int|float $quantity
      */
     protected function trackProductAction($product, $action, $quantity = 1)
@@ -171,7 +164,8 @@ class EnhancedEcommerce extends AbstractAnalyticsTracker implements
         $parameters['action'] = $action;
 
         $result = $this->renderTemplate('product_action', $parameters);
-        $this->trackCode($result);
+
+        $this->tracker->addCodePart($result, GoogleTracker::BLOCK_BEFORE_TRACK);
     }
 
     /**
@@ -189,18 +183,19 @@ class EnhancedEcommerce extends AbstractAnalyticsTracker implements
         $parameters['items'] = $items;
         $parameters['calls'] = $this->buildCheckoutCalls($items);
         $parameters['actionData'] = [
-            'step' => 1,
+            'step' => 1
         ];
 
         $result = $this->renderTemplate('checkout', $parameters);
-        $this->trackCode($result);
+
+        $this->tracker->addCodePart($result, GoogleTracker::BLOCK_BEFORE_TRACK);
     }
 
     /**
      * @param CheckoutManagerCheckoutStepInterface $step
      * @param CartInterface $cart
-     * @param string|null $stepNumber
-     * @param string|null $checkoutOption
+     * @param null $stepNumber
+     * @param null $checkoutOption
      */
     public function trackCheckoutStep(CheckoutManagerCheckoutStepInterface $step, CartInterface $cart, $stepNumber = null, $checkoutOption = null)
     {
@@ -223,7 +218,8 @@ class EnhancedEcommerce extends AbstractAnalyticsTracker implements
         }
 
         $result = $this->renderTemplate('checkout', $parameters);
-        $this->trackCode($result);
+
+        $this->tracker->addCodePart($result, GoogleTracker::BLOCK_BEFORE_TRACK);
     }
 
     /**
@@ -244,35 +240,8 @@ class EnhancedEcommerce extends AbstractAnalyticsTracker implements
         $parameters['calls'] = $this->buildCheckoutCompleteCalls($transaction, $items);
 
         $result = $this->renderTemplate('checkout_complete', $parameters);
-        $this->trackCode($result);
-    }
 
-    public function trackEvent(
-        string $eventCategory,
-        string $eventAction,
-        string $eventLabel = null,
-        int $eventValue = null
-    ) {
-        $parameters = [
-            'eventCategory' => $eventCategory,
-            'eventAction' => $eventAction,
-            'eventLabel' => $eventLabel,
-            'eventValue' => $eventValue,
-        ];
-
-        $result = $this->renderTemplate('track_event', $parameters);
-        $this->trackCode($result);
-    }
-
-    public function getTrackedCodes(): array
-    {
-        return $this->trackedCodes;
-    }
-
-    public function trackCode(string $code)
-    {
-        $this->trackedCodes[] = $code;
-        $this->tracker->addCodePart($code, GoogleTracker::BLOCK_BEFORE_TRACK);
+        $this->tracker->addCodePart($result, GoogleTracker::BLOCK_BEFORE_TRACK);
     }
 
     /**
@@ -302,16 +271,14 @@ class EnhancedEcommerce extends AbstractAnalyticsTracker implements
      */
     protected function transformTransaction(Transaction $transaction)
     {
-        return array_merge([
+        return [
             'id' => $transaction->getId(),                           // order ID - required
             'affiliation' => $transaction->getAffiliation() ?: '',            // affiliation or store name
             'revenue' => round($transaction->getTotal(), 2),     // total - required
             'tax' => round($transaction->getTax(), 2),       // tax
             'coupon' => $transaction->getCoupon(), // voucher code - optional
             'shipping' => round($transaction->getShipping(), 2),  // shipping
-        ],
-            $transaction->getAdditionalAttributes()
-        );
+        ];
     }
 
     protected function buildCheckoutCalls(array $items)
@@ -333,20 +300,17 @@ class EnhancedEcommerce extends AbstractAnalyticsTracker implements
      */
     protected function transformProductAction(ProductAction $item)
     {
-        return $this->filterNullValues(
-            array_merge([
-                'id' => $item->getId(),
-                'name' => $item->getName(),
-                'category' => $item->getCategory(),
-                'brand' => $item->getBrand(),
-                'variant' => $item->getVariant(),
-                'price' => $item->getPrice() ? Decimal::fromNumeric($item->getPrice())->asString() : '',
-                'quantity' => $item->getQuantity() ?: 1,
-                'position' => $item->getPosition(),
-                'coupon' => $item->getCoupon(),
-            ],
-                $item->getAdditionalAttributes())
-        );
+        return $this->filterNullValues([
+            'id' => $item->getId(),
+            'name' => $item->getName(),
+            'category' => $item->getCategory(),
+            'brand' => $item->getBrand(),
+            'variant' => $item->getVariant(),
+            'price' => round($item->getPrice(), 2),
+            'quantity' => $item->getQuantity() ?: 1,
+            'position' => $item->getPosition(),
+            'coupon' => $item->getCoupon()
+        ]);
     }
 
     /**
@@ -358,18 +322,16 @@ class EnhancedEcommerce extends AbstractAnalyticsTracker implements
      */
     protected function transformProductImpression(ProductImpression $item)
     {
-        $data = $this->filterNullValues(array_merge([
+        return $this->filterNullValues([
             'id' => $item->getId(),
             'name' => $item->getName(),
             'category' => $item->getCategory(),
             'brand' => $item->getBrand(),
             'variant' => $item->getVariant(),
-            'price' => $item->getPrice() ? Decimal::fromNumeric($item->getPrice())->asString() : '',
+            'price' => round($item->getPrice(), 2),
             'list' => $item->getList(),
-            'position' => $item->getPosition(),
-        ], $item->getAdditionalAttributes()));
-
-        return $data;
+            'position' => $item->getPosition()
+        ]);
     }
 
     /**
@@ -382,10 +344,10 @@ class EnhancedEcommerce extends AbstractAnalyticsTracker implements
         }
 
         $result = $this->renderTemplate('dependencies', [
-            'dependencies' => $this->dependencies,
+            'dependencies' => $this->dependencies
         ]);
 
-        $this->trackCode($result);
+        $this->tracker->addCodePart($result, GoogleTracker::BLOCK_BEFORE_TRACK);
 
         $this->dependenciesIncluded = true;
     }

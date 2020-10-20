@@ -24,7 +24,6 @@ class Attribute
     const TYPE_BLOCK = 'block';
     const TYPE_BLOCK_IN_LOCALIZED_FIELD = 'blockinlocalizedfield';
     const TYPE_FIELD_COLLECTION_LOCALIZED_FIELD = 'localizedfieldcollection';
-    const TYPE_ELEMENT_KEY = 'key';
 
     /**
      * @var string
@@ -42,11 +41,6 @@ class Attribute
     private $content;
 
     /**
-     * @var string[]
-     */
-    private $targetContent = [];
-
-    /**
      * @var bool
      */
     private $isReadonly;
@@ -58,15 +52,13 @@ class Attribute
      * @param string $name
      * @param string $content
      * @param bool $isReadonly
-     * @param string[] $targetContent
      */
-    public function __construct(string $type, string $name, string $content, bool $isReadonly = false, array $targetContent = [])
+    public function __construct(string $type, string $name, string $content, bool $isReadonly = false)
     {
         $this->type = $type;
         $this->name = $name;
         $this->content = $content;
         $this->isReadonly = $isReadonly;
-        $this->targetContent = $targetContent;
     }
 
     /**
@@ -91,14 +83,6 @@ class Attribute
     public function getContent(): string
     {
         return $this->content;
-    }
-
-    /**
-     * @return string[]
-     */
-    public function getTargetContent(): array
-    {
-        return $this->targetContent;
     }
 
     /**

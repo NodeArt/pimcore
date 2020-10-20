@@ -31,7 +31,7 @@ class DataObjectSplittedStateMarkingStore implements MarkingStoreInterface
     private $workflowName;
 
     /**
-     * @var array
+     * @var string
      */
     private $stateMapping;
 
@@ -141,7 +141,7 @@ class DataObjectSplittedStateMarkingStore implements MarkingStoreInterface
         }
 
         if ($fd->getFieldtype() !== 'multiselect') {
-            if (count($places) > 1) {
+            if (sizeof($places) > 1) {
                 throw new LogicException(sprintf('field type "%s" is not able to handle multiple values - given values are [%s]', $fd->getFieldtype(), implode(', ', $places)));
             }
 
@@ -152,7 +152,7 @@ class DataObjectSplittedStateMarkingStore implements MarkingStoreInterface
     }
 
     /**
-     * @param object $subject
+     * @param $subject
      *
      * @return Concrete
      */
@@ -169,7 +169,7 @@ class DataObjectSplittedStateMarkingStore implements MarkingStoreInterface
     {
         $diff = array_diff($places, array_keys($stateMapping));
 
-        if (count($diff) > 0) {
+        if (sizeof($diff) > 0) {
             throw new LogicException(sprintf('State mapping and places configuration need to match each other [detected differences: %s].', implode(', ', $diff)));
         }
     }

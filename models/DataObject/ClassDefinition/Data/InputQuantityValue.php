@@ -43,7 +43,7 @@ class InputQuantityValue extends QuantityValue
      */
     public $queryColumnType = [
         'value' => 'varchar(255)',
-        'unit' => 'bigint(20)',
+        'unit' => 'bigint(20)'
     ];
 
     /**
@@ -53,14 +53,14 @@ class InputQuantityValue extends QuantityValue
      */
     public $columnType = [
         'value' => 'varchar(255)',
-        'unit' => 'bigint(20)',
+        'unit' => 'bigint(20)'
     ];
 
     public $phpdocType = '\\Pimcore\\Model\\DataObject\\Data\\InputQuantityValue';
 
     /**
      * @param array $data
-     * @param Model\DataObject\Concrete|null $object
+     * @param null $object
      * @param array $params
      *
      * @return InputQuantityValueDataObject|null
@@ -71,7 +71,7 @@ class InputQuantityValue extends QuantityValue
             $dataObject = $this->getNewDataObject($data[$this->getName() . '__value'], $data[$this->getName() . '__unit']);
 
             if (isset($params['owner'])) {
-                $dataObject->setOwner($params['owner'], $params['fieldname'], $params['language'] ?? null);
+                $dataObject->setOwner($params['owner'], $params['fieldname'], $params['language']);
             }
 
             return $dataObject;
@@ -81,8 +81,8 @@ class InputQuantityValue extends QuantityValue
     }
 
     /**
-     * @param array $data
-     * @param Model\DataObject\Concrete|null $object
+     * @param float $data
+     * @param null $object
      * @param array $params
      *
      * @return InputQuantityValueDataObject|null
@@ -130,7 +130,7 @@ class InputQuantityValue extends QuantityValue
 
     /**
      * @param string $importValue
-     * @param null|Model\DataObject\Concrete $object
+     * @param null $object
      * @param array $params
      *
      * @return null|InputQuantityValueDataObject
@@ -149,12 +149,10 @@ class InputQuantityValue extends QuantityValue
     }
 
     /**
-     * @deprecated
-     *
      * @param mixed $value
-     * @param Model\DataObject\Concrete|null $object
+     * @param null $object
      * @param array $params
-     * @param Model\Webservice\IdMapperInterface|null $idMapper
+     * @param null $idMapper
      *
      * @return null|InputQuantityValueDataObject
      *
@@ -188,16 +186,16 @@ class InputQuantityValue extends QuantityValue
 
     /**
      * @param mixed $value
-     * @param Model\DataObject\Concrete|null $object
+     * @param null $object
      * @param array $params
      *
      * @return array|mixed|null|InputQuantityValueDataObject
      */
     public function unmarshal($value, $object = null, $params = [])
     {
-        if (($params['blockmode'] ?? false) && is_array($value)) {
+        if ($params['blockmode'] && is_array($value)) {
             return $this->getNewDataObject($value['value'], $value['value2']);
-        } elseif ($params['simple'] ?? false) {
+        } elseif ($params['simple']) {
             return $value;
         } elseif (is_array($value)) {
             return [

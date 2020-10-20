@@ -33,7 +33,7 @@ class Ffmpeg extends Adapter
     protected $processId;
 
     /**
-     * @var array
+     * @var string
      */
     protected $arguments = [];
 
@@ -71,10 +71,10 @@ class Ffmpeg extends Adapter
     }
 
     /**
-     * @param string $file
+     * @param $file
      * @param array $options
      *
-     * @return $this
+     * @return $this|mixed
      */
     public function load($file, $options = [])
     {
@@ -91,7 +91,7 @@ class Ffmpeg extends Adapter
     }
 
     /**
-     * @return bool
+     * @return mixed|void
      *
      * @throws \Exception
      */
@@ -165,8 +165,8 @@ class Ffmpeg extends Adapter
     }
 
     /**
-     * @param string $file
-     * @param int|null $timeOffset
+     * @param $file
+     * @param null $timeOffset
      */
     public function saveImage($file, $timeOffset = null)
     {
@@ -207,7 +207,7 @@ class Ffmpeg extends Adapter
     }
 
     /**
-     * @return float
+     * @return int
      *
      * @throws \Exception
      */
@@ -233,8 +233,8 @@ class Ffmpeg extends Adapter
     {
         $output = $this->getVideoInfo();
 
-        preg_match('/ ([0-9]+x[0-9]+)[, ]/', $output, $matches);
-        $durationRaw = $matches[1];
+        preg_match('/( [0-9]+x[0-9]+ )/', $output, $matches);
+        $durationRaw = trim($matches[1]);
         list($width, $height) = explode('x', $durationRaw);
 
         return ['width' => $width, 'height' => $height];
@@ -263,7 +263,7 @@ class Ffmpeg extends Adapter
     }
 
     /**
-     * @param string $processId
+     * @param $processId
      *
      * @return $this
      */
@@ -291,8 +291,8 @@ class Ffmpeg extends Adapter
     }
 
     /**
-     * @param string $key
-     * @param string $value
+     * @param $key
+     * @param $value
      */
     public function addArgument($key, $value)
     {
@@ -300,7 +300,7 @@ class Ffmpeg extends Adapter
     }
 
     /**
-     * @param int $videoBitrate
+     * @param $videoBitrate
      *
      * @return $this
      */
@@ -320,7 +320,7 @@ class Ffmpeg extends Adapter
     }
 
     /**
-     * @param int $audioBitrate
+     * @param $audioBitrate
      *
      * @return $this
      */
@@ -340,8 +340,8 @@ class Ffmpeg extends Adapter
     }
 
     /**
-     * @param int $width
-     * @param int $height
+     * @param $width
+     * @param $height
      */
     public function resize($width, $height)
     {
@@ -352,22 +352,22 @@ class Ffmpeg extends Adapter
     }
 
     /**
-     * @param int $width
+     * @param $width
      */
     public function scaleByWidth($width)
     {
         // ensure $width is even (mp4 requires this)
         $width = ceil($width / 2) * 2;
-        $this->addArgument('scaleByWidth', '-vf "scale='.$width.':trunc(ow/a/2)*2"');
+        $this->addArgument('scaleByWidth', '-vf "scale='.$width.':trunc(ow/a/vsub)*vsub"');
     }
 
     /**
-     * @param int $height
+     * @param $height
      */
     public function scaleByHeight($height)
     {
         // ensure $height is even (mp4 requires this)
         $height = ceil($height / 2) * 2;
-        $this->addArgument('scaleByHeight', '-vf "scale=trunc(oh/(ih/iw)/2)*2:'.$height.'"');
+        $this->addArgument('scaleByHeight', '-vf "scale=trunc(oh/(ih/iw)/hsub)*hsub:'.$height.'"');
     }
 }

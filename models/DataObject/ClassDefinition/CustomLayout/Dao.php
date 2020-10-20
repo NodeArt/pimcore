@@ -30,7 +30,7 @@ class Dao extends Model\Dao\AbstractDao
     protected $model;
 
     /**
-     * @param string|null $id
+     * @param null $id
      *
      * @throws \Exception
      */
@@ -70,7 +70,7 @@ class Dao extends Model\Dao\AbstractDao
     }
 
     /**
-     * @param string $id
+     * @param mixed $id
      *
      * @return string|null
      */
@@ -89,7 +89,7 @@ class Dao extends Model\Dao\AbstractDao
 
     /**
      * @param string $name
-     * @param string $classId
+     * @param int    $classId
      *
      * @return int|null
      */
@@ -107,7 +107,7 @@ class Dao extends Model\Dao\AbstractDao
     }
 
     /**
-     * @return int
+     * @return int|mixed
      */
     public function getNewId()
     {
@@ -119,25 +119,27 @@ class Dao extends Model\Dao\AbstractDao
     }
 
     /**
-     * @return Model\DataObject\ClassDefinition\Layout|null
+     * Save object to database
+     *
+     * @return string|null
      */
     protected function getLayoutData()
     {
         $file = PIMCORE_CUSTOMLAYOUT_DIRECTORY . '/custom_definition_'. $this->model->getId() .'.php';
         if (is_file($file)) {
             $layout = @include $file;
-            if ($layout instanceof Model\DataObject\ClassDefinition\CustomLayout) {
+            if ($layout instanceof \Pimcore\Model\DataObject\ClassDefinition\CustomLayout) {
                 return $layout->getLayoutDefinitions();
             }
         }
 
-        return null;
+        return;
     }
 
     /**
      * Get latest identifier
      *
-     * @param string $classId
+     * @param int $classId
      *
      * @return int
      */

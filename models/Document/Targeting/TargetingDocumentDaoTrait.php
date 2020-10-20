@@ -19,30 +19,33 @@ namespace Pimcore\Model\Document\Targeting;
 
 use Pimcore\Model\Document\PageSnippet;
 
+/**
+ * @implements TargetingDocumentDaoInterface
+ */
 trait TargetingDocumentDaoTrait
 {
-    public function hasTargetGroupSpecificEditables(): bool
+    public function hasTargetGroupSpecificElements(): bool
     {
-        /** @var PageSnippet\Dao $this */
+        /** @var $this PageSnippet\Dao */
         $count = $this->db->fetchOne(
             'SELECT count(*) FROM documents_elements WHERE documentId = ? AND name LIKE ?',
             [
                 $this->model->getId(),
-                '%' . TargetingDocumentInterface::TARGET_GROUP_EDITABLE_PREFIX . '%' . TargetingDocumentInterface::TARGET_GROUP_EDITABLE_SUFFIX . '%',
+                '%' . TargetingDocumentInterface::TARGET_GROUP_ELEMENT_PREFIX . '%' . TargetingDocumentInterface::TARGET_GROUP_ELEMENT_SUFFIX . '%'
             ]
         );
 
         return $count > 0;
     }
 
-    public function getTargetGroupSpecificEditableNames(): array
+    public function getTargetGroupSpecificElementNames(): array
     {
-        /** @var PageSnippet\Dao $this */
+        /** @var $this PageSnippet\Dao */
         $names = $this->db->fetchCol(
             'SELECT name FROM documents_elements WHERE documentId = ? AND name LIKE ?',
             [
                 $this->model->getId(),
-                '%' . TargetingDocumentInterface::TARGET_GROUP_EDITABLE_PREFIX . '%' . TargetingDocumentInterface::TARGET_GROUP_EDITABLE_SUFFIX . '%',
+                '%' . TargetingDocumentInterface::TARGET_GROUP_ELEMENT_PREFIX . '%' . TargetingDocumentInterface::TARGET_GROUP_ELEMENT_SUFFIX . '%'
             ]
         );
 

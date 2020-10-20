@@ -19,7 +19,7 @@ class ContrastColor
     /**
      * returns either hex code of black or white depending on the contrast to the given color
      *
-     * @param string $hexColor
+     * @param $hexColor
      *
      * @return string
      */

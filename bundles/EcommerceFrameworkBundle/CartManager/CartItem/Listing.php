@@ -14,11 +14,11 @@
 
 namespace Pimcore\Bundle\EcommerceFrameworkBundle\CartManager\CartItem;
 
+use Pimcore\Bundle\EcommerceFrameworkBundle\CartManager\CartItem;
 use Pimcore\Bundle\EcommerceFrameworkBundle\CartManager\CartItemInterface;
 
 /**
- * @method CartItemInterface[] load()
- * @method CartItemInterface current()
+ * @method CartItem[] load()
  * @method int getTotalCount()
  * @method int getTotalAmount()
  * @method \Pimcore\Bundle\EcommerceFrameworkBundle\CartManager\CartItem\Listing\Dao getDao()
@@ -27,8 +27,6 @@ class Listing extends \Pimcore\Model\Listing\AbstractListing
 {
     /**
      * @var array
-     *
-     * @deprecated use getter/setter methods or $this->data
      */
     public $cartItems;
 
@@ -41,11 +39,6 @@ class Listing extends \Pimcore\Model\Listing\AbstractListing
      * @var array
      */
     protected $orderKey = ['`sortIndex`', '`addedDateTimestamp`'];
-
-    public function __construct()
-    {
-        $this->cartItems = & $this->data;
-    }
 
     /**
      * @var array
@@ -66,17 +59,21 @@ class Listing extends \Pimcore\Model\Listing\AbstractListing
      */
     public function getCartItems()
     {
-        return $this->getData();
+        if (empty($this->cartItems)) {
+            $this->load();
+        }
+
+        return $this->cartItems;
     }
 
     /**
      * @param CartItemInterface[] $cartItems
      *
-     * @return static
+     * @return void
      */
     public function setCartItems($cartItems)
     {
-        return $this->setData($cartItems);
+        $this->cartItems = $cartItems;
     }
 
     /**

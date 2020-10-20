@@ -22,7 +22,7 @@ interface RuleInterface
     public function getId();
 
     /**
-     * @param int $id
+     * @param $id
      *
      * @return RuleInterface
      */
@@ -56,22 +56,22 @@ interface RuleInterface
     public function getLabel($locale = null);
 
     /**
-     * @param string $description
-     * @param string|null $locale
+     * @param $description
+     * @param string $locale
      *
      * @return RuleInterface
      */
     public function setDescription($description, $locale = null);
 
     /**
-     * @param string|null $locale
+     * @param string $locale
      *
      * @return string mixed
      */
     public function getDescription($locale = null);
 
     /**
-     * @param ConditionInterface $condition
+     * @param ConditionInterface
      *
      * @return RuleInterface
      */
@@ -107,7 +107,7 @@ interface RuleInterface
     public function getActive();
 
     /**
-     * @param string $behavior
+     * @param $behavior
      *
      * @return RuleInterface
      */

@@ -26,16 +26,15 @@ Please read the topic [Localization](../../06_Multi_Language_i18n/README.md).
 <div class="code-section">
 
 ```php
-<?= $this->date('date', [
-    'format' => 'd m Y',
-    'outputFormat' => '%d.%m.%Y'
+<?= $this->date("date", [
+    "format" => "d m Y",
+    'outputFormat' => "%d.%m.%Y"
 ]); ?>
 ```
 
 ```twig
-{{ pimcore_date('myDate', {
-    'format': 'd.m.Y',
-    'outputFormat': '%d.%m.%Y'
+{{ pimcore_date("myDate", {
+    "format": "d.m.Y"
     })
 }}
 ```

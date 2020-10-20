@@ -28,7 +28,7 @@ use Pimcore\Model\Document;
 class Dao extends Model\Dao\AbstractDao
 {
     /**
-     * @param int $id
+     * @param $id
      *
      * @throws \Exception
      */
@@ -74,7 +74,7 @@ class Dao extends Model\Dao\AbstractDao
 
             $preparedData[$name] = [
                 'data' => $data,
-                'type' => $type,
+                'type' => $type
             ];
         }
 
@@ -136,7 +136,7 @@ class Dao extends Model\Dao\AbstractDao
                 'id' => $this->model->getId(),
                 'name' => $name,
                 'type' => $type,
-                'data' => $data,
+                'data' => $data
             ]);
         }
 

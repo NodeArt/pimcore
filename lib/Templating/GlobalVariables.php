@@ -17,9 +17,6 @@ namespace Pimcore\Templating;
 use Symfony\Bundle\FrameworkBundle\Templating\GlobalVariables as BaseGlobalVariables;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-/**
- * @deprecated
- */
 class GlobalVariables extends BaseGlobalVariables
 {
     /**

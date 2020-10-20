@@ -24,13 +24,13 @@ pimcore.object.tags.indexFieldSelection = Class.create(pimcore.object.tags.selec
             this.data = {};
         }
         this.fieldConfig = fieldConfig;
-
+        
         this.store = new Ext.data.JsonStore({
             autoDestroy: true,
             autoLoad: true,
             proxy: {
                 type: 'ajax',
-                url: Routing.generate('pimcore_ecommerceframework_index_getfields'),
+                url: '/admin/ecommerceframework/index/get-fields',
                 reader: {
                     rootProperty: 'data',
                     idProperty: 'key'
@@ -46,7 +46,7 @@ pimcore.object.tags.indexFieldSelection = Class.create(pimcore.object.tags.selec
                 autoLoad: true,
                 proxy: {
                     type: 'ajax',
-                    url: Routing.generate('pimcore_ecommerceframework_index_getvaluesforfilterfield'),
+                    url: '/admin/ecommerceframework/index/get-values-for-filter-field',
                     reader: {
                         rootProperty: 'data',
                         idProperty: 'key'
@@ -89,7 +89,7 @@ pimcore.object.tags.indexFieldSelection = Class.create(pimcore.object.tags.selec
                 autoLoad: true,
                 proxy: {
                     type: 'ajax',
-                    url: Routing.generate('pimcore_ecommerceframework_index_getalltenants'),
+                    url: '/admin/ecommerceframework/index/get-all-tenants',
                     reader: {
                         rootProperty: 'data',
                         idProperty: 'key'
@@ -260,5 +260,13 @@ pimcore.object.tags.indexFieldSelection = Class.create(pimcore.object.tags.selec
 
     isDirty: function() {
         return this.fieldsCombobox.isDirty() || (this.preSelectCombobox && this.preSelectCombobox.isDirty());
+    },
+
+    isInvalidMandatory: function () {
+        if (this.fieldsCombobox.getValue()) {
+            return false;
+        }
+        return true;
     }
+
 });

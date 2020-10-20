@@ -23,12 +23,12 @@ use Pimcore\Model\Element\ElementInterface;
 trait ElementWithMetadataComparisonTrait
 {
     /**
-     * @param array $array1
-     * @param array $array2
+     * @param $array1
+     * @param $array2
      *
      * @return bool
      */
-    public function isEqual($array1, $array2): bool
+    public function isEqual($array1, $array2)
     {
         $count1 = is_array($array1) ? count($array1) : 0;
         $count2 = is_array($array2) ? count($array2) : 0;
@@ -41,9 +41,9 @@ trait ElementWithMetadataComparisonTrait
         $values2 = array_filter(array_values(is_array($array2) ? $array2 : []));
 
         for ($i = 0; $i < $count1; $i++) {
-            /** @var ElementMetadata $container1 */
+            /** @var $container1 ElementMetadata */
             $container1 = $values1[$i];
-            /** @var ElementMetadata $container2 */
+            /** @var $container2 ElementMetadata */
             $container2 = $values2[$i];
 
             if (!$container1 && $container2 || $container1 && !$container2) {
@@ -53,9 +53,9 @@ trait ElementWithMetadataComparisonTrait
                 return true;
             }
 
-            /** @var ElementInterface $el1 */
+            /** @var $el1 ElementInterface */
             $el1 = $container1->getElement();
-            /** @var ElementInterface $el2 */
+            /** @var $el2 ElementInterface */
             $el2 = $container2->getElement();
 
             if (! ($el1->getType() == $el2->getType() && ($el1->getId() == $el2->getId()))) {

@@ -96,7 +96,6 @@ pimcore.document.link = Class.create(pimcore.document.document, {
         var tabTitle = this.data.key;
         this.tabPanel = Ext.getCmp("pimcore_panel_tabs");
         var tabId = "document_" + this.id;
-
         this.tab = new Ext.Panel({
             id: tabId,
             title: tabTitle,
@@ -106,13 +105,13 @@ pimcore.document.link = Class.create(pimcore.document.document, {
                 this.getLayoutToolbar(),
                 this.getTabPanel()
             ],
-            iconCls: this.getIconClass(),
+            iconCls: "pimcore_icon_" + this.data.type,
             document: this
         });
 
         this.tab.on("beforedestroy", function () {
             Ext.Ajax.request({
-                url: Routing.generate('pimcore_admin_element_unlockelement'),
+                url: "/admin/element/unlock-element",
                 method: 'PUT',
                 params: {
                     id: this.data.id,
@@ -327,15 +326,12 @@ pimcore.document.link = Class.create(pimcore.document.document, {
                 path = this.data.rawHref;
             }
 
-            let isChangeAllowed = this.data.userPermissions.publish;
-
             var pathField = new Ext.form.TextField({
                 name: "path",
                 fieldLabel: t("path"),
                 value: path,
                 fieldCls: "input_drop_target",
-                width: 500,
-                disabled: !isChangeAllowed,
+                width: 500
             });
 
             pathField.on("render", function (el) {
@@ -354,7 +350,7 @@ pimcore.document.link = Class.create(pimcore.document.document, {
 
                     onNodeDrop: function (target, dd, e, data) {
 
-                        if(!pimcore.helpers.dragAndDropValidateSingleItem(data) || !isChangeAllowed) {
+                        if(!pimcore.helpers.dragAndDropValidateSingleItem(data)) {
                             return false;
                         }
 
@@ -373,7 +369,6 @@ pimcore.document.link = Class.create(pimcore.document.document, {
                     menu.add(new Ext.menu.Item({
                         text: t('empty'),
                         iconCls: "pimcore_icon_delete",
-                        hidden: !isChangeAllowed,
                         handler: function (item) {
                             item.parentMenu.destroy();
                             pathField.setValue("");
@@ -398,7 +393,6 @@ pimcore.document.link = Class.create(pimcore.document.document, {
                     menu.add(new Ext.menu.Item({
                         text: t('search'),
                         iconCls: "pimcore_icon_search",
-                        hidden: !isChangeAllowed,
                         handler: function (item) {
                             item.parentMenu.destroy();
                             pimcore.helpers.itemselector(false, function (data) {
@@ -437,7 +431,6 @@ pimcore.document.link = Class.create(pimcore.document.document, {
                     xtype: "button",
                     iconCls: "pimcore_icon_delete",
                     style: "margin-left: 5px",
-                    hidden: !isChangeAllowed,
                     handler: function () {
                         pathField.setValue("");
                         internalTypeField.setValue("");
@@ -448,7 +441,6 @@ pimcore.document.link = Class.create(pimcore.document.document, {
                     xtype: "button",
                     iconCls: "pimcore_icon_search",
                     style: "margin-left: 5px",
-                    hidden: !isChangeAllowed,
                     handler: function () {
                         pimcore.helpers.itemselector(false, function (data) {
                             pathField.setValue(data.fullpath);

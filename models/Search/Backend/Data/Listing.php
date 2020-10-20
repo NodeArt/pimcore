@@ -19,15 +19,11 @@ use Pimcore\Model\Search\Backend\Data;
 /**
  * @method \Pimcore\Model\Search\Backend\Data\Listing\Dao getDao()
  * @method Data[] load()
- * @method Data current()
- * @method int getTotalCount()
  */
 class Listing extends \Pimcore\Model\Listing\AbstractListing
 {
     /**
-     * @var Data[]|null
-     *
-     * @deprecated use getter/setter methods or $this->data
+     * @var array|null
      */
     protected $entries = null;
 
@@ -36,17 +32,23 @@ class Listing extends \Pimcore\Model\Listing\AbstractListing
      */
     public function getEntries()
     {
-        return $this->getData();
+        if ($this->entries === null) {
+            $this->getDao()->load();
+        }
+
+        return $this->entries;
     }
 
     /**
-     * @param Data[]|null $entries
+     * @param $entries
      *
-     * @return static
+     * @return $this
      */
     public function setEntries($entries)
     {
-        return $this->setData($entries);
+        $this->entries = $entries;
+
+        return $this;
     }
 
     /**
@@ -54,7 +56,6 @@ class Listing extends \Pimcore\Model\Listing\AbstractListing
      */
     public function __construct()
     {
-        $this->initDao(__CLASS__);
-        $this->entries = & $this->data;
+        $this->initDao('\\Pimcore\\Model\\Search\\Backend\\Data\\Listing');
     }
 }

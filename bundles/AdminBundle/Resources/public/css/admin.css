@@ -150,13 +150,11 @@
 
 #pimcore_loading.loaded {
     position: absolute;
-    z-index: 15;
+    z-index: 10;
     left: 8px;
-    bottom: 200px;
+    bottom: 210px;
     width:44px;
-    height: 25px;
     padding:0;
-    background: #0C0F12;
 }
 
 #pimcore_loading.loaded .spinner {
@@ -191,7 +189,7 @@
     position: absolute;
     color: #FFFFFF;
     background: #2A2D30;
-    min-height: 30px;
+    height: 30px;
     line-height: 30px;
     text-align: center;
     border-radius: 6px;
@@ -241,9 +239,19 @@
     text-decoration: underline;
 }
 
-.pimcore_navigation_exclude .x-tree-node-text {
-    color: #8e8e8e !important;
+
+/* TODO to be removed */
+.pimcore_unpublished .x-tree-node-anchor span {
+    text-decoration: line-through;
+    color: #777;
 }
+
+/* TODO to be removed */
+.pimcore_delete .x-tree-node-anchor span {
+    text-decoration: line-through;
+    color: #ff0000;
+}
+
 
 .pimcore_unpublished span.x-tree-node-text{
     text-decoration: line-through;
@@ -263,10 +271,6 @@
 
 .pimcore_treenode_lockOwner .x-tree-node-text  {
     color: #0091f8 !important;
-}
-
-.pimcore_treenode_hide_plus_button .x-tree-expander {
-    visibility: hidden;
 }
 
 .pimcore_overflow_scrolling {
@@ -1112,12 +1116,7 @@ span.warning {
     height: 13px;
 }
 
-[class^="pimcore_tag_"], [class*=" pimcore_tag_"] {
-    --deprecated: "Warning! pimcore_tag_* class selectors are deprecated and will be removed in Pimcore 7. Use .pimcore_editable_* instead";
-}
-
-.pimcore_tag_wysiwyg,
-.pimcore_editable_wysiwyg {
+.pimcore_tag_wysiwyg {
     position:relative;
     padding: 10px;
     min-height: 80px;
@@ -1125,80 +1124,67 @@ span.warning {
     background-color: #fff;
 }
 
-.pimcore_tag_wysiwyg strong,
-.pimcore_editable_wysiwyg strong {
+.pimcore_tag_wysiwyg strong {
     font-weight: bold !important;
     font-style: inherit;
 }
 
-.pimcore_tag_wysiwyg em,
-.pimcore_editable_wysiwyg em {
+.pimcore_tag_wysiwyg em {
     font-style: italic !important;
     font-weight: inherit;
 }
 
-.pimcore_tag_wysiwyg ul, .pimcore_tag_wysiwyg ol,
-.pimcore_editable_wysiwyg ul, .pimcore_editable_wysiwyg ol {
+.pimcore_tag_wysiwyg ul, .pimcore_tag_wysiwyg ol {
     list-style: inherit;
     margin:inherit;
     padding-left: 30px;
 }
 
-.pimcore_tag_wysiwyg ol,
-.pimcore_editable_wysiwyg ol {
+.pimcore_tag_wysiwyg ol {
     list-style: decimal;
 }
 
-.pimcore_tag_wysiwyg ul,
-.pimcore_editable_wysiwyg ul {
+.pimcore_tag_wysiwyg ul {
     list-style: disc;
 }
 
-.pimcore_tag_wysiwyg blockquote,
-.pimcore_editable_wysiwyg blockquote {
+.pimcore_tag_wysiwyg blockquote {
     padding-left: 20px;
     border-left: 3px solid #666666;
 }
 
-.pimcore_tag_wysiwyg h1,
-.pimcore_editable_wysiwyg h1 {
+.pimcore_tag_wysiwyg h1 {
     font-size: 28px;
     font-weight: normal;
 }
 
-.pimcore_tag_wysiwyg h2,
-.pimcore_editable_wysiwyg h2 {
+.pimcore_tag_wysiwyg h2 {
     font-size: 24px;
     font-weight: normal;
 }
 
-.pimcore_tag_wysiwyg h3,
-.pimcore_editable_wysiwyg h3 {
+.pimcore_tag_wysiwyg h3 {
     font-size: 20px;
     font-weight: normal;
 }
 
-.pimcore_tag_wysiwyg h4,
-.pimcore_editable_wysiwyg h4 {
+.pimcore_tag_wysiwyg h4 {
     font-size: 18px;
     font-weight: normal;
 }
 
-.pimcore_tag_wysiwyg h5,
-.pimcore_editable_wysiwyg h5 {
+.pimcore_tag_wysiwyg h5 {
     font-size: 14px;
     font-weight: normal;
 }
 
-.pimcore_tag_wysiwyg table,
-.pimcore_editable_wysiwyg table {
+.pimcore_tag_wysiwyg table {
     border-collapse: collapse;
     border-top:1px solid #333333;
     border-right:1px solid #333333;
 }
 
-.pimcore_tag_wysiwyg table td, .pimcore_tag_wysiwyg table th,
-.pimcore_editable_wysiwyg table td, .pimcore_editable_wysiwyg table th {
+.pimcore_tag_wysiwyg table td, .pimcore_tag_wysiwyg table th{
     border-left:1px solid #333333;
     border-bottom:1px solid #333333;
     padding: 3px;
@@ -1351,6 +1337,14 @@ span.warning {
 
 
 /* ExtJS 6.0 specific styles */
+
+#pimcore_panel_tabs-body {
+    background-image: url(/admin/settings/display-custom-logo);
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 500px auto;
+}
+
 #pimcore_panel_tabs > .x-tab-bar {
     background: #0C0F12;
     background-image: url(/bundles/pimcoreadmin/img/logo-gray.svg);
@@ -1477,12 +1471,12 @@ span.warning {
 }
 
 .pimcore_main_toolbar .x-btn.x-btn-disabled {
-    background-color: #484B4E;
+    background-color: #393C3F;
     opacity: 1;
 }
 
 .pimcore_main_toolbar .x-btn.x-btn-disabled .x-btn-inner {
-    color: #8e8e8e;
+    color: #000;
 }
 
 .pimcore_main_toolbar .x-btn.x-btn-disabled .x-btn-wrap {
@@ -1916,7 +1910,7 @@ span.warning {
 
 .pimcore_main_accordion .pimcore_tree_no_root_node .x-tree-view .x-grid-item-container {
     padding-top: 0;
-    padding-left: 30px;
+    margin-left: 15px;
 }
 
 .pimcore_main_splitter {
@@ -2041,7 +2035,6 @@ span.warning {
 
 #pimcore_quicksearch_preview .full-preview img {
     max-width: 100%;
-    max-height: 100%;
 }
 
 #pimcore_quicksearch_preview .data-table {
@@ -2075,10 +2068,6 @@ span.warning {
 
 #pimcore_quicksearch_preview .data-table td .limit-height {
     overflow: hidden;
-    max-height: 50px;
-}
-
-#pimcore_quicksearch_preview .data-table td .limit-height img {
     max-height: 50px;
 }
 
@@ -2160,7 +2149,7 @@ ul.leaflet-draw-actions.leaflet-draw-actions-top.leaflet-draw-actions-bottom li:
 }
 
 
-.strikeThrough, .strikeThrough input {
+.strikeThrough {
     text-decoration: line-through;
     color: #777;
 }
@@ -2293,16 +2282,3 @@ ul.leaflet-draw-actions.leaflet-draw-actions-top.leaflet-draw-actions-bottom li:
 }
 
 /** END notifications **/
-
-.x-body .sf-minitoolbar {
-    left:0;
-    right:auto;
-    bottom: 195px;
-    background: #0C0F12;
-    text-align: center;
-    z-index: 12;
-}
-
-.x-body .sf-minitoolbar a {
-    width: 48px;
-}

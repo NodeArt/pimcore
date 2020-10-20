@@ -22,11 +22,6 @@ abstract class AbstractData implements \JsonSerializable
     protected $id;
 
     /**
-     * @var array
-     */
-    protected $additionalAttributes = [];
-
-    /**
      * @return string
      */
     public function getId()
@@ -70,43 +65,6 @@ abstract class AbstractData implements \JsonSerializable
         }
 
         return $this;
-    }
-
-    /**
-     * Add an additional attribute.
-     *
-     * @param string $attribute
-     * @param mixed $value
-     *
-     * @return $this
-     */
-    public function addAdditionalAttribute($attribute, $value)
-    {
-        $this->additionalAttributes[$attribute] = $value;
-
-        return $this;
-    }
-
-    /**
-     * Get an additional attribute.
-     *
-     * @param string $attribute
-     *
-     * @return mixed
-     */
-    public function getAdditionalAttribute($attribute)
-    {
-        return $this->additionalAttributes[$attribute];
-    }
-
-    /**
-     * Get all additional attributes.
-     *
-     * @return array
-     */
-    public function getAdditionalAttributes()
-    {
-        return $this->additionalAttributes;
     }
 
     /**

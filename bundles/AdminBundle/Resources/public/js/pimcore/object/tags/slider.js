@@ -19,8 +19,6 @@ pimcore.object.tags.slider = Class.create(pimcore.object.tags.abstract, {
     initialize: function (data, fieldConfig) {
 
         this.data = data;
-        this.isEmpty = this.data === null;
-
 
         if (typeof data === "undefined" && fieldConfig.defaultValue) {
             this.data = fieldConfig.defaultValue;
@@ -38,169 +36,96 @@ pimcore.object.tags.slider = Class.create(pimcore.object.tags.abstract, {
         return {type: 'numeric', dataIndex: field.key};
     },
 
-    getLayoutEdit: function (disabled) {
-        var sliderConfig = {
+    getLayoutEdit: function () {
+
+        var slider = {
+            fieldLabel: this.fieldConfig.title,
             name: this.fieldConfig.name,
-            componentCls: "object_field object_field_type_" + this.type,
-            plugins: new Ext.slider.Tip()
+            componentCls: "object_field"
         };
 
         if (this.data != null) {
-            sliderConfig.value = this.data;
+            slider.value = this.data;
         }
 
         if (this.fieldConfig.width && !this.fieldConfig.vertical) {
-            sliderConfig.width = this.fieldConfig.width;
+            slider.width = this.fieldConfig.width;
         }
         if (this.fieldConfig.height) {
-            sliderConfig.height = this.fieldConfig.height;
+            slider.height = this.fieldConfig.height;
         } else if(this.fieldConfig.vertical) {
-            sliderConfig.height = 200;
+            slider.height = 200;
         }
 
         if (this.fieldConfig.minValue) {
-            sliderConfig.minValue = this.fieldConfig.minValue;
+            slider.minValue = this.fieldConfig.minValue;
         }
         if (this.fieldConfig.maxValue) {
-            sliderConfig.maxValue = this.fieldConfig.maxValue;
+            slider.maxValue = this.fieldConfig.maxValue;
         }
         if (this.fieldConfig.vertical) {
-            sliderConfig.vertical = true;
+            slider.vertical = true;
         }
         if (this.fieldConfig.increment) {
-            sliderConfig.increment = this.fieldConfig.increment;
-            sliderConfig.keyIncrement = this.fieldConfig.increment;
+            slider.increment = this.fieldConfig.increment;
+            slider.keyIncrement = this.fieldConfig.increment;
         }
         if (this.fieldConfig.decimalPrecision) {
-            sliderConfig.decimalPrecision = this.fieldConfig.decimalPrecision;
+            slider.decimalPrecision = this.fieldConfig.decimalPrecision;
         }
 
-        this.slider = new Ext.Slider(sliderConfig);
+        slider.plugins = new Ext.slider.Tip();
 
-        this.slider.on("afterrender", this.showValueInLabel.bind(this));
+        this.component = new Ext.Slider(slider);
 
-        this.slider.on("dragstart", function() {
-            // value change initiated by the user, it is not null anymore!
-            this.isEmpty = false;
-        }.bind(this));
+        this.component.on("afterrender", this.showValueInLabel.bind(this, true));
+        this.component.on("dragend", this.showValueInLabel.bind(this));
+        this.component.on("change", this.showValueInLabel.bind(this));
 
-        this.slider.on("change", function (newValue) {
-            // update label while dragging
-            this.showValueInLabel();
-        }.bind(this));
-
-        this.slider.on("changecomplete", function (newValue) {
+        this.component.on("change", function () {
             this.dirty = true;
-            this.isEmpty = false;           // value change initiated by the user
-            this.showValueInLabel();
         }.bind(this));
-
-        var items = [this.slider];
-
-        if (!disabled) {
-            this.emptyButton = new Ext.Button({
-                iconCls: "pimcore_icon_delete",
-                cls: 'pimcore_button_transparent',
-                tooltip: t("set_to_null"),
-                handler: function () {
-                    // note that even if we set it to null slider's new value will be constrained
-                    // within minValue and maxValue
-                    this.isEmpty = true;
-                    this.dirty = true;
-                    this.slider.setValue(null, false);      // set to minValue, do not animate
-                    this.showValueInLabel();
-                }.bind(this),
-                style: "margin-left: 10px; filter:grayscale(100%);",
-            });
-            items.push(this.emptyButton);
-        }
-
-        var componentCfg = {
-            fieldLabel: this.fieldConfig.title,
-            layout: 'hbox',
-            items: items,
-            componentCls: "object_field object_field_type_" + this.type,
-            border: false,
-            style: {
-                padding: 0
-            }
-        };
-
-        if (this.fieldConfig.labelWidth) {
-            componentCfg.labelWidth = this.fieldConfig.labelWidth;
-        }
-
-        this.component = Ext.create('Ext.form.FieldContainer', componentCfg);
 
         return this.component;
     },
 
-    addInheritanceSourceButton:function ($super, metaData) {
-        this.updateStyle("#6782F6");
-        $super();
-    },
-
-    updateStyle: function(newStyle) {
-
-        if ((this.context && this.context.cellEditing) || !this.getObject() || !this.getObject().data.general.allowInheritance) {
-            return;
-        }
-
-        var sliderEl = this.slider.el.down('.x-slider-thumb');
-
-        if (sliderEl) {
-            if (!newStyle) {
-                newStyle = this.getStyle();
-            }
-
-            sliderEl.setStyle('border-color', newStyle);
-        }
-    },
-
-    getStyle: function() {
-        if (this.isEmpty) {
-            return '#6782F6';
-        }
-
-        return '';
-    },
-
-    showValueInLabel: function () {
+    showValueInLabel: function (isInitial) {
         var labelEl = this.component.labelEl;
 
         if (!this.labelText) {
             this.labelText = labelEl.dom.innerHTML;
         }
 
-        var value = null;
-        if (!this.isEmpty) {
-            value = this.slider.getValue();
+        var value = this.data;
+        if(isInitial !== true) {
+            value = this.component.getValue();
         }
 
         if(value === null) {
-            value = t('no_value_set');
+            value = t('NULL');
         }
 
         labelEl.update(this.labelText + " (" + value  + ")");
-        this.updateStyle();
     },
 
     getLayoutShow: function () {
-        this.component = this.getLayoutEdit(true);
+
+        this.component = this.getLayoutEdit();
         this.component.disable();
+
         return this.component;
     },
 
     getValue: function () {
-        if (this.isEmpty) {
-            return null;
-        }
-        var currentValue = this.slider.getValue();
-        return currentValue.toString();
+        return this.component.getValue().toString();
     },
 
     getName: function () {
         return this.fieldConfig.name;
+    },
+
+    isInvalidMandatory: function () {
+        return false;
     },
 
     isDirty: function () {
@@ -227,7 +152,7 @@ pimcore.object.tags.slider = Class.create(pimcore.object.tags.abstract, {
         }.bind(this, field.key);
 
         return {
-            text: t(field.label), sortable: true, dataIndex: field.key, renderer: renderer,
+            text: ts(field.label), sortable: true, dataIndex: field.key, renderer: renderer,
             getEditor: this.getWindowCellEditor.bind(this, field)
         };
     },

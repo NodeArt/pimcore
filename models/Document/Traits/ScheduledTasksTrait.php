@@ -17,7 +17,6 @@ declare(strict_types=1);
 
 namespace Pimcore\Model\Document\Traits;
 
-use Pimcore\Model\Schedule\Task;
 use Pimcore\Model\Schedule\Task\Listing;
 
 trait ScheduledTasksTrait
@@ -25,12 +24,12 @@ trait ScheduledTasksTrait
     /**
      * Contains all scheduled tasks
      *
-     * @var Task[]
+     * @var array
      */
     public $scheduledTasks = null;
 
     /**
-     * @return Task[] the $scheduledTasks
+     * @return array the $scheduledTasks
      */
     public function getScheduledTasks()
     {
@@ -45,7 +44,7 @@ trait ScheduledTasksTrait
     }
 
     /**
-     * @param Task[] $scheduledTasks
+     * @param $scheduledTasks
      *
      * @return $this
      */
@@ -62,7 +61,6 @@ trait ScheduledTasksTrait
         $this->getDao()->deleteAllTasks();
 
         if (is_array($scheduledTasks) && count($scheduledTasks) > 0) {
-            /** @var Task $task */
             foreach ($scheduledTasks as $task) {
                 $task->setId(null);
                 $task->setDao(null);

@@ -23,6 +23,7 @@ use Pimcore\Extension\Bundle\Exception\BundleNotFoundException;
 use Pimcore\Extension\Bundle\PimcoreBundleInterface;
 use Pimcore\Extension\Bundle\PimcoreBundleManager;
 use Pimcore\Extension\Document\Areabrick\AreabrickInterface;
+use Pimcore\Extension\Document\Areabrick\AreabrickManager;
 use Pimcore\Extension\Document\Areabrick\AreabrickManagerInterface;
 use Pimcore\Routing\RouteReferenceInterface;
 use Pimcore\Tool\AssetsInstaller;
@@ -43,7 +44,7 @@ class ExtensionManagerController extends AdminController implements EventedContr
     private $bundleManager;
 
     /**
-     * @var AreabrickManagerInterface
+     * @var AreabrickManager
      */
     private $areabrickManager;
 
@@ -72,7 +73,7 @@ class ExtensionManagerController extends AdminController implements EventedContr
     }
 
     /**
-     * @Route("/admin/extensions", name="pimcore_admin_extensionmanager_extensionmanager_getextensions", methods={"GET"})
+     * @Route("/admin/extensions", methods={"GET"})
      *
      * @return JsonResponse
      */
@@ -89,7 +90,7 @@ class ExtensionManagerController extends AdminController implements EventedContr
     /**
      * Updates bundle options (priority, environments)
      *
-     * @Route("/admin/extensions", name="pimcore_admin_extensionmanager_extensionmanager_updateextensions", methods={"PUT"})
+     * @Route("/admin/extensions", methods={"PUT"})
      *
      * @param Request $request
      *
@@ -131,12 +132,12 @@ class ExtensionManagerController extends AdminController implements EventedContr
         $this->bundleManager->setStates($updates);
 
         return $this->adminJson([
-            'extensions' => $this->getBundleList(array_keys($updates)),
+            'extensions' => $this->getBundleList(array_keys($updates))
         ]);
     }
 
     /**
-     * @Route("/admin/toggle-extension-state", name="pimcore_admin_extensionmanager_extensionmanager_toggleextensionstate", methods={"PUT"})
+     * @Route("/admin/toggle-extension-state", methods={"PUT"})
      *
      * @param Request $request
      * @param KernelInterface $kernel
@@ -159,7 +160,7 @@ class ExtensionManagerController extends AdminController implements EventedContr
 
         $data = [
             'success' => true,
-            'errors' => [],
+            'errors' => []
         ];
 
         if ($type === 'bundle') {
@@ -172,7 +173,7 @@ class ExtensionManagerController extends AdminController implements EventedContr
             if (!$kernel->isDebug()) {
                 try {
                     $cacheClearer->clear($kernel->getEnvironment(), [
-                        'no-warmup' => true,
+                        'no-warmup' => true
                     ]);
                 } catch (\Throwable $e) {
                     $data['errors'][] = $e->getMessage();
@@ -225,7 +226,7 @@ class ExtensionManagerController extends AdminController implements EventedContr
     }
 
     /**
-     * @Route("/admin/install", name="pimcore_admin_extensionmanager_extensionmanager_install", methods={"POST"})
+     * @Route("/admin/install", methods={"POST"})
      *
      * @param Request $request
      *
@@ -237,7 +238,7 @@ class ExtensionManagerController extends AdminController implements EventedContr
     }
 
     /**
-     * @Route("/admin/uninstall", name="pimcore_admin_extensionmanager_extensionmanager_uninstall", methods={"POST"})
+     * @Route("/admin/uninstall", methods={"POST"})
      *
      * @param Request $request
      *
@@ -267,7 +268,7 @@ class ExtensionManagerController extends AdminController implements EventedContr
 
             $data = [
                 'success' => true,
-                'reload' => $this->bundleManager->needsReloadAfterInstall($bundle),
+                'reload' => $this->bundleManager->needsReloadAfterInstall($bundle)
             ];
 
             if (!empty($message = $this->getInstallerOutput($bundle))) {
@@ -278,12 +279,12 @@ class ExtensionManagerController extends AdminController implements EventedContr
         } catch (BundleNotFoundException $e) {
             return $this->adminJson([
                 'success' => false,
-                'message' => $e->getMessage(),
+                'message' => $e->getMessage()
             ], 404);
         } catch (\Exception $e) {
             return $this->adminJson([
                 'success' => false,
-                'message' => $e->getMessage(),
+                'message' => $e->getMessage()
             ], 400);
         }
     }
@@ -353,9 +354,9 @@ class ExtensionManagerController extends AdminController implements EventedContr
     }
 
     /**
-     * @param string $bundleName
+     * @param $bundleName
      *
-     * @return PimcoreBundleInterface|null
+     * @return PimcoreBundleInterface
      */
     private function buildBundleInstance($bundleName)
     {
@@ -368,11 +369,9 @@ class ExtensionManagerController extends AdminController implements EventedContr
         } catch (\Exception $e) {
             $this->get('monolog.logger.pimcore')->error('Failed to build instance of bundle {bundle}: {error}', [
                 'bundle' => $bundleName,
-                'error' => $e->getMessage(),
+                'error' => $e->getMessage()
             ]);
         }
-
-        return null;
     }
 
     /**
@@ -400,7 +399,7 @@ class ExtensionManagerController extends AdminController implements EventedContr
             'configuration' => $this->getIframePath($bundle),
             'version' => $bundle->getVersion(),
             'priority' => $state['priority'],
-            'environments' => implode(', ', $state['environments']),
+            'environments' => implode(', ', $state['environments'])
         ];
 
         // only check for installation specifics if the bundle is enabled
@@ -446,8 +445,6 @@ class ExtensionManagerController extends AdminController implements EventedContr
                 return $iframePath;
             }
         }
-
-        return null;
     }
 
     /**
@@ -479,7 +476,7 @@ class ExtensionManagerController extends AdminController implements EventedContr
             'uninstallable' => false,
             'installed' => true,
             'active' => $this->areabrickManager->isEnabled($brick->getId()),
-            'version' => $brick->getVersion(),
+            'version' => $brick->getVersion()
         ];
     }
 

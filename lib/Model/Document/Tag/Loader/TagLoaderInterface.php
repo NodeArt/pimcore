@@ -17,17 +17,18 @@ declare(strict_types = 1);
 
 namespace Pimcore\Model\Document\Tag\Loader;
 
-use Pimcore\Model\Document\Editable\Loader\EditableLoaderInterface;
+use Pimcore\Loader\ImplementationLoader\LoaderInterface;
+use Pimcore\Model\Document\Tag;
 
-@trigger_error(sprintf('Class "%s" is deprecated since v6.8 and will be removed in 7. Use "%s" instead.', TagLoaderInterface::class, EditableLoaderInterface::class), E_USER_DEPRECATED);
-
-class_exists(EditableLoaderInterface::class);
-
-if (false) {
+interface TagLoaderInterface extends LoaderInterface
+{
     /**
-     * @deprecated use \Pimcore\Model\Document\Editable\Loader\EditableLoaderInterface instead.
+     * Builds a tag instance
+     *
+     * @param string $name
+     * @param array $params
+     *
+     * @return Tag
      */
-    interface TagLoaderInterface extends EditableLoaderInterface
-    {
-    }
+    public function build(string $name, array $params = []): Tag;
 }

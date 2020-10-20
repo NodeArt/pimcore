@@ -25,11 +25,11 @@ use Pimcore\Model\DataObject\Traits\ObjectVarTrait;
  * @method array getValidTableColumns(string $table, bool $cache)
  * @method void resetValidTableColumnsCache(string $table)
  */
-abstract class AbstractModel implements ModelInterface
+abstract class AbstractModel
 {
     use ObjectVarTrait;
     /**
-     * @var \Pimcore\Model\Dao\AbstractDao|null
+     * @var \Pimcore\Model\Dao\AbstractDao
      */
     protected $dao;
 
@@ -56,7 +56,7 @@ abstract class AbstractModel implements ModelInterface
     }
 
     /**
-     * @param \Pimcore\Model\Dao\AbstractDao $dao
+     * @param $dao
      *
      * @return self
      */
@@ -68,7 +68,7 @@ abstract class AbstractModel implements ModelInterface
     }
 
     /**
-     * @param string|null $key
+     * @param null $key
      * @param bool $forceDetection
      *
      * @throws \Exception
@@ -146,7 +146,7 @@ abstract class AbstractModel implements ModelInterface
             for ($i = 0; $i < $length; $i++) {
                 $classNames = [
                     implode($delimiter, $classParts) . $delimiter . 'Dao',
-                    implode($delimiter, $classParts) . $delimiter . 'Resource',
+                    implode($delimiter, $classParts) . $delimiter . 'Resource'
                 ];
 
                 foreach ($classNames as $tmpClassName) {
@@ -188,8 +188,8 @@ abstract class AbstractModel implements ModelInterface
     }
 
     /**
-     * @param string $key
-     * @param mixed $value
+     * @param  $key
+     * @param  $value
      *
      * @return $this
      */
@@ -213,16 +213,21 @@ abstract class AbstractModel implements ModelInterface
      */
     public function __sleep()
     {
+        $finalVars = [];
         $blockedVars = ['dao', 'o_dirtyFields'];
-
         $vars = get_object_vars($this);
+        foreach ($vars as $key => $value) {
+            if (!in_array($key, $blockedVars)) {
+                $finalVars[] = $key;
+            }
+        }
 
-        return array_diff(array_keys($vars), $blockedVars);
+        return $finalVars;
     }
 
     /**
-     * @param string $method
-     * @param array $args
+     * @param $method
+     * @param $args
      *
      * @return mixed
      *

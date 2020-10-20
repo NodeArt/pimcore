@@ -29,14 +29,14 @@ interface TranslationInterface
     /**
      * Detemines if backend can handle the language
      *
-     * @param string $locale
+     * @param $locale
      *
      * @return bool
      */
     public static function isValidLanguage($locale): bool;
 
     /**
-     * @param string $id
+     * @param $id
      *
      * @return mixed
      */

@@ -35,7 +35,7 @@ class ClassCommand extends AbstractStructureImportCommand
      *
      * @param string $filename
      *
-     * @return string|null
+     * @return string
      */
     protected function getDefinitionName($filename)
     {
@@ -43,14 +43,12 @@ class ClassCommand extends AbstractStructureImportCommand
         if (1 === preg_match('/^class_(.*)_export\.json$/', $filename, $parts)) {
             return $parts[1];
         }
-
-        return null;
     }
 
     /**
      * Try to load definition by name
      *
-     * @param string $name
+     * @param $name
      *
      * @return AbstractModel|null
      */
@@ -62,7 +60,7 @@ class ClassCommand extends AbstractStructureImportCommand
     /**
      * Create a new definition
      *
-     * @param string $name
+     * @param $name
      *
      * @return AbstractModel
      */

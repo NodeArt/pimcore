@@ -16,6 +16,7 @@ namespace Pimcore\Bundle\EcommerceFrameworkBundle\PricingManager\Action;
 
 use Pimcore\Bundle\EcommerceFrameworkBundle\CartManager\CartPriceModificator\Discount;
 use Pimcore\Bundle\EcommerceFrameworkBundle\PricingManager\ActionInterface;
+use Pimcore\Bundle\EcommerceFrameworkBundle\PricingManager\ConditionInterface;
 use Pimcore\Bundle\EcommerceFrameworkBundle\PricingManager\EnvironmentInterface;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Type\Decimal;
 
@@ -85,14 +86,14 @@ class CartDiscount implements DiscountInterface
         return json_encode([
             'type' => 'CartDiscount',
             'amount' => $this->getAmount(),
-            'percent' => $this->getPercent(),
+            'percent' => $this->getPercent()
         ]);
     }
 
     /**
      * @param string $string
      *
-     * @return ActionInterface
+     * @return ConditionInterface
      */
     public function fromJSON($string)
     {
@@ -103,8 +104,6 @@ class CartDiscount implements DiscountInterface
         if ($json->percent) {
             $this->setPercent($json->percent);
         }
-
-        return $this;
     }
 
     /**

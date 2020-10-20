@@ -40,6 +40,7 @@ final class VersionsCompressTask implements TaskInterface
     {
         $perIteration = 100;
         $alreadyCompressedCounter = 0;
+        $overallCounter = 0;
 
         $list = new Version\Listing();
         $list->setCondition('date < ' . (time() - 86400 * 30));
@@ -58,6 +59,8 @@ final class VersionsCompressTask implements TaskInterface
             $versions = $list->load();
 
             foreach ($versions as $version) {
+                $overallCounter++;
+
                 if (file_exists($version->getFilePath())) {
                     gzcompressfile($version->getFilePath(), 9);
                     @unlink($version->getFilePath());

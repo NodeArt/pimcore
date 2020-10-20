@@ -28,11 +28,9 @@ class LFExpander extends AbstractOperator
      */
     private $localeService;
 
-    /** @var string[] */
     private $locales;
-
-    /** @var bool */
     private $asArray;
+    private $prefix;
 
     public function __construct(LocaleServiceInterface $localeService, \stdClass $config, $context = null)
     {
@@ -40,14 +38,15 @@ class LFExpander extends AbstractOperator
 
         $this->localeService = $localeService;
 
-        $this->locales = $config->locales ?? [];
-        $this->asArray = $config->asArray ?? false;
+        $this->prefix = $config->prefix;
+        $this->locales = $config->locales;
+        $this->asArray = $config->asArray;
     }
 
     public function getLabeledValue($element)
     {
         $childs = $this->getChilds();
-        if (isset($childs[0])) {
+        if ($childs[0]) {
             if ($this->getAsArray()) {
                 $result = new ResultContainer();
                 $result->label = $this->label;
@@ -83,6 +82,22 @@ class LFExpander extends AbstractOperator
     }
 
     /**
+     * @return mixed
+     */
+    public function getPrefix()
+    {
+        return $this->prefix;
+    }
+
+    /**
+     * @param mixed $prefix
+     */
+    public function setPrefix($prefix)
+    {
+        $this->prefix = $prefix;
+    }
+
+    /**
      * @return bool
      */
     public function expandLocales()
@@ -105,7 +120,7 @@ class LFExpander extends AbstractOperator
     }
 
     /**
-     * @return bool
+     * @return mixed
      */
     public function getAsArray()
     {
@@ -113,7 +128,7 @@ class LFExpander extends AbstractOperator
     }
 
     /**
-     * @param bool $asArray
+     * @param mixed $asArray
      */
     public function setAsArray($asArray)
     {

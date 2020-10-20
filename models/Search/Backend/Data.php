@@ -17,22 +17,14 @@ namespace Pimcore\Model\Search\Backend;
 use ForceUTF8\Encoding;
 use Pimcore\Event\Model\SearchBackendEvent;
 use Pimcore\Event\SearchBackendEvents;
-use Pimcore\Loader\ImplementationLoader\Exception\UnsupportedException;
 use Pimcore\Logger;
 use Pimcore\Model\Asset;
 use Pimcore\Model\DataObject;
 use Pimcore\Model\Document;
 use Pimcore\Model\Element;
-use Pimcore\Model\Search\Backend\Data\Dao;
 
-/**
- * @method Dao getDao()
- */
 class Data extends \Pimcore\Model\AbstractModel
 {
-    // if a word occures more often than this number it will get stripped to keep the search_backend_data table from getting too big
-    const MAX_WORD_OCCURENCES = 3;
-
     /**
      * @var Data\Id
      */
@@ -100,7 +92,7 @@ class Data extends \Pimcore\Model\AbstractModel
     public $userModification;
 
     /**
-     * @var string|null
+     * @var string
      */
     public $data;
 
@@ -110,13 +102,27 @@ class Data extends \Pimcore\Model\AbstractModel
     public $properties;
 
     /**
-     * @param Element\ElementInterface $element
+     * @param null $element
      */
     public function __construct($element = null)
     {
         if ($element instanceof Element\ElementInterface) {
             $this->setDataFromElement($element);
         }
+    }
+
+    /**
+     * @return \Pimcore\Model\Dao\AbstractDao
+     *
+     * @throws \Exception
+     */
+    public function getDao()
+    {
+        if (!$this->dao) {
+            $this->initDao('\\Pimcore\\Model\\Search\\Backend\\Data');
+        }
+
+        return $this->dao;
     }
 
     /**
@@ -128,7 +134,7 @@ class Data extends \Pimcore\Model\AbstractModel
     }
 
     /**
-     * @param Data\Id $id
+     * @param $id
      *
      * @return $this
      */
@@ -168,7 +174,7 @@ class Data extends \Pimcore\Model\AbstractModel
     }
 
     /**
-     * @param string $type
+     * @param $type
      *
      * @return $this
      */
@@ -188,7 +194,7 @@ class Data extends \Pimcore\Model\AbstractModel
     }
 
     /**
-     * @param string $subtype
+     * @param $subtype
      *
      * @return $this
      */
@@ -208,7 +214,7 @@ class Data extends \Pimcore\Model\AbstractModel
     }
 
     /**
-     * @param int $creationDate
+     * @param $creationDate
      *
      * @return $this
      */
@@ -348,7 +354,7 @@ class Data extends \Pimcore\Model\AbstractModel
     }
 
     /**
-     * @param Element\ElementInterface $element
+     * @param $element
      *
      * @return $this
      */
@@ -393,17 +399,17 @@ class Data extends \Pimcore\Model\AbstractModel
                 $this->data = ' ' . $element->getHref();
             } elseif ($element instanceof Document\PageSnippet) {
                 $this->published = $element->isPublished();
-                $editables = $element->getEditables();
-                if (is_array($editables) && !empty($editables)) {
-                    foreach ($editables as $editable) {
-                        if ($editable instanceof Document\Editable\EditableInterface) {
+                $elements = $element->getElements();
+                if (is_array($elements) && !empty($elements)) {
+                    foreach ($elements as $tag) {
+                        if ($tag instanceof Document\Tag\TagInterface) {
                             // areabrick elements are handled by getElementTypes()/getElements() as they return area elements as well
-                            if ($editable instanceof Document\Editable\Area || $editable instanceof Document\Editable\Areablock) {
+                            if ($tag instanceof Document\Tag\Area || $tag instanceof Document\Tag\Areablock) {
                                 continue;
                             }
 
                             ob_start();
-                            $this->data .= strip_tags($editable->frontend()).' ';
+                            $this->data .= strip_tags($tag->frontend()).' ';
                             $this->data .= ob_get_clean();
                         }
                     }
@@ -417,16 +423,8 @@ class Data extends \Pimcore\Model\AbstractModel
             $elementMetadata = $element->getMetadata();
             if (is_array($elementMetadata)) {
                 foreach ($elementMetadata as $md) {
-                    try {
-                        $loader = \Pimcore::getContainer()->get('pimcore.implementation_loader.asset.metadata.data');
-                        /** @var \Pimcore\Model\Asset\MetaData\ClassDefinition\Data\Data $instance */
-                        $instance = $loader->build($md['type']);
-                        $dataForSearchIndex = $instance->getDataForSearchIndex($md['data'], $md);
-                        if ($dataForSearchIndex) {
-                            $this->data .= ' ' . $dataForSearchIndex;
-                        }
-                    } catch (UnsupportedException $e) {
-                        Logger::error('asset metadata type ' . $md['type'] . ' could not be resolved');
+                    if (is_scalar($md['data'])) {
+                        $this->data .= ' ' . $md['name'] . ':' . $md['data'];
                     }
                 }
             }
@@ -435,12 +433,10 @@ class Data extends \Pimcore\Model\AbstractModel
                 if (\Pimcore\Document::isFileTypeSupported($element->getFilename())) {
                     try {
                         $contentText = $element->getText();
-                        if ($contentText) {
-                            $contentText = Encoding::toUTF8($contentText);
-                            $contentText = str_replace(["\r\n", "\r", "\n", "\t", "\f"], ' ', $contentText);
-                            $contentText = preg_replace('/[ ]+/', ' ', $contentText);
-                            $this->data .= ' ' . $contentText;
-                        }
+                        $contentText = Encoding::toUTF8($contentText);
+                        $contentText = str_replace(["\r\n", "\r", "\n", "\t", "\f"], ' ', $contentText);
+                        $contentText = preg_replace('/[ ]+/', ' ', $contentText);
+                        $this->data .= ' ' . $contentText;
                     } catch (\Exception $e) {
                         Logger::error($e);
                     }
@@ -460,11 +456,7 @@ class Data extends \Pimcore\Model\AbstractModel
                 try {
                     $metaData = array_merge($element->getEXIFData(), $element->getIPTCData());
                     foreach ($metaData as $key => $value) {
-                        if (is_array($value)) {
-                            $this->data .= ' ' . $key . ' : ' . implode(' - ', $value);
-                        } else {
-                            $this->data .= ' ' . $key . ' : ' . $value;
-                        }
+                        $this->data .= ' ' . $key . ' : ' . $value;
                     }
                 } catch (\Exception $e) {
                     Logger::error($e);
@@ -501,9 +493,9 @@ class Data extends \Pimcore\Model\AbstractModel
     }
 
     /**
-     * @param string $data
+     * @param $data
      *
-     * @return string
+     * @return mixed|string
      */
     protected function cleanupData($data)
     {
@@ -519,32 +511,16 @@ class Data extends \Pimcore\Model\AbstractModel
         $data = str_replace("\t", '', $data);
         $data = preg_replace('#[ ]+#', ' ', $data);
 
-        $minWordLength = $this->getDao()->getMinWordLengthForFulltextIndex();
-        $maxWordLength = $this->getDao()->getMaxWordLengthForFulltextIndex();
-
-        $words = explode(' ', $data);
-
-        $wordOccurrences = [];
-        foreach ($words as $key => $word) {
-            $wordLength = \mb_strlen($word);
-            if ($wordLength < $minWordLength || $wordLength > $maxWordLength) {
-                unset($words[$key]);
-                continue;
-            }
-
-            $wordOccurrences[$word] = ($wordOccurrences[$word] ?? 0) + 1;
-            if ($wordOccurrences[$word] > self::MAX_WORD_OCCURENCES) {
-                unset($words[$key]);
-            }
-        }
-
-        $data = implode(' ', $words);
+        // deduplication
+        $arr = explode(' ', $data);
+        $arr = array_unique($arr);
+        $data = implode(' ', $arr);
 
         return $data;
     }
 
     /**
-     * @param Element\ElementInterface $element
+     * @param $element
      *
      * @return Data
      */

@@ -142,7 +142,5 @@ class ClassesRebuildCommand extends AbstractCommand
 
             $fc->save(false);
         }
-
-        return 0;
     }
 }

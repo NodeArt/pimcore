@@ -46,7 +46,7 @@ class DefaultFindologic extends AbstractConfig implements FindologicConfigInterf
     protected function configureOptionsResolver(string $resolverName, OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'client_config' => [],
+            'client_config' => []
         ]);
 
         $resolver->setAllowedTypes('client_config', 'array');
@@ -81,7 +81,7 @@ class DefaultFindologic extends AbstractConfig implements FindologicConfigInterf
      * in case of subtenants returns a data structure containing all sub tenants
      *
      * @param IndexableInterface $object
-     * @param int|null $subObjectId
+     * @param null                                              $subObjectId
      *
      * @return mixed $subTenantData
      */
@@ -130,9 +130,9 @@ class DefaultFindologic extends AbstractConfig implements FindologicConfigInterf
     /**
      * creates object mockup for given data
      *
-     * @param int $objectId
-     * @param mixed $data
-     * @param array $relations
+     * @param $objectId
+     * @param $data
+     * @param $relations
      *
      * @return mixed
      */

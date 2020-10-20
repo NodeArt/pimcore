@@ -56,11 +56,6 @@ class FrontendRoutingListener implements EventSubscriberInterface
     protected $siteResolver;
 
     /**
-     * @var Config
-     */
-    protected $config;
-
-    /**
      * @param RequestHelper $requestHelper
      * @param RedirectHandler $redirectHandler
      * @param SiteResolver $siteResolver
@@ -68,13 +63,11 @@ class FrontendRoutingListener implements EventSubscriberInterface
     public function __construct(
         RequestHelper $requestHelper,
         RedirectHandler $redirectHandler,
-        SiteResolver $siteResolver,
-        Config $config
+        SiteResolver $siteResolver
     ) {
         $this->requestHelper = $requestHelper;
         $this->redirectHandler = $redirectHandler;
         $this->siteResolver = $siteResolver;
-        $this->config = $config;
     }
 
     /**
@@ -87,7 +80,7 @@ class FrontendRoutingListener implements EventSubscriberInterface
             KernelEvents::REQUEST => ['onKernelRequest', 512],
 
             // run with high priority before handling real errors
-            KernelEvents::EXCEPTION => ['onKernelException', 64],
+            KernelEvents::EXCEPTION => ['onKernelException', 64]
         ];
     }
 
@@ -152,7 +145,7 @@ class FrontendRoutingListener implements EventSubscriberInterface
      * Initialize Site
      *
      * @param Request $request
-     * @param string $path
+     * @param $path
      *
      * @return string
      */
@@ -205,11 +198,12 @@ class FrontendRoutingListener implements EventSubscriberInterface
     protected function handleMainDomainRedirect(GetResponseEvent $event, bool $adminContext = false)
     {
         $request = $event->getRequest();
+        $config = Config::getSystemConfig();
 
         $hostRedirect = null;
 
         if ($adminContext) {
-            $hostRedirect = $this->resolveConfigDomainRedirectHost($request);
+            $hostRedirect = $this->resolveConfigDomainRedirectHost($config, $request);
         } else {
             if (Site::isSiteRequest()) {
                 $site = Site::getCurrentSite();
@@ -218,7 +212,7 @@ class FrontendRoutingListener implements EventSubscriberInterface
                 }
             } else {
                 if (!$this->requestHelper->isFrontendRequestByAdmin()) {
-                    $hostRedirect = $this->resolveConfigDomainRedirectHost($request);
+                    $hostRedirect = $this->resolveConfigDomainRedirectHost($config, $request);
                 }
             }
         }
@@ -239,13 +233,13 @@ class FrontendRoutingListener implements EventSubscriberInterface
         }
     }
 
-    private function resolveConfigDomainRedirectHost(Request $request)
+    private function resolveConfigDomainRedirectHost(Config\Config $config, Request $request)
     {
         $hostRedirect = null;
 
-        $gc = $this->config['general'];
-        if (isset($gc['redirect_to_maindomain']) && $gc['redirect_to_maindomain'] === true && isset($gc['domain']) && $gc['domain'] !== $request->getHost()) {
-            $hostRedirect = $gc['domain'];
+        $gc = $config->general;
+        if ($gc->redirect_to_maindomain && $gc->domain && $gc->domain !== $request->getHost()) {
+            $hostRedirect = $config->general->domain;
         }
 
         return $hostRedirect;

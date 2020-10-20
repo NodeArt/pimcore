@@ -20,7 +20,6 @@ namespace Pimcore\Model\Tool;
 use Pimcore\Model;
 
 /**
- * @method \Pimcore\Model\Tool\TmpStore\Dao getById(string $id)
  * @method \Pimcore\Model\Tool\TmpStore\Dao getDao()
  */
 class TmpStore extends Model\AbstractModel
@@ -56,12 +55,12 @@ class TmpStore extends Model\AbstractModel
     public $serialized = false;
 
     /**
-     * @var TmpStore
+     * @var Lock
      */
     protected static $instance;
 
     /**
-     * @return TmpStore
+     * @return Lock
      */
     protected static function getInstance()
     {
@@ -81,12 +80,12 @@ class TmpStore extends Model\AbstractModel
     }
 
     /**
-     * @param string $id
-     * @param mixed $data
-     * @param string|null $tag
-     * @param int|null $lifetime
+     * @param $id
+     * @param $data
+     * @param null $tag
+     * @param null $lifetime
      *
-     * @return bool
+     * @return mixed
      */
     public static function add($id, $data, $tag = null, $lifetime = null)
     {
@@ -104,12 +103,12 @@ class TmpStore extends Model\AbstractModel
     }
 
     /**
-     * @param string $id
-     * @param mixed $data
-     * @param string|null $tag
-     * @param int|null $lifetime
+     * @param $id
+     * @param $data
+     * @param null $tag
+     * @param null $lifetime
      *
-     * @return bool
+     * @return mixed
      */
     public static function set($id, $data, $tag = null, $lifetime = null)
     {
@@ -123,7 +122,7 @@ class TmpStore extends Model\AbstractModel
     }
 
     /**
-     * @param string $id
+     * @param $id
      *
      * @return mixed
      */
@@ -135,13 +134,13 @@ class TmpStore extends Model\AbstractModel
     }
 
     /**
-     * @param string $id
+     * @param $id
      *
      * @return null|TmpStore
      */
     public static function get($id)
     {
-        $item = new self();
+        $item = new self;
         if ($item->getById($id)) {
             if ($item->getExpiryDate() < time()) {
                 self::delete($id);
@@ -154,7 +153,7 @@ class TmpStore extends Model\AbstractModel
     }
 
     /**
-     * @param string $tag
+     * @param $tag
      *
      * @return array
      */
@@ -207,7 +206,7 @@ class TmpStore extends Model\AbstractModel
     }
 
     /**
-     * @param mixed $data
+     * @param string $data
      */
     public function setData($data)
     {
@@ -263,7 +262,7 @@ class TmpStore extends Model\AbstractModel
     }
 
     /**
-     * @param int|null $lifetime
+     * @param null $lifetime
      *
      * @return mixed
      */

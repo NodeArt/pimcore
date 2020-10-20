@@ -57,7 +57,7 @@ interface MysqlConfigInterface extends ConfigInterface
     /**
      * returns column type for id
      *
-     * @param bool $isPrimary
+     * @param $isPrimary
      *
      * @return string
      */

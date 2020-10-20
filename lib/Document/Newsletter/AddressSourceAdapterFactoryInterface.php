@@ -19,7 +19,7 @@ interface AddressSourceAdapterFactoryInterface
     /**
      * Configures and creates the AddressSourceAdapterInterface
      *
-     * @param array $params
+     * @param $params
      *
      * @return AddressSourceAdapterInterface
      */

@@ -32,7 +32,7 @@ class IFrameController extends \Pimcore\Controller\FrontendController
         $language = $context["language"];
 
         // get the current editing data, not the saved one! 
-        $object = Service::getElementFromSession('object', $objectId);
+        $object = Service::getObjectFromSession($objectId);
 
         $response =  '<h1>Title for language "' . $language . '": '  . $object->getTitle($language) . "</h1>";
 

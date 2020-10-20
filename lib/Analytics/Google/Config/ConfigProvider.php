@@ -61,7 +61,7 @@ class ConfigProvider
     {
         $reportConfig = \Pimcore\Config::getReportConfig();
 
-        $config = $reportConfig->get('analytics');
+        $config = $reportConfig->analytics;
         if (!$config instanceof ConfigObject) {
             $config = new ConfigObject([]);
         }

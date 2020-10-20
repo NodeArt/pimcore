@@ -23,9 +23,6 @@ use Pimcore\Model\Document;
 use Pimcore\Model\Element;
 use Pimcore\Model\Webservice;
 
-/**
- * @deprecated
- */
 class Service
 {
     /**
@@ -67,9 +64,9 @@ class Service
 
     /**
      * @param DataObject\AbstractObject|Document|Asset $element
-     * @param array $apiElementKeys
-     * @param bool $recursive
-     * @param bool $includeRelations
+     * @param $apiElementKeys
+     * @param $recursive
+     * @param $includeRelations
      *
      * @return array
      */
@@ -98,7 +95,7 @@ class Service
                         $foundRelations[Element\Service::getType($child) . '_' . $child->getId()] = [
                             'elementType' => Element\Service::getType($child),
                             'element' => $child->getId(),
-                            'recursive' => $recursive,
+                            'recursive' => $recursive
                         ];
                     }
                 }

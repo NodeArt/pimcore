@@ -16,7 +16,6 @@ namespace Pimcore;
 
 use Egulias\EmailValidator\EmailValidator;
 use Egulias\EmailValidator\Validation\RFCValidation;
-use Html2Text\Html2Text;
 use Pimcore\Bundle\CoreBundle\EventListener\Frontend\ElementListener;
 use Pimcore\Event\MailEvents;
 use Pimcore\Event\Model\MailEvent;
@@ -57,18 +56,32 @@ class Mail extends \Swift_Message
     protected $document;
 
     /**
-     * Contains the dynamic Params for the Twig engine and the Placeholders
+     * Contains the dynamic Params for the Placeholders
      *
      * @var array
      */
     protected $params = [];
 
     /**
+     * html2text from mbayer is installed (http://www.mbayer.de/html2text/)
+     *
+     * @var bool
+     */
+    protected static $html2textInstalled = null;
+
+    /**
      * Options passed to html2text
      *
-     * @var array
+     * @var string
      */
-    protected $html2textOptions = [];
+    protected $html2textOptions = '';
+
+    /**
+     * use html2text from mbayer if it is installed (http://www.mbayer.de/html2text/)
+     *
+     * @var bool
+     */
+    protected $html2textBinaryEnabled = null;
 
     /**
      * Prevent adding debug information
@@ -105,7 +118,7 @@ class Mail extends \Swift_Message
      *
      * @see MailHelper::setAbsolutePaths()
      *
-     * @var string|null
+     * @var null
      */
     protected $hostUrl = null;
 
@@ -144,7 +157,7 @@ class Mail extends \Swift_Message
     protected $lastLogEntry;
 
     /**
-     * @param string $url
+     * @param $url
      *
      * @return $this
      */
@@ -156,7 +169,7 @@ class Mail extends \Swift_Message
     }
 
     /**
-     * @return string|null
+     * @return null
      */
     public function getHostUrl()
     {
@@ -166,10 +179,10 @@ class Mail extends \Swift_Message
     /**
      * Mail constructor.
      *
-     * @param array|string|null $subject
-     * @param string|null $body
-     * @param string|null $contentType
-     * @param string|null $charset
+     * @param null $subject
+     * @param null $body
+     * @param null $contentType
+     * @param null $charset
      */
     public function __construct($subject = null, $body = null, $contentType = null, $charset = null)
     {
@@ -202,17 +215,18 @@ class Mail extends \Swift_Message
      */
     public function init($type = 'email')
     {
-        $config = \Pimcore\Config::getSystemConfiguration($type);
+        $systemConfig = \Pimcore\Config::getSystemConfig()->toArray();
+        $emailSettings = & $systemConfig[$type];
 
-        if (!empty($config['sender']['email'])) {
+        if ($emailSettings['sender']['email']) {
             if (empty($this->getFrom())) {
-                $this->setFrom($config['sender']['email'], $config['sender']['name']);
+                $this->setFrom($emailSettings['sender']['email'], $emailSettings['sender']['name']);
             }
         }
 
-        if (!empty($config['return']['email'])) {
+        if ($emailSettings['return']['email']) {
             if (empty($this->getReplyTo())) {
-                $this->setReplyTo($config['return']['email'], $config['return']['name']);
+                $this->setReplyTo($emailSettings['return']['email'], $emailSettings['return']['name']);
             }
         }
 
@@ -220,7 +234,7 @@ class Mail extends \Swift_Message
     }
 
     /**
-     * @param bool $value
+     * @param $value
      *
      * @return $this
      */
@@ -256,7 +270,7 @@ class Mail extends \Swift_Message
     }
 
     /**
-     * @param bool $value
+     * @param $value
      *
      * @return $this
      */
@@ -276,8 +290,6 @@ class Mail extends \Swift_Message
     }
 
     /**
-     * @deprecated Pimcore\Mail::determineHtml2TextIsInstalled is deprecated since 6.6.0 and will be removed with 7.0
-     *
      * Determines if mbayer html2text is installed (more information at http://www.mbayer.de/html2text/)
      * and uses it to automatically create a text version of the html email
      *
@@ -287,23 +299,22 @@ class Mail extends \Swift_Message
      */
     public static function determineHtml2TextIsInstalled()
     {
-        return true;
+        return (bool) \Pimcore\Tool\Console::getExecutable('html2text');
     }
 
     /**
      * Sets options that are passed to html2text
      *
-     * @param array $options
+     * @param string $options
      *
      * @return \Pimcore\Mail
      */
-    public function setHtml2TextOptions($options = [])
+    public function setHtml2TextOptions($options = '')
     {
-        if (is_array($options)) {
+        if (is_string($options)) {
             $this->html2textOptions = $options;
         } else {
-            Logger::warn('Pimcore\Mail::setHtml2TextOptions only accepts array since version 6.6.0.' .
-                ' Please see available options: https://github.com/mtibben/html2text/blob/master/src/Html2Text.php#L212');
+            Logger::warn('Html2Text options ignored. You have to pass a string');
         }
 
         return $this;
@@ -312,7 +323,7 @@ class Mail extends \Swift_Message
     /**
      * Returns options for html2text
      *
-     * @return array
+     * @return string
      */
     public function getHtml2TextOptions()
     {
@@ -332,8 +343,6 @@ class Mail extends \Swift_Message
         $this->getHeaders()->removeAll('cc');
         $this->getHeaders()->removeAll('bcc');
         $this->getHeaders()->removeAll('replyTo');
-
-        return $this;
     }
 
     /**
@@ -371,7 +380,7 @@ class Mail extends \Swift_Message
     }
 
     /**
-     * Sets the parameters to the request object and the Placeholders
+     * Sets the parameters for the email view and the Placeholders
      *
      * @param array $params
      *
@@ -387,7 +396,7 @@ class Mail extends \Swift_Message
     }
 
     /**
-     * Sets a single parameter to the request object and the Placeholders
+     * Sets a single parameter for the email view and the Placeholders
      *
      * @param string | int $key
      * @param mixed $value
@@ -396,10 +405,10 @@ class Mail extends \Swift_Message
      */
     public function setParam($key, $value)
     {
-        if (is_string($key) || is_int($key)) {
+        if (is_string($key) || is_integer($key)) {
             $this->params[$key] = $value;
         } else {
-            Logger::warn('$key has to be a string or integer - Param ignored!');
+            Logger::warn('$key has to be a string - Param ignored!');
         }
 
         return $this;
@@ -462,10 +471,10 @@ class Mail extends \Swift_Message
      */
     public function unsetParam($key)
     {
-        if (is_string($key) || is_int($key)) {
+        if (is_string($key) || is_integer($key)) {
             unset($this->params[$key]);
         } else {
-            Logger::warn('$key has to be a string or integer - unsetParam ignored!');
+            Logger::warn('$key has to be a string - unsetParam ignored!');
         }
 
         return $this;
@@ -606,23 +615,19 @@ class Mail extends \Swift_Message
         }
 
         $event = new MailEvent($this, [
-            'mailer' => $mailer,
+            'mailer' => $mailer
         ]);
 
         \Pimcore::getEventDispatcher()->dispatch(MailEvents::PRE_SEND, $event);
 
         if ($event->hasArgument('mailer')) {
             $mailer = $event->getArgument('mailer');
-            $failedRecipients = [];
             try {
+                $failedRecipients = [];
                 $mailer->send($this, $failedRecipients);
             } catch (\Exception $e) {
                 $mailer->getTransport()->stop();
-                if (isset($failedRecipients[0])) {
-                    throw new \Exception($failedRecipients[0].' - '.$e->getMessage());
-                } else {
-                    throw new \Exception($e->getMessage());
-                }
+                throw new \Exception($failedRecipients[0].' - '.$e->getMessage());
             }
         }
 
@@ -682,7 +687,7 @@ class Mail extends \Swift_Message
      *
      * @static
      *
-     * @param string $emailAddress
+     * @param $emailAddress
      *
      * @return bool
      */
@@ -691,17 +696,6 @@ class Mail extends \Swift_Message
         $validator = new EmailValidator();
 
         return $validator->isValid($emailAddress, new RFCValidation());
-    }
-
-    protected function renderParams(string $string): string
-    {
-        $rendered = $this->placeholderObject->replacePlaceholders($string, $this->getParams(), $this->getDocument(), $this->getEnableLayoutOnPlaceholderRendering());
-
-        $twig = \Pimcore::getContainer()->get('twig');
-        $template = $twig->createTemplate((string) $rendered);
-        $rendered = $twig->render($template, $this->getParams());
-
-        return $rendered;
     }
 
     /**
@@ -717,7 +711,7 @@ class Mail extends \Swift_Message
             $subject = $this->getDocument()->getSubject();
         }
 
-        return $this->renderParams($subject);
+        return $this->placeholderObject->replacePlaceholders($subject, $this->getParams(), $this->getDocument(), $this->getEnableLayoutOnPlaceholderRendering());
     }
 
     /**
@@ -743,7 +737,7 @@ class Mail extends \Swift_Message
 
         $content = null;
         if ($html) {
-            $content = $this->renderParams($html);
+            $content = $this->placeholderObject->replacePlaceholders($html, $this->getParams(), $this->getDocument());
 
             // modifying the content e.g set absolute urls...
             $content = MailHelper::embedAndModifyCss($content, $this->getDocument());
@@ -765,9 +759,9 @@ class Mail extends \Swift_Message
 
         //if the content was manually set with $obj->setBodyText(); this content will be used
         if ($text) {
-            $content = $this->renderParams($text);
+            $content = $this->placeholderObject->replacePlaceholders($text, $this->getParams(), $this->getDocument(), $this->getEnableLayoutOnPlaceholderRendering());
         } else {
-            //creating text version from html email
+            //creating text version from html email if html2text is installed
             try {
                 $htmlContent = $this->getBodyHtmlRendered();
                 $html = str_get_html($htmlContent);
@@ -795,7 +789,7 @@ class Mail extends \Swift_Message
     }
 
     /**
-     * @param Model\Document|int|string $document
+     * @param $document
      *
      * @return $this
      *
@@ -850,55 +844,70 @@ class Mail extends \Swift_Message
     }
 
     /**
-     * @deprecated Pimcore\Mail::getHtml2TextBinaryEnabled is deprecated since 6.6.0 and will be removed with 7.0
      *
      * @return bool
      */
     public function getHtml2TextBinaryEnabled()
     {
-        return false;
+        return $this->html2textBinaryEnabled;
     }
 
     /**
-     * @deprecated Pimcore\Mail::enableHtml2textBinary is deprecated since 6.6.0 and will be removed with 7.0
-     *
      * @return $this
      *
      * @throws \Exception
      */
     public function enableHtml2textBinary()
     {
+        if (self::getHtml2textInstalled()) {
+            $this->html2textBinaryEnabled = true;
+        } else {
+            throw new \Exception('trying to enable html2text binary,
+            but html2text is not installed!');
+        }
+
         return $this;
     }
 
     /**
-     * @deprecated Pimcore\Mail::getHtml2textInstalled is deprecated since 6.6.0 and will be removed with 7.0
-     *
      * @static
      * returns  html2text binary installation status
      *
-     * @return bool
+     * @return bool || null
      */
     public static function getHtml2textInstalled()
     {
-        return true;
+        if (is_null(self::$html2textInstalled)) {
+            self::$html2textInstalled = self::determineHtml2TextIsInstalled();
+        }
+
+        return self::$html2textInstalled;
     }
 
     /**
-     * @param string $htmlContent
+     * @param $htmlContent
      *
      * @return string
      */
     protected function html2Text($htmlContent)
     {
-        $content = '';
+        if ($this->getHtml2TextBinaryEnabled()) {
+            $content = '';
+            //html2text doesn't support unicode
+            if ($this->getCharset() == 'UTF-8') {
+                $htmlContent = utf8_decode($htmlContent);
+            }
+            //using temporary file so we don't have problems with special characters
+            $tmpFileName = PIMCORE_SYSTEM_TEMP_DIRECTORY . '/' . uniqid('email_', true) . '.tmp';
+            if (\Pimcore\File::put($tmpFileName, $htmlContent)) {
+                $content = @shell_exec("html2text $tmpFileName " . $this->getHtml2TextOptions());
+                @unlink($tmpFileName);
+            }
 
-        if (!empty($htmlContent)) {
-            $html = new Html2Text($htmlContent, $this->getHtml2TextOptions());
-            $content = $html->getText();
+            return $content;
         }
 
-        return $content;
+        return '';
     }
 
     /**
@@ -910,7 +919,7 @@ class Mail extends \Swift_Message
     }
 
     /**
-     * @param string $bodyText
+     * @param $bodyText
      *
      * @return $this
      */
@@ -922,7 +931,7 @@ class Mail extends \Swift_Message
     }
 
     /**
-     * @param string $body
+     * @param $body
      *
      * @return \Pimcore\Mail
      */
@@ -966,10 +975,12 @@ class Mail extends \Swift_Message
     }
 
     /**
-     * @param string|\Swift_OutputByteStream $data
-     * @param string|null $mimeType
-     * @param string|null $filename
-     * @param string|null $disposition
+     *
+     *
+     * @param $data
+     * @param null $mimeType
+     * @param null $disposition
+     * @param null $filename
      *
      * @return \Swift_Mime_Attachment
      */
@@ -996,8 +1007,6 @@ class Mail extends \Swift_Message
         } else {
             parent::addTo($address, $name);
         }
-
-        return $this;
     }
 
     /**

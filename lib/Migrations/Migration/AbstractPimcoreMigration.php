@@ -53,7 +53,7 @@ abstract class AbstractPimcoreMigration extends AbstractMigration implements Pim
     /**
      * Writes a log message in the same format as a DB migration does (prefixed with ->)
      *
-     * @param string $message
+     * @param $message
      */
     protected function writeMessage($message)
     {
@@ -63,7 +63,7 @@ abstract class AbstractPimcoreMigration extends AbstractMigration implements Pim
     /**
      * Prefixes message with DRY-RUN: if in dry-run mode
      *
-     * @param string $message
+     * @param $message
      * @param string $prefix
      *
      * @return string

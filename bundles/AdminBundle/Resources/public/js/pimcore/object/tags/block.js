@@ -23,7 +23,7 @@ pimcore.object.tags.block = Class.create(pimcore.object.tags.abstract, {
         this.data = [];
         this.currentElements = [];
         this.layoutDefinitions = {};
-        this.dataFields = {};
+        this.dataFields = [];
 
         if (data) {
             this.data = data;
@@ -33,7 +33,7 @@ pimcore.object.tags.block = Class.create(pimcore.object.tags.abstract, {
     },
 
     getGridColumnConfig: function(field) {
-        return {text: t(field.label), width: 150, sortable: false, dataIndex: field.key,
+        return {text: ts(field.label), width: 150, sortable: false, dataIndex: field.key,
             renderer: function (key, value, metaData, record) {
                 this.applyPermissionStyle(key, value, metaData, record);
 
@@ -49,8 +49,8 @@ pimcore.object.tags.block = Class.create(pimcore.object.tags.abstract, {
         var panelConf = {
             autoHeight: true,
             border: true,
-            style: "margin-bottom: 10px",
-            componentCls: "object_field object_field_type_" + this.type,
+            // style: "margin-bottom: 10px",
+            componentCls: "object_field",
             collapsible: this.fieldConfig.collapsible,
             collapsed: this.fieldConfig.collapsed
         };
@@ -93,23 +93,20 @@ pimcore.object.tags.block = Class.create(pimcore.object.tags.abstract, {
     },
 
     getControls: function (blockElement) {
+
+        var collectionMenu = [];
+
         var items = [];
 
+
+        items.push({
+            disabled: this.fieldConfig.disallowAddRemove,
+            cls: "pimcore_block_button_plus",
+            iconCls: "pimcore_icon_plus",
+            handler: this.addBlock.bind(this,blockElement , null/*, rec.data.key */)
+        });
+
         if(blockElement) {
-            items.push({
-                disabled: this.fieldConfig.disallowAddRemove,
-                cls: "pimcore_block_button_plus",
-                iconCls: "pimcore_icon_plus_up",
-                handler: this.addBlock.bind(this, blockElement, "before")
-            });
-
-            items.push({
-                disabled: this.fieldConfig.disallowAddRemove,
-                cls: "pimcore_block_button_plus",
-                iconCls: "pimcore_icon_plus_down",
-                handler: this.addBlock.bind(this, blockElement, "after")
-            });
-
             items.push({
                 disabled: this.fieldConfig.disallowAddRemove,
                 cls: "pimcore_block_button_minus",
@@ -135,13 +132,6 @@ pimcore.object.tags.block = Class.create(pimcore.object.tags.abstract, {
                 listeners: {
                     "click": this.moveBlockDown.bind(this, blockElement)
                 }
-            });
-        } else {
-            items.push({
-                disabled: this.fieldConfig.disallowAddRemove,
-                cls: "pimcore_block_button_plus",
-                iconCls: "pimcore_icon_plus",
-                handler: this.addBlock.bind(this, blockElement, "after")
             });
         }
 
@@ -179,7 +169,7 @@ pimcore.object.tags.block = Class.create(pimcore.object.tags.abstract, {
         }
     },
 
-    addBlock: function (blockElement, position) {
+    addBlock: function (blockElement) {
 
         this.closeOpenEditors();
 
@@ -202,11 +192,7 @@ pimcore.object.tags.block = Class.create(pimcore.object.tags.abstract, {
             index = this.detectBlockIndex(blockElement);
         }
 
-        if (position !== "before") {
-            index++;
-        }
-
-        this.addBlockElement(index, {});
+        this.addBlockElement(index + 1, {});
     },
 
     removeBlock: function (blockElement) {
@@ -254,7 +240,7 @@ pimcore.object.tags.block = Class.create(pimcore.object.tags.abstract, {
             this.component.removeAll();
         }
 
-        this.dataFields = {};
+        this.dataFields = [];
         this.currentData = {};
 
         if(blockData) {
@@ -267,7 +253,6 @@ pimcore.object.tags.block = Class.create(pimcore.object.tags.abstract, {
         var context = this.getContext();
         context["subContainerType"] = "block";
         context["subContainerKey"] = fieldConfig.name;
-        context["applyDefaults"] = true;
         var items = this.getRecursiveLayout(fieldConfig, undefined, context, undefined, undefined, undefined, true);
 
         items = items.items;
@@ -306,7 +291,7 @@ pimcore.object.tags.block = Class.create(pimcore.object.tags.abstract, {
             this.dirty = true;
         }
 
-        this.dataFields = {};
+        this.dataFields = [];
         this.currentData = {};
     },
 
@@ -320,16 +305,7 @@ pimcore.object.tags.block = Class.create(pimcore.object.tags.abstract, {
     },
 
     addToDataFields: function (field, name) {
-        if (this.dataFields[name]) {
-            // this is especially for localized fields which get aggregated here into one field definition
-            // in the case that there are more than one localized fields in the class definition
-            // see also Object_Class::extractDataDefinitions();
-            if(typeof this.dataFields[name]["addReferencedField"]){
-                this.dataFields[name].addReferencedField(field);
-            }
-        } else {
-            this.dataFields[name] = field;
-        }
+        this.dataFields.push(field);
     },
 
     getLayoutShow: function () {
@@ -351,16 +327,13 @@ pimcore.object.tags.block = Class.create(pimcore.object.tags.abstract, {
             if(this.currentElements[this.component.items.items[s].key]) {
                 element = this.currentElements[this.component.items.items[s].key];
 
-                var elementFieldNames = Object.keys(element.fields);
-
-                for (var u=0; u<elementFieldNames.length; u++) {
-                    var elementFieldName = elementFieldNames[u];
+                for (var u=0; u<element.fields.length; u++) {
                     try {
                         // no check for dirty, ... always send all field to the server
-                        elementData[element.fields[elementFieldName].getName()] = element.fields[elementFieldName].getValue();
+                        elementData[element.fields[u].getName()] = element.fields[u].getValue();
                     } catch (e) {
                         console.log(e);
-                        elementData[element.fields[elementFieldName].getName()] = "";
+                        elementData[element.fields[u].getName()] = "";
                     }
 
                 }
@@ -396,11 +369,8 @@ pimcore.object.tags.block = Class.create(pimcore.object.tags.abstract, {
             if(this.currentElements[this.component.items.items[s].key]) {
                 element = this.currentElements[this.component.items.items[s].key];
 
-                var elementFieldNames = Object.keys(element.fields);
-
-                for (var u=0; u<elementFieldNames.length; u++) {
-                    var elementFieldName = elementFieldNames[u];
-                    if(element.fields[elementFieldName].isDirty()) {
+                for (var u=0; u<element.fields.length; u++) {
+                    if(element.fields[u].isDirty()) {
                         return true;
                     }
                 }
@@ -417,11 +387,8 @@ pimcore.object.tags.block = Class.create(pimcore.object.tags.abstract, {
             if(this.currentElements[this.component.items.items[s].key]) {
                 element = this.currentElements[this.component.items.items[s].key];
 
-                var elementFieldNames = Object.keys(element.fields);
-
-                for (var u=0; u<elementFieldNames.length; u++) {
-                    var elementFieldName = elementFieldNames[u];
-                    if(element.fields[elementFieldName].isMandatory()) {
+                for (var u=0; u<element.fields.length; u++) {
+                    if(element.fields[u].isMandatory()) {
                         return true;
                     }
                 }
@@ -429,6 +396,35 @@ pimcore.object.tags.block = Class.create(pimcore.object.tags.abstract, {
         }
 
         return false;
+    },
+
+    isInvalidMandatory: function () {
+        var element;
+        var isInvalid = false;
+        var invalidMandatoryFields = [];
+
+        for(var s=0; s<this.component.items.items.length; s++) {
+            if(this.currentElements[this.component.items.items[s].key]) {
+                element = this.currentElements[this.component.items.items[s].key];
+
+                for (var u=0; u<element.fields.length; u++) {
+                    if(element.fields[u].isMandatory()) {
+                        if(element.fields[u].isInvalidMandatory()) {
+                            invalidMandatoryFields.push(element.fields[u].getTitle() + " ("
+                                + element.fields[u].getName() + ")");
+                            isInvalid = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        // return the error messages not bool, this is handled in object/edit.js
+        if(isInvalid) {
+            return invalidMandatoryFields;
+        }
+
+        return isInvalid;
     }
 });
 

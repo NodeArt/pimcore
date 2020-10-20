@@ -93,7 +93,7 @@ pimcore.element.scheduler = Class.create({
                     autoDestroy: true,
                     proxy: {
                         type: 'ajax',
-                        url: Routing.generate('pimcore_admin_element_getversions'),
+                        url: "/admin/element/get-versions",
                         extraParams: {
                             id: this.element.id,
                             elementType: this.type
@@ -245,21 +245,27 @@ pimcore.element.scheduler = Class.create({
     buildActionsColumnStore: function() {
         var actions = [];
 
-        if ("document" === this.type || "object" === this.type) {
-            if(this.element.isAllowed("publish")) {
-                actions.push(["publish", t("publish")]);
-            }
-
-            if(this.element.isAllowed("unpublish")) {
-                actions.push(["unpublish", t("unpublish")]);
-            }
+        if ("document" === this.type) {
+            actions = [
+                ["publish", t("publish")],
+                ["unpublish", t("unpublish")],
+                ["delete", t("delete")]
+            ];
+        }
+        else if ("asset" === this.type) {
+            actions = [
+                ["delete", t("delete")]
+            ];
+        }
+        else if ("object" === this.type) {
+            actions = [
+                ["publish", t("publish")],
+                ["unpublish", t("unpublish")],
+                ["delete", t("delete")]
+            ];
         }
 
-        if(this.element.isAllowed("delete")) {
-            actions.push(["delete", t("delete")]);
-        }
-
-        if (this.options.supportsVersions && this.element.isAllowed("publish") && this.element.isAllowed("versions")) {
+        if (this.options.supportsVersions) {
             actions.push(["publish-version", t("publish_version")]);
         }
 

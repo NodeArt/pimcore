@@ -44,8 +44,6 @@ class TokenStorageUserResolver
         if ($proxy = $this->getUserProxy()) {
             return $proxy->getUser();
         }
-
-        return null;
     }
 
     /**
@@ -69,7 +67,5 @@ class TokenStorageUserResolver
         if ($user instanceof UserProxy) {
             return $user;
         }
-
-        return null;
     }
 }

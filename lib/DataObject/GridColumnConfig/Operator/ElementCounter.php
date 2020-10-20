@@ -19,14 +19,13 @@ namespace Pimcore\DataObject\GridColumnConfig\Operator;
 
 class ElementCounter extends AbstractOperator
 {
-    /** @var bool */
     private $countEmpty;
 
     public function __construct(\stdClass $config, $context = null)
     {
         parent::__construct($config, $context);
 
-        $this->countEmpty = $config->countEmpty ?? false;
+        $this->countEmpty = $config->countEmpty;
     }
 
     public function getLabeledValue($element)
@@ -66,7 +65,7 @@ class ElementCounter extends AbstractOperator
     }
 
     /**
-     * @return bool
+     * @return mixed
      */
     public function getCountEmpty()
     {
@@ -74,7 +73,7 @@ class ElementCounter extends AbstractOperator
     }
 
     /**
-     * @param bool $countEmpty
+     * @param mixed $countEmpty
      */
     public function setCountEmpty($countEmpty)
     {

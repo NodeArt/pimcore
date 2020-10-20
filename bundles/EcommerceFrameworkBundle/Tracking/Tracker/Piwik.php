@@ -29,8 +29,6 @@ use Pimcore\Bundle\EcommerceFrameworkBundle\Tracking\CheckoutCompleteInterface;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Tracking\ProductAction;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Tracking\ProductViewInterface;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Tracking\Tracker;
-use Pimcore\Bundle\EcommerceFrameworkBundle\Tracking\TrackEventInterface;
-use Pimcore\Bundle\EcommerceFrameworkBundle\Tracking\TrackingCodeAwareInterface;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Tracking\TrackingItemBuilderInterface;
 use Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -41,9 +39,7 @@ class Piwik extends Tracker implements
     CartUpdateInterface,
     CartProductActionAddInterface,
     CartProductActionRemoveInterface,
-    CheckoutCompleteInterface,
-    TrackEventInterface,
-    TrackingCodeAwareInterface
+    CheckoutCompleteInterface
 {
     /**
      * @var PiwikTracker
@@ -59,11 +55,6 @@ class Piwik extends Tracker implements
      * @var bool
      */
     private $handleCartRemove = true;
-
-    /**
-     * @var string[]
-     */
-    protected $trackedCodes = [];
 
     public function __construct(
         PiwikTracker $tracker,
@@ -124,7 +115,7 @@ class Piwik extends Tracker implements
 
         $result = $this->renderCalls([$call]);
 
-        $this->trackCode($result);
+        $this->tracker->addCodePart($result, PiwikTracker::BLOCK_BEFORE_TRACK);
     }
 
     /**
@@ -139,11 +130,11 @@ class Piwik extends Tracker implements
                 'setEcommerceView',
                 false,
                 false,
-                $category,
-            ],
+                $category
+            ]
         ]);
 
-        $this->trackCode($result);
+        $this->tracker->addCodePart($result, PiwikTracker::BLOCK_BEFORE_TRACK);
     }
 
     /**
@@ -176,12 +167,12 @@ class Piwik extends Tracker implements
         $calls = $this->buildItemCalls($items);
         $calls[] = [
             'trackEcommerceCartUpdate',
-            $cart->getPriceCalculator()->getGrandTotal()->getAmount()->asNumeric(),
+            $cart->getPriceCalculator()->getGrandTotal()->getAmount()->asNumeric()
         ];
 
         $result = $this->renderCalls($calls);
 
-        $this->trackCode($result);
+        $this->tracker->addCodePart($result, PiwikTracker::BLOCK_BEFORE_TRACK);
     }
 
     /**
@@ -204,43 +195,13 @@ class Piwik extends Tracker implements
 
         $result = $this->renderCalls($calls);
 
-        $this->trackCode($result);
-    }
-
-    public function trackEvent(
-        string $eventCategory,
-        string $eventAction,
-        string $eventLabel = null,
-        int $eventValue = null
-    ) {
-        $result = $this->renderCalls([
-            [
-                'trackEvent',
-                $eventCategory,
-                $eventAction,
-                $eventLabel,
-                $eventValue,
-            ],
-        ]);
-
-        $this->trackCode($result);
-    }
-
-    public function getTrackedCodes(): array
-    {
-        return $this->trackedCodes;
-    }
-
-    public function trackCode(string $code)
-    {
-        $this->trackedCodes[] = $code;
-        $this->tracker->addCodePart($code, PiwikTracker::BLOCK_BEFORE_TRACK);
+        $this->tracker->addCodePart($result, PiwikTracker::BLOCK_BEFORE_TRACK);
     }
 
     private function renderCalls(array $calls): string
     {
         return $this->renderTemplate('calls', [
-            'calls' => $calls,
+            'calls' => $calls
         ]);
     }
 
@@ -259,7 +220,7 @@ class Piwik extends Tracker implements
                 $item->getName(),
                 $item->getCategories(),
                 $item->getPrice(),
-                $item->getQuantity(),
+                $item->getQuantity()
             ];
         }
 

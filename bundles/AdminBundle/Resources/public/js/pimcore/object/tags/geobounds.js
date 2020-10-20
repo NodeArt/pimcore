@@ -27,24 +27,15 @@ pimcore.object.tags.geobounds = Class.create(pimcore.object.tags.geo.abstract, {
         this.searchfield = new Ext.form.TextField({
             width: 200,
             name: 'mapSearch',
-            style: 'float:left;margin-top:0px;',
-            listeners: {
-                render: function (cmp) {
-                    cmp.getEl().on('keypress', function (e) {
-                        if (e.getKey() === e.ENTER) {
-                            this.geocode();
-                        }
-                    }.bind(this));
-                }.bind(this)
-            }
+            style: 'float:left;margin-top:0px;'
         });
 
         this.component = new Ext.Panel({
             border: true,
             style: "margin-bottom: 10px",
-            height: this.fieldConfig.height,
-            width: this.fieldConfig.width,
-            componentCls: 'object_field object_geo_field object_field_type_' + this.type,
+            height: 370,
+            width: 650,
+            componentCls: 'object_field object_geo_field',
             html: '<div id="leaflet_maps_container_' + this.mapImageID + '"></div>',
             bbar: [{
                     xtype: 'button',
@@ -176,6 +167,17 @@ pimcore.object.tags.geobounds = Class.create(pimcore.object.tags.geo.abstract, {
 
     getName: function () {
         return this.fieldConfig.name;
+    },
+
+    isInvalidMandatory: function () {
+        var value = this.getValue();
+
+        // @TODO
+        /*if (value.longitude && value.latitude) {
+         return false;
+         }*/
+
+        return true;
     },
 
     isDirty: function () {

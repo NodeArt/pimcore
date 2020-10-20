@@ -23,9 +23,6 @@ use Pimcore\Document\Tag\NamingStrategy\NamingStrategyInterface;
 use Pimcore\Model\Document;
 use Psr\SimpleCache\CacheInterface;
 
-/**
- * @deprecated
- */
 abstract class AbstractMigrationStrategy
 {
     /**

@@ -32,6 +32,16 @@ class LazyLoadingPriceInfo extends AbstractPriceInfo implements PriceInfoInterfa
         return parent::getInstance();
     }
 
+    /**
+     * @inheritdoc
+     *
+     * @todo is this necessary?
+     */
+    public function getPrice(): PriceInterface
+    {
+        parent::getPrice();
+    }
+
     public function __call($name, $arg)
     {
         if (array_key_exists($name, $this->priceRegistry)) {

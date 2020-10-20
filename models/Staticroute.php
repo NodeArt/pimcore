@@ -78,11 +78,6 @@ class Staticroute extends AbstractModel
     public $siteId;
 
     /**
-     * @var array
-     */
-    public $methods;
-
-    /**
      * @var int
      */
     public $priority = 1;
@@ -122,7 +117,7 @@ class Staticroute extends AbstractModel
     /**
      * @static
      *
-     * @param Staticroute $route
+     * @param $route
      */
     public static function setCurrentRoute($route)
     {
@@ -142,7 +137,7 @@ class Staticroute extends AbstractModel
     /**
      * @param int $id
      *
-     * @return self|null
+     * @return Staticroute
      */
     public static function getById($id)
     {
@@ -169,9 +164,9 @@ class Staticroute extends AbstractModel
 
     /**
      * @param string $name
-     * @param int|null $siteId
+     * @param null $siteId
      *
-     * @return self|null
+     * @return Staticroute
      */
     public static function getByName($name, $siteId = null)
     {
@@ -198,12 +193,10 @@ class Staticroute extends AbstractModel
 
             return self::getById($route->getId());
         }
-
-        return null;
     }
 
     /**
-     * @return self
+     * @return Staticroute
      */
     public static function create()
     {
@@ -599,7 +592,7 @@ class Staticroute extends AbstractModel
             'frontendPath' => $url,
             'params' => $urlParams,
             'reset' => $reset,
-            'encode' => $encode,
+            'encode' => $encode
         ]);
         \Pimcore::getEventDispatcher()->dispatch(FrontendEvents::STATICROUTE_PATH, $event);
         $url = $event->getArgument('frontendPath');
@@ -702,36 +695,7 @@ class Staticroute extends AbstractModel
     }
 
     /**
-     * @return array
-     */
-    public function getMethods()
-    {
-        if ($this->methods && !is_array($this->methods)) {
-            $this->methods = explode(',', $this->methods);
-        }
-
-        return $this->methods;
-    }
-
-    /**
-     * @param array $methods
-     *
-     * @return $this
-     */
-    public function setMethods($methods)
-    {
-        if (!is_array($methods)) {
-            $methods = strlen($methods) ? explode(',', $methods) : [];
-            $methods = array_map('trim', $methods);
-        }
-
-        $this->methods = $methods;
-
-        return $this;
-    }
-
-    /**
-     * @param int $modificationDate
+     * @param $modificationDate
      *
      * @return $this
      */
@@ -751,7 +715,7 @@ class Staticroute extends AbstractModel
     }
 
     /**
-     * @param int $creationDate
+     * @param $creationDate
      *
      * @return $this
      */

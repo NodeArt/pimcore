@@ -26,7 +26,7 @@ use Pimcore\Model;
 class Dao extends Model\Dao\AbstractDao
 {
     /**
-     * @param int $id
+     * @param $id
      *
      * @throws \Exception
      */
@@ -51,7 +51,6 @@ class Dao extends Model\Dao\AbstractDao
     public function save()
     {
         $version = $this->model->getObjectVars();
-        $data = [];
 
         foreach ($version as $key => $value) {
             if (in_array($key, $this->getValidTableColumns('versions'))) {
@@ -96,16 +95,16 @@ class Dao extends Model\Dao\AbstractDao
     /**
      * @param string $hash
      *
-     * @return int|null
+     * @return string
      */
-    public function getBinaryFileIdForHash(string $hash): ?int
+    public function getBinaryFileIdForHash(string $hash): ?string
     {
-        $id = $this->db->fetchOne('SELECT IFNULL(binaryFileId, id) FROM versions WHERE binaryFileHash = ? AND cid = ? ORDER BY id ASC LIMIT 1', [$hash, $this->model->getCid()]);
-        if (!$id) {
-            return null;
+        $hash = $this->db->fetchOne('SELECT IFNULL(binaryFileId, id) FROM versions WHERE binaryFileHash = ? AND cid = ? ORDER BY id ASC LIMIT 1', [$hash, $this->model->getCid()]);
+        if (!$hash) {
+            $hash = null;
         }
 
-        return (int)$id;
+        return $hash;
     }
 
     /**
@@ -122,7 +121,7 @@ class Dao extends Model\Dao\AbstractDao
     }
 
     /**
-     * @param array $elementTypes
+     * @param $elementTypes
      * @param array $ignoreIds
      *
      * @return array

@@ -36,10 +36,6 @@ pimcore.object.classes.layout.fieldcontainer = Class.create(pimcore.object.class
         return t("fieldcontainer");
     },
 
-    supportsTitle: function() {
-        return false;
-    },
-
     getIconClass: function () {
         return "pimcore_icon_fieldcontainer";
     },

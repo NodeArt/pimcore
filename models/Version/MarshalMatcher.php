@@ -17,19 +17,44 @@
 
 namespace Pimcore\Model\Version;
 
-@trigger_error(
-    'Pimcore\Model\Version\MarshalMatcher is deprecated since version 6.8.0 and will be removed in 7.0.0. ' .
-    ' Use ' . \Pimcore\Model\Element\DeepCopy\MarshalMatcher::class . ' instead.',
-    E_USER_DEPRECATED
-);
+use DeepCopy\TypeMatcher\TypeMatcher;
+use Pimcore\Model\Element\ElementInterface;
+use Pimcore\Model\Element\Service;
 
-class_exists(\Pimcore\Model\Element\DeepCopy\MarshalMatcher::class);
+class MarshalMatcher extends TypeMatcher
+{
+    private $sourceType;
 
-if (false) {
+    private $sourceId;
+
     /**
-     * @deprecated use \Pimcore\Model\Element\DeepCopy\MarshalMatcher instead.
+     * MarshalMatcher constructor.
+     *
+     * @param $sourceType
+     * @param $sourceId
      */
-    class MarshalMatcher extends \Pimcore\Model\Element\DeepCopy\MarshalMatcher
+    public function __construct($sourceType, $sourceId)
     {
+        $this->sourceType = $sourceType;
+        $this->sourceId = $sourceId;
+    }
+
+    /**
+     * @param mixed $element
+     *
+     * @return bool
+     */
+    public function matches($element)
+    {
+        if ($element instanceof ElementInterface) {
+            $elementType = Service::getType($element);
+            if ($elementType == $this->sourceType && $element->getId() == $this->sourceId) {
+                return false;
+            }
+
+            return true;
+        }
+
+        return false;
     }
 }

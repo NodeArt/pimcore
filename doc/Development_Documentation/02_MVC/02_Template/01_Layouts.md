@@ -21,8 +21,6 @@ For more details about template inheritance and layouts, please have a look at t
 
 ###### A Simple Sample Layout Looks Like the Following:  
 
-<div class="code-section">
-
 ```php
 <?php
 /**
@@ -46,25 +44,6 @@ For more details about template inheritance and layouts, please have a look at t
 </html>
 ```
 
-```twig
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Example</title>
-    <link rel="stylesheet" type="text/css" href="/static/css/global.css" />
-</head>
-<body>
-    <div id="site">
-        {% block content %}
-        {% endblock %}
-    </div>
-</body>
-</html>
-```
-
-</div>
-
 Of course, PHP, editables and template helpers can be used within the layout file and therefore layouts can become much 
 more complicated. The most important line though is `<?php $this->slots()->output('_content') ?>`. 
 It includes the actual rendered content of the view. 
@@ -74,24 +53,15 @@ It includes the actual rendered content of the view.
 
 Layouts are simply used by declaring a parent template with the following code. 
 
-<div class="code-section">
-
 ```php
 $this->extend('layout.html.php');
 ```
-
-```twig
-{% extends 'layout.html.twig' %}
-```
-
-</div>
 
 In this example we extend from the template `layout.html.php`, but we can use any other and as many as needed 
 scripts instead.  
   
 A complete example of a document page would look like the following: 
 
-<div class="code-section">
 
 ```php
 <?php
@@ -109,13 +79,3 @@ $this->extend('layout.html.php');
 
 <?= $this->wysiwyg("content") ?>
 ```
-
-```twig
-{% extends 'layout.html.twig' %}
-
-<h1>
-    {{ pimcore_input('headline', {'width': 540}) }}
-</h1>
-```
-
-</div>

@@ -19,9 +19,6 @@ namespace Pimcore\Bundle\GeneratorBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
-/**
- * @deprecated
- */
 class PimcoreGeneratorBundle extends Bundle
 {
 }

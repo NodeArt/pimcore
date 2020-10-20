@@ -33,7 +33,7 @@ definition [here](https://github.com/pimcore/pimcore/blob/master/bundles/Ecommer
 Setup payment provider in e-commerce framework configuration. The access keys you find
 in heidelpay documentation (or you will get them from heidelpay for production integrations). 
 
-```yml
+```yml 
 heidelpay:
     provider_id: Pimcore\Bundle\EcommerceFrameworkBundle\PaymentManager\Payment\Heidelpay
     profile: sandbox
@@ -52,8 +52,8 @@ Create view template for payment method selection. This view template
 - has an additional form that submits successful payment information (heidelpay payment id) back to Pimcore.  
 
 **Sample template with Creditcard, Paypal and Sofort** 
+```twig 
 
-```twig
 {% do pimcore_head_link().appendStylesheet('https://static.heidelpay.com/v1/heidelpay.css') %}
 {% do pimcore_head_script().appendFile('https://static.heidelpay.com/v1/heidelpay.js') %}
 {% do pimcore_inline_script().appendFile(asset('static/js/payment.js')) %} {# custom payment js, see below #}
@@ -161,9 +161,10 @@ Create view template for payment method selection. This view template
 </form>
 ```
 
-**Sample Javascript (payment.js) with Creditcard, Paypal and Sofort**
 
+**Sample Javascript (payment.js) with Creditcard, Paypal and Sofort**
 ```javascript
+
 $(document).ready(function() {
 
     let heidelpayInstance = new heidelpay(_config.accessKey, {locale: 'en-GB'});
@@ -254,14 +255,16 @@ $(document).ready(function() {
 
 
 });
+
 ```
+
 
 5) **Create Controller Action for Payment Selection**
 
 The only special thing in this controller action is to get public access key out of
 payment provider and assign it to the template. 
 
-```php
+```php 
 /**
  * @Route("/checkout-payment", name="shop-checkout-payment")
  *
@@ -308,12 +311,16 @@ public function startPaymentAction(Request $request, Factory $factory, LoggerInt
         $cartManager = $factory->getCartManager();
         $cart = $cartManager->getOrCreateCartByName('cart');
 
-        /** @var CheckoutManagerInterface $checkoutManager */
+        /**
+         * @var $checkoutManager CheckoutManagerInterface
+         */
         $checkoutManager = $factory->getCheckoutManager($cart);
 
         $paymentInfo = $checkoutManager->initOrderPayment();
 
-        /** @var OnlineShopOrder $order */
+        /**
+         * @var OnlineShopOrder $order
+         */
         $order = $paymentInfo->getObject();
 
         $paymentConfig = new HeidelpayRequest();
@@ -348,13 +355,14 @@ public function paymentErrorAction(Request $request, LoggerInterface $logger)
 
     return $this->redirectToRoute('shop-checkout-payment');
 }
+
 ```
 
 
 7) **Create Controller Action for Commit Order**
 Finally commit order and redirect user to order success page. 
 
-```php
+```php 
 /**
  * @Route("/payment-commit-order", name="shop-commit-order")
  *
@@ -373,7 +381,7 @@ public function commitOrderAction(Request $request, Factory $factory, LoggerInte
     $cart = $cartManager->getOrCreateCartByName('cart');
 
     /**
-     * @var CheckoutManagerInterface $checkoutManager
+     * @var $checkoutManager CheckoutManagerInterface
      */
     $checkoutManager = $factory->getCheckoutManager($cart);
 
@@ -401,7 +409,3 @@ public function commitOrderAction(Request $request, Factory $factory, LoggerInte
     return $this->redirectToRoute('shop-checkout-completed');
 }
 ```
-
-## Important Configuration
-Please make sure that `serialize_precision` is set to a very high value, or even better to `-1` in order to prevent rounding issues with the heidelpay php sdk. 
-For details also see https://docs.heidelpay.com/docs/installation#php-configuration

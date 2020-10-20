@@ -28,7 +28,7 @@ class Dao extends Model\Dao\AbstractDao
     use Model\Element\ChildsCompatibilityTrait;
 
     /**
-     * @param int $id
+     * @param $id
      *
      * @throws \Exception
      */
@@ -48,7 +48,7 @@ class Dao extends Model\Dao\AbstractDao
     }
 
     /**
-     * @param string $name
+     * @param $name
      *
      * @throws \Exception
      */
@@ -67,7 +67,7 @@ class Dao extends Model\Dao\AbstractDao
     {
         $this->db->insert('users', [
             'name' => $this->model->getName(),
-            'type' => $this->model->getType(),
+            'type' => $this->model->getType()
         ]);
 
         $this->model->setId($this->db->lastInsertId());

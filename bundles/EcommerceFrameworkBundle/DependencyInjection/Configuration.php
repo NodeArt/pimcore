@@ -33,7 +33,6 @@ use Pimcore\Bundle\EcommerceFrameworkBundle\Factory;
 use Pimcore\Bundle\EcommerceFrameworkBundle\FilterService\FilterService;
 use Pimcore\Bundle\EcommerceFrameworkBundle\IndexService\Config\DefaultMysql;
 use Pimcore\Bundle\EcommerceFrameworkBundle\IndexService\IndexService;
-use Pimcore\Bundle\EcommerceFrameworkBundle\IndexService\Worker\ProductCentricBatchProcessingWorker;
 use Pimcore\Bundle\EcommerceFrameworkBundle\OfferTool\DefaultService as DefaultOfferToolService;
 use Pimcore\Bundle\EcommerceFrameworkBundle\OrderManager\Order\AgentFactory;
 use Pimcore\Bundle\EcommerceFrameworkBundle\OrderManager\Order\Listing;
@@ -226,32 +225,32 @@ class Configuration implements ConfigurationInterface
                     ->example([
                         '_defaults' => [
                             'cart' => [
-                                'factory_id' => 'CartFactory',
-                            ],
+                                'factory_id' => 'CartFactory'
+                            ]
                         ],
                         'default' => [
                             'cart' => [
                                 'factory_options' => [
-                                    'cart_class_name' => 'Pimcore\Bundle\EcommerceFrameworkBundle\CartManager\Cart',
-                                ],
+                                    'cart_class_name' => 'Pimcore\Bundle\EcommerceFrameworkBundle\CartManager\Cart'
+                                ]
                             ],
                             'price_calculator' => [
                                 'modificators' => [
                                     'shipping' => [
                                         'class' => 'Pimcore\Bundle\EcommerceFrameworkBundle\CartManager\CartPriceModificator\Shipping',
                                         'options' => [
-                                            'charge' => '5.90',
-                                        ],
-                                    ],
-                                ],
-                            ],
+                                            'charge' => '5.90'
+                                        ]
+                                    ]
+                                ]
+                            ]
                         ],
                         'noShipping' => [
                             'price_calculator' => [
                                 'factory_id' => 'PriceCalculatorFactory',
-                                'modificators' => '~',
-                            ],
-                        ],
+                                'modificators' => '~'
+                            ]
+                        ]
                     ])
                     ->useAttributeAsKey('name')
                     ->validate()
@@ -287,7 +286,7 @@ class Configuration implements ConfigurationInterface
                                     ->append($this->buildOptionsNode('factory_options', [
                                         'cart_class_name' => Cart::class,
                                         'guest_cart_class_name' => SessionCart::class,
-                                        'cart_readonly_mode' => AbstractCart::CART_READ_ONLY_MODE_STRICT,
+                                        'cart_readonly_mode' => AbstractCart::CART_READ_ONLY_MODE_STRICT
                                     ]))
                                 ->end()
                             ->end()
@@ -301,7 +300,7 @@ class Configuration implements ConfigurationInterface
                                     ->append($this->buildOptionsNode(
                                         'factory_options',
                                         [
-                                            'class' => CartPriceCalculator::class,
+                                            'class' => CartPriceCalculator::class
                                         ],
                                         "'class' defines a class name of the price calculator, which the factory instantiates. If you wish to replace or extend price calculation routine shipped with e-commerce framework provide your custom class name here."
                                     ))
@@ -422,11 +421,11 @@ class Configuration implements ConfigurationInterface
             // support deprecated options at the root level of the pricing_manager
             // values set here will OVERWRITE the value in every tenant, even if the
             // tenant defines the value!
-            // TODO remove in Pimcore 7
+            // TODO remove in Pimcore 6
             ->validate()
                 ->always(function ($v) {
                     $enabled = null;
-                    if (isset($v['enabled']) && is_bool($v['enabled'])) {
+                    if (is_bool($v['enabled'])) {
                         $enabled = $v['enabled'];
                         unset($v['enabled']);
                     }
@@ -751,14 +750,6 @@ class Configuration implements ConfigurationInterface
                     ->cannotBeEmpty()
                     ->defaultValue(IndexService::class)
                 ->end()
-                // @TODO Pimcore 7 - remove this
-                ->enumNode('worker_mode')
-                    ->values([ProductCentricBatchProcessingWorker::WORKER_MODE_PRODUCT_CENTRIC, ProductCentricBatchProcessingWorker::WORKER_MODE_LEGACY])
-                    ->cannotBeEmpty()
-                    ->setDeprecated('will be removed in Pimcore 7 as then ' . ProductCentricBatchProcessingWorker::WORKER_MODE_PRODUCT_CENTRIC . ' will be default mode.')
-                    ->info('Worker mode for ' . ProductCentricBatchProcessingWorker::class . ' workers.')
-                    ->defaultValue(ProductCentricBatchProcessingWorker::WORKER_MODE_LEGACY)
-                ->end()
                 ->scalarNode('default_tenant')
                     ->cannotBeEmpty()
                     ->defaultValue('default')
@@ -860,8 +851,8 @@ class Configuration implements ConfigurationInterface
                                 ->info('Placeholder values in this tenant attributes definition (locale: "%%locale%%") will be replaced by the given placeholder value (eg. "de_AT")')
                                 ->example([
                                     'placeholders' => [
-                                        '%%locale%%' => 'de_AT',
-                                    ],
+                                        '%%locale%%' => 'de_AT'
+                                    ]
                                 ])
                                 ->defaultValue([])
                                 ->beforeNormalization()
@@ -909,13 +900,13 @@ class Configuration implements ConfigurationInterface
                                                 'getter' => 'getter_id',
                                                 'interpreter' => 'interpreter_id',
                                                 'config' => 'options',
-                                                'hideInFieldlistDatatype' => 'hide_in_fieldlist_datatype',
+                                                'hideInFieldlistDatatype' => 'hide_in_fieldlist_datatype'
                                             ]);
 
                                             // this option was never properly supported
                                             // and is ignored
                                             if (isset($v['mapping'])) {
-                                                @trigger_error('The "mapping" config entry on the ecommerce index attribute level is unsupported and will be removed in Pimcore 7. Please set "options.mapping" instead.', E_USER_DEPRECATED);
+                                                @trigger_error('The "mapping" config entry on the ecommerce index attribute level is unsupported and will be removed in Pimcore 6. Please set "options.mapping" instead.', E_USER_DEPRECATED);
                                                 unset($v['mapping']);
                                             }
 
@@ -933,7 +924,7 @@ class Configuration implements ConfigurationInterface
                                         ->append($this->buildOptionsNode('getter_options'))
                                         ->scalarNode('interpreter_id')->defaultNull()->info('Service id of interpreter for this field')->end()
                                         ->append($this->buildOptionsNode('interpreter_options'))
-                                        ->append($this->buildOptionsNode('mapping')) // TODO Symfony 3.4 set as deprecated. TODO Pimcore 7 remove option completely.
+                                        ->append($this->buildOptionsNode('mapping')) // TODO Symfony 3.4 set as deprecated. TODO Pimcore 6 remove option completely.
                                         ->booleanNode('hide_in_fieldlist_datatype')->defaultFalse()->info('Hides field in field list selection data type of filter service - default to false')->end()
                                     ->end()
                                 ->end()
@@ -990,7 +981,7 @@ class Configuration implements ConfigurationInterface
 
                                             return $this->remapProperties($v, [
                                                 'class' => 'filter_type_id',
-                                                'script' => 'template',
+                                                'script' => 'template'
                                             ]);
                                         })
                                     ->end()

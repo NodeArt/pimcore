@@ -21,6 +21,8 @@ use Pimcore\Tool;
 
 class Language extends Model\DataObject\ClassDefinition\Data\Select
 {
+    use Model\DataObject\Traits\SimpleComparisonTrait;
+
     /**
      * Static type of this element
      *
@@ -48,7 +50,7 @@ class Language extends Model\DataObject\ClassDefinition\Data\Select
 
             $options[] = [
                 'key' => $translation,
-                'value' => $short,
+                'value' => $short
             ];
         }
 
@@ -64,7 +66,7 @@ class Language extends Model\DataObject\ClassDefinition\Data\Select
     }
 
     /**
-     * @param int|bool $value
+     * @param $value
      *
      * @return $this
      */
@@ -76,7 +78,7 @@ class Language extends Model\DataObject\ClassDefinition\Data\Select
     }
 
     /**
-     * @param array $data
+     * @param $data
      *
      * @return static
      */
@@ -86,10 +88,5 @@ class Language extends Model\DataObject\ClassDefinition\Data\Select
         $obj->configureOptions();
 
         return $obj;
-    }
-
-    public function isFilterable(): bool
-    {
-        return true;
     }
 }

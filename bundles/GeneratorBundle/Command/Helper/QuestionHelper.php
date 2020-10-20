@@ -17,13 +17,9 @@ declare(strict_types=1);
 
 namespace Pimcore\Bundle\GeneratorBundle\Command\Helper;
 
-use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Helper\QuestionHelper as BaseQuestionHelper;
 use Symfony\Component\Console\Output\OutputInterface;
 
-/**
- * @deprecated
- */
 class QuestionHelper extends BaseQuestionHelper
 {
     public function writeGeneratorSummary(OutputInterface $output, $errors)
@@ -63,11 +59,9 @@ class QuestionHelper extends BaseQuestionHelper
     {
         $text = str_replace('Symfony bundle generator', 'Pimcore bundle generator', $text);
 
-        /** @var FormatterHelper $formatter */
-        $formatter = $this->getHelperSet()->get('formatter');
         $output->writeln([
             '',
-            $formatter->formatBlock($text, $style, true),
+            $this->getHelperSet()->get('formatter')->formatBlock($text, $style, true),
             '',
         ]);
     }

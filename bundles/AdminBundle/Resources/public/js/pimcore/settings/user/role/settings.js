@@ -31,16 +31,6 @@ pimcore.settings.user.role.settings = Class.create({
         });
 
         var perspectivesStore = Ext.create('Ext.data.JsonStore', {
-            fields: [
-                "name",
-                {
-                    name:"translatedName",
-                    convert: function (v, rec) {
-                        return t(rec.data.name);
-                    },
-                    depends : ['name']
-                }
-            ],
             data: this.data.availablePerspectives
         });
 
@@ -52,7 +42,7 @@ pimcore.settings.user.role.settings = Class.create({
             width: 400,
             minHeight: 100,
             store: perspectivesStore,
-            displayField: "translatedName",
+            displayField: "name",
             valueField: "name",
             value: this.data.role.perspectives ? this.data.role.perspectives.join(",") : null
         });
@@ -78,7 +68,7 @@ pimcore.settings.user.role.settings = Class.create({
             }
             itemsPerSection[section].push({
                 xtype: "checkbox",
-                boxLabel: t(this.data.availablePermissions[i].key),
+                fieldLabel: t(this.data.availablePermissions[i].key),
                 name: "permission_" + this.data.availablePermissions[i].key,
                 checked: this.data.permissions[this.data.availablePermissions[i].key],
                 labelWidth: 200
@@ -112,7 +102,7 @@ pimcore.settings.user.role.settings = Class.create({
                 store: pimcore.globalmanager.get("document_types_store"),
                 value: this.data.docTypes,
                 listConfig: {
-                    itemTpl: new Ext.XTemplate('{[this.sanitize(values.translatedName)]}',
+                    itemTpl: new Ext.XTemplate('{[this.sanitize(values.name)]}',
                         {
                             sanitize: function (name) {
                                 return Ext.util.Format.htmlEncode(name);

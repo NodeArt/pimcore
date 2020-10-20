@@ -19,7 +19,7 @@ namespace Pimcore\Model\DataObject\ClassDefinition\Data\Extension;
 trait ColumnType
 {
     /**
-     * @return string|array|null
+     * @return string | array
      */
     public function getColumnType()
     {

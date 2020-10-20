@@ -28,9 +28,6 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
 
-/**
- * @deprecated
- */
 class WebserviceAuthenticator extends AbstractGuardAuthenticator implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
@@ -56,21 +53,16 @@ class WebserviceAuthenticator extends AbstractGuardAuthenticator implements Logg
      */
     public function getCredentials(Request $request)
     {
-        if ($apiKey = $request->headers->get('x_api-key')) {
-            // check for API key header
-            return [
-                'apiKey' => $apiKey,
-            ];
-        } elseif ($apiKey = $request->get('apikey')) {
+        if ($apiKey = $request->get('apikey')) {
             // check for API key parameter
             return [
-                'apiKey' => $apiKey,
+                'apiKey' => $apiKey
             ];
         } else {
             // check for existing session user
             if (null !== $pimcoreUser = Authentication::authenticateSession()) {
                 return [
-                    'user' => $pimcoreUser,
+                    'user' => $pimcoreUser
                 ];
             }
         }
@@ -109,8 +101,6 @@ class WebserviceAuthenticator extends AbstractGuardAuthenticator implements Logg
         if ($user && Authentication::isValidUser($user->getUser())) {
             return $user;
         }
-
-        return null;
     }
 
     /**
@@ -136,8 +126,6 @@ class WebserviceAuthenticator extends AbstractGuardAuthenticator implements Logg
 
             return $users[0];
         }
-
-        return null;
     }
 
     /**
@@ -159,7 +147,7 @@ class WebserviceAuthenticator extends AbstractGuardAuthenticator implements Logg
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception)
     {
         $this->logger->warning('Failed to authenticate for webservice request {path}', [
-            'path' => $request->getPathInfo(),
+            'path' => $request->getPathInfo()
         ]);
 
         throw $this->createAccessDeniedException($exception);
@@ -172,10 +160,8 @@ class WebserviceAuthenticator extends AbstractGuardAuthenticator implements Logg
     {
         $this->logger->debug('Successfully authenticated user {user} for webservice request {path}', [
             'user' => $token->getUser()->getUsername(),
-            'path' => $request->getPathInfo(),
+            'path' => $request->getPathInfo()
         ]);
-
-        return null;
     }
 
     /**

@@ -112,8 +112,6 @@ class EncryptedField implements OwnerAwareFieldInterface
 
             return ['encrypted'];
         }
-
-        return [];
     }
 
     /**

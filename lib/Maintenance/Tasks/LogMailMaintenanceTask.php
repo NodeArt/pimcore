@@ -22,22 +22,16 @@ use Pimcore\Maintenance\TaskInterface;
 final class LogMailMaintenanceTask implements TaskInterface
 {
     /**
-     * @var Db\ConnectionInterface
+     * @var Db\Connection
      */
     private $db;
 
     /**
-     * @var Config
+     * @param Db\Connection $db
      */
-    private $config;
-
-    /**
-     * @param Db\ConnectionInterface $db
-     */
-    public function __construct(Db\ConnectionInterface $db, Config $config)
+    public function __construct(Db\Connection $db)
     {
         $this->db = $db;
-        $this->config = $config;
     }
 
     /**
@@ -46,15 +40,17 @@ final class LogMailMaintenanceTask implements TaskInterface
     public function execute()
     {
         $db = $this->db;
+        $conf = Config::getSystemConfig();
+        $config = $conf->applicationlog;
 
-        if (!empty($this->config['applicationlog']['mail_notification']['send_log_summary'])) {
-            $receivers = preg_split('/,|;/', $this->config['applicationlog']['mail_notification']['mail_receiver']);
+        if ($config->mail_notification->send_log_summary) {
+            $receivers = preg_split('/,|;/', $config->mail_notification->mail_receiver);
 
             array_walk($receivers, function (&$value) {
                 $value = trim($value);
             });
 
-            $logLevel = (int) ($this->config['applicationlog']['mail_notification']['filter_priority'] ?? null);
+            $logLevel = (int)$config->mail_notification->filter_priority;
 
             $query = 'SELECT * FROM '.ApplicationLoggerDb::TABLE_NAME." WHERE maintenanceChecked IS NULL AND priority <= $logLevel order by id desc";
 

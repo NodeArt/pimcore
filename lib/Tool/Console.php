@@ -56,7 +56,7 @@ class Console
     }
 
     /**
-     * @param string $name
+     * @param $name
      * @param bool $throwException
      *
      * @return bool|mixed|string
@@ -85,11 +85,16 @@ class Console
             return $value;
         }
 
-        $systemConfig = Config::getSystemConfiguration('general');
+        $systemConfig = Config::getSystemConfig();
+
+        $pathVariable = null;
+        if ($systemConfig) {
+            $pathVariable = Config::getSystemConfig()->general->path_variable;
+        }
 
         $paths = [];
-        if (!empty($systemConfig['path_variable'])) {
-            $paths = explode(PATH_SEPARATOR, $systemConfig['path_variable']);
+        if ($pathVariable) {
+            $paths = explode(PATH_SEPARATOR, $pathVariable);
         }
 
         array_push($paths, '');
@@ -197,7 +202,7 @@ class Console
     }
 
     /**
-     * @param string $process
+     * @param $process
      *
      * @return bool
      */
@@ -245,8 +250,8 @@ class Console
     }
 
     /**
-     * @param string $script
-     * @param string $arguments
+     * @param $script
+     * @param $arguments
      *
      * @return string
      */
@@ -268,10 +273,10 @@ class Console
     }
 
     /**
-     * @param string $script
-     * @param string $arguments
-     * @param string|null $outputFile
-     * @param int|null $timeout
+     * @param $script
+     * @param $arguments
+     * @param $outputFile
+     * @param $timeout
      *
      * @return string
      */
@@ -284,11 +289,11 @@ class Console
     }
 
     /**
-     * @param string $script
-     * @param string $arguments
-     * @param string|null $outputFile
+     * @param $script
+     * @param $arguments
+     * @param $outputFile
      *
-     * @return int
+     * @return string
      */
     public static function runPhpScriptInBackground($script, $arguments = '', $outputFile = null)
     {
@@ -299,9 +304,9 @@ class Console
     }
 
     /**
-     * @param string $cmd
-     * @param string|null $outputFile
-     * @param int|null $timeout
+     * @param $cmd
+     * @param null $outputFile
+     * @param null $timeout
      *
      * @return string
      */
@@ -411,7 +416,7 @@ class Console
 
         Logger::debug('Process started with PID ' . $pid);
 
-        return (int)$pid;
+        return $pid;
     }
 
     /**
@@ -464,7 +469,7 @@ class Console
     }
 
     /**
-     * @param array $options
+     * @param $options
      * @param string $concatenator
      * @param string $arrayConcatenator
      *

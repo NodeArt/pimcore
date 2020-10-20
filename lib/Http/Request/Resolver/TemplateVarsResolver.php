@@ -18,9 +18,6 @@ use Pimcore\Templating\Vars\TemplateVarsProviderInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
-/**
- * @deprecated
- */
 class TemplateVarsResolver extends AbstractRequestResolver
 {
     /**

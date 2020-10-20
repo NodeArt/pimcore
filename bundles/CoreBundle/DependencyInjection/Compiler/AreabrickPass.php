@@ -18,7 +18,6 @@ use Doctrine\Common\Inflector\Inflector;
 use Pimcore\Extension\Document\Areabrick\AreabrickInterface;
 use Pimcore\Extension\Document\Areabrick\AreabrickManager;
 use Pimcore\Extension\Document\Areabrick\Exception\ConfigurationException;
-use Pimcore\Templating\Renderer\EditableRenderer;
 use Symfony\Component\Config\Resource\DirectoryResource;
 use Symfony\Component\Config\Resource\FileExistenceResource;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
@@ -68,7 +67,6 @@ class AreabrickPass implements CompilerPassInterface
 
             // handle bricks implementing ContainerAwareInterface
             $this->handleContainerAwareDefinition($container, $definition);
-            $this->handleEditableRendererCall($definition);
         }
 
         // autoload areas from bundles if not yet defined via service config
@@ -127,29 +125,15 @@ class AreabrickPass implements CompilerPassInterface
                 // register brick on the areabrick manager
                 $areaManagerDefinition->addMethodCall('registerService', [
                     $bundleArea['brickId'],
-                    $bundleArea['serviceId'],
+                    $bundleArea['serviceId']
                 ]);
 
                 // handle bricks implementing ContainerAwareInterface
                 $this->handleContainerAwareDefinition($container, $definition, $reflector);
-                $this->handleEditableRendererCall($definition);
             }
         }
 
         return $locatorMapping;
-    }
-
-    /**
-     * @param Definition $definition
-     *
-     * @throws \ReflectionException
-     */
-    private function handleEditableRendererCall(Definition $definition)
-    {
-        $reflector = new \ReflectionClass($definition->getClass());
-        if ($reflector->hasMethod('setEditableRenderer')) {
-            $definition->addMethodCall('setEditableRenderer', [new Reference(EditableRenderer::class)]);
-        }
     }
 
     /**
@@ -185,7 +169,7 @@ class AreabrickPass implements CompilerPassInterface
         $directory = implode(DIRECTORY_SEPARATOR, [
             $metadata['path'],
             'Document',
-            'Areabrick',
+            'Areabrick'
         ]);
 
         // update cache when directory is added/removed
@@ -268,9 +252,9 @@ class AreabrickPass implements CompilerPassInterface
      *  - AppBundle\Document\Areabrick\Foo         -> app.area.brick.foo
      *  - AppBundle\Document\Areabrick\Foo\Bar\Baz -> app.area.brick.foo.bar.baz
      *
-     * @param string $bundleName
-     * @param string $subNamespace
-     * @param string $className
+     * @param $bundleName
+     * @param $subNamespace
+     * @param $className
      *
      * @return string
      */

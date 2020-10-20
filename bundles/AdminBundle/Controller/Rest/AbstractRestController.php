@@ -26,9 +26,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Stopwatch\Stopwatch;
 
-/**
- * @deprecated
- */
 abstract class AbstractRestController extends AdminController
 {
     /**
@@ -64,7 +61,7 @@ abstract class AbstractRestController extends AdminController
             parent::checkPermission($permission);
         } catch (AccessDeniedHttpException $ex) {
             throw new ResponseException($this->createErrorResponse([
-                'msg' => sprintf('Not allowed: permission %s is needed', $permission),
+                'msg' => sprintf('Not allowed: permission %s is needed', $permission)
             ]));
         }
     }
@@ -79,7 +76,7 @@ abstract class AbstractRestController extends AdminController
     {
         if ($wrapInDataProperty) {
             $data = [
-                'data' => $data,
+                'data' => $data
             ];
         }
 
@@ -184,7 +181,7 @@ abstract class AbstractRestController extends AdminController
             $data = $this->decodeJson($request->getContent());
         } catch (\Exception $e) {
             $this->getLogger()->error('Failed to decode JSON data for request {request}', [
-                'request' => $request->getPathInfo(),
+                'request' => $request->getPathInfo()
             ]);
 
             $data = null;
@@ -198,7 +195,7 @@ abstract class AbstractRestController extends AdminController
             }
 
             throw new ResponseException($this->createErrorResponse([
-                'msg' => $message,
+                'msg' => $message
             ]));
         }
 
@@ -209,7 +206,7 @@ abstract class AbstractRestController extends AdminController
      * Get ID either as parameter or from request
      *
      * @param Request $request
-     * @param int|null $id
+     * @param null    $id
      *
      * @return mixed|null
      *
@@ -286,7 +283,7 @@ abstract class AbstractRestController extends AdminController
     }
 
     /**
-     * @param string $condition
+     * @param $condition
      *
      * @throws \Exception
      */
@@ -300,15 +297,13 @@ abstract class AbstractRestController extends AdminController
     /**
      * @param Request $request
      *
-     * @throws \Exception
-     *
-     * @return string|null
+     * @return string
      */
     protected function buildCondition(Request $request)
     {
         $q = trim($request->get('q'));
         if (!$q) {
-            return null;
+            return;
         }
         $q = json_decode($q, false);
         if (!$q) {
@@ -317,12 +312,14 @@ abstract class AbstractRestController extends AdminController
 
         $condition = Helper::buildSqlCondition($q);
 
+//        var_dump($condition);
+//        die();
+
         return $condition;
     }
 
     /**
-     * @param Request $request
-     * @param FilterEvent $eventData
+     * @param FilterEvent $event
      */
     public function dispatchBeforeLoadEvent(Request $request, FilterEvent $eventData)
     {

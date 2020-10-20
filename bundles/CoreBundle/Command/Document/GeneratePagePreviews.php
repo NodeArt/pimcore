@@ -56,7 +56,7 @@ class GeneratePagePreviews extends AbstractCommand
         if (!$hostUrl) {
             $this->io->error('Unable to determine URL prefix, please use option -u or specify a main domain in system settings');
 
-            return 1;
+            return;
         }
 
         $docs = new \Pimcore\Model\Document\Listing();
@@ -73,7 +73,5 @@ class GeneratePagePreviews extends AbstractCommand
                 $this->io->error($e->getMessage());
             }
         }
-
-        return 0;
     }
 }

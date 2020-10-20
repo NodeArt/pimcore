@@ -30,7 +30,7 @@ class SelectFromMultiSelect extends AbstractFilterType
             $explode = explode(WorkerInterface::MULTISELECT_DELIMITER, $v['value']);
             foreach ($explode as $e) {
                 if (!empty($e)) {
-                    if (!empty($values[$e])) {
+                    if ($values[$e]) {
                         $values[$e]['count'] += $v['count'];
                     } else {
                         $values[$e] = ['value' => $e, 'count' => $v['count']];
@@ -46,7 +46,7 @@ class SelectFromMultiSelect extends AbstractFilterType
             'values' => array_values($values),
             'fieldname' => $field,
             'metaData' => $filterDefinition->getMetaData(),
-            'resultCount' => $productList->count(),
+            'resultCount' => $productList->count()
         ]);
     }
 
@@ -55,12 +55,11 @@ class SelectFromMultiSelect extends AbstractFilterType
         $field = $this->getField($filterDefinition);
         $preSelect = $this->getPreSelect($filterDefinition);
 
-        $value = $params[$field] ?? null;
-        $isReload = $params['is_reload'] ?? null;
+        $value = $params[$field];
 
         if ($value == AbstractFilterType::EMPTY_STRING) {
             $value = null;
-        } elseif (empty($value) && !$isReload) {
+        } elseif (empty($value) && !$params['is_reload']) {
             $value = $preSelect;
         }
 

@@ -41,19 +41,19 @@ class Dao extends Model\Listing\Dao\AbstractDao
     }
 
     /**
-     * @param array|string|Expression $columns
+     * get select query
      *
      * @return QueryBuilder
      *
      * @throws \Exception
      */
-    public function getQuery($columns = '*')
+    public function getQuery()
     {
         // init
         $select = $this->db->select();
 
         // create base
-        $select->from([$this->getTableName()], $columns);
+        $select->from([ $this->getTableName() ]);
 
         // add joins
         $this->addJoins($select);
@@ -158,13 +158,11 @@ class Dao extends Model\Listing\Dao\AbstractDao
      */
     public function getCount()
     {
-        if ($this->model->isLoaded()) {
-            return count($this->model->getObjects());
-        } else {
-            $idList = $this->loadIdList();
-
-            return count($idList);
+        if (count($this->model->getObjects()) == 0) {
+            $this->load();
         }
+
+        return count($this->model->getObjects());
     }
 
     /**
@@ -174,7 +172,7 @@ class Dao extends Model\Listing\Dao\AbstractDao
      */
     public function loadIdList()
     {
-        $query = $this->getQuery([new Expression(sprintf('%s as o_id', $this->getTableName() . '.o_id')), 'o_type']);
+        $query = $this->getQuery();
         $objectIds = $this->db->fetchCol($query, $this->model->getConditionVariables(), $this->model->getConditionVariableTypes());
 
         return array_map('intval', $objectIds);
@@ -225,7 +223,7 @@ class Dao extends Model\Listing\Dao\AbstractDao
     }
 
     /**
-     * @param callable $callback
+     * @param $callback Callable
      */
     public function onCreateQuery(callable $callback)
     {

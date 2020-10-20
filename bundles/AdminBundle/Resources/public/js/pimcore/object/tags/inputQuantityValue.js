@@ -37,7 +37,7 @@ pimcore.object.tags.inputQuantityValue = Class.create(pimcore.object.tags.abstra
             fields: ['id', 'abbreviation']
         });
 
-        pimcore.helpers.quantityValue.initUnitStore(this.setData.bind(this), fieldConfig.validUnits, this.data);
+        pimcore.helpers.quantityValue.initUnitStore(this.setData.bind(this), fieldConfig.validUnits);
     },
 
     setData: function(data) {
@@ -102,7 +102,7 @@ pimcore.object.tags.inputQuantityValue = Class.create(pimcore.object.tags.abstra
             labelWidth: labelWidth,
             combineErrors: false,
             items: [this.inputField, this.unitField],
-            componentCls: "object_field object_field_type_" + this.type,
+            componentCls: "object_field",
             isDirty: function() {
                 return this.inputField.isDirty() || this.unitField.isDirty()
             }.bind(this)
@@ -132,7 +132,7 @@ pimcore.object.tags.inputQuantityValue = Class.create(pimcore.object.tags.abstra
         }.bind(this, field.key);
 
         return {
-            text: t(field.label),
+            text:ts(field.label),
             sortable:true,
             dataIndex:field.key,
             renderer:renderer
@@ -158,5 +158,9 @@ pimcore.object.tags.inputQuantityValue = Class.create(pimcore.object.tags.abstra
 
     getName: function () {
         return this.fieldConfig.name;
+    },
+
+    isInvalidMandatory: function () {
+        return !(this.unitField.getValue() && this.inputField.getValue());
     }
 });

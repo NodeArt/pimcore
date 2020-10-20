@@ -22,37 +22,35 @@ use Pimcore\Model;
 /**
  * @method \Pimcore\Model\GridConfig\Listing\Dao getDao()
  * @method Model\GridConfig[] load()
- * @method Model\GridConfig current()
  */
 class Listing extends Model\Listing\AbstractListing
 {
     /**
-     * @var Model\GridConfig[]|null
-     *
-     * @deprecated use getter/setter methods or $this->data
+     * @var array|null
      */
     protected $gridConfigs = null;
-
-    public function __construct()
-    {
-        $this->gridConfigs = & $this->data;
-    }
 
     /**
      * @return Model\GridConfig[]
      */
     public function getGridConfigs()
     {
-        return $this->getData();
+        if ($this->gridConfigs === null) {
+            $this->getDao()->load();
+        }
+
+        return $this->gridConfigs;
     }
 
     /**
-     * @param Model\GridConfig[]|null $gridConfigs
+     * @param $gridConfigs
      *
-     * @return static
+     * @return $this
      */
     public function setGridConfigs($gridConfigs)
     {
-        return $this->setData($gridConfigs);
+        $this->gridConfigs = $gridConfigs;
+
+        return $this;
     }
 }

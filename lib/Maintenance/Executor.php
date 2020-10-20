@@ -14,9 +14,8 @@
 
 namespace Pimcore\Maintenance;
 
-use Pimcore\Model\Tool\TmpStore;
+use Pimcore\Model\Tool\Lock;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Lock\Factory as LockFactory;
 
 final class Executor implements ExecutorInterface
 {
@@ -36,20 +35,13 @@ final class Executor implements ExecutorInterface
     private $logger;
 
     /**
-     * @var LockFactory|null
-     */
-    private $lockFactory = null;
-
-    /**
-     * @param string $pidFileName
+     * @param string          $pidFileName
      * @param LoggerInterface $logger
-     * @param LockFactory $lockFactory
      */
-    public function __construct(string $pidFileName, LoggerInterface $logger, LockFactory $lockFactory)
+    public function __construct(string $pidFileName, LoggerInterface $logger)
     {
         $this->pidFileName = $pidFileName;
         $this->logger = $logger;
-        $this->lockFactory = $lockFactory;
     }
 
     /**
@@ -73,38 +65,39 @@ final class Executor implements ExecutorInterface
 
             if (count($excludedJobs) > 0 && in_array($name, $excludedJobs)) {
                 $this->logger->info('Skipped job with ID {id} because it has been excluded', [
-                    'id' => $name,
+                    'id' => $name
                 ]);
 
                 continue;
             }
 
-            $lock = $this->lockFactory->createLock('maintenance-' . $name, 86400);
+            $lockKey = 'maintenance-' . $name;
+            $isLocked = Lock::isLocked($lockKey, 86400);
 
-            if ($lock->isAcquired() && !$force) {
+            if ($isLocked && !$force) {
                 $this->logger->info('Skipped job with ID {id} because it already being executed', [
-                    'id' => $name,
+                    'id' => $name
                 ]);
 
                 continue;
             }
 
-            $lock->acquire();
+            Lock::lock($lockKey);
 
             try {
                 $task->execute();
 
                 $this->logger->info('Finished job with ID {id}', [
-                    'id' => $name,
+                    'id' => $name
                 ]);
             } catch (\Exception $e) {
                 $this->logger->error('Failed to execute job with ID {id}: {exception}', [
                     'id' => $name,
-                    'exception' => $e,
+                    'exception' => $e
                 ]);
             }
 
-            $lock->release();
+            Lock::release($lockKey);
         }
     }
 
@@ -121,7 +114,7 @@ final class Executor implements ExecutorInterface
      */
     public function setLastExecution()
     {
-        TmpStore::add($this->pidFileName, time());
+        Lock::lock($this->pidFileName);
     }
 
     /**
@@ -129,10 +122,10 @@ final class Executor implements ExecutorInterface
      */
     public function getLastExecution()
     {
-        $item = TmpStore::get($this->pidFileName);
+        $lock = Lock::get($this->pidFileName);
 
-        if ($item instanceof TmpStore && $date = $item->getData()) {
-            return (int) $date;
+        if ($date = $lock->getDate()) {
+            return $date;
         }
 
         return 0;

@@ -90,6 +90,7 @@ pimcore.report.webmastertools.settings = Class.create({
 
     getValues: function () {
 
+        var formData = this.panel.getForm().getFieldValues();
         var sites = pimcore.globalmanager.get("sites");
         var sitesData = {};
 

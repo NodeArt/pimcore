@@ -142,14 +142,6 @@ pimcore.object.classes.data.datetime = Class.create(pimcore.object.classes.data.
                 defaultComponent,
                 defaultValue,
                 {
-                    xtype: 'textfield',
-                    width: 600,
-                    fieldLabel: t("default_value_generator"),
-                    labelWidth: 140,
-                    name: 'defaultValueGenerator',
-                    value: datax.defaultValueGenerator
-                },
-                {
                     xtype:"checkbox",
                     fieldLabel:t("use_current_date"),
                     name:"useCurrentDate",
@@ -161,7 +153,7 @@ pimcore.object.classes.data.datetime = Class.create(pimcore.object.classes.data.
                 }, {
                 xtype: "displayfield",
                 hideLabel:true,
-                html:'<span class="object_field_setting_warning">' +t('inherited_default_value_warning')+'</span>'
+                html:'<span class="object_field_setting_warning">' +t('default_value_warning')+'</span>'
             },
                 columnTypeField
             ]);
@@ -218,9 +210,7 @@ pimcore.object.classes.data.datetime = Class.create(pimcore.object.classes.data.
             Ext.apply(this.datax,
                 {
                     defaultValue: source.datax.defaultValue,
-                    useCurrentDate: source.datax.useCurrentDate,
-                    defaultValueGenerator: source.datax.defaultValueGenerator,
-                    columnType: source.datax.columnType
+                    useCurrentDate: source.datax.useCurrentDate
                 });
         }
     }

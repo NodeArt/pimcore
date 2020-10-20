@@ -30,8 +30,8 @@ class Item extends AbstractOrderListItem implements OrderListItemInterface
     }
 
     /**
-     * @param string $method
-     * @param array $args
+     * @param $method
+     * @param $args
      *
      * @return mixed
      *

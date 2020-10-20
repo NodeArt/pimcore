@@ -14,8 +14,8 @@
 pimcore.registerNS("pimcore.object.helpers.customLayoutEditor");
 pimcore.object.helpers.customLayoutEditor = Class.create({
 
-    uploadRoute: 'pimcore_admin_dataobject_class_importcustomlayoutdefinition',
-    exportRoute: 'pimcore_admin_dataobject_class_exportcustomlayoutdefinition',
+    uploadUrl: '/admin/class/import-custom-layout-definition',
+    exportUrl: "/admin/class/export-custom-layout-definition",
 
     data: {},
 
@@ -99,11 +99,11 @@ pimcore.object.helpers.customLayoutEditor = Class.create({
     },
 
     getUploadUrl: function(){
-        return Routing.generate(this.uploadRoute, {id: this.data.id});
+        return this.uploadUrl + '?id=' + this.data.id;
     },
 
     getExportUrl: function() {
-        return Routing.generate(this.exportRoute, {id: this.data.id});
+        return  this.exportUrl + "?id=" + this.data.id;
     },
 
     getNodeData: function (node) {
@@ -199,7 +199,7 @@ pimcore.object.helpers.customLayoutEditor = Class.create({
         this.layoutComboStore = new Ext.data.Store({
             proxy: {
                 type: 'ajax',
-                url: Routing.generate('pimcore_admin_dataobject_class_getcustomlayoutdefinitions'),
+                url: '/admin/class/get-custom-layout-definitions',
                 extraParams: {
                     classId: this.klass.id
                 },
@@ -222,6 +222,7 @@ pimcore.object.helpers.customLayoutEditor = Class.create({
             triggerAction: "all",
             selectOnFocus: true,
             forceSelection: true,
+            editable: false,
             store: this.layoutComboStore,
             displayField: 'name',
             valueField: 'id' ,
@@ -236,7 +237,7 @@ pimcore.object.helpers.customLayoutEditor = Class.create({
                     var layoutId = field.value;
                     this.editPanel.removeAll();
                     Ext.Ajax.request({
-                        url: Routing.generate('pimcore_admin_dataobject_class_getcustomlayout'),
+                        url: "/admin/class/get-custom-layout",
                         params: {
                             id: layoutId
                         },
@@ -457,7 +458,7 @@ pimcore.object.helpers.customLayoutEditor = Class.create({
 
     getClassDefinitionPanel: function () {
         if (!this.classDefinitionPanel) {
-            this.classDefinitionPanel = this.getClassTree(Routing.generate('pimcore_admin_dataobject_class_get'), this.klass.id);
+            this.classDefinitionPanel = this.getClassTree("/admin/class/get", this.klass.id);
         }
 
         return this.classDefinitionPanel;
@@ -590,7 +591,7 @@ pimcore.object.helpers.customLayoutEditor = Class.create({
 
                     var text = t(child.name);
                     if(child.nodeType == "objectbricks") {
-                        text = t(child.title) + " " + t("columns");
+                        text = ts(child.title) + " " + t("columns");
                         attributePrefix = child.title;
                     }
 
@@ -627,7 +628,7 @@ pimcore.object.helpers.customLayoutEditor = Class.create({
 
     suggestIdentifier: function() {
         Ext.Ajax.request({
-            url: Routing.generate('pimcore_admin_dataobject_class_suggestcustomlayoutidentifier'),
+            url: "/admin/class/suggest-custom-layout-identifier",
             params: {
                 classId: this.klass.id,
             },
@@ -698,7 +699,7 @@ pimcore.object.helpers.customLayoutEditor = Class.create({
             key = attributePrefix + "~" + key;
         }
 
-        var text = t(initData.title);
+        var text = ts(initData.title);
         if(showFieldname) {
             text = text + " (" + key.replace("~", ".") + ")";
         }
@@ -760,6 +761,8 @@ pimcore.object.helpers.customLayoutEditor = Class.create({
     },
 
     save: function () {
+        var id = this.layoutChangeCombo.getValue();
+
         this.saveCurrentNode();
         var regresult = this.data["name"].match(/[a-zA-Z _][a-zA-Z0-9 _]+/);
 
@@ -771,7 +774,7 @@ pimcore.object.helpers.customLayoutEditor = Class.create({
 
             if (this.getDataSuccess) {
                 Ext.Ajax.request({
-                    url: Routing.generate('pimcore_admin_dataobject_class_savecustomlayout'),
+                    url: "/admin/class/save-custom-layout",
                     method: "PUT",
                     params: {
                         configuration: m,
@@ -892,7 +895,7 @@ pimcore.object.helpers.customLayoutEditor = Class.create({
         }
 
         Ext.Ajax.request({
-            url: Routing.generate('pimcore_admin_dataobject_class_addcustomlayout'),
+            url: "/admin/class/add-custom-layout",
             method: 'POST',
             params: {
                 layoutName: layoutName,
@@ -933,7 +936,7 @@ pimcore.object.helpers.customLayoutEditor = Class.create({
         Ext.Msg.confirm(t('delete'), t('delete_message'), function(btn){
             if (btn == 'yes'){
                 Ext.Ajax.request({
-                    url: Routing.generate('pimcore_admin_dataobject_class_deletecustomlayout'),
+                    url: "/admin/class/delete-custom-layout",
                     method: 'DELETE',
                     params: {
                         id: id
@@ -960,7 +963,7 @@ pimcore.object.helpers.customLayoutEditor = Class.create({
         pimcore.helpers.uploadDialog(this.getUploadUrl(), "Filedata", function() {
             var layoutId = this.data.id;
             Ext.Ajax.request({
-                url: Routing.generate('pimcore_admin_dataobject_class_getcustomlayout'),
+                url: "/admin/class/get-custom-layout",
                 params: {
                     id: layoutId
                 },

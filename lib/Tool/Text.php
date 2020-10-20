@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Pimcore
  *
@@ -38,10 +37,9 @@ class Text
     }
 
     /**
-     * @param string $text
-     * @param array $params
+     * @param $text
      *
-     * @return string
+     * @return mixed
      */
     public static function wysiwygText($text, $params = [])
     {
@@ -113,7 +111,7 @@ class Text
                         if ((isset($widthAttr[1]) && $widthAttr[1]) || (isset($heightAttr[1]) && $heightAttr[1])) {
                             $config = [
                                 'width' => intval((isset($widthAttr[1]) ? $widthAttr[1] : null)),
-                                'height' => intval((isset($heightAttr[1]) ? $heightAttr[1] : null)),
+                                'height' => intval((isset($heightAttr[1]) ? $heightAttr[1] : null))
                             ];
                         }
 
@@ -196,8 +194,6 @@ class Text
             $s = $html->find('a[pimcore_id],img[pimcore_id]');
 
             foreach ($s as $el) {
-                $type = null;
-
                 // image
                 if ($el->src) {
                     $type = 'asset';
@@ -212,7 +208,7 @@ class Text
                     }
                 }
 
-                $newId = $idMapping[$type][$el->attr['pimcore_id']] ?? null;
+                $newId = $idMapping[$type][$el->attr['pimcore_id']];
                 if ($newId) {
                     //update id
 
@@ -261,7 +257,7 @@ class Text
         }
 
         //$text = Pimcore_Tool_Text::removeLineBreaks($text);
-        preg_match_all("@\<(a|img)[^>]*(pimcore_id=\"[0-9]+\")[^>]*(pimcore_type=\"[asset|document|object]+\")[^>]*\>@msUi", $text, $matches);
+        preg_match_all("@\<(a|img)[^>]*((?:pimcore_id|pimcore_type)+=\"[0-9]+\")[^>]*((?:pimcore_id|pimcore_type)+=\"[asset|document|object]+\")[^>]*\>@msUi", $text, $matches);
 
         \Pimcore\Cache\Runtime::set($hash, $matches);
 
@@ -271,7 +267,7 @@ class Text
     /**
      * @static
      *
-     * @param string $text
+     * @param $text
      *
      * @return array
      */
@@ -299,7 +295,7 @@ class Text
                     $elements[] = [
                         'id' => $id,
                         'type' => $type,
-                        'element' => $element,
+                        'element' => $element
                     ];
                 }
             }
@@ -329,7 +325,7 @@ class Text
                 $key = $element['type'] . '_' . $element['id'];
                 $dependencies[$key] = [
                     'id' => $element['id'],
-                    'type' => $element['type'],
+                    'type' => $element['type']
                 ];
             }
         }
@@ -338,7 +334,7 @@ class Text
     }
 
     /**
-     * @param string $text
+     * @param $text
      * @param array $tags
      *
      * @return array
@@ -361,7 +357,7 @@ class Text
     }
 
     /**
-     * @param string $text
+     * @param $text
      *
      * @return string
      */
@@ -376,7 +372,7 @@ class Text
     }
 
     /**
-     * @param string $text
+     * @param $text
      *
      * @return string
      */
@@ -408,7 +404,7 @@ class Text
         $detector = new EncodingDetector();
         $encoding = $detector->getEncoding($text);
 
-        if (empty($encoding)) {
+        if (!$encoding) {
             $encoding = 'UTF-8';
         }
 
@@ -416,7 +412,7 @@ class Text
     }
 
     /**
-     * @param string $string
+     * @param $string
      *
      * @return string
      */
@@ -432,8 +428,8 @@ class Text
     }
 
     /**
-     * @param string $string
-     * @param int $length
+     * @param $string
+     * @param $length
      *
      * @return string
      */
@@ -444,7 +440,7 @@ class Text
             if (false !== ($length = strrpos($text, ' '))) {
                 $text = substr($text, 0, $length);
             }
-            $string = $text . '...';
+            $string = $text.'...';
         }
 
         return $string;

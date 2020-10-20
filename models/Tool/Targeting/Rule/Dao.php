@@ -27,7 +27,7 @@ use Pimcore\Tool\Serialize;
 class Dao extends Model\Dao\AbstractDao
 {
     /**
-     * @param int|null $id
+     * @param null $id
      *
      * @throws \Exception
      */

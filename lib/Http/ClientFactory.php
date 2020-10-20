@@ -21,30 +21,19 @@ use Pimcore\Config;
 
 class ClientFactory
 {
-    /**
-     * @var Config
-     */
-    protected $config;
-
-    /**
-     * @param Config $config
-     */
-    public function __construct(Config $config)
-    {
-        $this->config = $config;
-    }
-
     public function createClient(array $config = [])
     {
+        $systemConfig = Config::getSystemConfig();
+
         $guzzleConfig = [
             RequestOptions::TIMEOUT => 3600,
-            RequestOptions::VERIFY => CaBundle::getSystemCaRootBundlePath(),
+            RequestOptions::VERIFY => CaBundle::getSystemCaRootBundlePath()
         ];
 
-        if (($this->config['httpclient']['adapter'] ?? null) == 'Proxy') {
+        if ($systemConfig['httpclient']['adapter'] == 'Proxy') {
             $authorization = '';
-            if (!empty($this->config['httpclient']['proxy_user'])) {
-                $authorization = $this->config['httpclient']['proxy_user'] . ':' . $this->config['httpclient']['proxy_pass'] . '@';
+            if ($systemConfig['httpclient']['proxy_user']) {
+                $authorization = $systemConfig['httpclient']['proxy_user'] . ':' . $systemConfig['httpclient']['proxy_pass'] . '@';
             }
 
             $protocol = 'tcp';
@@ -53,7 +42,7 @@ class ClientFactory
                 $protocol = 'http';
             }
 
-            $proxyUri = $protocol . '://' . $authorization . $this->config['httpclient']['proxy_host'] ?? '' . ':' . $this->config['httpclient']['proxy_port'] ?? '';
+            $proxyUri = $protocol . '://' . $authorization . $systemConfig['httpclient']['proxy_host'] . ':' . $systemConfig['httpclient']['proxy_port'];
 
             $guzzleConfig[RequestOptions::PROXY] = $proxyUri;
         }
@@ -66,7 +55,7 @@ class ClientFactory
     }
 
     /**
-     * @deprecated Use the ClientFactory service instead of the static method, to be remove in v7.0
+     * @deprecated Use the ClientFactory service instead of the static method
      */
     public static function createHttpClient()
     {

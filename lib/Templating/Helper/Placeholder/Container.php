@@ -39,9 +39,6 @@ namespace Pimcore\Templating\Helper\Placeholder;
 
 use Pimcore\Templating\Helper\Exception;
 
-/**
- * @deprecated
- */
 class Container extends \ArrayObject
 {
     /**
@@ -377,7 +374,7 @@ class Container extends \ArrayObject
     /**
      * Render the placeholder
      *
-     * @param int|string|null $indent
+     * @param null $indent
      *
      * @return string
      */

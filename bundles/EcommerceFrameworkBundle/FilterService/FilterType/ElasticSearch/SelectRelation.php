@@ -44,10 +44,9 @@ class SelectRelation extends \Pimcore\Bundle\EcommerceFrameworkBundle\FilterServ
         $field = $this->getField($filterDefinition);
         $preSelect = $this->getPreSelect($filterDefinition);
 
-        $value = $params[$field] ?? null;
-        $isReload = $params['is_reload'] ?? null;
+        $value = $params[$field];
 
-        if (empty($value) && !$isReload) {
+        if (empty($value) && !$params['is_reload']) {
             $o = $preSelect;
             if (!empty($o)) {
                 if (is_object($o)) {

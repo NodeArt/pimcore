@@ -30,7 +30,7 @@ final class Runtime extends \ArrayObject
      */
     private static $blockedIndexes = [
         'pimcore_tag_block_current' => 'Index "%s" is now handled via "pimcore.document.tag.block_state_stack" service',
-        'pimcore_tag_block_numeration' => 'Index "%s" is now handled via "pimcore.document.tag.block_state_stack" service',
+        'pimcore_tag_block_numeration' => 'Index "%s" is now handled via "pimcore.document.tag.block_state_stack" service'
     ];
 
     /**
@@ -163,10 +163,22 @@ final class Runtime extends \ArrayObject
     }
 
     /**
+     * @param string $index
+     *
+     * @return mixed
+     *
+     * Workaround for http://bugs.php.net/bug.php?id=40442 (ZF-960).
+     */
+    public function offsetExists($index)
+    {
+        return array_key_exists($index, $this);
+    }
+
+    /**
      * Alias of self::set() to be compatible with Pimcore\Cache
      *
-     * @param mixed $data
-     * @param string $id
+     * @param $data
+     * @param $id
      *
      * @return mixed
      */
@@ -178,7 +190,7 @@ final class Runtime extends \ArrayObject
     /**
      * Alias of self::get() to be compatible with Pimcore\Cache
      *
-     * @param string $id
+     * @param $id
      *
      * @return mixed
      */

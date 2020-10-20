@@ -26,7 +26,7 @@ use Symfony\Component\Templating\EngineInterface;
  * Payment integration for Mpay24
  *
  * @see https://payment-services.ingenico.com/int/en/ogone/support/guides/integration%20guides/e-commerce/introduction
- * @deprecated since v6.8.0 and will be moved to package "pimcore/payment-mpay24-seamless" in Pimcore 7.
+ *
  */
 class Mpay24Seamless extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrameworkBundle\PaymentManager\V7\Payment\PaymentInterface
 {
@@ -70,7 +70,7 @@ class Mpay24Seamless extends AbstractPayment implements \Pimcore\Bundle\Ecommerc
             'testSystem',
             'debugMode',
             'payment_methods',
-            'partial',
+            'partial'
         ]);
 
         $resolver->setAllowedTypes('payment_methods', 'array');
@@ -179,7 +179,7 @@ class Mpay24Seamless extends AbstractPayment implements \Pimcore\Bundle\Ecommerc
     /**
      * Get payment redirect URL after payment form has been submitted with a post.
      *
-     * @param array $config
+     * @param $config
      *
      * @return string[] first parameter contains redirect URL, second parameter contains error message if there is any.
      * if there is an error message is it up to you to redirect to the suggested URL, which might not
@@ -246,12 +246,12 @@ class Mpay24Seamless extends AbstractPayment implements \Pimcore\Bundle\Ecommerc
                     [
                         'description' => sprintf(
                             \Pimcore::getContainer()->get('translator')->trans('mpay24.general.orderDescription'),
-                            $order->getOrdernumber(), $order->getId()),
+                            $order->getOrdernumber(), $order->getId())
                     ],
                 'successURL' => $this->successURL,
                 'errorURL' => $this->errorURL,
                 'confirmationURL' => $this->confirmationURL,
-                'language' => strtoupper($this->getProviderCompatibleLocale($request)),
+                'language' => strtoupper($this->getProviderCompatibleLocale($request))
             ];
 
             /* Version with Mpay24 page (not seamless)
@@ -309,8 +309,6 @@ class Mpay24Seamless extends AbstractPayment implements \Pimcore\Bundle\Ecommerc
                 return [$forwardUrl, $errorText];
             }
         }
-
-        return [];
     }
 
     private function addOrderItemPositions(OnlineShopOrder $order, string $paymentType, array $additional): array
@@ -467,7 +465,7 @@ class Mpay24Seamless extends AbstractPayment implements \Pimcore\Bundle\Ecommerc
      *
      * @param PriceInterface $price
      * @param string $reference
-     * @param string $transactionId
+     * @param $transactionId
      *
      * @return StatusInterface
      *

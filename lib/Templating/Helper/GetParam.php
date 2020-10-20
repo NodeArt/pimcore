@@ -17,9 +17,6 @@ namespace Pimcore\Templating\Helper;
 use Pimcore\Http\RequestHelper;
 use Symfony\Component\Templating\Helper\Helper;
 
-/**
- * @deprecated
- */
 class GetParam extends Helper
 {
     /**

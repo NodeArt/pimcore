@@ -19,7 +19,6 @@ use Pimcore\Bundle\CoreBundle\DependencyInjection\Compiler\CacheCollectorPass;
 use Pimcore\Bundle\CoreBundle\DependencyInjection\Compiler\DebugStopwatchPass;
 use Pimcore\Bundle\CoreBundle\DependencyInjection\Compiler\DoctrineMigrationsParametersPass;
 use Pimcore\Bundle\CoreBundle\DependencyInjection\Compiler\LegacyTemplatePass;
-use Pimcore\Bundle\CoreBundle\DependencyInjection\Compiler\LockStoragePass;
 use Pimcore\Bundle\CoreBundle\DependencyInjection\Compiler\LongRunningHelperPass;
 use Pimcore\Bundle\CoreBundle\DependencyInjection\Compiler\MonologPsrLogMessageProcessorPass;
 use Pimcore\Bundle\CoreBundle\DependencyInjection\Compiler\MonologPublicLoggerPass;
@@ -62,8 +61,6 @@ class PimcoreCoreBundle extends Bundle
         if ($this->extension) {
             return $this->extension;
         }
-
-        return null;
     }
 
     /**
@@ -93,6 +90,5 @@ class PimcoreCoreBundle extends Bundle
         $container->addCompilerPass(new RoutingLoaderPass());
         $container->addCompilerPass(new ProfilerAliasPass());
         $container->addCompilerPass(new LegacyTemplatePass());
-        $container->addCompilerPass(new LockStoragePass());
     }
 }

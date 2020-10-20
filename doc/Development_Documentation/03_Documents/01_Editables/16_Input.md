@@ -14,7 +14,6 @@ For a multi-line alternative have a look at the [textarea editable](./36_Textare
 | `nowrap`           | boolean | set to false to disable the automatic line break                                      |
 | `class`            | string  | A CSS class that is added to the surrounding container of this element in editmode    |
 | `placeholder`      | string  | A placeholder that is displayed when the field is empty                               |
-| `required`         | boolean | set to true to make field value required for publish                                  |
 
 ## Methods
 
@@ -40,7 +39,6 @@ For a multi-line alternative have a look at the [textarea editable](./36_Textare
  {{ pimcore_input("myHeadline") }}
 </h2>
 ```
-
 </div>
 
 The above code generates an editable area which you can fill with the text, see:
@@ -63,5 +61,4 @@ You could also specify other parameters, like the size:
     {{ pimcore_input("headerLine", {'width': 540}) }}
 </h2>
 ```
-
 </div>

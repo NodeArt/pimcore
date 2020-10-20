@@ -17,7 +17,6 @@
 
 namespace Pimcore\Model\Element;
 
-use Pimcore\File;
 use Pimcore\Model;
 
 class AdminStyle
@@ -25,7 +24,7 @@ class AdminStyle
     /**
      * @var string
      */
-    protected $elementCssClass = '';
+    protected $elementCssClass;
 
     /**
      * @var string
@@ -33,12 +32,12 @@ class AdminStyle
     protected $elementIcon;
 
     /**
-     * @var string
+     * @var string string
      */
     protected $elementIconClass;
 
     /**
-     * @var array
+     * @var array sring
      */
     protected $elementQtipConfig;
 
@@ -49,90 +48,33 @@ class AdminStyle
      */
     public function __construct($element)
     {
-        if ($element instanceof Model\DataObject\AbstractObject) {
-            if ($element->getType() == 'folder') {
-                $this->elementIconClass = 'pimcore_icon_folder';
-                $this->elementQtipConfig = [
-                    'title' => 'ID: ' . $element->getId(),
-                ];
+        if ($element->getType() == 'folder') {
+            $this->elementIconClass = 'pimcore_icon_folder';
+            $this->elementQtipConfig = [
+                'title' => 'ID: ' . $element->getId()
+            ];
+        } else {
+            if ($element->getClass()->getIcon()) {
+                $this->elementIcon = $element->getClass()->getIcon();
             } else {
-                if ($element->getClass()->getIcon()) {
-                    $this->elementIcon = $element->getClass()->getIcon();
-                } else {
-                    $this->elementIconClass = $element->getType() == 'variant' ? 'pimcore_icon_variant' : 'pimcore_icon_object';
-                }
-
-                $this->elementQtipConfig = [
-                    'title' => 'ID: ' . $element->getId(),
-                    'text' => 'Type: ' . $element->getClass()->getName(),
-                ];
+                $this->elementIconClass = $element->getType() == 'variant' ? 'pimcore_icon_variant' : 'pimcore_icon_object';
             }
-        } elseif ($element instanceof Model\Asset) {
+
             $this->elementQtipConfig = [
                 'title' => 'ID: ' . $element->getId(),
+                'text' => 'Type: ' . $element->getClass()->getName()
             ];
-
-            if ($element->getType() == 'folder') {
-                $this->elementIconClass = 'pimcore_icon_folder';
-            } else {
-                $this->elementIconClass = 'pimcore_icon_asset_default';
-
-                $fileExt = File::getFileExtension($element->getFilename());
-                if ($fileExt) {
-                    $this->elementIconClass = ' pimcore_icon_' . File::getFileExtension($element->getFilename());
-                }
-            }
-        } elseif ($element instanceof Model\Document) {
-            $this->elementQtipConfig = [
-                'title' => 'ID: ' . $element->getId(),
-                'text' => 'Type: ' . $element->getType(),
-            ];
-
-            $this->elementIconClass = 'pimcore_icon_' . $element->getType();
-
-            // set type specific settings
-            if ($element->getType() == 'page') {
-                $site = Model\Site::getByRootId($element->getId());
-
-                if ($site instanceof Model\Site) {
-                    $translator = \Pimcore::getContainer()->get('pimcore.translator');
-                    $this->elementQtipConfig['text'] .= '<br>' . $translator->trans('site_id', [], 'admin') . ': ' . $site->getId();
-                }
-
-                $this->elementIconClass = 'pimcore_icon_page';
-
-                // test for a site
-                if ($site = Model\Site::getByRootId($element->getId())) {
-                    $this->elementIconClass = 'pimcore_icon_site';
-                }
-            } elseif ($element->getType() == 'folder' || $element->getType() == 'link' || $element->getType() == 'hardlink') {
-                if (!$element->hasChildren() && $element->getType() == 'folder') {
-                    $this->elementIconClass = 'pimcore_icon_folder';
-                }
-            }
         }
     }
 
     /**
-     * @param null|string $elementCssClass
+     * @param $elementCssClass
      *
      * @return $this
      */
     public function setElementCssClass($elementCssClass)
     {
         $this->elementCssClass = $elementCssClass;
-
-        return $this;
-    }
-
-    /**
-     * @param string $elementCssClass
-     *
-     * @return $this
-     */
-    public function appendElementCssClass($elementCssClass)
-    {
-        $this->elementCssClass .= ' ' . $elementCssClass;
 
         return $this;
     }
@@ -146,7 +88,7 @@ class AdminStyle
     }
 
     /**
-     * @param null|string $elementIcon
+     * @param $elementIcon
      *
      * @return $this
      */
@@ -158,7 +100,7 @@ class AdminStyle
     }
 
     /**
-     * @return string|bool|null Return false if you don't want to overwrite the default.
+     * @return string
      */
     public function getElementIcon()
     {
@@ -166,7 +108,7 @@ class AdminStyle
     }
 
     /**
-     * @param null|string $elementIconClass
+     * @param $elementIconClass
      *
      * @return $this
      */
@@ -178,7 +120,7 @@ class AdminStyle
     }
 
     /**
-     * @return string|bool|null Return false if you don't want to overwrite the default.
+     * @return string
      */
     public function getElementIconClass()
     {
@@ -186,7 +128,7 @@ class AdminStyle
     }
 
     /**
-     * @return array|null
+     * @return array
      */
     public function getElementQtipConfig()
     {
@@ -194,7 +136,7 @@ class AdminStyle
     }
 
     /**
-     * @param null|array $elementQtipConfig
+     * @param $elementQtipConfig
      */
     public function setElementQtipConfig($elementQtipConfig)
     {

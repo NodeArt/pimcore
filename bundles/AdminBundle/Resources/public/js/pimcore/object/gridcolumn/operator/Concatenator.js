@@ -92,18 +92,11 @@ pimcore.object.gridcolumn.operator.concatenator = Class.create(pimcore.object.gr
             value: this.node.data.configAttributes.glue
         });
 
-        this.forceValue = new Ext.form.Checkbox({
-            fieldLabel: t('force_value'),
-            length: 255,
-            width: 200,
-            value: this.node.data.configAttributes.forceValue
-        });
-
 
         this.configPanel = new Ext.Panel({
             layout: "form",
             bodyStyle: "padding: 10px;",
-            items: [this.textfield, this.glue, this.forceValue],
+            items: [this.textfield, this.glue],
             buttons: [{
                 text: t("apply"),
                 iconCls: "pimcore_icon_apply",
@@ -115,7 +108,7 @@ pimcore.object.gridcolumn.operator.concatenator = Class.create(pimcore.object.gr
 
         this.window = new Ext.Window({
             width: 400,
-            height: 250,
+            height: 200,
             modal: true,
             title: this.getDefaultText(),
             layout: "fit",
@@ -131,7 +124,6 @@ pimcore.object.gridcolumn.operator.concatenator = Class.create(pimcore.object.gr
         this.node.set('text', this.textfield.getValue());
         this.node.set('isOperator', true);
         this.node.data.configAttributes.glue = this.glue.getValue();
-        this.node.data.configAttributes.forceValue = this.forceValue.getValue();
         this.window.close();
 
         if (params && params.callback) {

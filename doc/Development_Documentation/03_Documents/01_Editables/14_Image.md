@@ -2,12 +2,12 @@
 
 ## Description
 
-The image editable adds a placeholder for images out of the assets module.
+The image editable adds an placeholder for images out of the assets module.
 The biggest advantages of using that instead of (for example) the relation editable:
 
 * You are able to specify generated thumbnail properties (including high-res)
-* There is an image preview rendered in the administration panel
-* You can specify additional attributes for generated `<img>` or `<picture>`
+* There is a image preview rendered in the administration panel
+* You can specify additional attribute for generated `<img>` or `<picture>`
 * You can crop the image directly inline
 * You can put hotspots and markers on the actual image 
 
@@ -15,7 +15,7 @@ The biggest advantages of using that instead of (for example) the relation edita
 
 | Name                           | Type    | Description                                                                                                                                                                                                                              |
 |--------------------------------|---------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `title`                        | string  | You can give the image widget in editmode a title. Using the new style this title is displayed as a tooltip.                                                                                                               |
+| `title`                        | string  | You can give the image widget in editmode a title. Using the new style (**ExtJS 6**) this title is displayed as a tooltip.                                                                                                               |
 | `width`                        | integer | Width of the image in pixel                                                                                                                                                                                                              |
 | `height`                       | integer | Height of the image in pixel                                                                                                                                                                                                             |
 | `thumbnail`                    | string  | Name of the configured thumbnail which should be used                                                                                                                                                                                    |
@@ -25,11 +25,11 @@ The biggest advantages of using that instead of (for example) the relation edita
 | `minHeight`                    | integer | Min. height of the image (in pixel)                                                                                                                                                                                                      |
 | `ratioX`                       | integer | Set width in pixel to make sure a fixed aspect ratio size is choosen in the crop tool. Must be used with ratioY.                                                                                                                         |
 | `ratioY`                       | integer | Set height in pixel to make sure a fixed aspect ratio size is choosen in the crop tool. Must be used with ratioX.                                                                                                                        |
-| `attributes`                   | array   | Custom attributes for the `<img />` tag - this can be used to pass custom attributes (not w3c)                                                                                                                                             |
+| `attributes`                   | array   | Custom attributes for the <img /> tag - this can be used to pass custom attributes (not w3c)                                                                                                                                             |
 | `removeAttributes`             | array   | You can remove standard attributes using this configuration, e.g. `"removeAttributes" => ["controls","poster"]`                                                                                                                          |
 | `uploadPath`                   | string  | Target path for (inline) uploaded images                                                                                                                                                                                                 |
 | `disableInlineUpload`          | boolean | Disable the inline upload. If set to true, the inline upload functionality will be disabled.                                                                                                                                             |
-| `highResolution`               | float   | Factor the thumbnail dimensions should be multiplied with (html attributes width and height contain the original dimensions ... used for *Retina* displays, print, ...)                                                                 |
+| `highResolution`               | float   | Factor the thumbnail dimensions should be multiplied with (html attributes width and height contain the original dimensions ... used for **Retina* displays, print, ...)                                                                 |
 | `disableWidthHeightAttributes` | bool    | Width & height attributes are set automatically by Pimcore, to avoid this set this option (eg. to true => isset check)                                                                                                                   |
 | `disableAutoTitle`             | bool    | Set to true, to disable the automatically generated title attribute (containing title and copyright from the origin image)                                                                                                               |
 | `disableAutoAlt`               | bool    | Set to true, to disable the automatically generated alt attribute                                                                                                                                                                        |
@@ -69,8 +69,8 @@ You can also pass every valid `<img>` tag attribute ([w3.org Image](http://www.w
 ```twig
 {{ pimcore_image("myImage") }}
 ```
-
 </div>
+
 
 The code above generates an image area in the backend and displays the image at the frontend.
 
@@ -106,7 +106,6 @@ Learn more about thumbnails here: [Image Thumbnails](../../04_Assets/03_Working_
     "thumbnail": "contentimages"
 }) }}
 ```
-
 </div>
 
 ###### Backend Preview
@@ -146,7 +145,6 @@ You can also change the thumbnail configuration:
     }
 }) }}
 ```
-
 </div>
 
 ### An Example Using Custom Attributes
@@ -172,13 +170,11 @@ You can also change the thumbnail configuration:
     }
 }) }}
 ```
-
 </div>
 
 And this is how the rendered html looks: `<img custom-attr="value" data-role="image" src="/var/tmp/image-thumbnails/0/56/thumb__content/dsc03807.jpeg" />`
 
 ### Other Advanced Examples
-
 <div class="code-section">
 
 ```php
@@ -255,8 +251,8 @@ And this is how the rendered html looks: `<img custom-attr="value" data-role="im
     "dropClass": "myCustomImageDropTarget"
 }) }}
 <div class="myCustomImageDropTarget someClass">My second alternative drop target</div>
-```
 
+```
 </div>
 
 ## Field-specific Image Cropping for Documents
@@ -286,7 +282,6 @@ You can get the data with the methods `getMarker()` and `getHotspots()`.
 All dimensions are in percent and therefore independent from the image size, you have to change them back to pixels according to your image size.
  
 ### Code Usage Example
-
 <div class="code-section">
  
 ```php
@@ -374,7 +369,6 @@ All dimensions are in percent and therefore independent from the image size, you
     </p>
 </div>
 ```
-
 </div>
 
 `getHotspots` output:

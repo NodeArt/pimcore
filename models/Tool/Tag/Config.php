@@ -21,10 +21,7 @@ use Pimcore\Cache;
 use Pimcore\Model;
 
 /**
- * @deprecated
- *
  * @method \Pimcore\Model\Tool\Tag\Config\Dao getDao()
- * @method void save()
  */
 class Config extends Model\AbstractModel
 {
@@ -90,9 +87,9 @@ class Config extends Model\AbstractModel
     public $creationDate;
 
     /**
-     * @param string $name
+     * @param $name
      *
-     * @return self|null
+     * @return Config
      *
      * @throws \Exception
      */
@@ -120,7 +117,7 @@ class Config extends Model\AbstractModel
     }
 
     /**
-     * @param array $parameters
+     * @param $parameters
      *
      * @return bool
      */
@@ -132,8 +129,8 @@ class Config extends Model\AbstractModel
     }
 
     /**
-     * @param int $position
-     * @param array $parameters
+     * @param $position
+     * @param $parameters
      *
      * @return bool
      */
@@ -150,7 +147,7 @@ class Config extends Model\AbstractModel
     }
 
     /**
-     * @param string $description
+     * @param $description
      *
      * @return $this
      */
@@ -170,7 +167,7 @@ class Config extends Model\AbstractModel
     }
 
     /**
-     * @param array $items
+     * @param $items
      *
      * @return $this
      */
@@ -190,7 +187,7 @@ class Config extends Model\AbstractModel
     }
 
     /**
-     * @param string $name
+     * @param $name
      *
      * @return $this
      */
@@ -210,7 +207,7 @@ class Config extends Model\AbstractModel
     }
 
     /**
-     * @param string $httpMethod
+     * @param $httpMethod
      *
      * @return $this
      */
@@ -230,7 +227,7 @@ class Config extends Model\AbstractModel
     }
 
     /**
-     * @param string $urlPattern
+     * @param $urlPattern
      *
      * @return $this
      */
@@ -266,7 +263,7 @@ class Config extends Model\AbstractModel
     }
 
     /**
-     * @param array $params
+     * @param $params
      *
      * @return $this
      */
@@ -286,7 +283,7 @@ class Config extends Model\AbstractModel
     }
 
     /**
-     * @param string $textPattern
+     * @param $textPattern
      *
      * @return $this
      */

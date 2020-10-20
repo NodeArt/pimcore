@@ -46,7 +46,7 @@ class IncludeRenderer
     /**
      * Renders a document include
      *
-     * @param mixed $include
+     * @param $include
      * @param array $params
      * @param bool $editmode
      * @param bool $cacheEnabled
@@ -150,7 +150,7 @@ class IncludeRenderer
 
     /**
      * @param PageSnippet $include
-     * @param array $params
+     * @param $params
      *
      * @return string
      */
@@ -167,13 +167,13 @@ class IncludeRenderer
      * if there's no first level HTML container => add one (wrapper)
      *
      * @param PageSnippet $include
-     * @param string $content
+     * @param $content
      *
      * @return string
      */
     protected function modifyEditmodeContent(PageSnippet $include, $content)
     {
-        $editmodeClass = ' pimcore_editable pimcore_tag_inc pimcore_editable_inc ';
+        $editmodeClass = ' pimcore_editable pimcore_tag_inc ';
 
         // this is if the content that is included does already contain markup/html
         // this is needed by the editmode to highlight included documents

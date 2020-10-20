@@ -19,9 +19,6 @@ namespace Pimcore\Model\Webservice\Data\Document\Printcontainer;
 
 use Pimcore\Model\Webservice\Data\Document;
 
-/**
- * @deprecated
- */
 class In extends Document\Printcontainer
 {
 }

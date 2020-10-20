@@ -32,7 +32,7 @@ namespace Pimcore\Bundle\AdminBundle\Controller\Admin\External {
         protected $adminerHome = '';
 
         /**
-         * @Route("/external_adminer/adminer", name="pimcore_admin_external_adminer_adminer")
+         * @Route("/external_adminer/adminer")
          *
          * @param Request $request
          * @param Profiler $profiler
@@ -62,9 +62,9 @@ namespace Pimcore\Bundle\AdminBundle\Controller\Admin\External {
         }
 
         /**
-         * @Route("/external_adminer/{path}", name="pimcore_admin_external_adminer_proxy", requirements={"path"=".*"})
-         * @Route("/adminer/{path}", name="pimcore_admin_external_adminer_proxy_1", requirements={"path"=".*"})
-         * @Route("/externals/{path}", name="pimcore_admin_external_adminer_proxy_2", requirements={"path"=".*"}, defaults={"type": "external"})
+         * @Route("/external_adminer/{path}", requirements={"path"=".*"})
+         * @Route("/adminer/{path}", requirements={"path"=".*"})
+         * @Route("/externals/{path}", requirements={"path"=".*"}, defaults={"type": "external"})
          *
          * @param Request $request
          *
@@ -157,7 +157,7 @@ namespace Pimcore\Bundle\AdminBundle\Controller\Admin\External {
                 $headersRaw = headers_list();
 
                 foreach ($headersRaw as $header) {
-                    $header = explode(':', $header, 2);
+                    $header = explode(':', $header);
                     list($headerKey, $headerValue) = $header;
 
                     if ($headerKey && $headerValue) {
@@ -233,8 +233,8 @@ namespace {
                 }
 
                 /**
-                 * @param string $login
-                 * @param string $password
+                 * @param $login
+                 * @param $password
                  *
                  * @return bool
                  */
@@ -259,7 +259,7 @@ namespace {
                     $result = [
                         $host,
                         $db->getUsername(),
-                        $db->getPassword(),
+                        $db->getPassword()
                     ];
 
                     return $result;

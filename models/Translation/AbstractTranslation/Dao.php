@@ -25,7 +25,7 @@ use Pimcore\Model;
 abstract class Dao extends Model\Dao\AbstractDao implements Dao\DaoInterface
 {
     /**
-     * @param string $key
+     * @param $key
      *
      * @throws \Exception
      */
@@ -42,10 +42,10 @@ abstract class Dao extends Model\Dao\AbstractDao implements Dao\DaoInterface
         if (!empty($data)) {
             foreach ($data as $d) {
                 $this->model->addTranslation($d['language'], $d['text']);
-                $this->model->setKey($d['key']);
-                $this->model->setCreationDate($d['creationDate']);
-                $this->model->setModificationDate($d['modificationDate']);
             }
+            $this->model->setKey($d['key']);
+            $this->model->setCreationDate($d['creationDate']);
+            $this->model->setModificationDate($d['modificationDate']);
         } else {
             throw new \Exception("Translation-Key -->'" . $key . "'<-- not found");
         }
@@ -63,7 +63,7 @@ abstract class Dao extends Model\Dao\AbstractDao implements Dao\DaoInterface
                     'language' => $language,
                     'text' => $text,
                     'modificationDate' => $this->model->getModificationDate(),
-                    'creationDate' => $this->model->getCreationDate(),
+                    'creationDate' => $this->model->getCreationDate()
                 ];
                 $this->db->insertOrUpdate(static::getTableName(), $data);
             }
@@ -86,7 +86,6 @@ abstract class Dao extends Model\Dao\AbstractDao implements Dao\DaoInterface
     public function getAvailableLanguages()
     {
         $l = $this->db->fetchAll('SELECT * FROM ' . static::getTableName()  . '  GROUP BY `language`;');
-        $languages = [];
 
         foreach ($l as $values) {
             $languages[] = $values['language'];

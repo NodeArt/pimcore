@@ -45,7 +45,7 @@ class Hotspotimage implements OwnerAwareFieldInterface
     protected $crop;
 
     /**
-     * @param Asset\Image|int|null $image
+     * @param null $image
      * @param array $hotspots
      * @param array $marker
      * @param array $crop
@@ -79,7 +79,7 @@ class Hotspotimage implements OwnerAwareFieldInterface
     }
 
     /**
-     * @param array[] $hotspots
+     * @param $hotspots
      *
      * @return $this
      */
@@ -100,7 +100,7 @@ class Hotspotimage implements OwnerAwareFieldInterface
     }
 
     /**
-     * @param array[] $marker
+     * @param $marker
      *
      * @return $this
      */
@@ -138,7 +138,7 @@ class Hotspotimage implements OwnerAwareFieldInterface
     }
 
     /**
-     * @param Asset\Image $image
+     * @param $image
      *
      * @return $this
      */
@@ -151,7 +151,7 @@ class Hotspotimage implements OwnerAwareFieldInterface
     }
 
     /**
-     * @return Asset\Image
+     * @return Asset|Asset\Image
      */
     public function getImage()
     {
@@ -159,7 +159,7 @@ class Hotspotimage implements OwnerAwareFieldInterface
     }
 
     /**
-     * @param string|array|Asset\Image\Thumbnail\Config $thumbnailName
+     * @param null $thumbnailName
      * @param bool $deferred
      *
      * @return Asset\Image\Thumbnail|string
@@ -189,7 +189,7 @@ class Hotspotimage implements OwnerAwareFieldInterface
                         'width' => $crop['cropWidth'],
                         'height' => $crop['cropHeight'],
                         'y' => $crop['cropTop'],
-                        'x' => $crop['cropLeft'],
+                        'x' => $crop['cropLeft']
                     ], $mediaName);
                 }
             }
@@ -198,7 +198,7 @@ class Hotspotimage implements OwnerAwareFieldInterface
                 'width' => $crop['cropWidth'],
                 'height' => $crop['cropHeight'],
                 'y' => $crop['cropTop'],
-                'x' => $crop['cropLeft'],
+                'x' => $crop['cropLeft']
             ]);
 
             $hash = md5(\Pimcore\Tool\Serialize::serialize($thumbConfig->getItems()));

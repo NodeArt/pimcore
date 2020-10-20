@@ -19,7 +19,7 @@ use Pimcore\Image\Optimizer\OptimizerInterface;
 interface ImageOptimizerInterface
 {
     /**
-     * @param string $path
+     * @param $path
      */
     public function optimizeImage($path);
 

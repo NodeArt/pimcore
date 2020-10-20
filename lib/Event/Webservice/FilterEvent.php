@@ -20,9 +20,6 @@ namespace Pimcore\Event\Webservice;
 use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\HttpFoundation\Request;
 
-/**
- * @deprecated
- */
 class FilterEvent extends Event
 {
     /** @var Request */
@@ -43,10 +40,10 @@ class FilterEvent extends Event
     /**
      * FilterEvent constructor.
      *
-     * @param Request $request
-     * @param string $type
-     * @param string $action
-     * @param string $condition
+     * @param $request
+     * @param $type
+     * @param $action
+     * @param $list
      */
     public function __construct($request, $type, $action, $condition)
     {
@@ -65,7 +62,7 @@ class FilterEvent extends Event
     }
 
     /**
-     * @param Request $request
+     * @param mixed $request
      */
     public function setRequest($request): void
     {
@@ -73,7 +70,7 @@ class FilterEvent extends Event
     }
 
     /**
-     * @return string
+     * @return mixed
      */
     public function getType()
     {
@@ -81,7 +78,7 @@ class FilterEvent extends Event
     }
 
     /**
-     * @param string $type
+     * @param mixed $type
      */
     public function setType($type): void
     {
@@ -89,7 +86,7 @@ class FilterEvent extends Event
     }
 
     /**
-     * @return string
+     * @return mixed
      */
     public function getAction()
     {
@@ -97,7 +94,7 @@ class FilterEvent extends Event
     }
 
     /**
-     * @param string $action
+     * @param mixed $action
      */
     public function setAction($action): void
     {

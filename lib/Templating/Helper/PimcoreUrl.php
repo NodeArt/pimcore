@@ -19,9 +19,6 @@ use Pimcore\Model\DataObject\Concrete;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Templating\Helper\Helper;
 
-/**
- * @deprecated
- */
 class PimcoreUrl extends Helper
 {
     /**
@@ -46,7 +43,7 @@ class PimcoreUrl extends Helper
 
     /**
      * @param array $urlOptions
-     * @param string|null $name
+     * @param null $name
      * @param bool $reset
      * @param bool $encode
      * @param bool $relative
@@ -98,7 +95,9 @@ class PimcoreUrl extends Helper
         }
 
         if (isset($parameters['object']) && $parameters['object'] instanceof Concrete) {
-            /** @var Concrete $object */
+            /**
+             * @var $object Concrete
+             */
             $object = $parameters['object'];
             if ($linkGenerator = $object->getClass()->getLinkGenerator()) {
                 unset($parameters['object']);
@@ -106,7 +105,7 @@ class PimcoreUrl extends Helper
                     'route' => $name,
                     'parameters' => $parameters,
                     'context' => $this,
-                    'referenceType' => $referenceType,
+                    'referenceType' => $referenceType
                 ]);
 
                 return $path;

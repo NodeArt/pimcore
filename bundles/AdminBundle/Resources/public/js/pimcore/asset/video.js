@@ -35,7 +35,7 @@ pimcore.asset.video = Class.create(pimcore.asset.asset, {
         }
 
         this.tagAssignment = new pimcore.element.tag.assignment(this, "asset");
-        this.metadata = new pimcore.asset.metadata.editor(this);
+        this.metadata = new pimcore.asset.metadata(this);
         this.workflows = new pimcore.element.workflows(this, "asset");
         this.embeddedMetaData = new pimcore.asset.embedded_meta_data(this);
 
@@ -142,13 +142,6 @@ pimcore.asset.video = Class.create(pimcore.asset.asset, {
             dimensionPanel.plugins[0].disable();
             dimensionPanel.getStore().sort("name", "DESC");
 
-            var url = Routing.generate('pimcore_admin_asset_getvideothumbnail', {
-                id: this.id,
-                width: 265,
-                aspectratio: true,
-                '_dc': date.getTime()
-            });
-
             this.previewImagePanel = new Ext.Panel({
                 width: 300,
                 region: "east",
@@ -192,7 +185,8 @@ pimcore.asset.video = Class.create(pimcore.asset.asset, {
                         style: "margin: 10px 0 10px 0;",
                         height: 200,
                         id: "pimcore_asset_video_imagepreview_" + this.id,
-                        html: '<img class="pimcore_video_preview_image" align="center" src="'+url+'" />'
+                        html: '<img class="pimcore_video_preview_image" align="center" src="/admin/asset/get-video-thumbnail?id='
+                            + this.id + '&width=265&aspectratio=true&_dc=' + date.getTime() + '" />'
                     }, {
                         xtype: "button",
                         text: t("use_current_player_position_as_preview"),
@@ -205,17 +199,9 @@ pimcore.asset.video = Class.create(pimcore.asset.asset, {
                                 var time = window[this.previewFrameId].document.getElementById("video").currentTime;
                                 var date = new Date();
                                 var cmp = Ext.getCmp("pimcore_asset_video_imagepreview_" + this.id);
-
-                                var url = Routing.generate('pimcore_admin_asset_getvideothumbnail', {
-                                    id: this.id,
-                                    width: 265,
-                                    aspectratio: true,
-                                    time: time,
-                                    settime: true,
-                                    '_dc': date.getTime()
-                                });
-
-                                cmp.update('<img class="pimcore_video_preview_image" align="center" src="'+url+'" />');
+                                cmp.update('<img class="pimcore_video_preview_image" align="center" src="/admin/asset/get-video-thumbnail?id='
+                                    + this.id + '&width=265&aspectratio=true&time=' + time + '&settime=true&_dc='
+                                    + date.getTime() + '" />');
 
                             } catch (e) {
                                 console.log(e);
@@ -251,17 +237,13 @@ pimcore.asset.video = Class.create(pimcore.asset.asset, {
                                             data = data.records[0].data;
                                             if (data.elementType == "asset") {
                                                 el.setValue(data.path);
+
                                                 var date = new Date();
-                                                var url = Routing.generate('pimcore_admin_asset_getvideothumbnail', {
-                                                    id: this.id,
-                                                    image: data.id,
-                                                    width: 265,
-                                                    aspectratio: true,
-                                                    settime: true,
-                                                    '_dc': date.getTime()
-                                                });
                                                 var cmp = Ext.getCmp("pimcore_asset_video_imagepreview_" + this.id);
-                                                cmp.update('<img align="center" src="'+url+'" />');
+                                                cmp.update('<img align="center" src="/admin/asset/get-video-thumbnail?id='
+                                                    + this.id + '&width=265&aspectratio=true&image='
+                                                    + data.id + '&setimage=true&_dc='
+                                                    + date.getTime() + '" />');
                                                 return true;
                                             }
                                         }
@@ -310,7 +292,7 @@ pimcore.asset.video = Class.create(pimcore.asset.asset, {
     },
 
     initPreviewVideo: function () {
-        var frameUrl = Routing.generate('pimcore_admin_asset_getpreviewvideo', {id: this.id});
+        var frameUrl = '/admin/asset/get-preview-video?id=' + this.id;
         var html = '<iframe src="' + frameUrl + '" frameborder="0" id="' + this.previewFrameId + '" name="' + this.previewFrameId + '" style="width:100%;"></iframe>';
         this.previewPanel.update(html);
 

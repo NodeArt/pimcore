@@ -35,22 +35,10 @@ abstract class AbstractCartItem extends \Pimcore\Model\AbstractModel implements 
      * @var CheckoutableInterface
      */
     protected $product;
-
-    /**
-     * @var int
-     */
-    protected $productId;
-
-    /**
-     * @var string
-     */
+    protected $productId = null;
     protected $itemKey;
     protected $count;
     protected $comment;
-
-    /**
-     * @var string
-     */
     protected $parentItemKey = '';
 
     protected $subItems = null;
@@ -125,7 +113,7 @@ abstract class AbstractCartItem extends \Pimcore\Model\AbstractModel implements 
     abstract public function getCart();
 
     /**
-     * @return int
+     * @return mixed
      */
     public function getCartId()
     {
@@ -133,7 +121,7 @@ abstract class AbstractCartItem extends \Pimcore\Model\AbstractModel implements 
     }
 
     /**
-     * @param int $cartId
+     * @param $cartId
      */
     public function setCartId($cartId)
     {
@@ -153,7 +141,7 @@ abstract class AbstractCartItem extends \Pimcore\Model\AbstractModel implements 
     }
 
     /**
-     * @param int $productId
+     * @param $productId
      */
     public function setProductId($productId)
     {
@@ -165,7 +153,7 @@ abstract class AbstractCartItem extends \Pimcore\Model\AbstractModel implements 
     }
 
     /**
-     * @param string $parentItemKey
+     * @param $parentItemKey
      */
     public function setParentItemKey($parentItemKey)
     {
@@ -181,7 +169,7 @@ abstract class AbstractCartItem extends \Pimcore\Model\AbstractModel implements 
     }
 
     /**
-     * @param string $itemKey
+     * @param $itemKey
      */
     public function setItemKey($itemKey)
     {
@@ -189,7 +177,7 @@ abstract class AbstractCartItem extends \Pimcore\Model\AbstractModel implements 
     }
 
     /**
-     * @return string
+     * @return mixed
      */
     public function getItemKey()
     {
@@ -232,7 +220,7 @@ abstract class AbstractCartItem extends \Pimcore\Model\AbstractModel implements 
             $priceInfo = $this->getProduct()->getOSPriceInfo($this->getCount());
         }
 
-        if ($priceInfo instanceof \Pimcore\Bundle\EcommerceFrameworkBundle\PricingManager\PriceInfoInterface) {
+        if ($priceInfo instanceof PriceInfoInterface) {
             $priceInfo->getEnvironment()->setCart($this->getCart());
             $priceInfo->getEnvironment()->setCartItem($this);
         }

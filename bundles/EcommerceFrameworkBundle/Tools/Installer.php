@@ -48,8 +48,7 @@ class Installer extends MigrationInstaller
               `name` varchar(250) COLLATE utf8_bin DEFAULT NULL,
               `creationDateTimestamp` int(10) NOT NULL,
               `modificationDateTimestamp` int(10) NOT NULL,
-              PRIMARY KEY (`id`),
-              KEY `ecommerceframework_cart_userid_index` (`userid`)
+              PRIMARY KEY (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;',
         'ecommerceframework_cartcheckoutdata' =>
             'CREATE TABLE IF NOT EXISTS `ecommerceframework_cartcheckoutdata` (
@@ -68,8 +67,7 @@ class Installer extends MigrationInstaller
               `comment` LONGTEXT ASCII,
               `addedDateTimestamp` int(10) NOT NULL,
               `sortIndex` INT(10) UNSIGNED NULL DEFAULT '0',
-              PRIMARY KEY (`itemKey`,`cartId`,`parentItemKey`),
-              KEY `cartId_parentItemKey` (`cartId`,`parentItemKey`)
+              PRIMARY KEY (`itemKey`,`cartId`,`parentItemKey`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;",
         'ecommerceframework_vouchertoolkit_statistics' =>
             "CREATE TABLE IF NOT EXISTS `ecommerceframework_vouchertoolkit_statistics` (
@@ -113,7 +111,7 @@ class Installer extends MigrationInstaller
                 PRIMARY KEY (`id`),
                 UNIQUE INDEX `name` (`name`),
                 INDEX `active` (`active`)
-            ) ENGINE=InnoDB AUTO_INCREMENT=0;",
+            ) ENGINE=InnoDB AUTO_INCREMENT=0;"
     ];
 
     /**
@@ -335,7 +333,7 @@ class Installer extends MigrationInstaller
     {
         foreach ($this->permissionsToInstall as $permission) {
             $version->addSql('DELETE FROM users_permission_definitions WHERE `key` = :key', [
-                'key' => $permission,
+                'key' => $permission
             ]);
         }
     }

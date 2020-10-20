@@ -55,21 +55,17 @@ class KeyConfig extends Model\AbstractModel
     public $name;
 
     /** Pseudo column for title
-     * @var string|null
+     * @var string
      */
     public $title;
 
-    /**
-     * The key description.
-     *
-     * @var string
+    /** The key description.
+     * @var
      */
     public $description;
 
-    /**
-     * The key type ("text", "number", etc...)
-     *
-     * @var string
+    /** The key type ("text", "number", etc...)
+     * @var
      */
     public $type;
 
@@ -144,10 +140,12 @@ class KeyConfig extends Model\AbstractModel
     }
 
     /**
-     * @param string $name
+     * @param $name
      * @param int $storeId
      *
      * @return self|null
+     *
+     * @internal param null $groupId
      */
     public static function getByName($name, $storeId = 1)
     {
@@ -234,20 +232,16 @@ class KeyConfig extends Model\AbstractModel
         return $this->name;
     }
 
-    /**
-     * Returns the key description.
-     *
-     * @return string
+    /** Returns the key description.
+     * @return mixed
      */
     public function getDescription()
     {
         return $this->description;
     }
 
-    /**
-     * Sets the key description
-     *
-     * @param string $description
+    /** Sets the key description
+     * @param $description
      *
      * @return Model\DataObject\Classificationstore\KeyConfig
      */
@@ -346,7 +340,7 @@ class KeyConfig extends Model\AbstractModel
     }
 
     /**
-     * @return string
+     * @return mixed
      */
     public function getType()
     {
@@ -354,7 +348,7 @@ class KeyConfig extends Model\AbstractModel
     }
 
     /**
-     * @param string $type
+     * @param mixed $type
      */
     public function setType($type)
     {
@@ -378,7 +372,7 @@ class KeyConfig extends Model\AbstractModel
     }
 
     /**
-     * @return bool
+     * @return mixed
      */
     public function getEnabled()
     {
@@ -386,7 +380,7 @@ class KeyConfig extends Model\AbstractModel
     }
 
     /**
-     * @param bool $enabled
+     * @param mixed $enabled
      */
     public function setEnabled($enabled)
     {

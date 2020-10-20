@@ -60,21 +60,7 @@ pimcore.object.classes.data.input = Class.create(pimcore.object.classes.data.dat
     },
 
     getSpecificPanelItems: function (datax, inEncryptedField) {
-        var specificItems = [
-            {
-                xtype: "textfield",
-                fieldLabel: t("default_value"),
-                name: "defaultValue",
-                value: datax.defaultValue,
-                width: 600
-            },{
-                xtype: 'textfield',
-                width: 600,
-                fieldLabel: t("default_value_generator"),
-                labelWidth: 140,
-                name: 'defaultValueGenerator',
-                value: datax.defaultValueGenerator
-            },{
+        var specificItems = [ {
                 xtype: "numberfield",
                 fieldLabel: t("width"),
                 name: "width",
@@ -167,15 +153,8 @@ pimcore.object.classes.data.input = Class.create(pimcore.object.classes.data.dat
                     width: source.datax.width,
                     columnLength: source.datax.columnLength,
                     regex: source.datax.regex,
-                    unique: source.datax.unique,
-                    defaultValue: source.datax.defaultValue,
-                    defaultValueGenerator: source.datax.defaultValueGenerator,
-                    showCharCount : source.datax.showCharCount
+                    unique: source.datax.unique
                 });
         }
-    },
-
-    supportsUnique: function() {
-        return true;
     }
 });

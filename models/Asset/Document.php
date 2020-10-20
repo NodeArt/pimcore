@@ -39,18 +39,14 @@ class Document extends Model\Asset
      */
     protected function update($params = [])
     {
-        parent::update($params);
         $this->clearThumbnails();
 
         if ($this->getDataChanged() && \Pimcore\Document::isAvailable()) {
-            if (php_sapi_name() === 'cli') {
-                // on CLI we directly process the page count / document conversion
-                $this->processPageCount();
-            } else {
-                // add to processing queue to generate a PDF if necessary (office documents)
-                TmpStore::add(sprintf('asset_document_conversion_%d', $this->getId()), $this->getId(), 'asset-document-conversion');
-            }
+            // add to processing queue to generate a PDF if necessary (office documents)
+            TmpStore::add(sprintf('asset_document_conversion_%d', $this->getId()), $this->getId(), 'asset-document-conversion');
         }
+
+        parent::update($params);
     }
 
     /**
@@ -63,7 +59,9 @@ class Document extends Model\Asset
     }
 
     /**
-     * @param string|null $path
+     * @param null $path
+     *
+     * @return |null
      */
     public function processPageCount($path = null)
     {
@@ -75,7 +73,7 @@ class Document extends Model\Asset
         if (!\Pimcore\Document::isAvailable()) {
             Logger::error("Couldn't create image-thumbnail of document " . $this->getRealFullPath() . ' no document adapter is available');
 
-            return;
+            return null;
         }
 
         try {
@@ -85,6 +83,7 @@ class Document extends Model\Asset
             // read from blob here, because in $this->update() (see above) $this->getFileSystemPath() contains the old data
             $pageCount = $converter->getPageCount();
             $this->setCustomSetting('document_page_count', $pageCount);
+            $this->save();
         } catch (\Exception $e) {
             Logger::error($e);
         }
@@ -101,7 +100,7 @@ class Document extends Model\Asset
     }
 
     /**
-     * @param string $thumbnailName
+     * @param $thumbnailName
      * @param int $page
      * @param bool $deferred $deferred deferred means that the image will be generated on-the-fly (details see below)
      *
@@ -109,15 +108,8 @@ class Document extends Model\Asset
      */
     public function getImageThumbnail($thumbnailName, $page = 1, $deferred = false)
     {
-        if (!\Pimcore\Document::isAvailable()) {
+        if (!\Pimcore\Document::isAvailable() || !$this->getCustomSetting('document_page_count')) {
             Logger::error("Couldn't create image-thumbnail of document " . $this->getRealFullPath() . ' no document adapter is available');
-
-            return new Document\ImageThumbnail(null);
-        }
-
-        if (!$this->getCustomSetting('document_page_count')) {
-            Logger::info('Image thumbnail not yet available, processing is done asynchronously.');
-            TmpStore::add(sprintf('asset_document_conversion_%d', $this->getId()), $this->getId(), 'asset-document-conversion');
 
             return new Document\ImageThumbnail(null);
         }
@@ -126,27 +118,23 @@ class Document extends Model\Asset
     }
 
     /**
-     * @param int|null $page
+     * @param null $page
      *
-     * @return string|null
+     * @return mixed|null
      */
     public function getText($page = null)
     {
-        if (\Pimcore\Document::isAvailable() && \Pimcore\Document::isFileTypeSupported($this->getFilename())) {
-            if ($this->getCustomSetting('document_page_count')) {
-                $cacheKey = 'asset_document_text_' . $this->getId() . '_' . ($page ? $page : 'all');
-                if (!$text = Cache::load($cacheKey)) {
-                    $document = \Pimcore\Document::getInstance();
-                    $text = $document->getText($page, $this->getFileSystemPath());
-                    Cache::save($text, $cacheKey, $this->getCacheTags(), null, 99, true); // force cache write
-                }
-
-                return $text;
-            } else {
-                Logger::info('Unable to fetch text of ' . $this->getRealFullPath() . ' as it was not processed yet by the maintenance script');
+        if (\Pimcore\Document::isAvailable() && \Pimcore\Document::isFileTypeSupported($this->getFilename()) && $this->getCustomSetting('document_page_count')) {
+            $cacheKey = 'asset_document_text_' . $this->getId() . '_' . ($page ? $page : 'all');
+            if (!$text = Cache::load($cacheKey)) {
+                $document = \Pimcore\Document::getInstance();
+                $text = $document->getText($page, $this->getFileSystemPath());
+                Cache::save($text, $cacheKey, $this->getCacheTags(), null, 99, true); // force cache write
             }
+
+            return $text;
         } else {
-            Logger::warning("Couldn't get text out of document " . $this->getRealFullPath() . ' no document adapter is available');
+            Logger::error("Couldn't get text out of document " . $this->getRealFullPath() . ' no document adapter is available');
         }
 
         return null;

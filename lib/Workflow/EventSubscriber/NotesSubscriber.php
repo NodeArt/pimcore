@@ -60,9 +60,11 @@ class NotesSubscriber implements EventSubscriberInterface
             return;
         }
 
-        /** @var AbstractElement $subject */
+        /**
+         * @var AbstractElement $subject
+         * @var Transition $transition
+         */
         $subject = $event->getSubject();
-        /** @var Transition $transition */
         $transition = $event->getTransition();
 
         $this->handleNotesPreWorkflow($transition, $subject);
@@ -79,9 +81,11 @@ class NotesSubscriber implements EventSubscriberInterface
             return;
         }
 
-        /** @var AbstractElement $subject */
+        /**
+         * @var AbstractElement $subject
+         * @var Transition $transition
+         */
         $subject = $event->getSubject();
-        /** @var Transition $transition */
         $transition = $event->getTransition();
 
         $this->handleNotesPostWorkflow($transition, $subject);
@@ -228,15 +232,15 @@ class NotesSubscriber implements EventSubscriberInterface
     }
 
     /**
-     * @return array
+     * @return array|null
      */
-    public function getAdditionalData(): array
+    public function getAdditionalData(): ?array
     {
         return $this->additionalData;
     }
 
     /**
-     * @param array $additionalData
+     * @param array|null $additionalData
      */
     public function setAdditionalData(array $additionalData = []): void
     {
@@ -272,7 +276,7 @@ class NotesSubscriber implements EventSubscriberInterface
             'workflow.completed' => ['onWorkflowCompleted', 1],
             'workflow.enter' => 'onWorkflowEnter',
             WorkflowEvents::PRE_GLOBAL_ACTION => 'onPreGlobalAction',
-            WorkflowEvents::POST_GLOBAL_ACTION => 'onPostGlobalAction',
+            WorkflowEvents::POST_GLOBAL_ACTION => 'onPostGlobalAction'
         ];
     }
 }

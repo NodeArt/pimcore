@@ -122,7 +122,7 @@ class NotificationEmailService extends AbstractNotificationService
     }
 
     /**
-     * @param User[] $recipients
+     * @param array $recipients
      * @param string $subjectType
      * @param AbstractElement $subject
      * @param Workflow $workflow
@@ -136,6 +136,9 @@ class NotificationEmailService extends AbstractNotificationService
         $mail = new \Pimcore\Mail(['document' => $mailPath, 'params' => $this->getNotificationEmailParameters($subjectType, $subject, $workflow, $action, $deeplink, $language)]);
 
         foreach ($recipients as $user) {
+            /**
+             * @var $user User
+             */
             $mail->addTo($user->getEmail(), $user->getName());
         }
 
@@ -143,7 +146,7 @@ class NotificationEmailService extends AbstractNotificationService
     }
 
     /**
-     * @param User[] $recipients
+     * @param array $recipients
      * @param string $subjectType
      * @param AbstractElement $subject
      * @param Workflow $workflow
@@ -157,6 +160,9 @@ class NotificationEmailService extends AbstractNotificationService
         $mail = new \Pimcore\Mail();
 
         foreach ($recipients as $user) {
+            /**
+             * @var $user User
+             */
             $mail->addTo($user->getEmail(), $user->getName());
         }
 
@@ -225,7 +231,7 @@ class NotificationEmailService extends AbstractNotificationService
             'deeplink' => $deeplink,
             'note_description' => $noteDescription,
             'translator' => $this->translator,
-            'lang' => $language,
+            'lang' => $language
         ];
     }
 }

@@ -22,8 +22,6 @@ use Pimcore\Tool\Session;
 
 /**
  * @method \Pimcore\Model\Element\Editlock\Dao getDao()
- * @method void delete()
- * @method void save()
  */
 class Editlock extends Model\AbstractModel
 {
@@ -58,13 +56,13 @@ class Editlock extends Model\AbstractModel
     public $date;
 
     /**
-     * @var string
+     * @var
      */
     public $cpath;
 
     /**
-     * @param int $cid
-     * @param string $ctype
+     * @param $cid
+     * @param $ctype
      *
      * @return bool
      */
@@ -85,8 +83,8 @@ class Editlock extends Model\AbstractModel
     }
 
     /**
-     * @param int $cid
-     * @param string $ctype
+     * @param $cid
+     * @param $ctype
      *
      * @return null|Editlock
      */
@@ -103,7 +101,7 @@ class Editlock extends Model\AbstractModel
     }
 
     /**
-     * @param string $sessionId
+     * @param $sessionId
      *
      * @return bool|null
      */
@@ -120,8 +118,8 @@ class Editlock extends Model\AbstractModel
     }
 
     /**
-     * @param int $cid
-     * @param string $ctype
+     * @param $cid
+     * @param $ctype
      *
      * @return bool|Editlock
      */
@@ -145,8 +143,8 @@ class Editlock extends Model\AbstractModel
     }
 
     /**
-     * @param int $cid
-     * @param string $ctype
+     * @param $cid
+     * @param $ctype
      *
      * @return bool
      */
@@ -292,7 +290,7 @@ class Editlock extends Model\AbstractModel
     }
 
     /**
-     * @param string $cpath
+     * @param $cpath
      *
      * @return $this
      */
@@ -304,7 +302,7 @@ class Editlock extends Model\AbstractModel
     }
 
     /**
-     * @return string
+     * @return
      */
     public function getCpath()
     {

@@ -19,9 +19,6 @@ namespace Pimcore\Model\Webservice\Data;
 
 use Pimcore\Model;
 
-/**
- * @deprecated
- */
 class ClassDefinition extends Model\Webservice\Data
 {
     /**
@@ -103,22 +100,12 @@ class ClassDefinition extends Model\Webservice\Data
     public $showVariants = false;
 
     /**
-     * @var bool
+     * @var array
      */
-    public $generateTypeDeclarations = false;
+    public $fieldDefinitions;
 
     /**
-     * @var string
-     */
-    public $implementsInterfaces;
-
-    /**
-     * @var Model\DataObject\ClassDefinition\Data[]
-     */
-    public $fieldDefinitions = [];
-
-    /**
-     * @var Model\DataObject\ClassDefinition\Layout|null
+     * @var array
      */
     public $layoutDefinitions;
 
@@ -131,29 +118,13 @@ class ClassDefinition extends Model\Webservice\Data
      * @var string
      */
     public $previewUrl;
-
     /**
      * @var string
      */
     public $group;
 
     /**
-     * @var bool
-     */
-    public $showAppLoggerTab = false;
-
-    /**
      * @var string
      */
     public $linkGeneratorReference;
-
-    /**
-     * @var array
-     */
-    public $compositeIndices;
-
-    /**
-     * @var bool
-     */
-    public $showFieldLookup = false;
 }

@@ -22,30 +22,24 @@ use Pimcore\Model;
 /**
  * @method \Pimcore\Model\User\Permission\Definition\Listing\Dao getDao()
  * @method Model\User\Permission\Definition[] load()
- * @method Model\User\Permission\Definition current()
  */
 class Listing extends Model\Listing\AbstractListing
 {
     /**
-     * @var Model\User\Permission\Definition[]|null
-     *
-     * @deprecated use getter/setter methods or $this->data
+     * @var array|null
      */
     protected $definitions = null;
 
-    public function __construct()
-    {
-        $this->definitions = & $this->data;
-    }
-
     /**
-     * @param Model\User\Permission\Definition[] $definitions
+     * @param $definitions
      *
-     * @return static
+     * @return $this
      */
     public function setDefinitions($definitions)
     {
-        return $this->setData($definitions);
+        $this->definitions = $definitions;
+
+        return $this;
     }
 
     /**
@@ -53,6 +47,10 @@ class Listing extends Model\Listing\AbstractListing
      */
     public function getDefinitions()
     {
-        return $this->getData();
+        if ($this->definitions === null) {
+            $this->getDao()->load();
+        }
+
+        return $this->definitions;
     }
 }

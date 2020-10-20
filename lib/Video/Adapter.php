@@ -49,7 +49,7 @@ abstract class Adapter
     public $length;
 
     /**
-     * @param int $audioBitrate
+     * @param $audioBitrate
      *
      * @return $this
      */
@@ -69,7 +69,7 @@ abstract class Adapter
     }
 
     /**
-     * @param int $videoBitrate
+     * @param $videoBitrate
      *
      * @return $this
      */
@@ -89,23 +89,23 @@ abstract class Adapter
     }
 
     /**
-     * @param string $file
+     * @param $file
      * @param array $options
      *
-     * @return $this
+     * @return mixed
      */
     abstract public function load($file, $options = []);
 
     /**
-     * @return bool
+     * @return mixed
      */
     abstract public function save();
 
     /**
      * @abstract
      *
-     * @param string $file
-     * @param int|null $timeOffset
+     * @param $file
+     * @param $timeOffset
      */
     abstract public function saveImage($file, $timeOffset = null);
 
@@ -115,7 +115,7 @@ abstract class Adapter
     abstract public function destroy();
 
     /**
-     * @param string $format
+     * @param $format
      *
      * @return $this
      */
@@ -135,7 +135,7 @@ abstract class Adapter
     }
 
     /**
-     * @param string $destinationFile
+     * @param $destinationFile
      *
      * @return $this
      */
@@ -155,7 +155,7 @@ abstract class Adapter
     }
 
     /**
-     * @param int $length
+     * @param $length
      *
      * @return $this
      */
@@ -189,16 +189,4 @@ abstract class Adapter
     {
         $this->storageFile = $storageFile;
     }
-
-    /**
-     * @return float
-     *
-     * @throws \Exception
-     */
-    abstract public function getDuration();
-
-    /**
-     * @return array
-     */
-    abstract public function getDimensions();
 }

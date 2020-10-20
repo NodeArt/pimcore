@@ -19,22 +19,19 @@ namespace Pimcore\DataObject\GridColumnConfig\Operator;
 
 class StringReplace extends AbstractOperator
 {
-    /** @var string */
     private $search;
 
-    /** @var string */
     private $replace;
 
-    /** @var bool */
     private $insensitive;
 
     public function __construct(\stdClass $config, $context = null)
     {
         parent::__construct($config, $context);
 
-        $this->search = $config->search ?? '';
-        $this->replace = $config->replace ?? '';
-        $this->insensitive = $config->insensitive ?? false;
+        $this->search = $config->search;
+        $this->replace = $config->replace;
+        $this->insensitive = $config->insensitive;
     }
 
     public function getLabeledValue($element)
@@ -56,8 +53,6 @@ class StringReplace extends AbstractOperator
                     $childValues = [$childValues];
                 }
 
-                $newValue = null;
-
                 if (is_array($childValues)) {
                     foreach ($childValues as $value) {
                         if (is_array($value)) {
@@ -71,6 +66,8 @@ class StringReplace extends AbstractOperator
                             $newValue = $this->replace($value);
                         }
                     }
+                } else {
+                    $newValue = null;
                 }
 
                 $newChildsResult[] = $newValue;
@@ -87,9 +84,9 @@ class StringReplace extends AbstractOperator
     }
 
     /**
-     * @param string $value
+     * @param $value
      *
-     * @return string
+     * @return mixed
      */
     public function replace($value)
     {
@@ -101,7 +98,7 @@ class StringReplace extends AbstractOperator
     }
 
     /**
-     * @return string
+     * @return mixed
      */
     public function getSearch()
     {
@@ -109,7 +106,7 @@ class StringReplace extends AbstractOperator
     }
 
     /**
-     * @param string $search
+     * @param mixed $search
      */
     public function setSearch($search)
     {
@@ -117,7 +114,7 @@ class StringReplace extends AbstractOperator
     }
 
     /**
-     * @return string
+     * @return mixed
      */
     public function getReplace()
     {
@@ -125,7 +122,7 @@ class StringReplace extends AbstractOperator
     }
 
     /**
-     * @param string $replace
+     * @param mixed $replace
      */
     public function setReplace($replace)
     {
@@ -133,7 +130,7 @@ class StringReplace extends AbstractOperator
     }
 
     /**
-     * @return bool
+     * @return mixed
      */
     public function getInsensitive()
     {
@@ -141,7 +138,7 @@ class StringReplace extends AbstractOperator
     }
 
     /**
-     * @param bool $insensitive
+     * @param mixed $insensitive
      */
     public function setInsensitive($insensitive)
     {

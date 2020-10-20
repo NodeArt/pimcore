@@ -47,7 +47,7 @@ class ValidationException extends \Exception
     }
 
     /**
-     * @param string $context
+     * @param $context
      */
     public function addContext($context)
     {

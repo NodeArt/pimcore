@@ -59,8 +59,6 @@ SQL;
 
             $query->where($condition, '%' . $this->getKeyword() . '%');
         }
-
-        return $this;
     }
 
     /**

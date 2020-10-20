@@ -30,7 +30,7 @@ class ExternalImage implements OwnerAwareFieldInterface
     /**
      * ExternalImage constructor.
      *
-     * @param string|null $url
+     * @param null $url
      */
     public function __construct($url = null)
     {

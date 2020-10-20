@@ -21,14 +21,13 @@ use Pimcore\Model;
 use Pimcore\Model\DataObject;
 
 /**
- * @method DataObject\Listing\Concrete\Dao getDao()
- * @method DataObject\Concrete[] load()
- * @method DataObject\Concrete current()
+ * @method \Pimcore\Model\DataObject\Listing\Concrete\Dao getDao()
+ * @method Model\Webservice\Data\DataObject\Concrete[] load()
  */
 abstract class Concrete extends Model\DataObject\Listing
 {
     /**
-     * @var string
+     * @var int
      */
     protected $classId;
 
@@ -38,7 +37,7 @@ abstract class Concrete extends Model\DataObject\Listing
     protected $className;
 
     /**
-     * @var string
+     * @var string|
      */
     protected $locale;
 
@@ -55,8 +54,7 @@ abstract class Concrete extends Model\DataObject\Listing
      */
     public function __construct()
     {
-        parent::__construct();
-        $this->initDao(__CLASS__);
+        $this->initDao('\\Pimcore\\Model\\DataObject\\Listing\\Concrete');
     }
 
     /**
@@ -76,28 +74,24 @@ abstract class Concrete extends Model\DataObject\Listing
     }
 
     /**
-     * @param string $classId
+     * @param $classId
      *
      * @return $this
      */
     public function setClassId($classId)
     {
-        $this->setData(null);
-
         $this->classId = $classId;
 
         return $this;
     }
 
     /**
-     * @param string $className
+     * @param $className
      *
      * @return $this
      */
     public function setClassName($className)
     {
-        $this->setData(null);
-
         $this->className = $className;
 
         return $this;
@@ -114,14 +108,12 @@ abstract class Concrete extends Model\DataObject\Listing
     }
 
     /**
-     * @param string $locale
+     * @param mixed $locale
      *
      * @return $this
      */
     public function setLocale($locale)
     {
-        $this->setData(null);
-
         $this->locale = $locale;
 
         return $this;
@@ -142,8 +134,6 @@ abstract class Concrete extends Model\DataObject\Listing
      */
     public function setIgnoreLocalizedFields($ignoreLocalizedFields)
     {
-        $this->setData(null);
-
         $this->ignoreLocalizedFields = $ignoreLocalizedFields;
 
         return $this;
@@ -165,15 +155,13 @@ abstract class Concrete extends Model\DataObject\Listing
     private $fieldCollectionConfigs = [];
 
     /**
-     * @param string $type
-     * @param string|null $fieldname
+     * @param $type
+     * @param null $fieldname
      *
      * @throws \Exception
      */
     public function addFieldCollection($type, $fieldname = null)
     {
-        $this->setData(null);
-
         if (empty($type)) {
             throw new \Exception('No fieldcollectiontype given');
         }
@@ -183,7 +171,7 @@ abstract class Concrete extends Model\DataObject\Listing
     }
 
     /**
-     * @param array $fieldCollections
+     * @param $fieldCollections
      *
      * @return $this
      *
@@ -191,8 +179,6 @@ abstract class Concrete extends Model\DataObject\Listing
      */
     public function setFieldCollections($fieldCollections)
     {
-        $this->setData(null);
-
         foreach ($fieldCollections as $fc) {
             $this->addFieldCollection($fc['type'], $fc['fieldname']);
         }
@@ -216,14 +202,12 @@ abstract class Concrete extends Model\DataObject\Listing
     private $objectBrickConfigs = [];
 
     /**
-     * @param string $type
+     * @param $type
      *
      * @throws \Exception
      */
     public function addObjectbrick($type)
     {
-        $this->setData(null);
-
         if (empty($type)) {
             throw new \Exception('No objectbrick given');
         }
@@ -235,7 +219,7 @@ abstract class Concrete extends Model\DataObject\Listing
     }
 
     /**
-     * @param array $objectbricks
+     * @param $objectbricks
      *
      * @return $this
      *
@@ -243,8 +227,6 @@ abstract class Concrete extends Model\DataObject\Listing
      */
     public function setObjectbricks($objectbricks)
     {
-        $this->setData(null);
-
         foreach ($objectbricks as $ob) {
             if (!in_array($ob, $this->objectBrickConfigs)) {
                 $this->addObjectbrick($ob);
@@ -271,97 +253,5 @@ abstract class Concrete extends Model\DataObject\Listing
         if (!empty($fieldCollections)) {
             return true;
         }
-
-        return false;
-    }
-
-    /**
-     * Filter by path (system field)
-     *
-     * @param string|int|float|float|array $data  comparison data, can be scalar or array (if operator is e.g. "IN (?)")
-     * @param string $operator  SQL comparison operator, e.g. =, <, >= etc. You can use "?" as placeholder, e.g. "IN (?)"
-     *
-     * @return static
-     */
-    public function filterByPath($data, $operator = '=')
-    {
-        $this->addFilterByField('o_path', $operator, $data);
-
-        return $this;
-    }
-
-    /**
-     * Filter by key (system field)
-     *
-     * @param string|int|float|float|array $data  comparison data, can be scalar or array (if operator is e.g. "IN (?)")
-     * @param string $operator  SQL comparison operator, e.g. =, <, >= etc. You can use "?" as placeholder, e.g. "IN (?)"
-     *
-     * @return static
-     */
-    public function filterByKey($data, $operator = '=')
-    {
-        $this->addFilterByField('o_key', $operator, $data);
-
-        return $this;
-    }
-
-    /**
-     * Filter by id (system field)
-     *
-     * @param string|int|float|float|array $data  comparison data, can be scalar or array (if operator is e.g. "IN (?)")
-     * @param string $operator  SQL comparison operator, e.g. =, <, >= etc. You can use "?" as placeholder, e.g. "IN (?)"
-     *
-     * @return static
-     */
-    public function filterById($data, $operator = '=')
-    {
-        $this->addFilterByField('o_id', $operator, $data);
-
-        return $this;
-    }
-
-    /**
-     * Filter by published (system field)
-     *
-     * @param string|int|float|float|array $data  comparison data, can be scalar or array (if operator is e.g. "IN (?)")
-     * @param string $operator  SQL comparison operator, e.g. =, <, >= etc. You can use "?" as placeholder, e.g. "IN (?)"
-     *
-     * @return static
-     */
-    public function filterByPublished($data, $operator = '=')
-    {
-        $this->addFilterByField('o_published', $operator, $data);
-
-        return $this;
-    }
-
-    /**
-     * Filter by creationDate (system field)
-     *
-     * @param string|int|float|float|array $data  comparison data, can be scalar or array (if operator is e.g. "IN (?)")
-     * @param string $operator  SQL comparison operator, e.g. =, <, >= etc. You can use "?" as placeholder, e.g. "IN (?)"
-     *
-     * @return static
-     */
-    public function filterByCreationDate($data, $operator = '=')
-    {
-        $this->addFilterByField('o_creationDate', $operator, $data);
-
-        return $this;
-    }
-
-    /**
-     * Filter by modificationDate (system field)
-     *
-     * @param string|int|float|float|array $data  comparison data, can be scalar or array (if operator is e.g. "IN (?)")
-     * @param string $operator  SQL comparison operator, e.g. =, <, >= etc. You can use "?" as placeholder, e.g. "IN (?)"
-     *
-     * @return static
-     */
-    public function filterByModificationDate($data, $operator = '=')
-    {
-        $this->addFilterByField('o_modificationDate', $operator, $data);
-
-        return $this;
     }
 }

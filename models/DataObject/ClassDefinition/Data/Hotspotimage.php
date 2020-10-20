@@ -25,10 +25,8 @@ use Pimcore\Tool\Serialize;
 
 class Hotspotimage extends Model\DataObject\ClassDefinition\Data\Image
 {
-    use DataObject\Traits\SimpleComparisonTrait;
     use Extension\ColumnType;
     use Extension\QueryColumnType;
-    use DataObject\ClassDefinition\NullablePhpdocReturnTypeTrait;
 
     /**
      * Static type of this element
@@ -40,14 +38,14 @@ class Hotspotimage extends Model\DataObject\ClassDefinition\Data\Image
     /**
      * Type for the column to query
      *
-     * @var array
+     * @var string
      */
     public $queryColumnType = ['image' => 'int(11)', 'hotspots' => 'text'];
 
     /**
      * Type for the column
      *
-     * @var array
+     * @var string
      */
     public $columnType = ['image' => 'int(11)', 'hotspots' => 'text'];
 
@@ -125,8 +123,8 @@ class Hotspotimage extends Model\DataObject\ClassDefinition\Data\Image
      * @see ResourcePersistenceAwareInterface::getDataForResource
      *
      * @param DataObject\Data\Hotspotimage $data
-     * @param null|DataObject\Concrete $object
-     * @param array $params
+     * @param null|Model\DataObject\AbstractObject $object
+     * @param mixed $params
      *
      * @return array
      */
@@ -141,20 +139,20 @@ class Hotspotimage extends Model\DataObject\ClassDefinition\Data\Image
             $metaData = [
                 'hotspots' => $data->getHotspots(),
                 'marker' => $data->getMarker(),
-                'crop' => $data->getCrop(),
+                'crop' => $data->getCrop()
             ];
 
             $metaData = Serialize::serialize($metaData);
 
             return [
                 $this->getName() . '__image' => $imageId,
-                $this->getName() . '__hotspots' => $metaData,
+                $this->getName() . '__hotspots' => $metaData
             ];
         }
 
         return [
             $this->getName() . '__image' => null,
-            $this->getName() . '__hotspots' => null,
+            $this->getName() . '__hotspots' => null
         ];
     }
 
@@ -162,8 +160,8 @@ class Hotspotimage extends Model\DataObject\ClassDefinition\Data\Image
      * @see ResourcePersistenceAwareInterface::getDataFromResource
      *
      * @param array $data
-     * @param null|DataObject\Concrete $object
-     * @param array $params
+     * @param null|Model\DataObject\AbstractObject $object
+     * @param mixed $params
      *
      * @return DataObject\Data\Hotspotimage|null
      */
@@ -213,7 +211,7 @@ class Hotspotimage extends Model\DataObject\ClassDefinition\Data\Image
             $value = new DataObject\Data\Hotspotimage($imageId, $hotspots, $marker, $crop);
 
             if (isset($params['owner'])) {
-                $value->setOwner($params['owner'], $params['fieldname'], $params['language'] ?? null);
+                $value->setOwner($params['owner'], $params['fieldname'], $params['language']);
             }
 
             return $value;
@@ -226,7 +224,7 @@ class Hotspotimage extends Model\DataObject\ClassDefinition\Data\Image
      * @see QueryResourcePersistenceAwareInterface::getDataForQueryResource
      *
      * @param DataObject\Data\Hotspotimage $data
-     * @param null|DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return array
@@ -240,7 +238,7 @@ class Hotspotimage extends Model\DataObject\ClassDefinition\Data\Image
      * @see Data::getDataForEditmode
      *
      * @param DataObject\Data\Hotspotimage $data
-     * @param null|DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return array|null
@@ -281,7 +279,7 @@ class Hotspotimage extends Model\DataObject\ClassDefinition\Data\Image
                 'id' => $imageId,
                 'hotspots' => $hotspots,
                 'marker' => $marker,
-                'crop' => $data->getCrop(),
+                'crop' => $data->getCrop()
             ];
         }
 
@@ -291,8 +289,8 @@ class Hotspotimage extends Model\DataObject\ClassDefinition\Data\Image
     /**
      * @see Data::getDataFromEditmode
      *
-     * @param array $data
-     * @param null|DataObject\Concrete $object
+     * @param DataObject\Data\Hotspotimage $data
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return DataObject\Data\Hotspotimage
@@ -327,12 +325,12 @@ class Hotspotimage extends Model\DataObject\ClassDefinition\Data\Image
             $data['hotspots'] = $rewritePath($data['hotspots']);
         }
 
-        return new DataObject\Data\Hotspotimage($data['id'], $data['hotspots'] ?? [], $data['marker'] ?? [], $data['crop'] ?? []);
+        return new DataObject\Data\Hotspotimage($data['id'], $data['hotspots'], $data['marker'], $data['crop']);
     }
 
     /**
      * @param DataObject\Data\Hotspotimage $data
-     * @param null|DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return DataObject\Data\Hotspotimage
@@ -345,8 +343,8 @@ class Hotspotimage extends Model\DataObject\ClassDefinition\Data\Image
     /**
      * @see Data::getVersionPreview
      *
-     * @param DataObject\Data\Hotspotimage|null $data
-     * @param null|DataObject\Concrete $object
+     * @param Asset\Image $data
+     * @param null|DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return string|null
@@ -365,7 +363,7 @@ class Hotspotimage extends Model\DataObject\ClassDefinition\Data\Image
      *
      * @abstract
      *
-     * @param DataObject\Concrete $object
+     * @param DataObject\AbstractObject $object
      * @param array $params
      *
      * @return string
@@ -377,14 +375,14 @@ class Hotspotimage extends Model\DataObject\ClassDefinition\Data\Image
         $data = $this->getDataFromObjectParam($object, $params);
         if ($data instanceof DataObject\Data\Hotspotimage) {
             return base64_encode(Serialize::serialize($data));
+        } else {
+            return null;
         }
-
-        return '';
     }
 
     /**
      * @param string $importValue
-     * @param null|DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return mixed|null|DataObject\ClassDefinition\Data
@@ -401,7 +399,7 @@ class Hotspotimage extends Model\DataObject\ClassDefinition\Data\Image
     }
 
     /**
-     * @param DataObject\Concrete|DataObject\Objectbrick\Data\AbstractData|DataObject\Fieldcollection\Data\AbstractData $object
+     * @param $object
      * @param mixed $params
      *
      * @return string
@@ -459,7 +457,7 @@ class Hotspotimage extends Model\DataObject\ClassDefinition\Data\Image
     }
 
     /**
-     * @param DataObject\Data\Hotspotimage|null $data
+     * @param mixed $data
      *
      * @return array
      */
@@ -470,7 +468,7 @@ class Hotspotimage extends Model\DataObject\ClassDefinition\Data\Image
         if ($data instanceof DataObject\Data\Hotspotimage && $data->getImage() instanceof Asset\Image) {
             $dependencies['asset_' . $data->getImage()->getId()] = [
                 'id' => $data->getImage()->getId(),
-                'type' => 'asset',
+                'type' => 'asset'
             ];
 
             $getMetaDataDependencies = function ($data, $dependencies) {
@@ -484,7 +482,7 @@ class Hotspotimage extends Model\DataObject\ClassDefinition\Data\Image
                             if ($metaData['value'] instanceof Element\ElementInterface) {
                                 $dependencies[$metaData['type'] . '_' . $metaData['value']->getId()] = [
                                     'id' => $metaData['value']->getId(),
-                                    'type' => $metaData['type'],
+                                    'type' => $metaData['type']
                                 ];
                             }
                         }
@@ -504,9 +502,7 @@ class Hotspotimage extends Model\DataObject\ClassDefinition\Data\Image
     /**
      * converts data to be exposed via webservices
      *
-     * @deprecated
-     *
-     * @param DataObject\Concrete $object
+     * @param string $object
      * @param mixed $params
      *
      * @return mixed
@@ -532,12 +528,10 @@ class Hotspotimage extends Model\DataObject\ClassDefinition\Data\Image
     }
 
     /**
-     * @deprecated
-     *
      * @param mixed $value
-     * @param DataObject\Concrete|null $object
+     * @param null $object
      * @param array $params
-     * @param Model\Webservice\IdMapperInterface|null $idMapper
+     * @param null $idMapper
      *
      * @return null|Asset|DataObject\Data\Hotspotimage
      *
@@ -561,7 +555,7 @@ class Hotspotimage extends Model\DataObject\ClassDefinition\Data\Image
         }
         $hotspotImage = $this->getDataFromResource($value);
 
-        /** @var DataObject\Data\Hotspotimage $hotspotImage */
+        /** @var $hotspotImage DataObject\Data\Hotspotimage */
         if (!$hotspotImage) {
             return null;
         }
@@ -588,16 +582,14 @@ class Hotspotimage extends Model\DataObject\ClassDefinition\Data\Image
                 $idMapper->recordMappingFailure('object', $object->getId(), 'asset', $value);
             }
         }
-
-        return null;
     }
 
     /**
-     * @param DataObject\Data\Hotspotimage|null $data
-     * @param DataObject\Concrete|null $object
-     * @param array $params
+     * @param $data
+     * @param null $object
+     * @param mixed $params
      *
-     * @return array|null
+     * @return null
      */
     public function getDataForGrid($data, $object = null, $params = [])
     {
@@ -656,8 +648,8 @@ class Hotspotimage extends Model\DataObject\ClassDefinition\Data\Image
     }
 
     /**
-     * @param array|null $dataArray
-     * @param array $idMapping
+     * @param $dataArray
+     * @param $idMapping
      *
      * @return array
      */
@@ -703,7 +695,7 @@ class Hotspotimage extends Model\DataObject\ClassDefinition\Data\Image
 
     /** Encode value for packing it into a single column.
      * @param mixed $value
-     * @param DataObject\Concrete $object
+     * @param Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return mixed
@@ -722,7 +714,7 @@ class Hotspotimage extends Model\DataObject\ClassDefinition\Data\Image
                 $id = $image->getId();
                 $result['image'] = [
                     'type' => $type,
-                    'id' => $id,
+                    'id' => $id
                 ];
             }
 
@@ -734,7 +726,7 @@ class Hotspotimage extends Model\DataObject\ClassDefinition\Data\Image
 
     /** See marshal
      * @param mixed $value
-     * @param DataObject\Concrete $object
+     * @param Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return mixed
@@ -755,46 +747,5 @@ class Hotspotimage extends Model\DataObject\ClassDefinition\Data\Image
 
             return $image;
         }
-    }
-
-    /**
-     * @param DataObject\Data\Hotspotimage|null $oldValue
-     * @param DataObject\Data\Hotspotimage|null $newValue
-     *
-     * @return bool
-     */
-    public function isEqual($oldValue, $newValue): bool
-    {
-        if ($oldValue === null && $newValue === null) {
-            return true;
-        }
-
-        if (!$oldValue instanceof DataObject\Data\Hotspotimage
-            || !$newValue instanceof DataObject\Data\Hotspotimage) {
-            return false;
-        }
-
-        $fd = new Image();
-        if (!$fd->isEqual($oldValue->getImage(), $newValue->getImage())) {
-            return false;
-        }
-
-        $oldValue = [
-            'hotspots' => $oldValue->getHotspots(),
-            'marker' => $oldValue->getMarker(),
-            'crop' => $oldValue->getCrop(),
-        ];
-
-        $newValue = [
-            'hotspots' => $newValue->getHotspots(),
-            'marker' => $newValue->getMarker(),
-            'crop' => $newValue->getCrop(),
-        ];
-
-        if (!$this->isEqualArray($oldValue, $newValue)) {
-            return false;
-        }
-
-        return true;
     }
 }

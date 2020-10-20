@@ -101,7 +101,7 @@ pimcore.document.settings_abstract = Class.create({
                                         Ext.getCmp("contentMasterDocumentPath_"
                                             + this.document.id).setValue("");
                                         Ext.Ajax.request({
-                                            url:Routing.generate('pimcore_admin_document_page_changemasterdocument'),
+                                            url:"/admin/page/change-master-document",
                                             method: 'PUT',
                                             params:{
                                                 id: this.document.id,
@@ -131,7 +131,7 @@ pimcore.document.settings_abstract = Class.create({
                                 function (buttonValue) {
                                     if (buttonValue == "yes") {
                                         Ext.Ajax.request({
-                                            url:Routing.generate('pimcore_admin_document_page_changemasterdocument'),
+                                            url:"/admin/page/change-master-document",
                                             method: 'PUT',
                                             params:{
                                                 id: this.document.id,
@@ -199,7 +199,7 @@ pimcore.document.settings_abstract = Class.create({
 
         var docTypeStore = new Ext.data.Store({
             proxy: {
-                url: Routing.generate('pimcore_admin_document_document_getdoctypes', {type: this.document.getType()}),
+                url: '/admin/document/get-doc-types?type=' + this.document.getType(),
                 type: 'ajax',
                 reader: {
                     type: 'json',
@@ -237,10 +237,13 @@ pimcore.document.settings_abstract = Class.create({
 
         var fieldSet = new Ext.form.FieldSet({
             title: t('controller') + ", " + t('action') + " & " + t('template'),
-            id: "pimcore_document_settings_" + this.document.id,
             collapsible: true,
             collapsed: collapsed,
             autoHeight:true,
+            defaults: {
+                labelWidth: 320,
+                width: 700
+            },
             defaultType: 'textfield',
             items :[
                 {
@@ -270,7 +273,7 @@ pimcore.document.settings_abstract = Class.create({
                         autoDestroy: true,
                         proxy: {
                             type: 'ajax',
-                            url: Routing.generate('pimcore_admin_misc_getavailablemodules'),
+                            url: "/admin/misc/get-available-modules",
                             reader: {
                                 type: 'json',
                                 rootProperty: 'data'
@@ -297,7 +300,7 @@ pimcore.document.settings_abstract = Class.create({
                         autoLoad: false,
                         proxy: {
                             type: 'ajax',
-                            url: Routing.generate('pimcore_admin_misc_getavailablecontrollers'),
+                            url: "/admin/misc/get-available-controllers",
                             reader: {
                                 type: 'json',
                                 rootProperty: 'data'
@@ -331,7 +334,7 @@ pimcore.document.settings_abstract = Class.create({
                         autoLoad: false,
                         proxy: {
                             type: 'ajax',
-                            url: Routing.generate('pimcore_admin_misc_getavailableactions'),
+                            url: "/admin/misc/get-available-actions",
                             reader: {
                                 type: 'json',
                                 rootProperty: 'data'
@@ -364,7 +367,7 @@ pimcore.document.settings_abstract = Class.create({
                         autoLoad: false,
                         proxy: {
                             type: 'ajax',
-                            url: Routing.generate('pimcore_admin_misc_getavailabletemplates'),
+                            url: "/admin/misc/get-available-templates",
                             reader: {
                                 type: 'json',
                                 rootProperty: 'data'
@@ -379,28 +382,9 @@ pimcore.document.settings_abstract = Class.create({
                         maxWidth: 600
                     }
                 }
-            ],
-            defaults: {
-                labelWidth: 300,
-                width: 700,
-                listeners: {
-                    "change": function (field, checked) {
-                        Ext.getCmp("pimcore_document_settings_" + this.document.id).dirty = true;
-                    }.bind(this)
-                },
-            }
-
+            ]
         });
 
         return fieldSet;
-    },
-
-    getValues: function () {
-
-        if (!this.layout.rendered) {
-            throw "settings not available";
-        }
-
-        return this.getLayout().getForm().getFieldValues();
     }
 });

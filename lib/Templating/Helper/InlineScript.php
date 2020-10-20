@@ -45,9 +45,6 @@
 
 namespace Pimcore\Templating\Helper;
 
-/**
- * @deprecated
- */
 class InlineScript extends HeadScript
 {
     /**

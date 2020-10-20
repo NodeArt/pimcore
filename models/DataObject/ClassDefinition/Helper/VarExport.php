@@ -19,7 +19,7 @@ namespace Pimcore\Model\DataObject\ClassDefinition\Helper;
 trait VarExport
 {
     /**
-     * @param array $data
+     * @param $data
      *
      * @return static
      */

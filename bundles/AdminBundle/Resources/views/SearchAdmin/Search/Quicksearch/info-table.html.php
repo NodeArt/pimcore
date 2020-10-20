@@ -1,13 +1,13 @@
 <?php
     /**
-     * @var \Pimcore\Model\Element\AbstractElement $element
+     * @var \Pimcore\Model\Element\ElementInterface $element
      */
     $element = $this->element;
     $this->get("translate")->setDomain("admin");
 ?>
 <div class="data-table <?= $this->cls ?>">
     <table>
-        <?php if($element instanceof \Pimcore\Model\DataObject\Concrete) { ?>
+        <?php if($element instanceof \Pimcore\Model\DataObject) { ?>
             <tr>
                 <th><?= $this->translate('class') ?></th>
                 <td><?= $element->getClassName() ?> [<?= $element->getClassId() ?>]</td>

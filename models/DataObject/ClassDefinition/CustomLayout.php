@@ -67,12 +67,12 @@ class CustomLayout extends Model\AbstractModel
     public $userModification;
 
     /**
-     * @var string
+     * @var int
      */
     public $classId;
 
     /**
-     * @var Layout|null
+     * @var array
      */
     public $layoutDefinitions;
 
@@ -82,7 +82,7 @@ class CustomLayout extends Model\AbstractModel
     public $default;
 
     /**
-     * @param string $id
+     * @param $id
      *
      * @return null|CustomLayout
      */
@@ -127,7 +127,7 @@ class CustomLayout extends Model\AbstractModel
 
     /**
      * @param string $name
-     * @param string $classId
+     * @param int    $classId
      *
      * @return null|CustomLayout
      */
@@ -145,29 +145,26 @@ class CustomLayout extends Model\AbstractModel
     /**
      * @param string $field
      *
-     * @return Data|null
+     * @return \Pimcore\Model\DataObject\ClassDefinition\Data | null
      */
     public function getFieldDefinition($field)
     {
-        /**
-         * @param string $key
-         * @param Data|Layout $definition
-         *
-         * @return Data|null
-         */
-        $findElement = static function ($key, $definition) use (&$findElement) {
-            if ($definition->getName() === $key) {
+        $findElement = function ($key, $definition) use (&$findElement) {
+            if ($definition->getName() == $key) {
                 return $definition;
-            }
-            if (method_exists($definition, 'getChildren')) {
-                foreach ($definition->getChildren() as $child) {
-                    if ($childDefinition = $findElement($key, $child)) {
-                        return $childDefinition;
+            } else {
+                if (method_exists($definition, 'getChilds')) {
+                    foreach ($definition->getChilds() as $definition) {
+                        if ($definition = $findElement($key, $definition)) {
+                            return $definition;
+                        }
+                    }
+                } else {
+                    if ($definition->getName() == $key) {
+                        return $definition;
                     }
                 }
             }
-
-            return null;
         };
 
         return $findElement($field, $this->getLayoutDefinitions());
@@ -264,7 +261,7 @@ class CustomLayout extends Model\AbstractModel
     }
 
     /**
-     * @param Data|Layout $data
+     * @param $data
      */
     public static function cleanupForExport(&$data)
     {
@@ -272,8 +269,8 @@ class CustomLayout extends Model\AbstractModel
             unset($data->fieldDefinitionsCache);
         }
 
-        if (method_exists($data, 'getChildren')) {
-            $children = $data->getChildren();
+        if (method_exists($data, 'getChilds')) {
+            $children = $data->getChilds();
             if (is_array($children)) {
                 foreach ($children as $child) {
                     self::cleanupForExport($child);
@@ -291,6 +288,16 @@ class CustomLayout extends Model\AbstractModel
 
         $cd .= '/** ';
         $cd .= "\n";
+        $cd .= '* Generated at: '.date('c')."\n";
+
+        $user = Model\User::getById($this->getUserModification());
+        if ($user) {
+            $cd .= '* Changed by: '.$user->getName().' ('.$user->getId().')'."\n";
+        }
+
+        if (isset($_SERVER['REMOTE_ADDR'])) {
+            $cd .= '* IP: '.$_SERVER['REMOTE_ADDR']."\n";
+        }
 
         if ($this->getDescription()) {
             $description = str_replace(['/**', '*/', '//'], '', $this->getDescription());
@@ -304,7 +311,7 @@ class CustomLayout extends Model\AbstractModel
     }
 
     /**
-     * @param string $classId
+     * @param mixed $classId
      *
      * @return int|null
      */
@@ -513,7 +520,7 @@ class CustomLayout extends Model\AbstractModel
     }
 
     /**
-     * @param Layout|null $layoutDefinitions
+     * @param array $layoutDefinitions
      */
     public function setLayoutDefinitions($layoutDefinitions)
     {
@@ -521,7 +528,7 @@ class CustomLayout extends Model\AbstractModel
     }
 
     /**
-     * @return Layout|null
+     * @return array
      */
     public function getLayoutDefinitions()
     {
@@ -529,7 +536,7 @@ class CustomLayout extends Model\AbstractModel
     }
 
     /**
-     * @param string $classId
+     * @param int $classId
      */
     public function setClassId($classId)
     {

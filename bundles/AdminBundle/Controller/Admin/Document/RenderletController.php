@@ -18,7 +18,7 @@ declare(strict_types=1);
 namespace Pimcore\Bundle\AdminBundle\Controller\Admin\Document;
 
 use Pimcore\Bundle\AdminBundle\Controller\AdminController;
-use Pimcore\Document\Editable\EditableHandlerInterface;
+use Pimcore\Document\Tag\TagHandlerInterface;
 use Pimcore\Localization\LocaleServiceInterface;
 use Pimcore\Model\Document;
 use Pimcore\Model\Element\AbstractElement;
@@ -37,11 +37,11 @@ class RenderletController extends AdminController
     /**
      * Handles editmode preview for renderlets
      *
-     * @Route("/document_tag/renderlet", name="pimcore_admin_document_renderlet_renderlet")
+     * @Route("/document_tag/renderlet")
      *
      * @param Request $request
      * @param ActionRenderer $actionRenderer
-     * @param EditableHandlerInterface $editableHandler
+     * @param TagHandlerInterface $tagHandler
      * @param LocaleServiceInterface $localeService
      *
      * @return Response
@@ -49,7 +49,7 @@ class RenderletController extends AdminController
     public function renderletAction(
         Request $request,
         ActionRenderer $actionRenderer,
-        EditableHandlerInterface $editableHandler,
+        TagHandlerInterface $tagHandler,
         LocaleServiceInterface $localeService
     ) {
         $query = $request->query->all();
@@ -73,7 +73,7 @@ class RenderletController extends AdminController
 
         // set document if set in request
         if ($document = $request->get('pimcore_parentDocument')) {
-            $document = Document\PageSnippet::getById($document);
+            $document = Document::getById($document);
             if ($document) {
                 $attributes = $actionRenderer->addDocumentAttributes($document, $attributes);
                 unset($attributes[DynamicRouter::CONTENT_TEMPLATE]);
@@ -97,7 +97,7 @@ class RenderletController extends AdminController
             $localeService->setLocale($attributes['_locale']);
         }
 
-        $result = $editableHandler->renderAction(new ViewModel(), $controller, $action, $moduleOrBundle, $attributes, $query);
+        $result = $tagHandler->renderAction(new ViewModel(), $controller, $action, $moduleOrBundle, $attributes, $query);
 
         return new Response($result);
     }

@@ -53,7 +53,7 @@ interface PriceInfoInterface extends PriceSystemPriceInfoInterface
     public function setAmount(Decimal $amount);
 
     /**
-     * @return Decimal
+     * @return PriceInfoInterface
      */
     public function getAmount(): Decimal;
 

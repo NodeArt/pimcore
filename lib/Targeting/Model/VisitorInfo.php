@@ -61,14 +61,14 @@ class VisitorInfo implements \IteratorAggregate
     /**
      * Target group assignments sorted by count
      *
-     * @var TargetGroupAssignment[]|null
+     * @var TargetGroupAssignment[]
      */
     private $sortedTargetGroupAssignments;
 
     /**
      * Plain list of assigned target groups
      *
-     * @var TargetGroup[]|null
+     * @var TargetGroup[]
      */
     private $targetGroups;
 

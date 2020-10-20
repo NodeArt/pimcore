@@ -50,7 +50,7 @@ trait PimcoreMigrationsConfiguration
 
     protected function configureCommand(string $name)
     {
-        /** @var AbstractCommand $this */
+        /** @var $this AbstractCommand */
         $this
             ->setName(sprintf('pimcore:migrations:%s', $name))
             ->addOption(
@@ -59,7 +59,7 @@ trait PimcoreMigrationsConfiguration
                 InputOption::VALUE_REQUIRED,
                 sprintf(
                     'The bundle to migrate. If no bundle is set it will use the <comment>app</comment> set from <comment>%s</comment>.',
-                    'app/Migrations'
+                    'app/Resources/migrations'
                 )
             )
             ->addOption(
@@ -68,7 +68,7 @@ trait PimcoreMigrationsConfiguration
                 InputOption::VALUE_REQUIRED,
                 sprintf(
                     'The migration set to use (will be overridden by bundle if <comment>--bundle</comment> option is set).' . PHP_EOL . 'Defaults to <comment>app</comment> which loads migrations from <comment>%s</comment>.',
-                    'app/Migrations'
+                    'app/Resources/migrations'
                 ),
                 'app'
             );
@@ -76,6 +76,7 @@ trait PimcoreMigrationsConfiguration
 
     protected function getMigrationConfiguration(InputInterface $input, OutputInterface $output): Configuration
     {
+        /** @var $this AbstractCommand */
         if (!$this->migrationConfiguration) {
             $factory = $this->getApplication()->getKernel()->getContainer()->get(ConfigurationFactory::class);
 

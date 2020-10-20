@@ -44,7 +44,7 @@ class DeliveryAddress extends AbstractStep implements CheckoutStepInterface
     /**
      * sets delivered data and commits step
      *
-     * @param mixed $data
+     * @param  $data
      *
      * @return bool
      */

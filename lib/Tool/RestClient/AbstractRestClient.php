@@ -26,9 +26,6 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 
-/**
- * @deprecated
- */
 abstract class AbstractRestClient implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
@@ -44,7 +41,7 @@ abstract class AbstractRestClient implements LoggerAwareInterface
     protected $enableProfiling = false;
 
     /**
-     * @var object|null
+     * @var mixed
      */
     protected $profilingInfo;
 
@@ -153,8 +150,8 @@ abstract class AbstractRestClient implements LoggerAwareInterface
     }
 
     /**
-     * @param string $key
-     * @param mixed $value
+     * @param  $key
+     * @param  $value
      *
      * @return $this
      */
@@ -171,7 +168,7 @@ abstract class AbstractRestClient implements LoggerAwareInterface
     }
 
     /**
-     * @param bool $disableMappingExceptions
+     * @param $disableMappingExceptions
      *
      * @return $this
      */
@@ -191,7 +188,7 @@ abstract class AbstractRestClient implements LoggerAwareInterface
     }
 
     /**
-     * @param bool $condense
+     * @param $condense
      *
      * @return $this
      */
@@ -211,7 +208,7 @@ abstract class AbstractRestClient implements LoggerAwareInterface
     }
 
     /**
-     * @param bool $enableProfiling
+     * @param $enableProfiling
      *
      * @return $this
      */
@@ -231,7 +228,7 @@ abstract class AbstractRestClient implements LoggerAwareInterface
     }
 
     /**
-     * @return object|null
+     * @return mixed
      */
     public function getProfilingInfo()
     {
@@ -255,7 +252,7 @@ abstract class AbstractRestClient implements LoggerAwareInterface
     }
 
     /**
-     * @param string $apikey
+     * @param $apikey
      *
      * @return $this
      */
@@ -494,16 +491,16 @@ abstract class AbstractRestClient implements LoggerAwareInterface
     }
 
     /**
-     * @param string|null $condition
-     * @param string|null $order
-     * @param string|null $orderKey
-     * @param int|null $offset
-     * @param int|null $limit
-     * @param string|null $groupBy
+     * @param null $condition
+     * @param null $order
+     * @param null $orderKey
+     * @param null $offset
+     * @param null $limit
+     * @param null $groupBy
      * @param bool $decode
-     * @param string|null $objectClass
+     * @param null $objectClass
      *
-     * @return DataObject\AbstractObject[]
+     * @return Object[]
      *
      * @throws Exception
      */
@@ -533,12 +530,12 @@ abstract class AbstractRestClient implements LoggerAwareInterface
     }
 
     /**
-     * @param string|null $condition
-     * @param string|null $order
-     * @param string|null $orderKey
-     * @param int|null $offset
-     * @param int|null $limit
-     * @param string|null $groupBy
+     * @param null $condition
+     * @param null $order
+     * @param null $orderKey
+     * @param null $offset
+     * @param null $limit
+     * @param null $groupBy
      * @param bool $decode
      *
      * @return Asset[]
@@ -573,12 +570,12 @@ abstract class AbstractRestClient implements LoggerAwareInterface
     }
 
     /**
-     * @param string|null $condition
-     * @param string|null $order
-     * @param string|null $orderKey
-     * @param int|null $offset
-     * @param int|null $limit
-     * @param string|null $groupBy
+     * @param null $condition
+     * @param null $order
+     * @param null $orderKey
+     * @param null $offset
+     * @param null $limit
+     * @param null $groupBy
      * @param bool $decode
      *
      * @return Document[]
@@ -618,11 +615,11 @@ abstract class AbstractRestClient implements LoggerAwareInterface
     }
 
     /**
-     * @param int $id
+     * @param      $id
      * @param bool $decode
-     * @param Webservice\IdMapperInterface|null $idMapper
+     * @param null $idMapper
      *
-     * @return DataObject\AbstractObject|null
+     * @return mixed|DataObject\Folder
      *
      * @throws Exception
      */
@@ -677,16 +674,14 @@ abstract class AbstractRestClient implements LoggerAwareInterface
                 throw new Exception("Unable to decode object, could not instantiate Object with given class name [ $classname ]");
             }
         }
-
-        return null;
     }
 
     /**
-     * @param int $id
+     * @param      $id
      * @param bool $decode
-     * @param Webservice\IdMapperInterface|null $idMapper
+     * @param null $idMapper
      *
-     * @return Document|null
+     * @return mixed
      *
      * @throws Exception
      */
@@ -721,20 +716,20 @@ abstract class AbstractRestClient implements LoggerAwareInterface
                 return $document;
             }
         }
-
-        return null;
     }
 
     /**
-     * @param int $id
-     * @param bool $decode
-     * @param Webservice\IdMapperInterface|null $idMapper
-     * @param bool $light
-     * @param string|null $thumbnail
-     * @param bool $tolerant
+     * TODO
+     *
+     * @param        $id
+     * @param bool   $decode
+     * @param null   $idMapper
+     * @param bool   $light
+     * @param null   $thumbnail
+     * @param bool   $tolerant
      * @param string $protocol
      *
-     * @return Asset|null
+     * @return mixed|Asset\Folder
      *
      * @throws Exception
      */
@@ -779,7 +774,7 @@ abstract class AbstractRestClient implements LoggerAwareInterface
                 $wsDocument->reverseMap($asset, $this->getDisableMappingExceptions(), $idMapper);
 
                 if ($light) {
-                    /** @var Client $client */
+                    /** @var $client Client */
                     $client = ClientFactory::createHttpClient();
 
                     $assetType = $asset->getType();
@@ -837,8 +832,6 @@ abstract class AbstractRestClient implements LoggerAwareInterface
                 return $asset;
             }
         }
-
-        return null;
     }
 
     /**
@@ -846,7 +839,7 @@ abstract class AbstractRestClient implements LoggerAwareInterface
      *
      * @param Document $document
      *
-     * @return object json encoded success value and id
+     * @return mixed json encoded success value and id
      */
     public function createDocument(Document $document)
     {
@@ -890,6 +883,7 @@ abstract class AbstractRestClient implements LoggerAwareInterface
      *
      * @return mixed|null|string
      *
+     * @throws Exception
      * @throws \Exception
      */
     public function createAsset(Asset $asset)
@@ -911,7 +905,7 @@ abstract class AbstractRestClient implements LoggerAwareInterface
     /**
      * Deletes an object.
      *
-     * @param int $objectId
+     * @param $objectId
      *
      * @return mixed json encoded success value and id
      */
@@ -925,7 +919,7 @@ abstract class AbstractRestClient implements LoggerAwareInterface
     /**
      * Deletes an asset.
      *
-     * @param int $assetId
+     * @param $assetId
      *
      * @return mixed json encoded success value and id
      */
@@ -939,7 +933,7 @@ abstract class AbstractRestClient implements LoggerAwareInterface
     /**
      * Deletes a document.
      *
-     * @param int $documentId
+     * @param $documentId
      *
      * @return mixed json encoded success value and id
      */
@@ -987,7 +981,7 @@ abstract class AbstractRestClient implements LoggerAwareInterface
     }
 
     /**
-     * @param string $id
+     * @param      $id
      * @param bool $decode
      *
      * @return mixed|null|DataObject\ClassDefinition|string
@@ -1012,7 +1006,7 @@ abstract class AbstractRestClient implements LoggerAwareInterface
     }
 
     /**
-     * @param int $id
+     * @param      $id
      * @param bool $decode
      *
      * @return mixed|DataObject\ClassDefinition
@@ -1037,8 +1031,8 @@ abstract class AbstractRestClient implements LoggerAwareInterface
     }
 
     /**
-     * @param string|null $condition
-     * @param string|null $groupBy
+     * @param null $condition
+     * @param null $groupBy
      *
      * @return mixed
      *
@@ -1059,8 +1053,8 @@ abstract class AbstractRestClient implements LoggerAwareInterface
     }
 
     /**
-     * @param string|null $condition
-     * @param string|null $groupBy
+     * @param null $condition
+     * @param null $groupBy
      *
      * @return mixed
      *
@@ -1081,9 +1075,9 @@ abstract class AbstractRestClient implements LoggerAwareInterface
     }
 
     /**
-     * @param string|null $condition
-     * @param string|null $groupBy
-     * @param string|null $objectClass
+     * @param null $condition
+     * @param null $groupBy
+     * @param null $objectClass
      *
      * @return mixed
      *
@@ -1129,7 +1123,7 @@ abstract class AbstractRestClient implements LoggerAwareInterface
     }
 
     /**
-     * @param int $id
+     * @param $id
      *
      * @return mixed|null|string
      *
@@ -1169,7 +1163,7 @@ abstract class AbstractRestClient implements LoggerAwareInterface
     /**
      * Returns the given object brick definition
      *
-     * @param int $id
+     * @param $id
      *
      * @return mixed
      */
@@ -1207,14 +1201,14 @@ abstract class AbstractRestClient implements LoggerAwareInterface
     /**
      * Returns the image thumbnail configuration with the given ID.
      *
-     * @param int $id
+     * @param $id
      *
      * @return mixed
      */
     public function getImageThumbnail($id)
     {
         $params = [
-            'id' => $id,
+            'id' => $id
         ];
 
         $response = $this->getJsonResponse('GET', '/image-thumbnail', $params);
@@ -1235,8 +1229,8 @@ abstract class AbstractRestClient implements LoggerAwareInterface
     }
 
     /**
-     * @param object $wsData
-     * @param \stdClass $data
+     * @param $wsData
+     * @param $data
      *
      * @return mixed
      *
@@ -1270,8 +1264,8 @@ abstract class AbstractRestClient implements LoggerAwareInterface
     }
 
     /**
-     * @param string $class
-     * @param \stdClass $data
+     * @param $class
+     * @param $data
      *
      * @return mixed
      *
@@ -1291,8 +1285,8 @@ abstract class AbstractRestClient implements LoggerAwareInterface
     }
 
     /**
-     * @param string $filename
-     * @param string $extension
+     * @param $filename
+     * @param $extension
      *
      * @return string
      */

@@ -15,7 +15,8 @@ website triggers a save action.
 ## Content Localization 
 
 ### Language Configuration
-The available languages for content are configured centrally in system settings (*Settings* > *System Settings* > *Localization & Internationalization (i18n/l10n)*). 
+The available languages for content are configured centrally in system settings (*Settings* > *System Settings*
+> *Localization & Internationalization (i18n/l10n)*). 
 
 ![Localization Settings](../img/localization-settings.png)
 
@@ -31,8 +32,8 @@ The activated languages have influence to following modules of content within Pi
 
 * [Document - Localization (system property for language)](./02_Localize_your_Documents.md)
 * [Shared Translations (Symfony Translations Component)](./04_Shared_Translations.md)
-* [Localized Fields for Objects (object localization)](../05_Objects/01_Object_Classes/01_Data_Types/50_Localized_Fields.md)
-* [Structured Data Fields - Classification Store](../05_Objects/01_Object_Classes/01_Data_Types/15_Classification_Store.md)
+* [Localized Fields for Objects (object localization)](../05_Objects/01_Object_Classes/01_Data_Types/23_Localized_Fields.md)
+* [Structured Data Fields - Classification Store](../05_Objects/01_Object_Classes/01_Data_Types/13_Classification_Store.md)
 
 
 ## Pimcore Backend UI Localization 

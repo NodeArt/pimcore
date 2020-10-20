@@ -17,17 +17,15 @@ declare(strict_types = 1);
 
 namespace Pimcore\Model\Document\Tag\Loader;
 
-use Pimcore\Model\Document\Editable\Loader\PrefixLoader as EditablePrefixLoader;
+use Pimcore\Loader\ImplementationLoader\PrefixLoader as BasePrefixLoader;
 
-@trigger_error(sprintf('Class "%s" is deprecated since v6.8 and will be removed in 7. Use "%s" instead.', PrefixLoader::class, EditablePrefixLoader::class), E_USER_DEPRECATED);
-
-class_exists(EditablePrefixLoader::class);
-
-if (false) {
+class PrefixLoader extends BasePrefixLoader
+{
     /**
-     * @deprecated use \Pimcore\Model\Document\Editable\Loader\PrefixLoader instead.
+     * @inheritDoc
      */
-    class PrefixLoader extends EditablePrefixLoader
+    protected function normalizeName(string $name): string
     {
+        return ucfirst(strtolower($name));
     }
 }

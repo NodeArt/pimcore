@@ -49,10 +49,9 @@ pimcore.object.helpers.grid = Class.create({
         this.baseParams['fields[]'] = fieldParam;
     },
 
-    getStore: function(noBatchColumns, batchAppendColumns, batchRemoveColumns) {
+    getStore: function(noBatchColumns, batchAppendColumns) {
 
         batchAppendColumns = batchAppendColumns || [];
-        batchRemoveColumns = batchRemoveColumns || [];
         // the store
         var readerFields = [];
         readerFields.push({name: "id"});
@@ -71,7 +70,6 @@ pimcore.object.helpers.grid = Class.create({
 
         this.noBatchColumns = [];
         this.batchAppendColumns = [];
-        this.batchRemoveColumns = [];
 
         for (var i = 0; i < this.fields.length; i++) {
             if (!in_array(this.fields[i].key, ["creationDate", "modificationDate"])) {
@@ -104,9 +102,6 @@ pimcore.object.helpers.grid = Class.create({
 
                 if (pimcore.object.tags[type] && pimcore.object.tags[type].prototype.allowBatchAppend) {
                     batchAppendColumns.push(key);
-                }
-                if (pimcore.object.tags[type] && pimcore.object.tags[type].prototype.allowBatchRemove) {
-                    batchRemoveColumns.push(key);
                 }
 
                 readerFields.push(readerFieldConfig);
@@ -216,14 +211,13 @@ pimcore.object.helpers.grid = Class.create({
             if(field.key == "subtype") {
                 gridColumns.push({text: t("type"), width: this.getColumnWidth(field, 40), sortable: true, dataIndex: 'subtype',
                     hidden: !this.showSubtype,
-                    locked: this.getColumnLock(field),
                     renderer: function (value, metaData, record, rowIndex, colIndex, store) {
                         return '<div style="height: 16px;" class="pimcore_icon_asset  pimcore_icon_'
                         + value + '" name="' + t(record.data.subtype) + '">&nbsp;</div>';
                     }});
             } else if(field.key == "id") {
                 gridColumns.push({text: 'ID', width: this.getColumnWidth(field, this.getColumnWidth(field, 40)), sortable: true,
-                    dataIndex: 'id', filter: 'numeric', locked: this.getColumnLock(field)});
+                    dataIndex: 'id', filter: 'numeric'});
             } else if(field.key == "published") {
                 gridColumns.push(new Ext.grid.column.Check({
                     text: t("published"),
@@ -231,35 +225,34 @@ pimcore.object.helpers.grid = Class.create({
                     sortable: true,
                     filter: 'boolean',
                     dataIndex: "published",
-                    disabled: this.isSearch,
-                    locked: this.getColumnLock(field)
+                    disabled: this.isSearch
                 }));
             } else if(field.key == "fullpath") {
                 gridColumns.push({text: t("path"), width: this.getColumnWidth(field, 200), sortable: true,
-                    dataIndex: 'fullpath', filter: "string", locked: this.getColumnLock(field)});
+                    dataIndex: 'fullpath', filter: "string"});
             } else if(field.key == "filename") {
                 gridColumns.push({text: t("filename"), width: this.getColumnWidth(field, 200), sortable: true,
-                    dataIndex: 'filename', hidden: !showKey, locked: this.getColumnLock(field)});
+                    dataIndex: 'filename', hidden: !showKey});
             } else if(field.key == "key") {
                 gridColumns.push({text: t("key"), width: this.getColumnWidth(field, 200), sortable: true,
-                    dataIndex: 'key', hidden: !showKey, filter: 'string', locked: this.getColumnLock(field)});
+                    dataIndex: 'key', hidden: !showKey, filter: 'string'});
             } else if(field.key == "classname") {
                 gridColumns.push({text: t("class"), width: this.getColumnWidth(field, 200), sortable: true,
-                    dataIndex: 'classname', locked: this.getColumnLock(field), renderer: function(v){return t(v);}/*, hidden: true*/});
+                    dataIndex: 'classname',renderer: function(v){return ts(v);}/*, hidden: true*/});
             } else if(field.key == "creationDate") {
                 gridColumns.push({text: t("creationdate") + " (System)", width: this.getColumnWidth(field, 200), sortable: true,
-                    dataIndex: "creationDate", filter: 'date', editable: false, locked: this.getColumnLock(field), renderer: function(d) {
+                    dataIndex: "creationDate", filter: 'date', editable: false, renderer: function(d) {
                         return Ext.Date.format(d, "Y-m-d H:i:s");
                     }/*, hidden: !propertyVisibility.creationDate*/});
             } else if(field.key == "modificationDate") {
                 gridColumns.push({text: t("modificationdate") + " (System)", width: this.getColumnWidth(field, 200), sortable: true,
-                    dataIndex: "modificationDate", filter: 'date', editable: false, locked: this.getColumnLock(field), renderer: function(d) {
+                    dataIndex: "modificationDate", filter: 'date', editable: false, renderer: function(d) {
 
                         return Ext.Date.format(d, "Y-m-d H:i:s");
                     }/*, hidden: !propertyVisibility.modificationDate*/});
             } else {
                 if (fields[i].isOperator) {
-                    var operatorColumnConfig = {text: field.attributes.label ? field.attributes.label : field.attributes.key, width: field.width ? field.width : 200, locked: this.getColumnLock(field), sortable: false,
+                    var operatorColumnConfig = {text: field.attributes.label ? field.attributes.label : field.attributes.key, width: field.width ? field.width : 200, sortable: false,
                         dataIndex: fields[i].key, editable: false};
 
                     if (field.attributes.renderer && pimcore.object.tags[field.attributes.renderer]) {
@@ -272,7 +265,7 @@ pimcore.object.helpers.grid = Class.create({
 
 
                     operatorColumnConfig.getEditor = function() {
-                        return new pimcore.element.helpers.gridCellEditor({
+                        return new pimcore.object.helpers.gridCellEditor({
                             fieldInfo: {
                                 layout: {
                                     noteditable: true
@@ -298,8 +291,6 @@ pimcore.object.helpers.grid = Class.create({
                             fc.sortable = false;
                         }
 
-                        fc.locked = this.getColumnLock(field);
-
                         gridColumns.push(fc);
                         gridColumns[gridColumns.length - 1].hidden = false;
                         gridColumns[gridColumns.length - 1].layout = fields[i];
@@ -320,14 +311,6 @@ pimcore.object.helpers.grid = Class.create({
             return field.layout.width;
         } else {
             return defaultValue;
-        }
-    },
-
-    getColumnLock: function(field) {
-        if (field.locked) {
-            return field.locked;
-        } else {
-            return false;
         }
     },
 
@@ -419,10 +402,11 @@ pimcore.object.helpers.grid = Class.create({
             var columnKeys = field.layout.columnKeys ? field.layout.columnKeys : [];
             if (columnKeys && columnKeys.length) {
                 result = '<table border="0" cellpadding="0"  cellspacing="0" style="border-collapse: collapse;">';
+                var i;
 
                 result += '<tr><td>&nbsp;</td>';
                 for (let i = 0; i < columnKeys.length; i++) {
-                    result += '<td style="padding: 0 5px 0 5px; font-size:11px; border-bottom: 1px solid #d0d0d0; border-top: 1px solid #d0d0d0; border-left: 1px solid #d0d0d0; border-right: 1px solid #d0d0d0;">' + t(columnKeys[i]) + '</td>';
+                    result += '<td style="padding: 0 5px 0 5px; font-size:11px; border-bottom: 1px solid #d0d0d0; border-top: 1px solid #d0d0d0; border-left: 1px solid #d0d0d0; border-right: 1px solid #d0d0d0;">' + ts(columnKeys[i]) + '</td>';
                 }
                 result += '</tr>';
 

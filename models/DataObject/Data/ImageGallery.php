@@ -32,7 +32,7 @@ class ImageGallery implements \Iterator, OwnerAwareFieldInterface
     /**
      * ImageGallery constructor.
      *
-     * @param Hotspotimage[] $items
+     * @param $items
      */
     public function __construct($items)
     {
@@ -67,7 +67,9 @@ class ImageGallery implements \Iterator, OwnerAwareFieldInterface
      */
     public function next()
     {
-        next($this->items);
+        $var = next($this->items);
+
+        return $var;
     }
 
     /**

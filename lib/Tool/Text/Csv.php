@@ -19,7 +19,7 @@ namespace Pimcore\Tool\Text;
 class Csv
 {
     /**
-     * @param string $data
+     * @param $data
      *
      * @return \stdClass
      *
@@ -56,7 +56,7 @@ class Csv
     }
 
     /**
-     * @param string $data
+     * @param $data
      *
      * @return string
      */
@@ -84,7 +84,7 @@ class Csv
     }
 
     /**
-     * @param string $data
+     * @param $data
      *
      * @return array
      */
@@ -125,9 +125,9 @@ class Csv
     }
 
     /**
-     * @param string $data
-     * @param string $linefeed
-     * @param string $quotechar
+     * @param $data
+     * @param $linefeed
+     * @param $quotechar
      *
      * @return bool|string
      */
@@ -225,14 +225,13 @@ class Csv
     }
 
     /**
-     * @param array $array
+     * @param $array
      *
      * @return float
      */
     protected function deviation($array)
     {
         $avg = array_sum($array) / count($array);
-        $variance = [];
         foreach ($array as $value) {
             $variance[] = pow($value - $avg, 2);
         }

@@ -223,8 +223,8 @@ class Dao
     /**
      * returns order by statement for simularity calculations based on given fields and object ids
      *
-     * @param array $fields
-     * @param int $objectId
+     * @param $fields
+     * @param $objectId
      *
      * @return string
      */
@@ -282,8 +282,8 @@ class Dao
     /**
      * returns where statement for fulltext search index
      *
-     * @param array $fields
-     * @param string $searchstring
+     * @param $fields
+     * @param $searchstring
      *
      * @return string
      */

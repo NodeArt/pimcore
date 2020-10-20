@@ -78,7 +78,7 @@ pimcore.layout.toolbar = Class.create({
                 });
 
                 Ext.Ajax.request({
-                    url: Routing.generate('pimcore_admin_portal_dashboardlist'),
+                    url: "/admin/portal/dashboard-list",
                     success: function (response) {
                         var data = Ext.decode(response.responseText);
                         for (var i = 0; i < data.length; i++) {
@@ -105,7 +105,7 @@ pimcore.layout.toolbar = Class.create({
                                     function (button, value, object) {
                                         if (button == "ok") {
                                             Ext.Ajax.request({
-                                                url: Routing.generate('pimcore_admin_portal_createdashboard'),
+                                                url: "/admin/portal/create-dashboard",
                                                 method: 'POST',
                                                 params: {
                                                     key: value
@@ -612,7 +612,7 @@ pimcore.layout.toolbar = Class.create({
                         // create a promise which is resolved if the request succeeds
                         var promise = new Ext.Promise(function (resolve, reject) {
                             Ext.Ajax.request({
-                                url: Routing.generate('pimcore_admin_reports_piwik_iframeintegration'),
+                                url: "/admin/reports/piwik/iframe-integration",
                                 ignoreErrors: true, // do not pop up error window on failure
                                 success: function (response) {
                                     var data = {};
@@ -911,7 +911,7 @@ pimcore.layout.toolbar = Class.create({
                         cacheSubItems.push({
                             text: t("all_caches") + ' (Symfony + Data)',
                             iconCls: "pimcore_nav_icon_clear_cache",
-                            handler: this.clearCache.bind(this, {'env[]': pimcore.settings['cached_environments']})
+                            handler: this.clearCache.bind(this, {'env[]': ['dev','prod']})
                         });
                     }
 
@@ -924,22 +924,22 @@ pimcore.layout.toolbar = Class.create({
                     }
 
                     if (perspectiveCfg.inToolbar("settings.cache.clearSymfony")) {
+                        cacheSubItems.push({
+                            text: 'Symfony ' + t('environment') + ": prod",
+                            iconCls: "pimcore_nav_icon_clear_cache",
+                            handler: this.clearCache.bind(this, {'only_symfony_cache': true, 'env[]': 'prod'})
+                        });
 
-                        pimcore.settings['cached_environments'].forEach(function(environment) {
-                            cacheSubItems.push({
-                                text: 'Symfony ' + t('environment') + ": " + environment,
-                                iconCls: "pimcore_nav_icon_clear_cache",
-                                handler: this.clearCache.bind(this, {
-                                    'only_symfony_cache': true,
-                                    'env[]': environment
-                                })
-                            });
-                        }.bind(this));
+                        cacheSubItems.push({
+                            text: 'Symfony ' + t('environment') + ": " + pimcore.settings['environment'],
+                            iconCls: "pimcore_nav_icon_clear_cache",
+                            handler: this.clearCache.bind(this, {'only_symfony_cache': true, 'env[]': pimcore.settings['environment']})
+                        });
 
                         cacheSubItems.push({
                             text: 'Symfony ' + t('environment') + ": " + t('all'),
                             iconCls: "pimcore_nav_icon_clear_cache",
-                            handler: this.clearCache.bind(this, {'only_symfony_cache': true, 'env[]': pimcore.settings['cached_environments']})
+                            handler: this.clearCache.bind(this, {'only_symfony_cache': true, 'env[]': ['dev','prod']})
                         });
                     }
 
@@ -1027,7 +1027,7 @@ pimcore.layout.toolbar = Class.create({
                     iconCls: "pimcore_nav_icon_icons",
                     text: t('icon_library'),
                     handler: function() {
-                        pimcore.helpers.openGenericIframeWindow("icon-library", Routing.generate('pimcore_admin_misc_iconlist'), "pimcore_icon_icons", t("icon_library"));
+                        pimcore.helpers.openGenericIframeWindow("icon-library", "/admin/misc/icon-list", "pimcore_icon_icons", t("icon_library"));
                     }
                 });
             }
@@ -1056,7 +1056,7 @@ pimcore.layout.toolbar = Class.create({
         if (perspectiveCfg.inToolbar("search")) {
             var searchItems = [];
 
-            if ((user.isAllowed("documents") || user.isAllowed("assets") || user.isAllowed("objects")) && perspectiveCfg.inToolbar("search.quickSearch")) {
+            if ((user.isAllowed("documents") || user.isAllowed("asset") || user.isAllowed("objects")) && perspectiveCfg.inToolbar("search.quickSearch")) {
                 searchItems.push({
                     text: t("quicksearch"),
                     iconCls: "pimcore_nav_icon_quicksearch",
@@ -1071,8 +1071,7 @@ pimcore.layout.toolbar = Class.create({
                 pimcore.helpers.itemselector(false, function (selection) {
                         pimcore.helpers.openElement(selection.id, selection.type, selection.subtype);
                     }, {type: [type]},
-                    {
-                        asTab: true,
+                    {moveToTab: true,
                         context: {
                             scope: "globalSearch"
                         }
@@ -1163,7 +1162,7 @@ pimcore.layout.toolbar = Class.create({
                     text: t("maintenance_not_active"),
                     iconCls: "pimcore_nav_icon_maintenance",
                     handler: function () {
-                        window.open('https://pimcore.com/docs/6.x/Development_Documentation/Getting_Started/Installation.html#page_5-Maintenance-Cron-Job');
+                        window.open('https://pimcore.com/docs/5.0.x/Getting_Started/Installation.html#page_5-Maintenance-Cron-Job');
                     }
                 });
                 pimcore.notification.helper.incrementCount();
@@ -1175,7 +1174,7 @@ pimcore.layout.toolbar = Class.create({
                     text: t("mail_settings_incomplete"),
                     iconCls: "pimcore_nav_icon_email",
                     handler: function () {
-                        window.open('https://pimcore.com/docs/6.x/Development_Documentation/Tools_and_Features/System_Settings.html#page_E-Mail-Settings');
+                        window.open('https://pimcore.com/docs/5.x/Development_Documentation/Tools_and_Features/System_Settings.html#page_E-Mail-Settings');
                     }
                 });
                 pimcore.notification.helper.incrementCount();
@@ -1368,12 +1367,12 @@ pimcore.layout.toolbar = Class.create({
     },
 
     openPerspective: function(name) {
-        location.href = Routing.generate('pimcore_admin_index', {perspective: name});
+        location.href = "/admin/?perspective=" + name;
     },
 
     generatePagePreviews: function ()  {
         Ext.Ajax.request({
-            url: Routing.generate('pimcore_admin_document_page_getlist'),
+            url: '/admin/page/get-list',
             success: function (res) {
                 var data = Ext.decode(res.responseText);
                 if(data && data.success) {
@@ -1387,12 +1386,12 @@ pimcore.layout.toolbar = Class.create({
                     var progressWin = new Ext.Window({
                         title: t("generate_page_previews"),
                         layout:'fit',
-                        width:200,
+                        width:500,
                         bodyStyle: "padding: 10px;",
                         closable:false,
                         plain: true,
-                        items: [progressBar],
-                        listeners: pimcore.helpers.getProgressWindowListeners()
+                        modal: false,
+                        items: [progressBar]
                     });
 
                     progressWin.show();
@@ -1640,7 +1639,7 @@ pimcore.layout.toolbar = Class.create({
         Ext.Msg.confirm(t('warning'), t('system_performance_stability_warning'), function(btn){
             if (btn == 'yes'){
                 Ext.Ajax.request({
-                    url: Routing.generate('pimcore_admin_settings_clearcache'),
+                    url: '/admin/settings/clear-cache',
                     method: "DELETE",
                     params: params
                 });
@@ -1650,7 +1649,7 @@ pimcore.layout.toolbar = Class.create({
 
     clearOutputCache: function () {
         Ext.Ajax.request({
-            url: Routing.generate('pimcore_admin_settings_clearoutputcache'),
+            url: '/admin/settings/clear-output-cache',
             method: 'DELETE'
         });
     },
@@ -1659,7 +1658,7 @@ pimcore.layout.toolbar = Class.create({
         Ext.Msg.confirm(t('warning'), t('system_performance_stability_warning'), function(btn){
             if (btn == 'yes'){
                 Ext.Ajax.request({
-                    url: Routing.generate('pimcore_admin_settings_cleartemporaryfiles'),
+                    url: '/admin/settings/clear-temporary-files',
                     method: "DELETE"
                 });
             }
@@ -1716,23 +1715,23 @@ pimcore.layout.toolbar = Class.create({
     },
 
     showPhpInfo: function () {
-        pimcore.helpers.openGenericIframeWindow("phpinfo", Routing.generate('pimcore_admin_misc_phpinfo'), "pimcore_icon_php", "PHP Info");
+        pimcore.helpers.openGenericIframeWindow("phpinfo", "/admin/misc/phpinfo", "pimcore_icon_php", "PHP Info");
     },
 
     showServerInfo: function () {
-        pimcore.helpers.openGenericIframeWindow("serverinfo", Routing.generate('pimcore_admin_external_linfo_index'), "pimcore_icon_server_info", "Server Info");
+        pimcore.helpers.openGenericIframeWindow("serverinfo", "/admin/external_linfo", "pimcore_icon_server_info", "Server Info");
     },
 
     showOpcacheStatus: function () {
-        pimcore.helpers.openGenericIframeWindow("opcachestatus", Routing.generate('pimcore_admin_external_opcache_index'), "pimcore_icon_reports", "PHP OPcache Status");
+        pimcore.helpers.openGenericIframeWindow("opcachestatus", "/admin/external_opcache", "pimcore_icon_reports", "PHP OPcache Status");
     },
 
     showSystemRequirementsCheck: function () {
-        pimcore.helpers.openGenericIframeWindow("systemrequirementscheck", Routing.generate('pimcore_admin_install_check'), "pimcore_icon_systemrequirements", "System-Requirements Check");
+        pimcore.helpers.openGenericIframeWindow("systemrequirementscheck", "/admin/install/check", "pimcore_icon_systemrequirements", "System-Requirements Check");
     },
 
     showAdminer: function () {
-        pimcore.helpers.openGenericIframeWindow("adminer", Routing.generate('pimcore_admin_external_adminer_adminer'), "pimcore_icon_mysql", "Database Admin");
+        pimcore.helpers.openGenericIframeWindow("adminer", "/admin/external_adminer/adminer", "pimcore_icon_mysql", "Database Admin");
     },
 
     showElementHistory: function() {

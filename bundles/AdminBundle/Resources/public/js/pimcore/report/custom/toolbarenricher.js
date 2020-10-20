@@ -16,7 +16,7 @@ pimcore.report.custom.toolbarenricher = Class.create(pimcore.plugin.admin, {
 
             // get available reports
             Ext.Ajax.request({
-                url: Routing.generate('pimcore_admin_reports_customreport_getreportconfig'),
+                url: "/admin/reports/custom-report/get-report-config",
                 success: function (response) {
                     var res = Ext.decode(response.responseText);
                     var report;
@@ -64,7 +64,7 @@ pimcore.report.custom.toolbarenricher = Class.create(pimcore.plugin.admin, {
 
                                             if(!groupToolbarMenuEntries[report["group"]]) {
                                                 groupToolbarMenuEntries[report["group"]] = new Ext.menu.Item({
-                                                    text: t(report["group"]),
+                                                    text: report["group"],
                                                     iconCls: report["groupIconClass"],
                                                     menu: []
                                                 });
@@ -75,12 +75,12 @@ pimcore.report.custom.toolbarenricher = Class.create(pimcore.plugin.admin, {
                                         }
 
                                         parentMenuEntry.add({
-                                            text: t(report["niceName"]),
+                                            text: report["niceName"],
                                             iconCls: report["iconClass"],
                                             handler: function (report, reportClass) {
                                                 toolbar.showReports(reportClass, {
                                                     name: report["name"],
-                                                    text: t(report["niceName"]),
+                                                    text: report["niceName"],
                                                     niceName: report["niceName"],
                                                     iconCls: report["iconClass"]
                                                 });

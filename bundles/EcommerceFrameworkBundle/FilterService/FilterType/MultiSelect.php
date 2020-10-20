@@ -30,7 +30,7 @@ class MultiSelect extends AbstractFilterType
             'values' => $productList->getGroupByValues($field, true, !$filterDefinition->getUseAndCondition()),
             'fieldname' => $field,
             'metaData' => $filterDefinition->getMetaData(),
-            'resultCount' => $productList->count(),
+            'resultCount' => $productList->count()
         ]);
     }
 
@@ -39,8 +39,7 @@ class MultiSelect extends AbstractFilterType
         $field = $this->getField($filterDefinition);
         $preSelect = $this->getPreSelect($filterDefinition);
 
-        $value = $params[$field] ?? null;
-        $isReload = $params['is_reload'] ?? null;
+        $value = $params[$field];
 
         if (!empty($value)) {
             if (!is_array($value)) {
@@ -48,7 +47,7 @@ class MultiSelect extends AbstractFilterType
             }
         }
 
-        if (empty($value) && !$isReload) {
+        if (empty($value) && !$params['is_reload']) {
             if (!empty($preSelect) || $preSelect == '0') {
                 $value = explode(',', $preSelect);
             }

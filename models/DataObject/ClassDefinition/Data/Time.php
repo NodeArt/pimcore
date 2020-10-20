@@ -20,6 +20,8 @@ use Pimcore\Model;
 
 class Time extends Model\DataObject\ClassDefinition\Data\Input
 {
+    use Model\DataObject\Traits\SimpleComparisonTrait;
+
     /**
      * Static type of this element
      *
@@ -35,12 +37,12 @@ class Time extends Model\DataObject\ClassDefinition\Data\Input
     public $columnLength = 5;
 
     /**
-     * @var string|null
+     * @var string
      */
     public $minValue;
 
     /**
-     * @var string|null
+     * @var string
      */
     public $maxValue;
 
@@ -50,7 +52,7 @@ class Time extends Model\DataObject\ClassDefinition\Data\Input
     public $increment = 15 ;
 
     /**
-     * @return string|null
+     * @return string
      */
     public function getMinValue()
     {
@@ -58,7 +60,7 @@ class Time extends Model\DataObject\ClassDefinition\Data\Input
     }
 
     /**
-     * @param string|null $minValue
+     * @param string $minValue
      */
     public function setMinValue($minValue)
     {
@@ -70,7 +72,7 @@ class Time extends Model\DataObject\ClassDefinition\Data\Input
     }
 
     /**
-     * @return string|null
+     * @return string
      */
     public function getMaxValue()
     {
@@ -78,7 +80,7 @@ class Time extends Model\DataObject\ClassDefinition\Data\Input
     }
 
     /**
-     * @param string|null $maxValue
+     * @param string $maxValue
      */
     public function setMaxValue($maxValue)
     {
@@ -121,7 +123,7 @@ class Time extends Model\DataObject\ClassDefinition\Data\Input
     }
 
     /** True if change is allowed in edit mode.
-     * @param Model\DataObject\Concrete $object
+     * @param string $object
      * @param mixed $params
      *
      * @return bool
@@ -132,7 +134,7 @@ class Time extends Model\DataObject\ClassDefinition\Data\Input
     }
 
     /**
-     * @param string|null $data
+     * @param $data
      *
      * @return bool
      */
@@ -144,13 +146,13 @@ class Time extends Model\DataObject\ClassDefinition\Data\Input
     /**
      * Returns a 5 digit time string of a given time
      *
-     * @param int $timestamp
+     * @param $string
      *
      * @return null|string
      */
-    public function toTime($timestamp)
+    public function toTime($string)
     {
-        $time = @date('H:i', strtotime($timestamp));
+        $time = @date('H:i', strtotime($string));
         if (!$time) {
             return null;
         }
@@ -161,7 +163,7 @@ class Time extends Model\DataObject\ClassDefinition\Data\Input
     /**
      * Returns a timestamp representation of a given time
      *
-     * @param string $string
+     * @param      $string
      * @param null $baseTimestamp
      *
      * @return int
@@ -178,10 +180,10 @@ class Time extends Model\DataObject\ClassDefinition\Data\Input
     /**
      * Returns whether or not a time is earlier than the subject
      *
-     * @param string $subject
-     * @param string $comparison
+     * @param $subject
+     * @param $comparison
      *
-     * @return bool
+     * @return int
      */
     public function isEarlier($subject, $comparison)
     {
@@ -193,10 +195,10 @@ class Time extends Model\DataObject\ClassDefinition\Data\Input
     /**
      * Returns whether or not a time is later than the subject
      *
-     * @param string $subject
-     * @param string $comparison
+     * @param $subject
+     * @param $comparison
      *
-     * @return bool
+     * @return int
      */
     public function isLater($subject, $comparison)
     {
@@ -206,7 +208,7 @@ class Time extends Model\DataObject\ClassDefinition\Data\Input
     }
 
     /**
-     * @param Model\DataObject\Concrete\Dao|Model\DataObject\Localizedfield|Model\DataObject\Objectbrick\Data\AbstractData|\Pimcore\Model\DataObject\Fieldcollection\Data\AbstractData $object
+     * @param $object
      * @param mixed $params
      *
      * @return string

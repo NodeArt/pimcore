@@ -12,7 +12,7 @@ The select editable generates select-box component in Editmode.
 | `reload` | bool    | Set true to reload the page in editmode after selecting an item                    |
 | `width`  | integer | Width of the select box in pixel                                                   |
 | `class`  | string  | A CSS class that is added to the surrounding container of this element in editmode |
-| `defaultValue`  | string   | A default value for the available options.                                       |
+
 ## Methods
 
 | Name        | Return | Description                                                           |
@@ -29,6 +29,7 @@ in the frontend preview you will see simply the value of the chosen option.
 
 <div class="code-section">
 
+
 ```php
 <?php
 if($this->editmode):
@@ -38,8 +39,7 @@ if($this->editmode):
                 ['one-month', 'One month'],
                 ['three-months', 'Three months'],
                 ['unlimited', 'Unlimited']
-            ],
-            "defaultValue" => "unlimited"
+            ]
         ]);
 
 else:
@@ -57,8 +57,7 @@ else:
                 ["one-month", "One month"],
                 ["three-months", "Three months"],
                 ["unlimited", "Unlimited"]
-            ],
-            "defaultValue" : "unlimited"
+            ]
         }) }}
 {% else %}
     <p>
@@ -66,7 +65,6 @@ else:
     </p>
 {% endif %}
 ```
-
 </div>
 
 Editmode:
@@ -75,11 +73,12 @@ Editmode:
 Frontend:
 ![Select editable in frontend](../../img/editables_select_frontend_preview.png)
 
-### Preselect the option
-You can *_preselect_* an option in your select editable by using `setDataFromResource()`
+### Preselect an Option
+
+You can ***preselect*** an option in your select editable by using `setDataFromResource()`.
 
 <div class="code-section">
-
+    
 ```php
 if($this->editmode):
     if($this->select("valid_for")->isEmpty()):
@@ -93,13 +92,12 @@ endif;
 
 ```twig
 {% if editmode %}
-    {% if pimcore_select('valid_for').isEmpty() %}
-        {% do pimcore_select('valid_for').setDataFromResource('unlimited') %}
+    {% if pimcore_select("valid_for").isEmpty() %}
+        {% do pimcore_select("valid_for").setDataFromResource("unlimited") %}
     {% endif %}
     
     ...
     
 {% endif %}
 ```
-
 </div>

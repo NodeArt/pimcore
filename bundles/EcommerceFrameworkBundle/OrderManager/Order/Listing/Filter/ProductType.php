@@ -31,16 +31,8 @@ class ProductType implements OrderListFilterInterface
      */
     public function apply(OrderListInterface $orderList)
     {
-        $types = [];
         $orderList->joinOrderItemObjects();
-
-        $db = \Pimcore\Db::get();
-        foreach ($this->getTypes() as $type) {
-            $types[] = $db->quote($type);
-        }
-        $orderList->getQuery()->where('orderItemObjects.o_className IN (' . implode(',', $types) . ')');
-
-        return $this;
+        $orderList->getQuery()->where('orderItemObjects.o_className IN (?)', $this->getTypes());
     }
 
     /**

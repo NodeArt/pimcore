@@ -21,14 +21,13 @@ use Pimcore\Tool\Serialize;
 
 class PHP extends AbstractOperator
 {
-    /** @var string */
     private $mode;
 
     public function __construct(\stdClass $config, $context = null)
     {
         parent::__construct($config, $context);
 
-        $this->mode = $config->mode ?? '';
+        $this->mode = $config->mode;
     }
 
     public function getLabeledValue($element)
@@ -54,7 +53,7 @@ class PHP extends AbstractOperator
                 $childValues = [$childValues];
             }
 
-            /** @var array $childValues */
+            /** @var $childValue string */
             if (is_array($childValues)) {
                 foreach ($childValues as $childValue) {
                     $valueArray[] = $childValue;

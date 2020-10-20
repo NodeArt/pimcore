@@ -14,20 +14,20 @@
 
 namespace Pimcore\Maintenance\Tasks;
 
-use Pimcore\Db\ConnectionInterface;
+use Pimcore\Db\Connection;
 use Pimcore\Maintenance\TaskInterface;
 
 final class TmpStoreCleanupTask implements TaskInterface
 {
     /**
-     * @var ConnectionInterface
+     * @var Connection
      */
     private $db;
 
     /**
-     * @param ConnectionInterface $db
+     * @param Connection $db
      */
-    public function __construct(ConnectionInterface $db)
+    public function __construct(Connection $db)
     {
         $this->db = $db;
     }

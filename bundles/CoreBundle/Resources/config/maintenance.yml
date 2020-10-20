@@ -42,24 +42,6 @@ services:
         tags:
             - { name: pimcore.maintenance.task, type: runSanityCheck }
 
-    Pimcore\Maintenance\Tasks\CleanupBrickTablesTask:
-        arguments:
-            - '@logger'
-        tags:
-            - { name: pimcore.maintenance.task, type: cleanupBrickTables }
-
-    Pimcore\Maintenance\Tasks\CleanupClassificationstoreTablesTask:
-        arguments:
-            - '@logger'
-        tags:
-            - { name: pimcore.maintenance.task, type: cleanupClassificationstoreTables }
-
-    Pimcore\Maintenance\Tasks\CleanupFieldcollectionTablesTask:
-        arguments:
-            - '@logger'
-        tags:
-            - { name: pimcore.maintenance.task, type: cleanupFieldcollectionTables }
-
     Pimcore\Maintenance\Tasks\VersionsCleanupTask:
         arguments:
             - '@logger'
@@ -71,12 +53,6 @@ services:
             - '@logger'
         tags:
             - { name: pimcore.maintenance.task, type: versioncompress }
-
-    Pimcore\Maintenance\Tasks\VersionsCleanupStackTraceDbTask:
-        arguments:
-            - '@logger'
-        tags:
-            - { name: pimcore.maintenance.task, type: VersionsCleanupStackTraceDb }
 
     Pimcore\Maintenance\Tasks\RedirectCleanupTask:
         arguments:
@@ -90,6 +66,12 @@ services:
             - '@logger'
         tags:
             - { name: pimcore.maintenance.task, type: cleanupbrokenviews }
+
+    Pimcore\Maintenance\Tasks\DownloadMaxMinDbTask:
+        arguments:
+            - '@logger'
+        tags:
+            - { name: pimcore.maintenance.task, type: downloadmaxminddb }
 
     Pimcore\Maintenance\Tasks\CacheCleanupTask:
         arguments:
@@ -117,20 +99,10 @@ services:
             - { name: pimcore.maintenance.task, type: asset_document_convert }
 
     Pimcore\Maintenance\Tasks\HousekeepingTask:
-        arguments:
-            - '%pimcore.maintenance.housekeeping.cleanup_tmp_files_atime_older_than%'
-            - '%pimcore.maintenance.housekeeping.cleanup_profiler_files_atime_older_than%'
         tags:
             - { name: pimcore.maintenance.task, type: housekeeping }
 
-    Pimcore\Maintenance\Tasks\LowQualityImagePreviewTask:
-        arguments:
-            - '@logger'
-        tags:
-            - { name: pimcore.maintenance.task, type: low_quality_image_preview }
-
     Pimcore\Maintenance\Tasks\TagsExpireTask:
-        deprecated: 'The "%service_id%" service is deprecated and will be removed in Pimcore 7'
         arguments:
             - '@logger'
         tags:

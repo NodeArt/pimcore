@@ -20,9 +20,6 @@ use Pimcore\Http\Exception\ResponseException;
 use Pimcore\Model\Element\AbstractElement;
 use Symfony\Component\HttpFoundation\Request;
 
-/**
- * @deprecated
- */
 abstract class AbstractElementController extends AbstractRestController
 {
     const ELEMENT_DOES_NOT_EXIST = -1;
@@ -113,7 +110,7 @@ abstract class AbstractElementController extends AbstractRestController
             'get' => 'view',
             'delete' => 'delete',
             'update' => 'publish',
-            'create' => 'create',
+            'create' => 'create'
         ];
 
         if (!isset($map[$type])) {
@@ -133,14 +130,14 @@ abstract class AbstractElementController extends AbstractRestController
             );
 
             throw new ResponseException($this->createErrorResponse([
-                'msg' => sprintf('Not allowed: permission %s is needed', $permission),
+                'msg' => sprintf('Not allowed: permission %s is needed', $permission)
             ]));
         }
     }
 
     /**
-     * @param string $class
-     * @param array $data
+     * @param $class
+     * @param $data
      *
      * @return \Pimcore\Model\Webservice\Data
      */
@@ -152,8 +149,8 @@ abstract class AbstractElementController extends AbstractRestController
     }
 
     /**
-     * @param object $wsData
-     * @param array $data
+     * @param $wsData
+     * @param $data
      *
      * @return \Pimcore\Model\Webservice\Data
      */

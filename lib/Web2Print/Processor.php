@@ -23,16 +23,9 @@ use Pimcore\Model\Document;
 use Pimcore\Tool;
 use Pimcore\Web2Print\Processor\PdfReactor8;
 use Pimcore\Web2Print\Processor\WkHtmlToPdf;
-use Symfony\Component\Lock\Factory as LockFactory;
-use Symfony\Component\Lock\LockInterface;
 
 abstract class Processor
 {
-    /**
-     * @var LockInterface|null
-     */
-    private static $lock = null;
-
     /**
      * @return PdfReactor8|WkHtmlToPdf
      *
@@ -42,20 +35,18 @@ abstract class Processor
     {
         $config = Config::getWeb2PrintConfig();
 
-        if ($config->get('generalTool') === 'pdfreactor') {
+        if ($config->generalTool == 'pdfreactor') {
             return new PdfReactor8();
-        } elseif ($config->get('generalTool') === 'wkhtmltopdf') {
+        } elseif ($config->generalTool == 'wkhtmltopdf') {
             return new WkHtmlToPdf();
         } else {
-            throw new \Exception('Invalid Configuation - ' . $config->get('generalTool'));
+            throw new \Exception('Invalid Configuation - ' . $config->generalTool);
         }
     }
 
     /**
-     * @param int $documentId
-     * @param array $config
-     *
-     * @return bool
+     * @param $documentId
+     * @param $config
      *
      * @throws \Exception
      */
@@ -84,21 +75,20 @@ abstract class Processor
         $cmd = Tool\Console::getPhpCli() . ' ' . realpath(PIMCORE_PROJECT_ROOT . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR . 'console'). ' pimcore:web2print:pdf-creation ' . implode(' ', $args);
 
         Logger::info($cmd);
-        $disableBackgroundExecution = $config['disableBackgroundExecution'] ?? false;
 
-        if (!$disableBackgroundExecution) {
+        if (!$config['disableBackgroundExecution']) {
             Tool\Console::execInBackground($cmd, PIMCORE_LOG_DIRECTORY . DIRECTORY_SEPARATOR . 'web2print-output.log');
 
             return true;
+        } else {
+            return self::getInstance()->startPdfGeneration($jobConfig->documentId);
         }
-
-        return (bool)self::getInstance()->startPdfGeneration($jobConfig->documentId);
     }
 
     /**
-     * @param int $documentId
+     * @param $documentId
      *
-     * @return string|null
+     * @return mixed|null
      */
     public function startPdfGeneration($documentId)
     {
@@ -106,16 +96,15 @@ abstract class Processor
 
         $document = $this->getPrintDocument($documentId);
 
-        $lock = self::getLock($document);
         // check if there is already a generating process running, wait if so ...
-        $lock->acquire(true);
+        Model\Tool\Lock::acquire($document->getLockKey(), 0);
 
         $pdf = null;
 
         try {
             \Pimcore::getEventDispatcher()->dispatch(DocumentEvents::PRINT_PRE_PDF_GENERATION, new DocumentEvent($document, [
                 'processor' => $this,
-                'jobConfig' => $jobConfigFile->config,
+                'jobConfig' => $jobConfigFile->config
             ]));
 
             $pdf = $this->buildPdf($document, $jobConfigFile->config);
@@ -123,19 +112,17 @@ abstract class Processor
 
             \Pimcore::getEventDispatcher()->dispatch(DocumentEvents::PRINT_POST_PDF_GENERATION, new DocumentEvent($document, [
                 'filename' => $document->getPdfFileName(),
-                'pdf' => $pdf,
+                'pdf' => $pdf
             ]));
 
             $document->setLastGenerated((time() + 1));
-            $document->setLastGenerateMessage('');
             $document->save();
         } catch (\Exception $e) {
             Logger::err($e);
-            $document->setLastGenerateMessage($e->getMessage());
             $document->save();
         }
 
-        $lock->release();
+        Model\Tool\Lock::release($document->getLockKey());
         Model\Tool\TmpStore::delete($document->getLockKey());
 
         @unlink($this->getJobConfigFile($documentId));
@@ -145,16 +132,14 @@ abstract class Processor
 
     /**
      * @param Document\PrintAbstract $document
-     * @param object $config
+     * @param $config
      *
-     * @return string
-     *
-     * @throws \Exception
+     * @return mixed
      */
     abstract protected function buildPdf(Document\PrintAbstract $document, $config);
 
     /**
-     * @param \stdClass $jobConfig
+     * @param $jobConfig
      *
      * @return bool
      */
@@ -166,7 +151,7 @@ abstract class Processor
     }
 
     /**
-     * @param int $documentId
+     * @param $documentId
      *
      * @return \stdClass
      */
@@ -178,9 +163,9 @@ abstract class Processor
     }
 
     /**
-     * @param int $documentId
+     * @param $documentId
      *
-     * @return Document\PrintAbstract
+     * @return Document\Printpage
      *
      * @throws \Exception
      */
@@ -195,7 +180,7 @@ abstract class Processor
     }
 
     /**
-     * @param int $processId
+     * @param $processId
      *
      * @return string
      */
@@ -210,9 +195,9 @@ abstract class Processor
     abstract public function getProcessingOptions();
 
     /**
-     * @param int $documentId
-     * @param int $status
-     * @param string $statusUpdate
+     * @param $documentId
+     * @param $status
+     * @param $statusUpdate
      */
     protected function updateStatus($documentId, $status, $statusUpdate)
     {
@@ -223,7 +208,7 @@ abstract class Processor
     }
 
     /**
-     * @param int $documentId
+     * @param $documentId
      *
      * @return array
      */
@@ -233,13 +218,13 @@ abstract class Processor
         if ($jobConfig) {
             return [
                 'status' => $jobConfig->status,
-                'statusUpdate' => $jobConfig->statusUpdate,
+                'statusUpdate' => $jobConfig->statusUpdate
             ];
         }
     }
 
     /**
-     * @param int $documentId
+     * @param $documentId
      *
      * @throws \Exception
      */
@@ -249,40 +234,17 @@ abstract class Processor
         if (empty($document)) {
             throw new \Exception('Document with id ' . $documentId . ' not found.');
         }
-
-        self::getLock($document)->release();
+        Model\Tool\Lock::release($document->getLockKey());
         Model\Tool\TmpStore::delete($document->getLockKey());
     }
 
-    /**
-     * @param string $html
-     * @param array $params
-     *
-     * @return string
-     */
     protected function processHtml($html, $params)
     {
         $placeholder = new \Pimcore\Placeholder();
-        $document = $params['document'] ?? null;
-        $hostUrl = $params['hostUrl'] ?? null;
-
-        $html = $placeholder->replacePlaceholders($html, $params, $document);
-        $twig = \Pimcore::getContainer()->get('twig');
-        $template = $twig->createTemplate((string) $html);
-        $html = $twig->render($template, $params);
-
-        $html = \Pimcore\Helper\Mail::setAbsolutePaths($html, $document, $hostUrl);
+        $html = $placeholder->replacePlaceholders($html, $params, $params['document']);
+        $html = \Pimcore\Helper\Mail::setAbsolutePaths($html, $params['document'], $params['hostUrl']);
 
         return $html;
-    }
-
-    protected function getLock(Document\PrintAbstract $document): LockInterface
-    {
-        if (!self::$lock) {
-            self::$lock = \Pimcore::getContainer()->get(LockFactory::class)->createLock($document->getLockKey());
-        }
-
-        return self::$lock;
     }
 
     /**

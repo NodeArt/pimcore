@@ -65,9 +65,7 @@ class Xliff12Exporter implements ExporterInterface
                     continue;
                 }
 
-                $targetContent = $attribute->getTargetContent()[$targetLanguage] ?? null;
-
-                $this->addTransUnitNode($body, $attribute->getType() . self::DELIMITER . $attribute->getName(), $attribute->getContent(), $attributeSet->getSourceLanguage(), $targetContent, $targetLanguage);
+                $this->addTransUnitNode($body, $attribute->getType() . self::DELIMITER . $attribute->getName(), $attribute->getContent(), $attributeSet->getSourceLanguage());
             }
         }
 
@@ -99,35 +97,23 @@ class Xliff12Exporter implements ExporterInterface
     }
 
     /**
-     * @param \SimpleXMLElement $xml
-     * @param string $name
-     * @param string $sourceContent
-     * @param string $sourceLang
-     * @param string $targetContent
-     * @param string $targetLang
+     * @param $xml
+     * @param $name
+     * @param $content
+     * @param $source
      */
-    protected function addTransUnitNode(\SimpleXMLElement $xml, $name, $sourceContent, $sourceLang, $targetContent, $targetLang)
+    protected function addTransUnitNode(\SimpleXMLElement $xml, $name, $content, $source)
     {
         $transUnit = $xml->addChild('trans-unit');
         $transUnit->addAttribute('id', htmlentities($name));
 
         $sourceNode = $transUnit->addChild('source');
-        $sourceNode->addAttribute('xmlns:xml:lang', $sourceLang);
+        $sourceNode->addAttribute('xmlns:xml:lang', $source);
 
         $node = dom_import_simplexml($sourceNode);
         $no = $node->ownerDocument;
         $f = $no->createDocumentFragment();
-        $f->appendXML($this->xliffEscaper->escapeXliff($sourceContent));
+        $f->appendXML($this->xliffEscaper->escapeXliff($content));
         @$node->appendChild($f);
-
-        if (!empty($targetContent)) {
-            $targetNode = $transUnit->addChild('target');
-            $targetNode->addAttribute('xmlns:xml:lang', $targetLang);
-
-            $tNode = dom_import_simplexml($targetNode);
-            $targetFragment = $no->createDocumentFragment();
-            $targetFragment->appendXML($this->xliffEscaper->escapeXliff($targetContent));
-            @$tNode->appendChild($targetFragment);
-        }
     }
 }

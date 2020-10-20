@@ -52,8 +52,8 @@ class AttributePriceInfo extends AbstractPriceInfo implements PriceInfoInterface
     /**
      * Try to delegate all other functions to the product
      *
-     * @param string $name
-     * @param array $arguments
+     * @param $name
+     * @param $arguments
      *
      * @return mixed
      */

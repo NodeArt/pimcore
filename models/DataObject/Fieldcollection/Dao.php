@@ -21,7 +21,6 @@ use Pimcore\Logger;
 use Pimcore\Model;
 use Pimcore\Model\DataObject;
 use Pimcore\Model\DataObject\ClassDefinition\Data\CustomResourcePersistingInterface;
-use Pimcore\Model\DataObject\ClassDefinition\Data\LazyLoadingSupportInterface;
 use Pimcore\Model\DataObject\ClassDefinition\Data\ResourcePersistenceAwareInterface;
 
 /**
@@ -31,7 +30,7 @@ class Dao extends Model\Dao\AbstractDao
 {
     /**
      * @param DataObject\Concrete $object
-     * @param array $params
+     * @param $params mixed
      *
      * @return array
      */
@@ -47,7 +46,6 @@ class Dao extends Model\Dao\AbstractDao
      */
     public function load(DataObject\Concrete $object)
     {
-        /** @var DataObject\ClassDefinition\Data\Fieldcollections $fieldDef */
         $fieldDef = $object->getClass()->getFieldDefinition($this->model->getFieldname(), ['suppressEnrichment' => true]);
         $values = [];
 
@@ -69,29 +67,16 @@ class Dao extends Model\Dao\AbstractDao
             $modelFactory = \Pimcore::getContainer()->get('pimcore.model.factory');
 
             foreach ($results as $result) {
-                /** @var DataObject\Fieldcollection\Data\AbstractData $collection */
                 $collection = $modelFactory->build($collectionClass);
                 $collection->setIndex($result['index']);
                 $collection->setFieldname($result['fieldname']);
                 $collection->setObject($object);
 
                 foreach ($fieldDefinitions as $key => $fd) {
-                    $params = [
-                        'context' => [
-                            'object' => $object,
-                            'containerType' => 'fieldcollection',
-                            'containerKey' => $type,
-                            'fieldname' => $this->model->getFieldname(),
-                            'index' => $result['index'],
-                        ],
-                        'owner' => $collection,
-                        'fieldname' => $key,
-                    ];
-
                     if ($fd instanceof CustomResourcePersistingInterface) {
                         $doLoad = true;
-                        if ($fd instanceof LazyLoadingSupportInterface) {
-                            if ($fd->getLazyLoading()) {
+                        if ($fd instanceof DataObject\ClassDefinition\Data\Relations\AbstractRelations) {
+                            if (!DataObject\Concrete::isLazyLoadingDisabled() && $fd->getLazyLoading()) {
                                 $doLoad = false;
                             }
                         }
@@ -100,13 +85,20 @@ class Dao extends Model\Dao\AbstractDao
                             // datafield has it's own loader
                             $value = $fd->load(
                                 $collection,
-                                $params
+                                [
+                                    'context' => [
+                                        'object' => $object,
+                                        'containerType' => 'fieldcollection',
+                                        'containerKey' => $type,
+                                        'fieldname' => $this->model->getFieldname(),
+                                        'index' => $result['index']
+                                    ]]
                             );
 
                             if ($value === 0 || !empty($value)) {
                                 $collection->setValue($key, $value);
 
-                                if ($collection instanceof Model\Element\DirtyIndicatorInterface) {
+                                if ($collection instanceof DataObject\DirtyIndicatorInterface) {
                                     $collection->markFieldDirty($key, false);
                                 }
                             }
@@ -118,9 +110,9 @@ class Dao extends Model\Dao\AbstractDao
                             foreach ($fd->getColumnType() as $fkey => $fvalue) {
                                 $multidata[$key . '__' . $fkey] = $result[$key . '__' . $fkey];
                             }
-                            $collection->setValue($key, $fd->getDataFromResource($multidata, $object, $params));
+                            $collection->setValue($key, $fd->getDataFromResource($multidata));
                         } else {
-                            $collection->setValue($key, $fd->getDataFromResource($result[$key], $object, $params));
+                            $collection->setValue($key, $fd->getDataFromResource($result[$key]));
                         }
                     }
                 }
@@ -143,15 +135,13 @@ class Dao extends Model\Dao\AbstractDao
 
     /**
      * @param DataObject\Concrete $object
-     * @param bool $saveMode true if called from save method
+     * @param $saveMode true if called from save method
      *
      * @return array
      */
     public function delete(DataObject\Concrete $object, $saveMode = false)
     {
         // empty or create all relevant tables
-
-        /** @var DataObject\ClassDefinition\Data\Fieldcollections $fieldDef */
         $fieldDef = $object->getClass()->getFieldDefinition($this->model->getFieldname(), ['suppressEnrichment' => true]);
         $hasLocalizedFields = false;
 
@@ -169,7 +159,7 @@ class Dao extends Model\Dao\AbstractDao
             try {
                 $this->db->delete($tableName, [
                     'o_id' => $object->getId(),
-                    'fieldname' => $this->model->getFieldname(),
+                    'fieldname' => $this->model->getFieldname()
                 ]);
             } catch (\Exception $e) {
                 // create definition if it does not exist
@@ -182,18 +172,18 @@ class Dao extends Model\Dao\AbstractDao
                 try {
                     $this->db->delete($tableName, [
                         'ooo_id' => $object->getId(),
-                        'fieldname' => $this->model->getFieldname(),
+                        'fieldname' => $this->model->getFieldname()
                     ]);
                 } catch (\Exception $e) {
                     Logger::error($e);
                 }
             }
 
-            $childDefinitions = $definition->getFieldDefinitions(['suppressEnrichment' => true]);
+            $childDefinitions = $definition->getFielddefinitions(['suppressEnrichment' => true]);
 
             if (is_array($childDefinitions)) {
                 foreach ($childDefinitions as $fd) {
-                    if (!DataObject\AbstractObject::isDirtyDetectionDisabled() && $this->model instanceof Model\Element\DirtyIndicatorInterface) {
+                    if (!DataObject\AbstractObject::isDirtyDetectionDisabled() && $this->model instanceof DataObject\DirtyIndicatorInterface) {
                         if ($fd instanceof DataObject\ClassDefinition\Data\Relations\AbstractRelations && !$this->model->isFieldDirty(
                                 '_self'
                             )) {
@@ -205,12 +195,11 @@ class Dao extends Model\Dao\AbstractDao
                         $fd->delete(
                             $object,
                             [
-                                'isUpdate' => $saveMode,
                                 'context' => [
                                     'containerType' => 'fieldcollection',
                                     'containerKey' => $type,
-                                    'fieldname' => $this->model->getFieldname(),
-                                ],
+                                    'fieldname' => $this->model->getFieldname()
+                                ]
                             ]
                         );
                     }
@@ -218,22 +207,9 @@ class Dao extends Model\Dao\AbstractDao
             }
         }
 
-        $isDirty = $this->model->isFieldDirty('_self');
-        if (!$isDirty) {
-            if ($items = $this->model->getItems()) {
-                /** @var Model\Element\DirtyIndicatorInterface $item */
-                foreach ($items as $item) {
-                    if ($item->hasDirtyFields()) {
-                        $this->model->markFieldDirty('_self');
-                        break;
-                    }
-                }
-            }
-        }
         if (!$this->model->isFieldDirty('_self') && !DataObject\AbstractObject::isDirtyDetectionDisabled()) {
             return [];
         }
-
         $whereLocalizedFields = "(ownertype = 'localizedfield' AND "
             . $this->db->quoteInto('ownername LIKE ?', '/fieldcollection~'
                 . $this->model->getFieldname() . '/%')

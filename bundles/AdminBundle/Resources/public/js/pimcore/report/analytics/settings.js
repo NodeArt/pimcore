@@ -179,7 +179,7 @@ pimcore.report.analytics.settings = Class.create({
                             autoLoad: false,
                             proxy: {
                                 type: 'ajax',
-                                url: Routing.generate('pimcore_admin_reports_analytics_getprofiles'),
+                                url: "/admin/reports/analytics/get-profiles",
                                 reader: {
                                     type: 'json',
                                     rootProperty: "data"
@@ -231,6 +231,7 @@ pimcore.report.analytics.settings = Class.create({
 
     getValues: function () {
 
+        var formData = this.panel.getForm().getFieldValues();
         var sites = pimcore.globalmanager.get("sites");
         var sitesData = {};
 

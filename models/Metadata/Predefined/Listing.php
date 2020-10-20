@@ -20,12 +20,11 @@ namespace Pimcore\Model\Metadata\Predefined;
 /**
  * @method \Pimcore\Model\Metadata\Predefined\Listing\Dao getDao()
  * @method \Pimcore\Model\Metadata\Predefined[] load()
- * @method int getTotalCount()
  */
 class Listing extends \Pimcore\Model\Listing\JsonListing
 {
     /**
-     * @var \Pimcore\Model\Metadata\Predefined[]|null
+     * @var array|null
      */
     protected $definitions = null;
 
@@ -42,7 +41,7 @@ class Listing extends \Pimcore\Model\Listing\JsonListing
     }
 
     /**
-     * @param \Pimcore\Model\Metadata\Predefined[]|null $definitions
+     * @param $definitions
      *
      * @return $this
      */
@@ -54,8 +53,8 @@ class Listing extends \Pimcore\Model\Listing\JsonListing
     }
 
     /**
-     * @param string $type
-     * @param array $subTypes
+     * @param $type
+     * @param $subTypes
      *
      * @return \Pimcore\Model\Metadata\Predefined[]
      *
@@ -92,9 +91,9 @@ class Listing extends \Pimcore\Model\Listing\JsonListing
     }
 
     /**
-     * @param string $key
-     * @param string $language
-     * @param string|null $targetSubtype
+     * @param $key
+     * @param $language
+     * @param null $targetSubtype
      *
      * @return \Pimcore\Model\Metadata\Predefined|null
      */

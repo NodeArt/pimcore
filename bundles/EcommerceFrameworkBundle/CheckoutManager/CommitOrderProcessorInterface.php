@@ -42,7 +42,7 @@ interface CommitOrderProcessorInterface
      *
      * Can be used by controllers to commit orders with payment
      *
-     * @param array|StatusInterface $paymentResponseParams
+     * @param $paymentResponseParams
      * @param PaymentInterface $paymentProvider
      *
      * @return AbstractOrder

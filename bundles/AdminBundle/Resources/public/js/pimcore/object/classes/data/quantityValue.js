@@ -85,19 +85,12 @@ pimcore.object.classes.data.quantityValue = Class.create(pimcore.object.classes.
                 displayField: 'abbreviation',
                 valueField: 'id',
                 width: 275
-            },{
-                xtype: 'textfield',
-                width: 600,
-                fieldLabel: t("default_value_generator"),
-                labelWidth: 140,
-                name: 'defaultValueGenerator',
-                value: this.datax.defaultValueGenerator
             },
             {
                 xtype: "panel",
                 bodyStyle: "padding-top: 3px",
                 style: "margin-bottom: 10px",
-                html: '<span class="object_field_setting_warning">' + t('inherited_default_value_warning') + '</span>'
+                html: '<span class="object_field_setting_warning">' + t('default_value_warning') + '</span>'
             },
             {
                 xtype: 'multiselect',
@@ -139,7 +132,6 @@ pimcore.object.classes.data.quantityValue = Class.create(pimcore.object.classes.
                     defaultValue: source.datax.defaultValue,
                     decimalPrecision: source.datax.decimalPrecision,
                     autoConvert: source.datax.autoConvert,
-                    defaultValueGenerator: source.datax.defaultValueGenerator
                 });
         }
     }

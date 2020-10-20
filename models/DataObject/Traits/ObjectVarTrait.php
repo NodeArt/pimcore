@@ -43,27 +43,21 @@ trait ObjectVarTrait
     }
 
     /**
-     * @param string $var
+     * @param $var
      *
      * @return mixed
      */
     public function getObjectVar($var)
     {
-        if (!property_exists($this, $var)) {
-            return null;
-        }
-
         return $this->{$var};
     }
 
     /**
-     * @param string $var
-     * @param mixed $value
-     * @param bool $silent
+     * @param $var mixed
+     * @param $value mixed
+     * @param $silent bool
      *
      * @return $this
-     *
-     * @throws \Exception
      */
     public function setObjectVar($var, $value, bool $silent = false)
     {

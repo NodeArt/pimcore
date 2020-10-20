@@ -22,13 +22,13 @@ interface CustomReportAdapterInterface
     /**
      * returns data for given parameters
      *
-     * @param array|null $filters
-     * @param string|null $sort
-     * @param string|null $dir
-     * @param int|null $offset
-     * @param int|null $limit
-     * @param array|null $fields - if set, only in fields specified columns are returned
-     * @param array|null $drillDownFilters - if set, additional filters are set
+     * @param $filters
+     * @param $sort
+     * @param $dir
+     * @param $offset
+     * @param $limit
+     * @param null $fields - if set, only in fields specified columns are returned
+     * @param null $drillDownFilters - if set, additional filters are set
      *
      * @return array
      */
@@ -37,20 +37,20 @@ interface CustomReportAdapterInterface
     /**
      * returns available columns for given configuration
      *
-     * @param \stdClass $configuration
+     * @param $configuration
      *
-     * @return array
+     * @return mixed
      */
     public function getColumns($configuration);
 
     /**
      * returns all available values for given field with given filters and drillDownFilters
      *
-     * @param array $filters
-     * @param string $field
-     * @param array $drillDownFilters
+     * @param $filters
+     * @param $field
+     * @param $drillDownFilters
      *
-     * @return array
+     * @return mixed
      */
     public function getAvailableOptions($filters, $field, $drillDownFilters);
 }

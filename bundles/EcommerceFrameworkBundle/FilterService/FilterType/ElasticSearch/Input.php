@@ -22,15 +22,14 @@ class Input extends \Pimcore\Bundle\EcommerceFrameworkBundle\FilterService\Filte
 {
     public function addCondition(AbstractFilterDefinitionType $filterDefinition, ProductListInterface $productList, $currentFilter, $params, $isPrecondition = false)
     {
-        $field = $filterDefinition->getField();
+        $field = $filterDefinition->getField($filterDefinition);
         $preSelect = $filterDefinition->getPreSelect($filterDefinition);
 
-        $value = $params[$field] ?? null;
-        $isReload = $params['is_reload'] ?? null;
+        $value = $params[$field];
 
         if ($value == AbstractFilterType::EMPTY_STRING) {
             $value = null;
-        } elseif (empty($value) && !$isReload) {
+        } elseif (empty($value) && !$params['is_reload']) {
             $value = $preSelect;
         }
 

@@ -32,12 +32,12 @@ use Symfony\Component\Routing\Annotation\Route;
 class AnalyticsController extends ReportsControllerBase implements EventedControllerInterface
 {
     /**
-     * @var \Google_Service_Analytics
+     * @var \Google_Client
      */
     protected $service;
 
     /**
-     * @Route("/deeplink", name="pimcore_admin_reports_analytics_deeplink", methods={"GET"})
+     * @Route("/deeplink", methods={"GET"})
      *
      * @param Request $request
      *
@@ -55,7 +55,7 @@ class AnalyticsController extends ReportsControllerBase implements EventedContro
     }
 
     /**
-     * @Route("/get-profiles", name="pimcore_admin_reports_analytics_getprofiles", methods={"GET"})
+     * @Route("/get-profiles", methods={"GET"})
      *
      * @param Request $request
      *
@@ -75,31 +75,16 @@ class AnalyticsController extends ReportsControllerBase implements EventedContro
             }
 
             foreach ($accountIds as $accountId) {
-                $propertyNames = [];
-                $properties = $this->service->management_webproperties->listManagementWebproperties($accountId);
-
-                if (is_array($properties['items'])) {
-                    foreach ($properties['items'] as $property) {
-                        $propertyNames[$property['id']] = $property['name'];
-                    }
-                }
-
                 $details = $this->service->management_profiles->listManagementProfiles($accountId, '~all');
 
                 if (is_array($details['items'])) {
                     foreach ($details['items'] as $detail) {
-                        $name = $detail['name'];
-
-                        if (array_key_exists($detail['webPropertyId'], $propertyNames)) {
-                            $name = $propertyNames[$detail['webPropertyId']] . ': ' . $name;
-                        }
-
                         $data['data'][] = [
                             'id' => $detail['id'],
-                            'name' => $name,
+                            'name' => $detail['name'],
                             'trackid' => $detail['webPropertyId'],
                             'internalid' => $detail['internalWebPropertyId'],
-                            'accountid' => $detail['accountId'],
+                            'accountid' => $detail['accountId']
                         ];
                     }
                 }
@@ -150,7 +135,7 @@ class AnalyticsController extends ReportsControllerBase implements EventedContro
     }
 
     /**
-     * @Route("/chartmetricdata", name="pimcore_admin_reports_analytics_chartmetricdata", methods={"GET"})
+     * @Route("/chartmetricdata", methods={"GET"})
      *
      * @param Request $request
      * @param SiteConfigProvider $siteConfigProvider
@@ -193,7 +178,7 @@ class AnalyticsController extends ReportsControllerBase implements EventedContro
         }
 
         $opts = [
-            'dimensions' => 'ga:date',
+            'dimensions' => 'ga:date'
         ];
 
         if (!empty($filters)) {
@@ -215,7 +200,7 @@ class AnalyticsController extends ReportsControllerBase implements EventedContro
 
             $tmpData = [
                 'timestamp' => strtotime($date),
-                'datetext' => $this->formatDimension('date', $date),
+                'datetext' => $this->formatDimension('date', $date)
             ];
 
             foreach ($result['columnHeaders'] as $index => $metric) {
@@ -233,7 +218,7 @@ class AnalyticsController extends ReportsControllerBase implements EventedContro
     }
 
     /**
-     * @Route("/summary", name="pimcore_admin_reports_analytics_summary", methods={"GET"})
+     * @Route("/summary", methods={"GET"})
      *
      * @param Request $request
      * @param SiteConfigProvider $siteConfigProvider
@@ -257,7 +242,7 @@ class AnalyticsController extends ReportsControllerBase implements EventedContro
         }
 
         $opts = [
-            'dimensions' => 'ga:date',
+            'dimensions' => 'ga:date'
         ];
 
         if (!empty($filters)) {
@@ -279,9 +264,6 @@ class AnalyticsController extends ReportsControllerBase implements EventedContro
             foreach ($result['columnHeaders'] as $index => $metric) {
                 if ($index) {
                     $dailyDataGrouped[$metric['name']][] = $row[$index];
-                    if (!isset($data[$metric['name']])) {
-                        $data[$metric['name']] = 0;
-                    }
                     $data[$metric['name']] += $row[$index];
                 }
             }
@@ -292,7 +274,7 @@ class AnalyticsController extends ReportsControllerBase implements EventedContro
             'ga:uniquePageviews' => 1,
             'ga:exits' => 2,
             'ga:entrances' => 3,
-            'ga:bounces' => 4,
+            'ga:bounces' => 4
         ];
 
         $outputData = [];
@@ -301,7 +283,7 @@ class AnalyticsController extends ReportsControllerBase implements EventedContro
                 'label' => str_replace('ga:', '', $key),
                 'value' => round($value, 2),
                 'chart' => \Pimcore\Helper\ImageChart::lineSmall($dailyDataGrouped[$key]),
-                'metric' => str_replace('ga:', '', $key),
+                'metric' => str_replace('ga:', '', $key)
             ];
         }
 
@@ -311,7 +293,7 @@ class AnalyticsController extends ReportsControllerBase implements EventedContro
     }
 
     /**
-     * @Route("/source", name="pimcore_admin_reports_analytics_source", methods={"GET"})
+     * @Route("/source", methods={"GET"})
      *
      * @param Request $request
      * @param SiteConfigProvider $siteConfigProvider
@@ -337,7 +319,7 @@ class AnalyticsController extends ReportsControllerBase implements EventedContro
         $opts = [
             'dimensions' => 'ga:source',
             'max-results' => '10',
-            'sort' => '-ga:pageviews',
+            'sort' => '-ga:pageviews'
         ];
 
         if (!empty($filters)) {
@@ -357,7 +339,7 @@ class AnalyticsController extends ReportsControllerBase implements EventedContro
         foreach ((array) $result['rows'] as $row) {
             $data[] = [
                 'pageviews' => $row[1],
-                'source' => $row[0],
+                'source' => $row[0]
             ];
         }
 
@@ -365,7 +347,7 @@ class AnalyticsController extends ReportsControllerBase implements EventedContro
     }
 
     /**
-     * @Route("/data-explorer", name="pimcore_admin_reports_analytics_dataexplorer", methods={"GET", "POST"})
+     * @Route("/data-explorer", methods={"GET", "POST"})
      *
      * @param Request $request
      * @param SiteConfigProvider $siteConfigProvider
@@ -409,7 +391,7 @@ class AnalyticsController extends ReportsControllerBase implements EventedContro
         $opts = [
             'dimensions' => $dimension,
             'max-results' => $limit,
-            'sort' => ($descending ? '-' : '') . $metric,
+            'sort' => ($descending ? '-' : '') . $metric
         ];
 
         if (!empty($filters)) {
@@ -428,7 +410,7 @@ class AnalyticsController extends ReportsControllerBase implements EventedContro
         foreach ($result['rows'] as $row) {
             $data[] = [
                 'dimension' => $this->formatDimension($dimension, $row[0]),
-                'metric' => (float) $row[1],
+                'metric' => (float) $row[1]
             ];
         }
 
@@ -436,7 +418,7 @@ class AnalyticsController extends ReportsControllerBase implements EventedContro
     }
 
     /**
-     * @Route("/get-dimensions", name="pimcore_admin_reports_analytics_getdimensions", methods={"GET"})
+     * @Route("/get-dimensions", methods={"GET"})
      *
      * @param Request $request
      *
@@ -448,7 +430,7 @@ class AnalyticsController extends ReportsControllerBase implements EventedContro
     }
 
     /**
-     * @Route("/get-metrics", name="pimcore_admin_reports_analytics_getmetrics", methods={"GET"})
+     * @Route("/get-metrics", methods={"GET"})
      *
      * @param Request $request
      *
@@ -460,7 +442,7 @@ class AnalyticsController extends ReportsControllerBase implements EventedContro
     }
 
     /**
-     * @Route("/get-segments", name="pimcore_admin_reports_analytics_getsegments", methods={"GET"})
+     * @Route("/get-segments", methods={"GET"})
      *
      * @param Request $request
      *
@@ -475,7 +457,7 @@ class AnalyticsController extends ReportsControllerBase implements EventedContro
         foreach ($result['items'] as $row) {
             $data[] = [
                 'id' => $row['segmentId'],
-                'name' => $row['name'],
+                'name' => $row['name']
             ];
         }
 
@@ -483,8 +465,8 @@ class AnalyticsController extends ReportsControllerBase implements EventedContro
     }
 
     /**
-     * @param string $type
-     * @param string $value
+     * @param $type
+     * @param $value
      *
      * @return string
      */

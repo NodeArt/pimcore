@@ -17,17 +17,117 @@
 
 namespace Pimcore\Model\Document\Tag;
 
-use Pimcore\Model\Document\Editable\Multiselect as EditableMultiselect;
+use Pimcore\Model;
 
-@trigger_error(sprintf('Class "%s" is deprecated since v6.8 and will be removed in 7. Use "%s" instead.', Multiselect::class, EditableMultiselect::class), E_USER_DEPRECATED);
-
-class_exists(EditableMultiselect::class);
-
-if (false) {
+/**
+ * @method \Pimcore\Model\Document\Tag\Dao getDao()
+ */
+class Multiselect extends Model\Document\Tag
+{
     /**
-     * @deprecated use \Pimcore\Model\Document\Editable\Multiselect instead.
+     * Contains the current selected values
+     *
+     * @var array
      */
-    class Multiselect extends EditableMultiselect
+    public $values = [];
+
+    /**
+     * @see TagInterface::getType
+     *
+     * @return string
+     */
+    public function getType()
     {
+        return 'multiselect';
+    }
+
+    /**
+     * @see TagInterface::getData
+     *
+     * @return mixed
+     */
+    public function getData()
+    {
+        return $this->values;
+    }
+
+    /**
+     * @see TagInterface::frontend
+     *
+     * @return string
+     */
+    public function frontend()
+    {
+        return implode(',', $this->values);
+    }
+
+    /**
+     * @return string
+     */
+    public function getDataEditmode()
+    {
+        return implode(',', $this->values);
+    }
+
+    /**
+     * @see TagInterface::setDataFromResource
+     *
+     * @param mixed $data
+     *
+     * @return $this
+     */
+    public function setDataFromResource($data)
+    {
+        $this->values = \Pimcore\Tool\Serialize::unserialize($data);
+
+        return $this;
+    }
+
+    /**
+     * @see TagInterface::setDataFromEditmode
+     *
+     * @param mixed $data
+     *
+     * @return $this
+     */
+    public function setDataFromEditmode($data)
+    {
+        if (empty($data)) {
+            $this->values = [];
+        } elseif (is_string($data)) {
+            $this->values = explode(',', $data);
+        } elseif (is_array($data)) {
+            $this->values = $data;
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isEmpty()
+    {
+        return empty($this->values);
+    }
+
+    /**
+     * @param Model\Webservice\Data\Document\Element $wsElement
+     * @param $document
+     * @param mixed $params
+     * @param null $idMapper
+     *
+     * @throws \Exception
+     */
+    public function getFromWebserviceImport($wsElement, $document = null, $params = [], $idMapper = null)
+    {
+        $data = $this->sanitizeWebserviceData($wsElement->value);
+        if ($data->values === null) {
+            $this->values = null;
+        } elseif ($data->values instanceof  \stdClass) {
+            $this->values = get_object_vars($data->values);
+        } else {
+            throw new \Exception('cannot get values from web service import - invalid data');
+        }
     }
 }

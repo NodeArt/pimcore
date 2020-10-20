@@ -30,8 +30,9 @@ pimcore.object.tags.password = Class.create(pimcore.object.tags.abstract, {
         var input = {
             fieldLabel: this.fieldConfig.title,
             name: this.fieldConfig.name,
-            componentCls: "object_field object_field_type_" + this.type,
+            componentCls: "object_field",
             inputType: "password",
+            maxLength: 30,
             listeners: {
                 afterrender: function (cmp) {
                     cmp.inputEl.set({
@@ -48,6 +49,9 @@ pimcore.object.tags.password = Class.create(pimcore.object.tags.abstract, {
         } else {
             input.width = 350;
         }
+
+        input.maxLength = 30;
+        input.inputType = "password";
 
         this.component = new Ext.form.TextField(input);
 

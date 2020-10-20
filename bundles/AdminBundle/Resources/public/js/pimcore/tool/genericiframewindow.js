@@ -85,6 +85,7 @@ pimcore.tool.genericiframewindow = Class.create({
 
     reload: function () {
         try {
+            var d = new Date();
             Ext.get("pimcore_iframe_frame_" + this.id).dom.src = this.src;
         }
         catch (e) {

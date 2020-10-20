@@ -15,7 +15,6 @@
 namespace Pimcore\Bundle\CoreBundle\Command;
 
 use Pimcore\Console\AbstractCommand;
-use Pimcore\Db;
 use Pimcore\Model\Asset;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputInterface;
@@ -62,7 +61,7 @@ class LowQualityImagePreviewCommand extends AbstractCommand
         if ($input->getOption('parent')) {
             $parent = Asset::getById($input->getOption('parent'));
             if ($parent instanceof Asset\Folder) {
-                $conditions[] = "path LIKE '" . Db::get()->escapeLike($parent->getRealFullPath()) . "/%'";
+                $conditions[] = "path LIKE '" . $parent->getRealFullPath() . "/%'";
             } else {
                 $this->writeError($input->getOption('parent') . ' is not a valid asset folder ID!');
                 exit;
@@ -89,7 +88,9 @@ class LowQualityImagePreviewCommand extends AbstractCommand
         for ($i = 0; $i < (ceil($total / $perLoop)); $i++) {
             $list->setLimit($perLoop);
             $list->setOffset($i * $perLoop);
-            /** @var Asset\Image[] $images */
+            /**
+             * @var $images Asset\Image[]
+             */
             $images = $list->load();
             foreach ($images as $image) {
                 $progressBar->advance();
@@ -106,7 +107,5 @@ class LowQualityImagePreviewCommand extends AbstractCommand
         }
 
         $progressBar->finish();
-
-        return 0;
     }
 }

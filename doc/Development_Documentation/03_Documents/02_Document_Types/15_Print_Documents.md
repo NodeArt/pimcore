@@ -15,7 +15,7 @@ Web to print flow implemented in Pimcore:
 
 Once activated, print documents are integrated into the default documents tree. 
 But of course you can setup your custom views to have separate trees for web documents and print documents. 
-Just use our completely redesigned [custom views](../../05_Objects/01_Object_Classes/05_Class_Settings/20_Custom_Views.md) 
+Just use our completely redesigned [custom views](../../05_Objects/01_Object_Classes/05_Class_Settings/11_Custom_Views.md) 
 and all [new perspectives features](../../18_Tools_and_Features/13_Perspectives.md).
 
 For more detail-information on the settings see later.
@@ -51,7 +51,7 @@ If you updated an existing Pimcore installation, please get the default implemen
 ## PDF Rendering
 
 Both web-to-print documents have an additional tab that is the place for rendering documents to print-ready PDFs. 
-When rendering, the print is first rendererd to HTML, then rendered as a Twig template (yes, you can use Twig expressions in the document) and then rendered to an PDF. PDF rendering itself is done by an
+When rendering, the print is first rendererd to HTML and then rendered to an PDF. PDF rendering itself is done by an
 third party renderer. Currently we support [wkhtmltopdf](http://wkhtmltopdf.org/) and [pdfreactor](http://www.pdfreactor.com/). 
 Please see their documentation for details concerning template possibilities.
 

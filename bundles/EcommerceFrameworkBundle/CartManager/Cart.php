@@ -93,7 +93,7 @@ class Cart extends AbstractCart implements CartInterface
     /**
      * @param int $id
      *
-     * @return Cart|null
+     * @return Cart
      */
     public static function getById($id)
     {

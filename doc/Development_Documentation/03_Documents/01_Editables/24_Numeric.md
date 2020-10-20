@@ -11,7 +11,6 @@ The numeric editable is very similar to the [input editable](./16_Input.md), but
 | `minValue` | float   | Define a minimum value                                                             |
 | `width`    | integer | Width of the field in pixel                                                        |
 | `class`    | string  | A CSS class that is added to the surrounding container of this element in editmode |
-| `required` | boolean | set to true to make field value required for publish                       |
 
 ## Methods
 
@@ -24,17 +23,12 @@ The numeric editable is very similar to the [input editable](./16_Input.md), but
 
 ### Basic Usage
 
-<div class="code-section">
-
 ```php
 <?= $this->numeric("myNumber"); ?>
 ```
-
 ```twig
 {{ pimcore_numeric('myNumber') }}
 ```
-
-</div>
 
 Now you can see the **numeric** value in the editmode view 
 ![Numeric input - editmode](../../img/editables_numeric_simple_editmode.png)
@@ -42,8 +36,6 @@ Now you can see the **numeric** value in the editmode view
 ### Advanced Usage
 
 In the following example we're going to use a minimal and maximum value as well as a decimal precision. 
-
-<div class="code-section">
 
 ```php
 <?= $this->numeric("myNumber", [
@@ -53,7 +45,6 @@ In the following example we're going to use a minimal and maximum value as well 
     "decimalPrecision" => 0
 ]); ?>
 ```
-
 ```twig
 {{ pimcore_numeric('myNumber',{
 		"width" : 300,
@@ -64,22 +55,14 @@ In the following example we're going to use a minimal and maximum value as well 
 }}
 ```
 
-</div>
-
 To display the number also in editmode, you can use the method `getData()`
-
-<div class="code-section">
-
 ```php
 <p>
     <?= $this->numeric("myNumber")->getData(); ?>
 </p>
 ```
-
 ```twig
 <p>
     {{ pimcore_numeric('myNumber').getData() }}
 </p>
 ```
-
-</div>

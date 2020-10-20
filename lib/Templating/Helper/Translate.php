@@ -17,9 +17,6 @@ namespace Pimcore\Templating\Helper;
 use Symfony\Component\Templating\Helper\Helper;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-/**
- * @deprecated
- */
 class Translate extends Helper
 {
     /**
@@ -48,10 +45,10 @@ class Translate extends Helper
     }
 
     /**
-     * @param string $key
+     * @param $key
      * @param array $parameters
-     * @param string|null $domain
-     * @param string|null $locale
+     * @param null $domain
+     * @param null $locale
      *
      * @return string
      */

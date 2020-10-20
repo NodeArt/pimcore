@@ -27,11 +27,6 @@ class Ghostscript extends Adapter
     protected $path;
 
     /**
-     * @var string|null
-     */
-    private $version = null;
-
-    /**
      * @return bool
      */
     public function isAvailable()
@@ -58,7 +53,7 @@ class Ghostscript extends Adapter
     {
 
         // it's also possible to pass a path or filename
-        if (preg_match("/\.?pdf$/i", $fileType)) {
+        if (preg_match("/\.?pdf$/", $fileType)) {
             return true;
         }
 
@@ -86,7 +81,7 @@ class Ghostscript extends Adapter
     }
 
     /**
-     * @param string $path
+     * @param $path
      *
      * @return $this
      *
@@ -114,7 +109,7 @@ class Ghostscript extends Adapter
     }
 
     /**
-     * @param string|null $path
+     * @param null $path
      *
      * @return null|string
      *
@@ -130,7 +125,7 @@ class Ghostscript extends Adapter
             $path = $this->path;
         }
 
-        if (preg_match("/\.?pdf$/i", $path)) { // only PDF's are supported
+        if (preg_match("/\.?pdf$/", $path)) { // only PDF's are supported
             return $path;
         }
 
@@ -140,59 +135,24 @@ class Ghostscript extends Adapter
     }
 
     /**
-     * @return int
+     * @return string
      *
      * @throws \Exception
      */
     public function getPageCount()
     {
-        $pages = Console::exec($this->buildPageCountCommand(), null, 120);
+        $pages = Console::exec(self::getGhostscriptCli() . " -dNODISPLAY -q -c '(" . $this->path . ") (r) file runpdfbegin pdfpagecount = quit'", null, 120);
         $pages = trim($pages);
 
-        if (! is_numeric($pages)) {
+        if (!is_numeric($pages)) {
             throw new \Exception('Unable to get page-count of ' . $this->path);
         }
 
-        return (int) $pages;
+        return $pages;
     }
 
     /**
-     * @return string
-     *
-     * @throws \Exception
-     */
-    protected function buildPageCountCommand()
-    {
-        $command = self::getGhostscriptCli() . ' -dNODISPLAY -q';
-
-        // Adding permit-file-read flag to prevent issue with Ghostscript's SAFER mode which is enabled by default as of version 9.50.
-        if (version_compare($this->getVersion(), '9.50', '>=')) {
-            $command .= " --permit-file-read='" . $this->path . "'";
-        }
-
-        $command .= " -c '(" . $this->path . ") (r) file runpdfbegin pdfpagecount = quit'";
-
-        return $command;
-    }
-
-    /**
-     * Get the version of the installed Ghostscript CLI.
-     *
-     * @return string
-     *
-     * @throws \Exception
-     */
-    protected function getVersion()
-    {
-        if (is_null($this->version)) {
-            $this->version = Console::exec(self::getGhostscriptCli() . ' --version');
-        }
-
-        return $this->version;
-    }
-
-    /**
-     * @param string $path
+     * @param $path
      * @param int $page
      * @param int $resolution
      *
@@ -207,7 +167,7 @@ class Ghostscript extends Adapter
                 $path = PIMCORE_SYSTEM_TEMP_DIRECTORY . '/ghostscript-tmp-' . uniqid() . '.' . File::getFileExtension($path);
             }
 
-            Console::exec(self::getGhostscriptCli() . ' -sDEVICE=pngalpha -dFirstPage=' . $page . ' -dLastPage=' . $page . ' -dTextAlphaBits=4 -dGraphicsAlphaBits=4 -r' . $resolution . ' -o ' . escapeshellarg($path) . ' ' . escapeshellarg($this->path), null, 240);
+            Console::exec(self::getGhostscriptCli() . ' -sDEVICE=png16m -dFirstPage=' . $page . ' -dLastPage=' . $page . ' -r' . $resolution . ' -o ' . escapeshellarg($path) . ' ' . escapeshellarg($this->path), null, 240);
 
             if ($realTargetPath) {
                 File::rename($path, $realTargetPath);
@@ -222,8 +182,8 @@ class Ghostscript extends Adapter
     }
 
     /**
-     * @param int|null $page
-     * @param string|null $path
+     * @param null $page
+     * @param null $path
      *
      * @return bool|string
      */
@@ -232,7 +192,6 @@ class Ghostscript extends Adapter
         try {
             $path = $path ? $this->preparePath($path) : $this->path;
             $pageRange = '';
-            $text = null;
 
             try {
                 // first try to use poppler's pdftotext, because this produces more accurate results than the txtwrite device from ghostscript

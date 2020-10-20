@@ -19,13 +19,14 @@ class Transliteration
     /**
      * @static
      *
-     * @param string $value
-     * @param string|null $language
+     * @param $value
+     * @param null $language
      *
      * @return string
      */
     public static function toASCII($value, $language = null)
     {
+
         // the transliteration is based on the locale
         // äüö is in EN auo in DE  aeueoe
         if (!$language) {
@@ -59,9 +60,9 @@ class Transliteration
     /**
      * @static
      *
-     * @param string $string
+     * @param $string
      * @param string $unknown
-     * @param string|null $source_langcode
+     * @param null $source_langcode
      *
      * @return string
      */
@@ -154,7 +155,6 @@ class Transliteration
                     } while (--$remaining);
 
                     $n = ord($head);
-                    $ord = null;
                     if ($n <= 0xdf) {
                         $ord = ($n - 192) * 64 + (ord($sequence[1]) - 128);
                     } elseif ($n <= 0xef) {
@@ -191,9 +191,9 @@ class Transliteration
     /**
      * @static
      *
-     * @param int $ord
+     * @param $ord
      * @param string $unknown
-     * @param string|null $langcode
+     * @param null $langcode
      *
      * @return string
      */
@@ -201,7 +201,7 @@ class Transliteration
     {
         $map = [];
 
-        if (!$langcode) {
+        if (!isset($langcode)) {
             $langcode = 'en';
         }
 
@@ -211,10 +211,9 @@ class Transliteration
             $file = __DIR__ . '/Transliteration/Data/' . sprintf('x%02x', $bank) . '.php';
             if (file_exists($file)) {
                 $base = [];
-                $variant = [];
                 // contains the $base variable
                 include($file);
-                if ($langcode !== 'en' && isset($variant[$langcode])) {
+                if ($langcode != 'en' && isset($variant[$langcode])) {
                     // Merge in language specific mappings.
                     $map[$bank][$langcode] = $variant[$langcode] + $base;
                 } else {

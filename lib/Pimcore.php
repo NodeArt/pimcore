@@ -20,29 +20,24 @@ use Symfony\Component\HttpKernel\KernelInterface;
 class Pimcore
 {
     /**
-     * @var bool|null
+     * @var bool
      */
     public static $adminMode;
 
     /**
      * @var bool|null
      */
-    protected static $debugMode;
+    protected static $debugMode = null;
 
     /**
      * @var bool|null
      */
-    protected static $devMode;
+    protected static $devMode = null;
 
     /**
      * @var bool
      */
     private static $inShutdown = false;
-
-    /**
-     * @var bool
-     */
-    private static $shutdownEnabled = true;
 
     /**
      * @var KernelInterface
@@ -53,6 +48,14 @@ class Pimcore
      * @var \Composer\Autoload\ClassLoader
      */
     private static $autoloader;
+
+    public static function initConfiguration()
+    {
+        // custom error logging when debug flag is set
+        if (self::inDebugMode()) {
+            error_reporting(E_ALL & ~E_NOTICE);
+        }
+    }
 
     /**
      * @return bool
@@ -161,7 +164,7 @@ class Pimcore
     }
 
     /**
-     * @return \Symfony\Component\EventDispatcher\EventDispatcherInterface
+     * @return object|\Symfony\Component\EventDispatcher\ContainerAwareEventDispatcher
      */
     public static function getEventDispatcher()
     {
@@ -252,8 +255,8 @@ class Pimcore
         $longRunningHelper = self::getContainer()->get(\Pimcore\Helper\LongRunningHelper::class);
         $longRunningHelper->cleanUp([
             'pimcoreRuntimeCache' => [
-                'keepItems' => $keepItems,
-            ],
+                'keepItems' => $keepItems
+            ]
         ]);
     }
 
@@ -267,33 +270,15 @@ class Pimcore
         // set inShutdown to true so that the output-buffer knows that he is allowed to send the headers
         self::$inShutdown = true;
 
-        if (self::getContainer() === null) {
-            return;
-        }
-
-        if (self::$shutdownEnabled && self::isInstalled()) {
+        // Check if this is a cache warming run and if this runs on an installed instance. If this is a cache warmup
+        // we can't use self::isInstalled() as it will refer to the wrong caching dir.
+        if (self::getKernel()->getCacheDir() === self::getContainer()->getParameter('kernel.cache_dir') && self::isInstalled()) {
             // write and clean up cache
             Cache::shutdown();
 
             // release all open locks from this process
             Model\Tool\Lock::releaseAll();
         }
-    }
-
-    /**
-     * @internal
-     */
-    public static function disableShutdown()
-    {
-        self::$shutdownEnabled = false;
-    }
-
-    /**
-     * @internal
-     */
-    public static function enableShutdown()
-    {
-        self::$shutdownEnabled = true;
     }
 
     public static function disableMinifyJs(): bool

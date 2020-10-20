@@ -26,9 +26,6 @@ use Pimcore\Document\Tag\NamingStrategy\Migration\Analyze\Exception\BuildEditabl
 use Pimcore\Document\Tag\NamingStrategy\Migration\Analyze\Exception\LogicException;
 use Pimcore\Model\Document;
 
-/**
- * @deprecated
- */
 final class ElementTree
 {
     /**
@@ -80,7 +77,7 @@ final class ElementTree
      */
     private $blockTypes = [
         'block' => Block::class,
-        'areablock' => Areablock::class,
+        'areablock' => Areablock::class
     ];
 
     /**
@@ -273,13 +270,13 @@ final class ElementTree
                 $this->document,
                 $exception
             );
+        } elseif (count($editables) > 1) {
+            return $this->conflictResolver->resolveEditableConflict(
+                $this->document,
+                $exception,
+                $editables
+            );
         }
-
-        return $this->conflictResolver->resolveEditableConflict(
-            $this->document,
-            $exception,
-            $editables
-        );
     }
 
     private function buildBlocks(array $blockNames, array $parentCandidates): array

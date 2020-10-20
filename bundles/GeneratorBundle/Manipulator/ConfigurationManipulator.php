@@ -7,7 +7,6 @@ use Pimcore\Bundle\GeneratorBundle\Model\BaseBundle as Bundle;
 use Symfony\Component\Yaml\Yaml;
 
 /**
- * @deprecated
  * Changes the PHP code of a YAML services configuration file.
  *
  * The following class is copied from \Sensio\Bundle\GeneratorBundle\Manipulator\ConfigurationManipulator
@@ -80,7 +79,7 @@ EOF
     /**
      * Finds the last imported resource path in the YAML file.
      *
-     * @param string $yamlContents
+     * @param $yamlContents
      *
      * @return bool|string
      */

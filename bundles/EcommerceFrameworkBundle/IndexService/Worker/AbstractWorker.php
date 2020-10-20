@@ -17,7 +17,6 @@ namespace Pimcore\Bundle\EcommerceFrameworkBundle\IndexService\Worker;
 use Pimcore\Bundle\EcommerceFrameworkBundle\IndexService\Config\ConfigInterface;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Model\IndexableInterface;
 use Pimcore\Db\ConnectionInterface;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 abstract class AbstractWorker implements WorkerInterface
 {
@@ -46,19 +45,13 @@ abstract class AbstractWorker implements WorkerInterface
      */
     protected $filterGroups;
 
-    /**
-     * @var EventDispatcherInterface
-     */
-    protected $eventDispatcher;
-
-    public function __construct(ConfigInterface $tenantConfig, ConnectionInterface $db, EventDispatcherInterface $eventDispatcher)
+    public function __construct(ConfigInterface $tenantConfig, ConnectionInterface $db)
     {
         $this->tenantConfig = $tenantConfig;
         $tenantConfig->setTenantWorker($this);
 
         $this->name = $tenantConfig->getTenantName();
         $this->db = $db;
-        $this->eventDispatcher = $eventDispatcher;
     }
 
     public function getTenantConfig()
@@ -75,7 +68,7 @@ abstract class AbstractWorker implements WorkerInterface
     {
         if (null === $this->indexColumns) {
             $indexColumns = [
-                'categoryIds' => 'categoryIds',
+                'categoryIds' => 'categoryIds'
             ];
 
             foreach ($this->tenantConfig->getAttributes() as $attribute) {
@@ -136,22 +129,24 @@ abstract class AbstractWorker implements WorkerInterface
     /**
      * actually deletes all sub entries from index. original object is delivered too, but keep in mind, that this might be empty.
      *
-     * @param int $subObjectId
-     * @param IndexableInterface|null $object - might be empty (when object doesn't exist any more in pimcore
+     * @param $subObjectId
+     * @param IndexableInterface $object - might be empty (when object doesn't exist any more in pimcore
+     *
+     * @return mixed
      */
     abstract protected function doDeleteFromIndex($subObjectId, IndexableInterface $object = null);
 
     /**
      * Checks if given data is array and returns converted data suitable for search backend. For mysql it is a string with special delimiter.
      *
-     * @param array|string $data
+     * @param $data
      *
      * @return string
      */
     protected function convertArray($data)
     {
         if (is_array($data)) {
-            return WorkerInterface::MULTISELECT_DELIMITER . implode(WorkerInterface::MULTISELECT_DELIMITER, $data) . WorkerInterface::MULTISELECT_DELIMITER;
+            return WorkerInterface::MULTISELECT_DELIMITER . implode($data, WorkerInterface::MULTISELECT_DELIMITER) . WorkerInterface::MULTISELECT_DELIMITER;
         }
 
         return $data;

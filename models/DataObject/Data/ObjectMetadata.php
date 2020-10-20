@@ -66,7 +66,7 @@ class ObjectMetadata extends Model\AbstractModel implements DataObject\OwnerAwar
     /**
      * @param DataObject\Concrete $object
      *
-     * @return $this
+     * @return $this|void
      */
     public function setObject($object)
     {
@@ -75,7 +75,7 @@ class ObjectMetadata extends Model\AbstractModel implements DataObject\OwnerAwar
         if (!$object) {
             $this->setObjectId(null);
 
-            return $this;
+            return;
         }
 
         $this->objectId = $object->getId();
@@ -84,8 +84,8 @@ class ObjectMetadata extends Model\AbstractModel implements DataObject\OwnerAwar
     }
 
     /**
-     * @param string $name
-     * @param array $arguments
+     * @param $name
+     * @param $arguments
      *
      * @return mixed|void
      *
@@ -94,25 +94,19 @@ class ObjectMetadata extends Model\AbstractModel implements DataObject\OwnerAwar
     public function __call($name, $arguments)
     {
         if (substr($name, 0, 3) == 'get') {
-            $key = substr($name, 3, strlen($name) - 3);
+            $key = strtolower(substr($name, 3, strlen($name) - 3));
 
-            $idx = array_searchi($key, $this->columns);
-            if ($idx !== false) {
-                $correctedKey = $this->columns[$idx];
-
-                return isset($this->data[$correctedKey]) ? $this->data[$correctedKey] : null;
+            if (in_array($key, $this->columns)) {
+                return isset($this->data[$key]) ? $this->data[$key] : null;
             }
 
             throw new \Exception("Requested data $key not available");
         }
 
         if (substr($name, 0, 3) == 'set') {
-            $key = substr($name, 3, strlen($name) - 3);
-            $idx = array_searchi($key, $this->columns);
-
-            if ($idx !== false) {
-                $correctedKey = $this->columns[$idx];
-                $this->data[$correctedKey] = $arguments[0];
+            $key = strtolower(substr($name, 3, strlen($name) - 3));
+            if (in_array($key, $this->columns)) {
+                $this->data[$key] = $arguments[0];
                 $this->markMeDirty();
             } else {
                 throw new \Exception("Requested data $key not available");
@@ -121,25 +115,25 @@ class ObjectMetadata extends Model\AbstractModel implements DataObject\OwnerAwar
     }
 
     /**
-     * @param DataObject\Concrete $object
+     * @param $object
      * @param string $ownertype
-     * @param string $ownername
-     * @param string $position
-     * @param int $index
+     * @param $ownername
+     * @param $position
+     * @param $index
      */
-    public function save($object, $ownertype, $ownername, $position, $index)
+    public function save($object, $ownertype = 'object', $ownername, $position, $index)
     {
         $this->getDao()->save($object, $ownertype, $ownername, $position, $index);
     }
 
     /**
      * @param DataObject\Concrete $source
-     * @param int $destinationId
-     * @param string $fieldname
-     * @param string $ownertype
-     * @param string $ownername
-     * @param string $position
-     * @param int $index
+     * @param $destinationId
+     * @param $fieldname
+     * @param $ownertype
+     * @param $ownername
+     * @param $position
+     * @param $index
      *
      * @return mixed
      */
@@ -149,7 +143,7 @@ class ObjectMetadata extends Model\AbstractModel implements DataObject\OwnerAwar
     }
 
     /**
-     * @param string $fieldname
+     * @param $fieldname
      *
      * @return $this
      */
@@ -170,7 +164,7 @@ class ObjectMetadata extends Model\AbstractModel implements DataObject\OwnerAwar
     }
 
     /**
-     * @return DataObject\Concrete|null
+     * @return DataObject\Concrete
      */
     public function getObject()
     {
@@ -182,14 +176,14 @@ class ObjectMetadata extends Model\AbstractModel implements DataObject\OwnerAwar
 
             return $object;
         }
-
-        return null;
     }
 
     /**
-     * @param DataObject\Concrete $element
+     * @param $element
      *
      * @return $this
+     *
+     * @internal param $object
      */
     public function setElement($element)
     {
@@ -199,7 +193,7 @@ class ObjectMetadata extends Model\AbstractModel implements DataObject\OwnerAwar
     }
 
     /**
-     * @return DataObject\Concrete|null
+     * @return DataObject\Concrete
      */
     public function getElement()
     {
@@ -207,7 +201,7 @@ class ObjectMetadata extends Model\AbstractModel implements DataObject\OwnerAwar
     }
 
     /**
-     * @param array $columns
+     * @param $columns
      *
      * @return $this
      */
@@ -245,7 +239,7 @@ class ObjectMetadata extends Model\AbstractModel implements DataObject\OwnerAwar
     }
 
     /**
-     * @return string
+     * @return mixed
      */
     public function __toString()
     {

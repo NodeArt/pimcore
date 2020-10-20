@@ -20,12 +20,11 @@ use Pimcore\Model;
 use Pimcore\Model\DataObject;
 use Pimcore\Model\DataObject\ClassDefinition\Data;
 
-class BooleanSelect extends Data implements ResourcePersistenceAwareInterface, QueryResourcePersistenceAwareInterface, TypeDeclarationSupportInterface, EqualComparisonInterface
+class BooleanSelect extends Data implements ResourcePersistenceAwareInterface, QueryResourcePersistenceAwareInterface
 {
     use Model\DataObject\Traits\SimpleComparisonTrait;
     use Extension\ColumnType;
     use Extension\QueryColumnType;
-    use DataObject\ClassDefinition\NullablePhpdocReturnTypeTrait;
 
     /** storage value for yes */
     const YES_VALUE = 1;
@@ -43,16 +42,16 @@ class BooleanSelect extends Data implements ResourcePersistenceAwareInterface, Q
     const DEFAULT_OPTIONS = [
         [
             'key' => 'empty',
-            'value' => self::EMPTY_VALUE_EDITMODE,
+            'value' => self::EMPTY_VALUE_EDITMODE
         ],
         [
             'key' => 'yes',
-            'value' => self::YES_VALUE,
+            'value' => self::YES_VALUE
         ],
         [
             'key' => 'no',
-            'value' => self::NO_VALUE,
-        ],
+            'value' => self::NO_VALUE
+        ]
     ];
     /**
      * Static type of this element
@@ -92,7 +91,7 @@ class BooleanSelect extends Data implements ResourcePersistenceAwareInterface, Q
      *
      * @var string
      */
-    public $phpdocType = 'bool';
+    public $phpdocType = 'boolean';
 
     /**
      * @return array
@@ -122,7 +121,7 @@ class BooleanSelect extends Data implements ResourcePersistenceAwareInterface, Q
     }
 
     /**
-     * @param int|null $width
+     * @param $width
      *
      * @return $this
      */
@@ -136,11 +135,11 @@ class BooleanSelect extends Data implements ResourcePersistenceAwareInterface, Q
     /**
      * @see ResourcePersistenceAwareInterface::getDataFromResource
      *
-     * @param int|null $data
-     * @param null|DataObject\Concrete $object
+     * @param string $data
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
-     * @return bool|null
+     * @return string
      */
     public function getDataFromResource($data, $object = null, $params = [])
     {
@@ -160,11 +159,11 @@ class BooleanSelect extends Data implements ResourcePersistenceAwareInterface, Q
     /**
      * @see QueryResourcePersistenceAwareInterface::getDataForQueryResource
      *
-     * @param int|bool|null $data
-     * @param null|DataObject\Concrete $object
-     * @param array $params
+     * @param string $data
+     * @param null|Model\DataObject\AbstractObject $object
+     * @param mixed $params
      *
-     * @return int|null
+     * @return string
      */
     public function getDataForQueryResource($data, $object = null, $params = [])
     {
@@ -174,11 +173,11 @@ class BooleanSelect extends Data implements ResourcePersistenceAwareInterface, Q
     /**
      * @see ResourcePersistenceAwareInterface::getDataForResource
      *
-     * @param int|bool|null $data
-     * @param null|DataObject\Concrete $object
-     * @param array $params
+     * @param string $data
+     * @param null|Model\DataObject\AbstractObject $object
+     * @param mixed $params
      *
-     * @return int|null
+     * @return string
      */
     public function getDataForResource($data, $object = null, $params = [])
     {
@@ -198,8 +197,8 @@ class BooleanSelect extends Data implements ResourcePersistenceAwareInterface, Q
      * @see Data::getVersionPreview
      *
      * @param string $data
-     * @param DataObject\Concrete|null $object
-     * @param array $params
+     * @param null|DataObject\AbstractObject $object
+     * @param mixed $params
      *
      * @return string
      */
@@ -209,7 +208,7 @@ class BooleanSelect extends Data implements ResourcePersistenceAwareInterface, Q
     }
 
     /** True if change is allowed in edit mode.
-     * @param DataObject\Concrete $object
+     * @param string $object
      * @param mixed $params
      *
      * @return bool
@@ -221,7 +220,7 @@ class BooleanSelect extends Data implements ResourcePersistenceAwareInterface, Q
 
     /** See parent class.
      * @param mixed $data
-     * @param DataObject\Concrete|null $object
+     * @param null $object
      * @param mixed $params
      *
      * @return array|null
@@ -270,7 +269,7 @@ class BooleanSelect extends Data implements ResourcePersistenceAwareInterface, Q
     }
 
     /**
-     * @param bool|null $data
+     * @param $data
      *
      * @return bool
      */
@@ -280,7 +279,7 @@ class BooleanSelect extends Data implements ResourcePersistenceAwareInterface, Q
     }
 
     /**
-     * @param DataObject\ClassDefinition\Data\BooleanSelect $masterDefinition
+     * @param DataObject\ClassDefinition\Data $masterDefinition
      */
     public function synchronizeWithMasterDefinition(DataObject\ClassDefinition\Data $masterDefinition)
     {
@@ -297,7 +296,7 @@ class BooleanSelect extends Data implements ResourcePersistenceAwareInterface, Q
     }
 
     /**
-     * @param string|null $yesLabel
+     * @param $yesLabel
      *
      * @return $this
      */
@@ -314,8 +313,8 @@ class BooleanSelect extends Data implements ResourcePersistenceAwareInterface, Q
         if (!is_array($this->options)) {
             $this->options = [
                 ['key' => $label,
-                'value' => $value,
-                ],
+                'value' => $value
+                ]
 
             ];
         } else {
@@ -363,10 +362,10 @@ class BooleanSelect extends Data implements ResourcePersistenceAwareInterface, Q
 
     /**
      * @param string $data
-     * @param null|Model\DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
-     * @return int
+     * @return string
      */
     public function getDataForGrid($data, $object = null, $params = [])
     {
@@ -377,10 +376,10 @@ class BooleanSelect extends Data implements ResourcePersistenceAwareInterface, Q
      * @see Data::getDataForEditmode
      *
      * @param string $data
-     * @param null|DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
-     * @return int
+     * @return string
      */
     public function getDataForEditmode($data, $object = null, $params = [])
     {
@@ -394,11 +393,11 @@ class BooleanSelect extends Data implements ResourcePersistenceAwareInterface, Q
     }
 
     /**
-     * @param string $data
-     * @param DataObject\Concrete|null $object
+     * @param $data
+     * @param null $object
      * @param array $params
      *
-     * @return bool|null
+     * @return string
      */
     public function getDataFromGridEditor($data, $object = null, $params = [])
     {
@@ -409,10 +408,10 @@ class BooleanSelect extends Data implements ResourcePersistenceAwareInterface, Q
      * @see Data::getDataFromEditmode
      *
      * @param string $data
-     * @param null|DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
-     * @return bool|null
+     * @return string
      */
     public function getDataFromEditmode($data, $object = null, $params = [])
     {
@@ -423,60 +422,5 @@ class BooleanSelect extends Data implements ResourcePersistenceAwareInterface, Q
         }
 
         return null;
-    }
-
-    /**
-     * @param mixed $oldValue
-     * @param mixed $newValue
-     *
-     * @return bool
-     */
-    public function isEqual($oldValue, $newValue): bool
-    {
-        return $oldValue === $newValue;
-    }
-
-    /**
-     * converts object data to a simple string value or CSV Export
-     *
-     * @abstract
-     *
-     * @param DataObject\Concrete|DataObject\Localizedfield|DataObject\Objectbrick\Data\AbstractData|DataObject\Fieldcollection\Data\AbstractData $object
-     * @param array $params
-     *
-     * @return string
-     */
-    public function getForCsvExport($object, $params = [])
-    {
-        $value = $this->getDataFromObjectParam($object, $params);
-        if ($value === null) {
-            $value = '';
-        } elseif ($value) {
-            $value = '1';
-        } else {
-            $value = '0';
-        }
-
-        return $value;
-    }
-
-    /**
-     * @param string $importValue
-     * @param null|DataObject\Concrete $object
-     * @param mixed $params
-     *
-     * @return mixed
-     */
-    public function getFromCsvImport($importValue, $object = null, $params = [])
-    {
-        if ($importValue === '1') {
-            $value = true;
-        } elseif ($importValue === '0') {
-            $value = false;
-        } else {
-            $value = null;
-        }
-
-        return $value;
     }
 }

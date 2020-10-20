@@ -12,7 +12,6 @@
 
 use Pimcore\Model\DataObject;
 
-$this->get('translate')->setDomain('admin');
 $fields = $this->object->getClass()->getFieldDefinitions();
 
 ?>
@@ -49,7 +48,7 @@ $fields = $this->object->getClass()->getFieldDefinitions();
             <?php foreach (\Pimcore\Tool::getValidLanguages() as $language) { ?>
                 <?php foreach ($definition->getFieldDefinitions() as $lfd) { ?>
                     <tr<?php if ($c % 2) { ?> class="odd"<?php } ?>>
-                        <td><?= $this->translate($lfd->getTitle()) ?> (<?= $language; ?>)</td>
+                        <td><?= $lfd->getTitle() ?> (<?= $language; ?>)</td>
                         <td><?= $lfd->getName() ?></td>
                         <td>
                             <?php
@@ -83,12 +82,12 @@ $fields = $this->object->getClass()->getFieldDefinitions();
                         <?php foreach (\Pimcore\Tool::getValidLanguages() as $language) { ?>
                             <?php foreach ($lfd->getFieldDefinitions() as $localizedFieldDefinition) { ?>
                                 <tr<?php if ($c % 2) { ?> class="odd"<?php } ?>>
-                                    <td><?= $this->translate($localizedFieldDefinition->getTitle()) ?> (<?= $language; ?>)</td>
+                                    <td><?= $localizedFieldDefinition->getTitle() ?> (<?= $language; ?>)</td>
                                     <td><?= $localizedFieldDefinition->getName() ?></td>
                                     <td>
                                         <?php
                                         if ($brickValue) {
-                                            /** @var DataObject\Localizedfield $localizedBrickValues */
+                                            /** @var  $localizedBrickValues DataObject\Localizedfield */
                                             $localizedBrickValues = $brickValue->getLocalizedFields();
                                             $localizedBrickValue = $localizedBrickValues->getLocalizedValue($localizedFieldDefinition->getName(), $language);
                                             $versionPreview = $localizedFieldDefinition->getVersionPreview($localizedBrickValue);
@@ -110,7 +109,7 @@ $fields = $this->object->getClass()->getFieldDefinitions();
 
                         ?>
                         <tr<?php if ($c % 2) { ?> class="odd"<?php } ?>>
-                            <td><?= ucfirst($asAllowedType) . " - " . $this->translate($lfd->getTitle()) ?></td>
+                            <td><?= ucfirst($asAllowedType) . " - " . $lfd->getTitle() ?></td>
                             <td><?= $lfd->getName() ?></td>
                             <td><?= $value ?></td>
                         </tr>
@@ -120,7 +119,7 @@ $fields = $this->object->getClass()->getFieldDefinitions();
                 } ?>
             <?php } ?>
         <?php } else if ($definition instanceof DataObject\ClassDefinition\Data\Classificationstore) {
-            /** @var DataObject\Classificationstore $storedata */
+            /** @var $storedata DataObject\Classificationstore */
             $storedata = $definition->getVersionPreview($this->object->getValueForFieldName($fieldName));
 
             if (!$storedata) {
@@ -141,15 +140,15 @@ $fields = $this->object->getClass()->getFieldDefinitions();
                 if (!$enabled) {
                     continue;
                 }
-                /** @var DataObject\Classificationstore\GroupConfig $groupDefinition */
+                /** @var $groupDefinition DataObject\Classificationstore\GroupConfig */
                 $groupDefinition = Pimcore\Model\DataObject\Classificationstore\GroupConfig::getById($activeGroupId);
                 if (!$groupDefinition) {
                     continue;
                 }
 
+                /** @var $keyGroupRelation DataObject\Classificationstore\KeyGroupRelation */
                 $keyGroupRelations = $groupDefinition->getRelations();
 
-                /** @var DataObject\Classificationstore\KeyGroupRelation $keyGroupRelation */
                 foreach ($keyGroupRelations as $keyGroupRelation) {
 
                     $keyDef = DataObject\Classificationstore\Service::getFieldDefinitionFromJson(json_decode($keyGroupRelation->getDefinition()), $keyGroupRelation->getType());
@@ -164,7 +163,7 @@ $fields = $this->object->getClass()->getFieldDefinitions();
                         ?>
 
                         <tr<?php if ($c % 2) { ?> class="odd"<?php } ?>>
-                            <td><?= $this->translate($definition->getTitle()) ?></td>
+                            <td><?= $definition->getTitle() ?></td>
                             <td><?= $groupDefinition->getName() ?> - <?= $keyGroupRelation->getName() ?>
                                 / <?= $definition->isLocalized() ? $language : "" ?></td>
                             <td><?= $preview ?></td>
@@ -177,20 +176,21 @@ $fields = $this->object->getClass()->getFieldDefinitions();
             ?>
         <?php } else if ($definition instanceof DataObject\ClassDefinition\Data\Fieldcollections) {
             $fields = $this->object->{"get" . ucfirst($fieldName)}();
-            $fieldDefinitions = null;
-            $fieldItems = null;
             if ($fields) {
                 $fieldDefinitions = $fields->getItemDefinitions();
                 $fieldItems = $fields->getItems();
             }
 
             if (!is_null($fieldItems) && count($fieldItems)) {
+
                 foreach ($fieldItems as $fkey => $fieldItem) {
                     $fieldKeys = $fieldDefinitions[$fieldItem->getType()]->getFieldDefinitions();
                     foreach ($fieldKeys as $fieldKey) {
+
+
                         $value = $fieldItem->{"get" . ucfirst($fieldKey->name)}();  ?>
                         <tr<?php if ($c % 2) { ?> class="odd"<?php } ?>>
-                            <td><?= ucfirst($fieldItem->getType()) . " - " . $this->translate($fieldKey->title) ?></td>
+                            <td><?= ucfirst($fieldItem->getType()) . " - " . $fieldKey->title ?></td>
                             <td><?= $fieldKey->name ?></td>
                             <td><?= $fieldKey->getVersionPreview($value) ?></td>
                         </tr>
@@ -202,7 +202,7 @@ $fields = $this->object->getClass()->getFieldDefinitions();
             ?>
         <?php } else { ?>
             <tr<?php if ($c % 2) { ?> class="odd"<?php } ?>>
-                <td><?= $this->translate($definition->getTitle()) ?></td>
+                <td><?= $definition->getTitle() ?></td>
                 <td><?= $definition->getName() ?></td>
                 <td><?= $definition->getVersionPreview($this->object->getValueForFieldName($fieldName)) ?></td>
             </tr>

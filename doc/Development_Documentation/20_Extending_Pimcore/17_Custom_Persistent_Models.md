@@ -66,7 +66,7 @@ class Vote extends AbstractModel {
     /**
      * get score by id
      *
-     * @param int $id
+     * @param $id
      * @return null|self
      */
     public static function getById($id) {
@@ -76,14 +76,14 @@ class Vote extends AbstractModel {
             return $obj;
         }
         catch (\Exception $ex) {
-            \Pimcore\Logger::warn("Vote with id $id not found");
+            \Logger::warn("Vote with id $id not found");
         }
  
         return null;
     }
  
     /**
-     * @param int $score
+     * @param $score
      */
     public function setScore($score) {
         $this->score = $score;
@@ -97,7 +97,7 @@ class Vote extends AbstractModel {
     }
  
     /**
-     * @param string $username
+     * @param $username
      */
     public function setUsername($username) {
         $this->username = $username;
@@ -111,7 +111,7 @@ class Vote extends AbstractModel {
     }
  
     /**
-     * @param int $id
+     * @param $id
      */
     public function setId($id) {
         $this->id = $id;
@@ -154,7 +154,7 @@ class Dao extends AbstractDao {
     /**
      * get vote by id
      *
-     * @param int|null $id
+     * @param null $id
      * @throws \Exception
      */
     public function getById($id = null) {

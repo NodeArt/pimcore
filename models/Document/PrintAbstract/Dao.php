@@ -70,7 +70,7 @@ class Dao extends Document\PageSnippet\Dao
         parent::create();
 
         $this->db->insert('documents_printpage', [
-            'id' => $this->model->getId(),
+            'id' => $this->model->getId()
         ]);
     }
 
@@ -81,8 +81,6 @@ class Dao extends Document\PageSnippet\Dao
     {
         $this->model->setModificationDate(time());
         $document = $this->model->getObjectVars();
-        $dataDocument = [];
-        $dataPage = [];
 
         foreach ($document as $key => $value) {
             // check if the getter exists

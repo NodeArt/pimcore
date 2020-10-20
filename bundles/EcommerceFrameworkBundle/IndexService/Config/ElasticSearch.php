@@ -17,7 +17,6 @@ namespace Pimcore\Bundle\EcommerceFrameworkBundle\IndexService\Config;
 use Pimcore\Bundle\EcommerceFrameworkBundle\EnvironmentInterface;
 use Pimcore\Bundle\EcommerceFrameworkBundle\IndexService\Config\Definition\Attribute;
 use Pimcore\Bundle\EcommerceFrameworkBundle\IndexService\Interpreter\RelationInterpreterInterface;
-use Pimcore\Bundle\EcommerceFrameworkBundle\IndexService\SynonymProvider\SynonymProviderInterface;
 use Pimcore\Bundle\EcommerceFrameworkBundle\IndexService\Worker\ElasticSearch\AbstractElasticSearch as DefaultElasticSearchWorker;
 use Pimcore\Bundle\EcommerceFrameworkBundle\IndexService\Worker\WorkerInterface;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Model\DefaultMockup;
@@ -74,26 +73,6 @@ class ElasticSearch extends AbstractConfig implements MockupConfigInterface, Ela
      */
     protected $environment;
 
-    /** @var SynonymProviderInterface[] */
-    protected $synonymProviders = [];
-
-    /**
-     * @inheritDoc
-     *
-     * @param SynonymProviderInterface[] $synonymProviders
-     */
-    public function __construct(
-        string $tenantName,
-        array $attributes,
-        array $searchAttributes,
-        array $filterTypes,
-        array $options = [],
-        iterable $synonymProviders = []
-    ) {
-        $this->synonymProviders = $synonymProviders;
-        parent::__construct($tenantName, $attributes, $searchAttributes, $filterTypes, $options);
-    }
-
     protected function addAttribute(Attribute $attribute)
     {
         parent::addAttribute($attribute);
@@ -146,7 +125,7 @@ class ElasticSearch extends AbstractConfig implements MockupConfigInterface, Ela
             'client_config',
             'index_settings',
             'es_client_params',
-            'mapping',
+            'mapping'
         ];
 
         foreach ($arrayFields as $field) {
@@ -158,14 +137,13 @@ class ElasticSearch extends AbstractConfig implements MockupConfigInterface, Ela
         $resolver->setAllowedTypes('mapper', 'string');
 
         $resolver->setDefined('analyzer');
-        $resolver->setDefined('synonym_providers');
 
         $resolver->setDefault('store', true);
         $resolver->setAllowedTypes('store', 'bool');
     }
 
     /**
-     * @param string $fieldName
+     * @param $fieldName
      *
      * @return array
      */
@@ -188,8 +166,8 @@ class ElasticSearch extends AbstractConfig implements MockupConfigInterface, Ela
     /**
      * returns the full field name
      *
-     * @param string $fieldName
-     * @param bool $considerSubFieldNames - activate to consider subfield names like name.analyzed or score definitions like name^3
+     * @param $fieldName
+     * @param $considerSubFieldNames - activate to consider subfield names like name.analyzed or score definitions like name^3
      *
      * @return string
      */
@@ -216,7 +194,7 @@ class ElasticSearch extends AbstractConfig implements MockupConfigInterface, Ela
      * returns short field name based on full field name
      * also considers subfield names like name.analyzed etc.
      *
-     * @param string $fullFieldName
+     * @param $fullFieldName
      *
      * @return false|int|string
      */
@@ -293,7 +271,7 @@ class ElasticSearch extends AbstractConfig implements MockupConfigInterface, Ela
      * in case of subtenants returns a data structure containing all sub tenants
      *
      * @param IndexableInterface $object
-     * @param int|null $subObjectId
+     * @param null $subObjectId
      *
      * @return array $subTenantData
      */
@@ -349,9 +327,9 @@ class ElasticSearch extends AbstractConfig implements MockupConfigInterface, Ela
     /**
      * creates object mockup for given data
      *
-     * @param int $objectId
-     * @param mixed $data
-     * @param array $relations
+     * @param $objectId
+     * @param $data
+     * @param $relations
      *
      * @return mixed
      */
@@ -364,18 +342,13 @@ class ElasticSearch extends AbstractConfig implements MockupConfigInterface, Ela
      * Gets object mockup by id, can consider subIds and therefore return e.g. an array of values
      * always returns a object mockup if available
      *
-     * @param int $objectId
+     * @param $objectId
      *
      * @return IndexableInterface | array
      */
     public function getObjectMockupById($objectId)
     {
-        $listing = $this->getTenantWorker()->getProductList();
-        $listing->addCondition($objectId, 'o_id');
-        $listing->setLimit(1);
-        $product = $listing->current();
-
-        return $product ? $product : null;
+        return $this->getTenantWorker()->getMockupFromCache($objectId);
     }
 
     /**
@@ -386,17 +359,5 @@ class ElasticSearch extends AbstractConfig implements MockupConfigInterface, Ela
     public function setEnvironment(EnvironmentInterface $environment)
     {
         $this->environment = $environment;
-    }
-
-    /**
-     * Get an associative array of configured synonym providers.
-     *  - key: the name of the synonym provider configuration, which is equivalent to the name of the configured filter
-     *  - value: the synonym provider
-     *
-     * @return SynonymProviderInterface[]
-     */
-    public function getSynonymProviders(): array
-    {
-        return $this->synonymProviders;
     }
 }

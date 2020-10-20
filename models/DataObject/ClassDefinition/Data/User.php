@@ -28,11 +28,6 @@ class User extends Model\DataObject\ClassDefinition\Data\Select
     public $fieldtype = 'user';
 
     /**
-     * @var bool
-     */
-    public $unique;
-
-    /**
      * @return User
      */
     protected function init()
@@ -50,7 +45,7 @@ class User extends Model\DataObject\ClassDefinition\Data\Select
      * @see ResourcePersistenceAwareInterface::getDataFromResource
      *
      * @param string $data
-     * @param null|Model\DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return string
@@ -72,7 +67,7 @@ class User extends Model\DataObject\ClassDefinition\Data\Select
      * @see ResourcePersistenceAwareInterface::getDataForResource
      *
      * @param string $data
-     * @param Model\DataObject\Concrete|null $object
+     * @param null $object
      * @param mixed $params
      *
      * @return null|string
@@ -110,7 +105,7 @@ class User extends Model\DataObject\ClassDefinition\Data\Select
                     }
                     $options[] = [
                         'value' => $user->getId(),
-                        'key' => $value,
+                        'key' => $value
                     ];
                 }
             }
@@ -141,7 +136,7 @@ class User extends Model\DataObject\ClassDefinition\Data\Select
     }
 
     /**
-     * @param Model\DataObject\Concrete|Model\DataObject\Localizedfield|Model\DataObject\Objectbrick\Data\AbstractData|\Pimcore\Model\DataObject\Fieldcollection\Data\AbstractData $object
+     * @param $object
      * @param mixed $params
      *
      * @return string
@@ -152,7 +147,7 @@ class User extends Model\DataObject\ClassDefinition\Data\Select
     }
 
     /**
-     * @param array $data
+     * @param $data
      *
      * @return static
      */
@@ -162,21 +157,5 @@ class User extends Model\DataObject\ClassDefinition\Data\Select
         $obj->configureOptions();
 
         return $obj;
-    }
-
-    /**
-     * @return bool
-     */
-    public function getUnique()
-    {
-        return $this->unique;
-    }
-
-    /**
-     * @param bool $unique
-     */
-    public function setUnique($unique)
-    {
-        $this->unique = $unique;
     }
 }

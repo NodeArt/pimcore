@@ -31,7 +31,6 @@ services:
 
     # guard implementation handling webservice login
     Pimcore\Bundle\AdminBundle\Security\Guard\WebserviceAuthenticator:
-        deprecated: ~
         public: false
         calls:
             - [setLogger, ['@logger']]

@@ -20,14 +20,11 @@ use Pimcore\Model\Asset\Image\Thumbnail\Config;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
-/**
- * @deprecated
- */
 class ImageController extends AbstractRestController
 {
     /**
-     * @Route("/image-thumbnail/id/{id}", name="pimcore_api_rest_image_imagethumbnail", methods={"GET"})
-     * @Route("/image-thumbnail", name="pimcore_api_rest_image_imagethumbnail_1", methods={"GET"})
+     * @Route("/image-thumbnail/id/{id}", methods={"GET"})
+     * @Route("/image-thumbnail", methods={"GET"})
      *
      * @param Request     $request
      * @param string|null $id
@@ -53,7 +50,7 @@ class ImageController extends AbstractRestController
     }
 
     /**
-     * @Route("/image-thumbnails", name="pimcore_api_rest_image_imagethumbnails", methods={"GET"})
+     * @Route("/image-thumbnails", methods={"GET"})
      */
     public function imageThumbnailsAction()
     {
@@ -67,7 +64,7 @@ class ImageController extends AbstractRestController
         foreach ($items as $item) {
             $thumbnails[] = [
                 'id' => $item->getName(),
-                'text' => $item->getName(),
+                'text' => $item->getName()
             ];
         }
 

@@ -20,7 +20,7 @@ use Pimcore\Model;
 use Pimcore\Model\DataObject;
 use Pimcore\Model\DataObject\ClassDefinition\Data\Geo\AbstractGeo;
 
-class Geopoint extends AbstractGeo implements ResourcePersistenceAwareInterface, QueryResourcePersistenceAwareInterface, EqualComparisonInterface
+class Geopoint extends AbstractGeo implements ResourcePersistenceAwareInterface, QueryResourcePersistenceAwareInterface
 {
     use Extension\ColumnType;
     use Extension\QueryColumnType;
@@ -35,21 +35,21 @@ class Geopoint extends AbstractGeo implements ResourcePersistenceAwareInterface,
     /**
      * Type for the column to query
      *
-     * @var array
+     * @var string
      */
     public $queryColumnType = [
         'longitude' => 'double',
-        'latitude' => 'double',
+        'latitude' => 'double'
     ];
 
     /**
      * Type for the column
      *
-     * @var array
+     * @var string
      */
     public $columnType = [
         'longitude' => 'double',
-        'latitude' => 'double',
+        'latitude' => 'double'
     ];
 
     /**
@@ -63,7 +63,7 @@ class Geopoint extends AbstractGeo implements ResourcePersistenceAwareInterface,
      * @see ResourcePersistenceAwareInterface::getDataForResource
      *
      * @param string $data
-     * @param null|DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return array
@@ -73,13 +73,13 @@ class Geopoint extends AbstractGeo implements ResourcePersistenceAwareInterface,
         if ($data instanceof DataObject\Data\Geopoint) {
             return [
                 $this->getName() . '__longitude' => $data->getLongitude(),
-                $this->getName() . '__latitude' => $data->getLatitude(),
+                $this->getName() . '__latitude' => $data->getLatitude()
             ];
         }
 
         return [
             $this->getName() . '__longitude' => null,
-            $this->getName() . '__latitude' => null,
+            $this->getName() . '__latitude' => null
         ];
     }
 
@@ -87,7 +87,7 @@ class Geopoint extends AbstractGeo implements ResourcePersistenceAwareInterface,
      * @see ResourcePersistenceAwareInterface::getDataFromResource
      *
      * @param array $data
-     * @param null|DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return DataObject\Data\Geopoint|null
@@ -98,7 +98,7 @@ class Geopoint extends AbstractGeo implements ResourcePersistenceAwareInterface,
             $geopoint = new DataObject\Data\Geopoint($data[$this->getName() . '__longitude'], $data[$this->getName() . '__latitude']);
 
             if (isset($params['owner'])) {
-                $geopoint->setOwner($params['owner'], $params['fieldname'], $params['language'] ?? null);
+                $geopoint->setOwner($params['owner'], $params['fieldname'], $params['language']);
             }
 
             return $geopoint;
@@ -111,7 +111,7 @@ class Geopoint extends AbstractGeo implements ResourcePersistenceAwareInterface,
      * @see QueryResourcePersistenceAwareInterface::getDataForQueryResource
      *
      * @param string $data
-     * @param null|DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return array
@@ -125,7 +125,7 @@ class Geopoint extends AbstractGeo implements ResourcePersistenceAwareInterface,
      * @see Data::getDataForEditmode
      *
      * @param string $data
-     * @param null|DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return array|null
@@ -135,7 +135,7 @@ class Geopoint extends AbstractGeo implements ResourcePersistenceAwareInterface,
         if ($data instanceof DataObject\Data\Geopoint) {
             return [
                 'longitude' => $data->getLongitude(),
-                'latitude' => $data->getLatitude(),
+                'latitude' => $data->getLatitude()
             ];
         }
 
@@ -146,7 +146,7 @@ class Geopoint extends AbstractGeo implements ResourcePersistenceAwareInterface,
      * @see Data::getDataFromEditmode
      *
      * @param string $data
-     * @param null|DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return DataObject\Data\Geopoint|null
@@ -162,7 +162,7 @@ class Geopoint extends AbstractGeo implements ResourcePersistenceAwareInterface,
 
     /**
      * @param string $data
-     * @param null|DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return DataObject\Data\Geopoint|null
@@ -175,8 +175,8 @@ class Geopoint extends AbstractGeo implements ResourcePersistenceAwareInterface,
     /**
      * @see Data::getVersionPreview
      *
-     * @param DataObject\Data\Geopoint|null $data
-     * @param DataObject\Concrete|null $object
+     * @param string $data
+     * @param null|DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return string
@@ -195,7 +195,7 @@ class Geopoint extends AbstractGeo implements ResourcePersistenceAwareInterface,
      *
      * @abstract
      *
-     * @param DataObject\Concrete $object
+     * @param DataObject\AbstractObject $object
      * @param array $params
      *
      * @return string
@@ -206,14 +206,14 @@ class Geopoint extends AbstractGeo implements ResourcePersistenceAwareInterface,
         if ($data instanceof DataObject\Data\Geopoint) {
             //TODO latitude and longitude should be switched - but doing this we will loose compatitbilty to old export files
             return $data->getLatitude() . ',' . $data->getLongitude();
+        } else {
+            return null;
         }
-
-        return '';
     }
 
     /**
      * @param string $importValue
-     * @param null|DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return null|DataObject\ClassDefinition\Data|DataObject\Data\Geopoint
@@ -232,7 +232,7 @@ class Geopoint extends AbstractGeo implements ResourcePersistenceAwareInterface,
     }
 
     /**
-     * @param DataObject\Concrete|DataObject\Objectbrick\Data\AbstractData|DataObject\Fieldcollection\Data\AbstractData $object
+     * @param $object
      * @param mixed $params
      *
      * @return string
@@ -245,9 +245,7 @@ class Geopoint extends AbstractGeo implements ResourcePersistenceAwareInterface,
     /**
      * converts data to be exposed via webservices
      *
-     * @deprecated
-     *
-     * @param DataObject\Concrete $object
+     * @param string $object
      * @param mixed $params
      *
      * @return mixed
@@ -259,7 +257,7 @@ class Geopoint extends AbstractGeo implements ResourcePersistenceAwareInterface,
         if ($data instanceof DataObject\Data\Geopoint) {
             return [
                 'longitude' => $data->getLongitude(),
-                'latitude' => $data->getLatitude(),
+                'latitude' => $data->getLatitude()
             ];
         } else {
             return null;
@@ -267,12 +265,10 @@ class Geopoint extends AbstractGeo implements ResourcePersistenceAwareInterface,
     }
 
     /**
-     * @deprecated
-     *
      * @param mixed $value
-     * @param null|DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
-     * @param Model\Webservice\IdMapperInterface|null $idMapper
+     * @param null $idMapper
      *
      * @return mixed|void
      *
@@ -293,7 +289,7 @@ class Geopoint extends AbstractGeo implements ResourcePersistenceAwareInterface,
     }
 
     /** True if change is allowed in edit mode.
-     * @param DataObject\Concrete $object
+     * @param string $object
      * @param mixed $params
      *
      * @return bool
@@ -305,7 +301,7 @@ class Geopoint extends AbstractGeo implements ResourcePersistenceAwareInterface,
 
     /** Encode value for packing it into a single column.
      * @param mixed $value
-     * @param DataObject\Concrete|null $object
+     * @param Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return mixed
@@ -315,14 +311,14 @@ class Geopoint extends AbstractGeo implements ResourcePersistenceAwareInterface,
         if ($value instanceof DataObject\Data\Geopoint) {
             return [
                 'value' => $value->getLatitude(),
-                'value2' => $value->getLongitude(),
+                'value2' => $value->getLongitude()
             ];
         }
     }
 
     /** See marshal
      * @param mixed $value
-     * @param DataObject\Concrete|null $object
+     * @param Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return mixed
@@ -337,8 +333,8 @@ class Geopoint extends AbstractGeo implements ResourcePersistenceAwareInterface,
     }
 
     /**
-     * @param DataObject\Data\Geopoint|null $data
-     * @param DataObject\Concrete|null $object
+     * @param $data
+     * @param null $object
      * @param array $params
      *
      * @return array
@@ -346,27 +342,5 @@ class Geopoint extends AbstractGeo implements ResourcePersistenceAwareInterface,
     public function getDataForGrid($data, $object = null, $params = [])
     {
         return $this->getDataForEditmode($data, $object, $params);
-    }
-
-    /**
-     *
-     * @param DataObject\Data\Geopoint|null $oldValue
-     * @param DataObject\Data\Geopoint|null $newValue
-     *
-     * @return bool
-     */
-    public function isEqual($oldValue, $newValue): bool
-    {
-        if ($oldValue === null && $newValue === null) {
-            return true;
-        }
-
-        if (!$oldValue instanceof DataObject\Data\Geopoint
-            || !$newValue instanceof DataObject\Data\Geopoint) {
-            return false;
-        }
-
-        return (abs($oldValue->getLongitude() - $newValue->getLongitude()) < 0.000000000001)
-            && (abs($oldValue->getLatitude() - $newValue->getLatitude()) < 0.000000000001);
     }
 }

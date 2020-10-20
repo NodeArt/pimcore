@@ -25,10 +25,10 @@ use Pimcore\Model;
 class Dao extends Model\Dao\AbstractDao
 {
     /**
-     * @param int $ownerId
-     * @param string $classId
-     * @param int|null $objectId
-     * @param string|null $searchType
+     * @param $ownerId
+     * @param $classId
+     * @param null $objectId
+     * @param null $searchType
      *
      * @throws \Exception
      */
@@ -53,12 +53,11 @@ class Dao extends Model\Dao\AbstractDao
     /**
      * Save object to database
      *
-     * @return Model\GridConfigFavourite
+     * @return int
      */
     public function save()
     {
         $gridConfigFavourite = $this->model->getObjectVars();
-        $data = [];
 
         foreach ($gridConfigFavourite as $key => $value) {
             if (in_array($key, $this->getValidTableColumns('gridconfig_favourites'))) {

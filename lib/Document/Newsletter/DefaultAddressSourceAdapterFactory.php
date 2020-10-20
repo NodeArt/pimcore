@@ -16,13 +16,10 @@ namespace Pimcore\Document\Newsletter;
 
 class DefaultAddressSourceAdapterFactory implements AddressSourceAdapterFactoryInterface
 {
-    /**
-     * @var string
-     */
     private $className;
 
     /**
-     * @param string $className
+     * @param $className
      */
     public function __construct($className)
     {

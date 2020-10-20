@@ -24,10 +24,6 @@ use Pimcore\Tool;
 use Psr\Http\Message\ResponseInterface;
 use Zend\Paginator\Adapter\AdapterInterface;
 
-/**
- * @deprecated since version 6.7.0 and will be removed in 7.0.0.
- *
- */
 class DefaultFactFinder implements ProductListInterface
 {
     /**
@@ -121,7 +117,7 @@ class DefaultFactFinder implements ProductListInterface
     protected $conditions = [];
 
     /**
-     * @var array
+     * @var string[]
      */
     protected $queryConditions = [];
 
@@ -260,11 +256,6 @@ class DefaultFactFinder implements ProductListInterface
      */
     public function __construct(ConfigInterface $tenantConfig)
     {
-        @trigger_error(
-            'Class ' . self::class . ' is deprecated since version 6.7.0 and will be removed in 7.0.0.',
-            E_USER_DEPRECATED
-        );
-
         $this->tenantName = $tenantConfig->getTenantName();
         $this->tenantConfig = $tenantConfig;
 
@@ -310,7 +301,7 @@ class DefaultFactFinder implements ProductListInterface
      * Fieldname is optional but highly recommended - needed for resetting condition based on fieldname
      * and exclude functionality in group by results
      *
-     * @param string $condition
+     * @param $condition
      * @param string $fieldname
      */
     public function addQueryCondition($condition, $fieldname = '')
@@ -322,7 +313,9 @@ class DefaultFactFinder implements ProductListInterface
     /**
      * Reset query condition for fieldname
      *
-     * @param string $fieldname
+     * @param $fieldname
+     *
+     * @return mixed
      */
     public function resetQueryCondition($fieldname)
     {
@@ -398,7 +391,7 @@ class DefaultFactFinder implements ProductListInterface
     }
 
     /**
-     * @param string|array $orderKey either single field name, or array of field names or array of arrays (field name, direction)
+     * @param $orderKey string | array  - either single field name, or array of field names or array of arrays (field name, direction)
      */
     public function setOrderKey($orderKey)
     {
@@ -727,7 +720,7 @@ class DefaultFactFinder implements ProductListInterface
     /**
      * loads group by values based on relation fieldname either from local variable if prepared or directly from product index
      *
-     * @param string $fieldname
+     * @param      $fieldname
      * @param bool $countValues
      * @param bool $fieldnameShouldBeExcluded => set to false for and-conditions
      *
@@ -738,11 +731,10 @@ class DefaultFactFinder implements ProductListInterface
     public function getGroupBySystemValues($fieldname, $countValues = false, $fieldnameShouldBeExcluded = true)
     {
         // TODO: Implement getGroupBySystemValues() method.
-        return [];
     }
 
     /**
-     * @param string $fieldname
+     * @param      $fieldname
      * @param bool $countValues
      * @param bool $fieldnameShouldBeExcluded
      *
@@ -758,7 +750,7 @@ class DefaultFactFinder implements ProductListInterface
 
             foreach ($field['elements'] as $item) {
                 $groups[] = [
-                    'value' => $item['name'], 'count' => $item['recordCount'],
+                    'value' => $item['name'], 'count' => $item['recordCount']
                 ];
             }
         }
@@ -790,9 +782,9 @@ class DefaultFactFinder implements ProductListInterface
         $client = \Pimcore::getContainer()->get('pimcore.http_client');
         $response = $client->request('GET', $url);
 
-        $factFinderTimeout = $response->getHeaderLine('X-FF-Timeout');
+        $factFinderTimeout = $response->getHeader('X-FF-Timeout');
         if ($factFinderTimeout === 'true') {
-            $errorMessage = 'FactFinder Read timeout:' . $url.' X-FF-RefKey: ' . $response->getHeaderLine('X-FF-RefKey').' Tried: ' . ($trys + 1);
+            $errorMessage = 'FactFinder Read timeout:' . $url.' X-FF-RefKey: ' . $response->getHeader('X-FF-RefKey').' Tried: ' . ($trys + 1);
             $this->getLogger()->err($errorMessage);
             $trys++;
             if ($trys > 2) {
@@ -874,7 +866,7 @@ class DefaultFactFinder implements ProductListInterface
     }
 
     /**
-     * @return string|null
+     * @return null
      */
     public function getFollowSearchParam()
     {
@@ -882,7 +874,7 @@ class DefaultFactFinder implements ProductListInterface
     }
 
     /**
-     * @param string|null $followSearchParam
+     * @param null $followSearchParam
      *
      * @return $this
      */

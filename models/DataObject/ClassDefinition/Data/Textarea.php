@@ -19,13 +19,12 @@ namespace Pimcore\Model\DataObject\ClassDefinition\Data;
 use Pimcore\Model;
 use Pimcore\Model\DataObject\ClassDefinition\Data;
 
-class Textarea extends Data implements ResourcePersistenceAwareInterface, QueryResourcePersistenceAwareInterface, TypeDeclarationSupportInterface, EqualComparisonInterface
+class Textarea extends Data implements ResourcePersistenceAwareInterface, QueryResourcePersistenceAwareInterface
 {
     use Model\DataObject\ClassDefinition\Data\Extension\Text;
     use Model\DataObject\Traits\SimpleComparisonTrait;
     use Extension\ColumnType;
     use Extension\QueryColumnType;
-    use Model\DataObject\ClassDefinition\NullablePhpdocReturnTypeTrait;
 
     /**
      * Static type of this element
@@ -162,8 +161,6 @@ class Textarea extends Data implements ResourcePersistenceAwareInterface, QueryR
 
     /**
      * @param bool $excludeFromSearchIndex
-     *
-     * @return self
      */
     public function setExcludeFromSearchIndex(bool $excludeFromSearchIndex)
     {
@@ -176,7 +173,7 @@ class Textarea extends Data implements ResourcePersistenceAwareInterface, QueryR
      * @see ResourcePersistenceAwareInterface::getDataForResource
      *
      * @param string $data
-     * @param null|Model\DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return string
@@ -190,7 +187,7 @@ class Textarea extends Data implements ResourcePersistenceAwareInterface, QueryR
      * @see ResourcePersistenceAwareInterface::getDataFromResource
      *
      * @param string $data
-     * @param null|Model\DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return string
@@ -204,7 +201,7 @@ class Textarea extends Data implements ResourcePersistenceAwareInterface, QueryR
      * @see QueryResourcePersistenceAwareInterface::getDataForQueryResource
      *
      * @param string $data
-     * @param null|Model\DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return string
@@ -218,7 +215,7 @@ class Textarea extends Data implements ResourcePersistenceAwareInterface, QueryR
      * @see Data::getDataForEditmode
      *
      * @param string $data
-     * @param null|Model\DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return string
@@ -232,7 +229,7 @@ class Textarea extends Data implements ResourcePersistenceAwareInterface, QueryR
      * @see Data::getDataFromEditmode
      *
      * @param string $data
-     * @param null|Model\DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return string
@@ -244,10 +241,10 @@ class Textarea extends Data implements ResourcePersistenceAwareInterface, QueryR
 
     /**
      * Generates a pretty version preview (similar to getVersionPreview) can be either html or
-     * a image URL. See the https://github.com/pimcore/object-merger bundle documentation for details
+     * a image URL. See the ObjectMerger plugin documentation for details
      *
-     * @param string|null $data
-     * @param Model\DataObject\Concrete|null $object
+     * @param $data
+     * @param null $object
      * @param mixed $params
      *
      * @return array|string
@@ -272,7 +269,7 @@ class Textarea extends Data implements ResourcePersistenceAwareInterface, QueryR
     /**
      * @see Model\DataObject\ClassDefinition\Data::getDataForSearchIndex
      *
-     * @param Model\DataObject\Concrete|Model\DataObject\Localizedfield|Model\DataObject\Objectbrick\Data\AbstractData|\Pimcore\Model\DataObject\Fieldcollection\Data\AbstractData $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return string
@@ -303,10 +300,5 @@ class Textarea extends Data implements ResourcePersistenceAwareInterface, QueryR
         }
 
         parent::checkValidity($data, $omitMandatoryCheck);
-    }
-
-    public function isFilterable(): bool
-    {
-        return true;
     }
 }

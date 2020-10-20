@@ -20,11 +20,9 @@ use Pimcore\Bundle\EcommerceFrameworkBundle\Factory;
 use Pimcore\Bundle\EcommerceFrameworkBundle\PricingManager\Rule;
 use Pimcore\Bundle\EcommerceFrameworkBundle\PricingManager\RuleInterface;
 use Pimcore\Controller\EventedControllerInterface;
-use Pimcore\Tool\RestClient\Exception;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -47,7 +45,7 @@ class PricingController extends AdminController implements EventedControllerInte
     }
 
     /**
-     * @Route("/list", name="pimcore_ecommerceframework_pricing_list", methods={"GET"})
+     * @Route("/list", methods={"GET"})
      */
     public function listAction()
     {
@@ -74,8 +72,8 @@ class PricingController extends AdminController implements EventedControllerInte
                 'qtipCfg' => [
                     'xtype' => 'quicktip',
                     'title' => $rule->getLabel(),
-                    'text' => $title,
-                ],
+                    'text' => $title
+                ]
             ];
         }
 
@@ -83,15 +81,10 @@ class PricingController extends AdminController implements EventedControllerInte
     }
 
     /**
-     * get priceing rule details as json
-     *
-     * @Route("/get", name="pimcore_ecommerceframework_pricing_get", methods={"GET"})
+     * @Route("/get", methods={"GET"})
      *
      * @param Request $request
-     *
-     * @return JsonResponse
-     *
-     * @throws NotFoundHttpException
+     * preisregel details als json ausgeben
      */
     public function getAction(Request $request)
     {
@@ -116,7 +109,7 @@ class PricingController extends AdminController implements EventedControllerInte
                 'behavior' => $rule->getBehavior(),
                 'active' => $rule->getActive(),
                 'condition' => $condition ? json_decode($condition->toJSON()) : '',
-                'actions' => [],
+                'actions' => []
             ];
 
             foreach ($rule->getActions() as $action) {
@@ -125,25 +118,20 @@ class PricingController extends AdminController implements EventedControllerInte
 
             return $this->adminJson($json);
         }
-
-        throw $this->createNotFoundException('Rule not found');
     }
 
     /**
-     * add new rule
-     *
-     * @Route("/add", name="pimcore_ecommerceframework_pricing_add", methods={"POST"})
+     * @Route("/add", methods={"POST"})
      *
      * @param Request $request
-     *
-     * @return JsonResponse
+     * add new rule
      */
     public function addAction(Request $request)
     {
         // send json respone
         $return = [
             'success' => false,
-            'message' => '',
+            'message' => ''
         ];
 
         // save rule
@@ -163,20 +151,17 @@ class PricingController extends AdminController implements EventedControllerInte
     }
 
     /**
-     * delete exiting rule
-     *
-     * @Route("/delete", name="pimcore_ecommerceframework_pricing_delete", methods={"DELETE"})
+     * @Route("/delete", methods={"DELETE"})
      *
      * @param Request $request
-     *
-     * @return JsonResponse
+     * delete exiting rule
      */
     public function deleteAction(Request $request)
     {
         // send json respone
         $return = [
             'success' => false,
-            'message' => '',
+            'message' => ''
         ];
 
         // delete rule
@@ -193,120 +178,17 @@ class PricingController extends AdminController implements EventedControllerInte
     }
 
     /**
-     * @Route("/copy", name="pimcore_ecommerceframework_pricing_copy", methods={"POST"})
+     * @Route("/save", methods={"PUT"})
      *
      * @param Request $request
-     *
-     * @return JsonResponse
-     * copy existing rule
-     */
-    public function copyAction(Request $request)
-    {
-        // send json respone
-        $return = [
-            'success' => false,
-            'message' => '',
-        ];
-
-        // copy rule
-        try {
-            /** @var Rule $ruleSource */
-            $ruleSource = Rule::getById((int) $request->get('id'));
-            $rules = (new Rule\Listing())->load();
-
-            $name = $ruleSource->getName() . '_copy';
-
-            // Get new unique name.
-            do {
-                $uniqueName = true;
-
-                foreach ($rules as $rule) {
-                    if ($rule->getName() == $name) {
-                        $uniqueName = false;
-                        $name .= '_copy';
-
-                        break;
-                    }
-                }
-            } while (!$uniqueName);
-
-            // Clone and save new rule.
-            $newRule = clone $ruleSource;
-            $newRule->setId(null);
-            $newRule->setName($name);
-            $newRule->save();
-
-            $return['success'] = true;
-        } catch (\Exception $e) {
-            $return['message'] = $e->getMessage();
-        }
-
-        // send respone
-        return $this->adminJson($return);
-    }
-
-    /**
-     * @Route("/rename", name="pimcore_ecommerceframework_pricing_rename", methods={"PUT"})
-     *
-     * @param Request $request
-     *
-     * @return JsonResponse
-     * rename exiting rule
-     */
-    public function renameAction(Request $request)
-    {
-        // send json respone
-        $return = [
-            'success' => false,
-            'message' => '',
-        ];
-
-        $ruleId = $request->get('id');
-        $ruleNewName = $request->get('name');
-
-        try {
-            if ($ruleId && $ruleNewName) {
-                $renameRule = Rule::getById($ruleId);
-
-                if ($renameRule->getName() != $ruleNewName) {
-                    $rules = (new Rule\Listing())->load();
-
-                    // Check if rulename is available.
-                    foreach ($rules as $rule) {
-                        if ($rule->getName() == $ruleNewName) {
-                            throw new Exception('Rulename already exists.');
-                        }
-                    }
-
-                    $renameRule->setName($ruleNewName);
-                    $renameRule->save();
-                }
-
-                $return['success'] = true;
-            }
-        } catch (Exception $e) {
-            $return['message'] = $e->getMessage();
-        }
-
-        // send respone
-        return $this->adminJson($return);
-    }
-
-    /**
      * save rule config
-     *
-     * @Route("/save", name="pimcore_ecommerceframework_pricing_save", methods={"PUT"})
-     *
-     * @param Request $request
-     *
-     * @return JsonResponse
      */
     public function saveAction(Request $request)
     {
         // send json respone
         $return = [
             'success' => false,
-            'message' => '',
+            'message' => ''
         ];
 
         // save rule config
@@ -387,18 +269,16 @@ class PricingController extends AdminController implements EventedControllerInte
     }
 
     /**
-     * @Route("/save-order", name="pimcore_ecommerceframework_pricing_save-order", methods={"PUT"})
+     * @Route("/save-order", methods={"PUT"})
      *
      * @param Request $request
-     *
-     * @return JsonResponse
      */
     public function saveOrderAction(Request $request)
     {
         // send json respone
         $return = [
             'success' => false,
-            'message' => '',
+            'message' => ''
         ];
 
         // save order
@@ -416,7 +296,7 @@ class PricingController extends AdminController implements EventedControllerInte
     }
 
     /**
-     * @Route("/get-config", name="pimcore_ecommerceframework_pricing_get-config", methods={"GET"})
+     * @Route("/get-config", methods={"GET"})
      *
      * @return JsonResponse
      */
@@ -426,7 +306,7 @@ class PricingController extends AdminController implements EventedControllerInte
 
         return $this->adminJson([
             'condition' => array_keys($pricingManager->getConditionMapping()),
-            'action' => array_keys($pricingManager->getActionMapping()),
+            'action' => array_keys($pricingManager->getActionMapping())
         ]);
     }
 

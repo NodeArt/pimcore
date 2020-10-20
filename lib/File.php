@@ -19,7 +19,7 @@ class File
     /**
      * @var int
      */
-    public static $defaultMode = 0664;
+    public static $defaultMode = 0775;
 
     /**
      * @var array
@@ -32,7 +32,9 @@ class File
     protected static $context = null;
 
     /**
-     * @param string $name
+     * @static
+     *
+     * @param  $name
      *
      * @return string
      */
@@ -42,17 +44,17 @@ class File
         $parts = explode('.', $name);
 
         if (count($parts) > 1) {
-            return $parts[count($parts) - 1];
+            return strtolower($parts[count($parts) - 1]);
         }
 
         return '';
     }
 
     /**
-     * Helper to get a valid filename for the filesystem, use Element\Service::getValidKey() for the use with Pimcore Elements
+     * @static
      *
-     * @param string $tmpFilename
-     * @param string|null $language
+     * @param  $tmpFilename
+     * @param null $language
      * @param string $replacement
      *
      * @return string
@@ -71,7 +73,9 @@ class File
     }
 
     /**
-     * @param string $filename
+     * @static
+     *
+     * @param  $filename
      *
      * @return bool
      */
@@ -99,7 +103,7 @@ class File
     }
 
     /**
-     * @param int $mode
+     * @param $mode
      */
     public static function setDefaultMode($mode)
     {
@@ -115,8 +119,8 @@ class File
     }
 
     /**
-     * @param string $path
-     * @param mixed $data
+     * @param $path
+     * @param $data
      *
      * @return int
      */
@@ -133,8 +137,8 @@ class File
     }
 
     /**
-     * @param string $path
-     * @param mixed $data
+     * @param $path
+     * @param $data
      */
     public static function putPhpFile($path, $data)
     {
@@ -146,19 +150,23 @@ class File
     }
 
     /**
-     * @param string $path
-     * @param int|null $mode
+     * @param $path
+     * @param null $mode
      * @param bool $recursive
      *
      * @return bool
      */
-    public static function mkdir($path, $mode = 0775, $recursive = true)
+    public static function mkdir($path, $mode = null, $recursive = true)
     {
         if (is_dir($path)) {
             return true;
         }
 
         $return = true;
+
+        if (!$mode) {
+            $mode = self::$defaultMode;
+        }
 
         $oldMask = umask(0);
 
@@ -197,8 +205,8 @@ class File
     }
 
     /**
-     * @param string $oldPath
-     * @param string $newPath
+     * @param $oldPath
+     * @param $newPath
      *
      * @return bool
      */

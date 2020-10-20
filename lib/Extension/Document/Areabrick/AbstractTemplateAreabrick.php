@@ -27,20 +27,10 @@ abstract class AbstractTemplateAreabrick extends AbstractAreabrick implements Te
     /**
      * @inheritDoc
      */
-    public function getTemplate()
+    public function getViewTemplate()
     {
         // return null by default = auto-discover
         return null;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getViewTemplate()
-    {
-        @trigger_error(sprintf('%s is deprecated, use getTemplate() instead', __METHOD__), E_USER_DEPRECATED);
-
-        return $this->getTemplate();
     }
 
     /**

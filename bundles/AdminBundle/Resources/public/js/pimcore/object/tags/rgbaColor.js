@@ -30,7 +30,7 @@ pimcore.object.tags.rgbaColor = Class.create(pimcore.object.tags.abstract, {
     getGridColumnConfig: function (field) {
 
         return {
-            text: t(field.label), width: 120, sortable: false, dataIndex: field.key, sortable: true,
+            text: ts(field.label), width: 120, sortable: false, dataIndex: field.key, sortable: true,
             getEditor: this.getWindowCellEditor.bind(this, field),
             renderer: function (key, value, metaData, record) {
                 this.applyPermissionStyle(key, value, metaData, record);
@@ -51,6 +51,13 @@ pimcore.object.tags.rgbaColor = Class.create(pimcore.object.tags.abstract, {
 
     getCellEditValue: function () {
         return this.getValue();
+    },
+
+    isInvalidMandatory: function () {
+        if (this.isMandatory() && !this.getValue()) {
+            return true;
+        }
+        return false;
     },
 
     getGridColumnEditor: function (field) {
@@ -120,7 +127,7 @@ pimcore.object.tags.rgbaColor = Class.create(pimcore.object.tags.abstract, {
             },
             layout: 'hbox',
             width: width,
-            componentCls: "object_field object_field_type_" + this.type,
+            componentCls: "object_field",
             items: [this.colorField, this.selector,
                 {
                 xtype: "button",

@@ -23,7 +23,7 @@ use Pimcore\Bundle\EcommerceFrameworkBundle\PaymentManager\StatusInterface;
 use Pimcore\Log\ApplicationLogger;
 use Pimcore\Log\FileObject;
 use Pimcore\Logger;
-use Symfony\Component\Lock\Factory as LockFactory;
+use Pimcore\Model\Tool\Lock;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class CommitOrderProcessor implements CommitOrderProcessorInterface
@@ -37,16 +37,11 @@ class CommitOrderProcessor implements CommitOrderProcessorInterface
     protected $orderManagers;
 
     /**
-     * @var LockFactory
-     */
-    private $lockFactory;
-
-    /**
      * @var string
      */
     protected $confirmationMail = '/emails/order-confirmation';
 
-    public function __construct(LockFactory $lockFactory, OrderManagerLocatorInterface $orderManagers, array $options = [])
+    public function __construct(OrderManagerLocatorInterface $orderManagers, array $options = [])
     {
         @trigger_error(
             'Class ' . self::class . ' is deprecated since version 6.1.0 and will be removed in 7.0.0. ' .
@@ -60,8 +55,6 @@ class CommitOrderProcessor implements CommitOrderProcessorInterface
         $this->configureOptions($resolver);
 
         $this->processOptions($resolver->resolve($options));
-
-        $this->lockFactory = $lockFactory;
     }
 
     protected function processOptions(array $options)
@@ -97,7 +90,7 @@ class CommitOrderProcessor implements CommitOrderProcessorInterface
     protected $lastPaymentStatus = null;
 
     /**
-     * @param array|StatusInterface $paymentResponseParams
+     * @param $paymentResponseParams
      * @param PaymentInterface $paymentProvider
      *
      * @return Status|StatusInterface
@@ -185,8 +178,7 @@ class CommitOrderProcessor implements CommitOrderProcessorInterface
     public function commitOrderPayment(StatusInterface $paymentStatus, PaymentInterface $paymentProvider, AbstractOrder $sourceOrder = null)
     {
         // acquire lock to make sure only one process is committing order payment
-        $lock = $this->lockFactory->createLock(self::LOCK_KEY . $paymentStatus->getInternalPaymentId());
-        $lock->acquire(true);
+        Lock::acquire(self::LOCK_KEY . $paymentStatus->getInternalPaymentId());
 
         // check if order is already committed and payment information with same internal payment id has same state
         // if so, do nothing and return order
@@ -218,11 +210,10 @@ class CommitOrderProcessor implements CommitOrderProcessorInterface
             $logger->critical($message,
                 [
                     'fileObject' => new FileObject(print_r($paymentStatus, true)),
-                    'relatedObject' => $order,
+                    'relatedObject' => $order
                 ]
             );
-
-            $lock->release();
+            Lock::release(self::LOCK_KEY . $paymentStatus->getInternalPaymentId());
 
             throw new UnsupportedException($message);
         }
@@ -235,7 +226,7 @@ class CommitOrderProcessor implements CommitOrderProcessorInterface
             $order->save(['versionNote' => 'CommitOrderProcessor::commitOrderPayment - set order state to null.']);
         }
 
-        $lock->release();
+        Lock::release(self::LOCK_KEY . $paymentStatus->getInternalPaymentId());
 
         return $order;
     }
@@ -326,7 +317,7 @@ class CommitOrderProcessor implements CommitOrderProcessorInterface
         $list->addFieldCollection('PaymentInfo', 'paymentinfo');
         $list->setCondition('`PaymentInfo~paymentinfo`.paymentState = ? AND `PaymentInfo~paymentinfo`.paymentStart < ?', [AbstractOrder::ORDER_STATE_PAYMENT_PENDING, $timestamp]);
 
-        /** @var AbstractOrder $order */
+        /** @var AbstractOrder[] $list */
         foreach ($list as $order) {
             $payments = $order->getPaymentInfo();
 

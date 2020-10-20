@@ -22,7 +22,6 @@ use Pimcore\Logger;
 use Pimcore\Model;
 use Pimcore\Model\Tool\TmpStore;
 use Pimcore\Tool\Console;
-use Symfony\Component\Lock\Factory as LockFactory;
 
 class Processor
 {
@@ -32,11 +31,11 @@ class Processor
     protected static $argumentMapping = [
         'resize' => ['width', 'height'],
         'scaleByWidth' => ['width'],
-        'scaleByHeight' => ['height'],
+        'scaleByHeight' => ['height']
     ];
 
     /**
-     * @var \Pimcore\Video\Adapter[]
+     * @var array
      */
     public $queue = [];
 
@@ -62,10 +61,10 @@ class Processor
 
     /**
      * @param Model\Asset\Video $asset
-     * @param Config $config
+     * @param $config
      * @param array $onlyFormats
      *
-     * @return Processor|null
+     * @return Processor
      *
      * @throws \Exception
      */
@@ -87,7 +86,7 @@ class Processor
         if (is_array($customSetting) && array_key_exists($config->getName(), $customSetting)) {
             if ($customSetting[$config->getName()]['status'] == 'inprogress') {
                 if (TmpStore::get($instance->getJobStoreId($customSetting[$config->getName()]['processId']))) {
-                    return null;
+                    return;
                 }
             } elseif ($customSetting[$config->getName()]['status'] == 'finished') {
                 // check if the files are there
@@ -97,13 +96,14 @@ class Processor
                         $formatsToConvert[] = $f;
                     } else {
                         $existingFormats[$f] = $customSetting[$config->getName()]['formats'][$f];
+                        $existingFormats[$f] = $customSetting[$config->getName()]['formats'][$f];
                     }
                 }
 
                 if (!empty($formatsToConvert)) {
                     $formats = $formatsToConvert;
                 } else {
-                    return null;
+                    return;
                 }
             } elseif ($customSetting[$config->getName()]['status'] == 'error') {
                 throw new \Exception('Unable to convert video, see logs for details.');
@@ -112,12 +112,13 @@ class Processor
 
         foreach ($formats as $format) {
             $thumbDir = $asset->getVideoThumbnailSavePath() . '/video-thumb__' . $asset->getId() . '__' . $config->getName();
-            $filename = preg_replace("/\." . preg_quote(File::getFileExtension($asset->getFilename()), '/') . '/', '', $asset->getFilename()) . '.' . $format;
+            $filename = preg_replace("/\." . preg_quote(File::getFileExtension($asset->getFilename())) . '/', '', $asset->getFilename()) . '.' . $format;
             $fsPath = $thumbDir . '/' . $filename;
             $tmpPath = PIMCORE_SYSTEM_TEMP_DIRECTORY . '/video-converter-' . $filename;
 
             if (!is_dir(dirname($fsPath))) {
                 File::mkdir(dirname($fsPath));
+                @chmod($thumbDir, File::getDefaultMode());
             }
 
             if (is_file($fsPath)) {
@@ -167,7 +168,7 @@ class Processor
         $customSetting[$config->getName()] = [
             'status' => 'inprogress',
             'formats' => $existingFormats,
-            'processId' => $instance->getProcessId(),
+            'processId' => $instance->getProcessId()
         ];
         $asset->setCustomSetting('thumbnails', $customSetting);
         $asset->save();
@@ -178,7 +179,7 @@ class Processor
     }
 
     /**
-     * @param string $processId
+     * @param $processId
      */
     public static function execute($processId)
     {
@@ -186,17 +187,13 @@ class Processor
         $instance->setProcessId($processId);
 
         $instanceItem = TmpStore::get($instance->getJobStoreId($processId));
-        /**
-         * @var self $instance
-         */
         $instance = $instanceItem->getData();
 
         $formats = [];
         $conversionStatus = 'finished';
 
         // check if there is already a transcoding process running, wait if so ...
-        $lock = \Pimcore::getContainer()->get(LockFactory::class)->createLock('video-transcoding', 7200);
-        $lock->acquire(true);
+        Model\Tool\Lock::acquire('video-transcoding', 7200, 10); // expires after 2 hrs, refreshes every 10 secs
 
         $asset = Model\Asset::getById($instance->getAssetId());
 
@@ -225,7 +222,7 @@ class Processor
             }
         }
 
-        $lock->release();
+        Model\Tool\Lock::release('video-transcoding');
 
         if ($asset) {
             $customSetting = $asset->getCustomSetting('thumbnails');
@@ -239,7 +236,7 @@ class Processor
 
             $customSetting[$instance->getConfig()->getName()] = [
                 'status' => $conversionStatus,
-                'formats' => $formats,
+                'formats' => $formats
             ];
             $asset->setCustomSetting('thumbnails', $customSetting);
             $asset->save();
@@ -265,7 +262,7 @@ class Processor
     }
 
     /**
-     * @param string $processId
+     * @param $processId
      *
      * @return string
      */
@@ -279,7 +276,7 @@ class Processor
     }
 
     /**
-     * @param string $processId
+     * @param $processId
      *
      * @return $this
      */
@@ -299,7 +296,7 @@ class Processor
     }
 
     /**
-     * @param int $assetId
+     * @param $assetId
      *
      * @return $this
      */
@@ -319,7 +316,7 @@ class Processor
     }
 
     /**
-     * @param Config $config
+     * @param $config
      *
      * @return $this
      */
@@ -339,7 +336,7 @@ class Processor
     }
 
     /**
-     * @param array $queue
+     * @param $queue
      *
      * @return $this
      */

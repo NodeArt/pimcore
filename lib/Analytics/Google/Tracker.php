@@ -27,14 +27,12 @@ use Pimcore\Analytics\SiteId\SiteId;
 use Pimcore\Analytics\SiteId\SiteIdProvider;
 use Pimcore\Config\Config as ConfigObject;
 use Pimcore\Event\Analytics\GoogleAnalyticsEvents;
-use Psr\Log\LoggerAwareTrait;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Templating\EngineInterface;
 
 class Tracker extends AbstractTracker
 {
-    use LoggerAwareTrait;
-
     const BLOCK_BEFORE_SCRIPT_TAG = 'beforeScriptTag';
     const BLOCK_BEFORE_SCRIPT = 'beforeScript';
     const BLOCK_BEFORE_INIT = 'beforeInit';
@@ -67,6 +65,11 @@ class Tracker extends AbstractTracker
      * @var string|null
      */
     private $defaultPath;
+
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
 
     /**
      * @var array
@@ -103,6 +106,14 @@ class Tracker extends AbstractTracker
     public function setDefaultPath(string $defaultPath = null)
     {
         $this->defaultPath = $defaultPath;
+    }
+
+    /**
+     * TODO Pimcore 6 set logger as constructor dependency
+     */
+    public function setLogger(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
     }
 
     protected function buildCodeCollector(): CodeCollector
@@ -150,19 +161,19 @@ class Tracker extends AbstractTracker
             'siteId' => $siteId,
             'config' => $config,
             'siteConfig' => $siteConfig,
-            'trackId' => $siteConfig->get('trackid'),
+            'trackId' => $siteConfig->trackid,
             'defaultPath' => $this->getDefaultPath(),
-            'universalConfiguration' => $siteConfig->get('universal_configuration') ?? null,
-            'retargeting' => $siteConfig->get('retargetingcode') ?? false,
+            'universalConfiguration' => $siteConfig->universal_configuration ?? null,
+            'retargeting' => $siteConfig->retargetingcode ?? false,
         ];
 
-        if ($siteConfig->get('gtagcode')) {
+        if ($siteConfig->gtagcode) {
             $template = '@PimcoreCore/Analytics/Tracking/Google/Analytics/gtagTrackingCode.html.twig';
 
-            $data['gtagConfig'] = $this->getTrackerConfigurationFromJson($siteConfig->get('universal_configuration') ?? null, [
-                'anonymize_ip' => true,
+            $data['gtagConfig'] = $this->getTrackerConfigurationFromJson($siteConfig->universal_configuration ?? null, [
+                'anonymize_ip' => true
             ]);
-        } elseif ($siteConfig->get('asynchronouscode') || $siteConfig->get('retargetingcode')) {
+        } elseif ($siteConfig->asynchronouscode || $siteConfig->retargetingcode) {
             $template = '@PimcoreCore/Analytics/Tracking/Google/Analytics/asynchronousTrackingCode.html.twig';
         } else {
             $template = '@PimcoreCore/Analytics/Tracking/Google/Analytics/universalTrackingCode.html.twig';
@@ -185,7 +196,7 @@ class Tracker extends AbstractTracker
                 $config = $jsonConfig;
             } else {
                 $this->logger->warning('Failed to parse analytics tracker custom configuration: {error}', [
-                    'error' => json_last_error_msg() ?? 'not an array',
+                    'error' => json_last_error_msg() ?? 'not an array'
                 ]);
             }
         }
@@ -217,16 +228,16 @@ class Tracker extends AbstractTracker
     {
         $blockData = [];
 
-        if (!empty($siteConfig->get('additionalcodebeforeinit'))) {
-            $blockData[self::BLOCK_BEFORE_INIT] = $siteConfig->get('additionalcodebeforeinit');
+        if (!empty($siteConfig->additionalcodebeforeinit)) {
+            $blockData[self::BLOCK_BEFORE_INIT] = $siteConfig->additionalcodebeforeinit;
         }
 
-        if (!empty($siteConfig->get('additionalcodebeforepageview'))) {
-            $blockData[self::BLOCK_BEFORE_TRACK] = $siteConfig->get('additionalcodebeforepageview');
+        if (!empty($siteConfig->additionalcodebeforepageview)) {
+            $blockData[self::BLOCK_BEFORE_TRACK] = $siteConfig->additionalcodebeforepageview;
         }
 
-        if (!empty($siteConfig->get('additionalcode'))) {
-            $blockData[self::BLOCK_AFTER_TRACK] = $siteConfig->get('additionalcode');
+        if (!empty($siteConfig->additionalcode)) {
+            $blockData[self::BLOCK_AFTER_TRACK] = $siteConfig->additionalcode;
         }
 
         return $blockData;

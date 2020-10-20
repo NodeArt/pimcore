@@ -24,12 +24,12 @@ use Pimcore\Targeting\Storage\TargetingStorageInterface;
 class TargetingStorageTask implements TaskInterface
 {
     /**
-     * @var TargetingStorageInterface
+     * @var TargetingStorageInterface|MaintenanceStorageInterface
      */
     private $targetingStorage;
 
     /**
-     * @param TargetingStorageInterface $targetingStorage
+     * @param MaintenanceStorageInterface|TargetingStorageInterface $targetingStorage
      */
     public function __construct(TargetingStorageInterface $targetingStorage)
     {

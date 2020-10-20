@@ -23,11 +23,8 @@ use Pimcore\Db\ConnectionInterface;
 use Pimcore\Logger;
 use Pimcore\Model\DataObject\AbstractObject;
 use Pimcore\Tool\Text;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
- * @deprecated since version 6.7.0 and will be removed in 7.0.0.
- *
  * @property DefaultFactFinderConfig $tenantConfig
  */
 class DefaultFactFinder extends AbstractMockupCacheWorker implements WorkerInterface, BatchProcessingWorkerInterface
@@ -40,20 +37,9 @@ class DefaultFactFinder extends AbstractMockupCacheWorker implements WorkerInter
      */
     protected $_sqlChangeLog = [];
 
-    /**
-     * @param FactFinderConfigInterface $tenantConfig
-     * @param ConnectionInterface $db
-     * @param EventDispatcherInterface $eventDispatcher
-     * @param string|null $workerMode
-     */
-    public function __construct(FactFinderConfigInterface $tenantConfig, ConnectionInterface $db, EventDispatcherInterface $eventDispatcher, string $workerMode = null)
+    public function __construct(FactFinderConfigInterface $tenantConfig, ConnectionInterface $db)
     {
-        @trigger_error(
-            'Class ' . self::class . ' is deprecated since version 6.7.0 and will be removed in 7.0.0.',
-            E_USER_DEPRECATED
-        );
-
-        parent::__construct($tenantConfig, $db, $eventDispatcher, $workerMode);
+        parent::__construct($tenantConfig, $db);
     }
 
     protected function getSystemAttributes()
@@ -77,7 +63,7 @@ class DefaultFactFinder extends AbstractMockupCacheWorker implements WorkerInter
             'worker_id',
             'in_preparation_queue',
             'preparation_worker_timestamp',
-            'preparation_worker_id', ];
+            'preparation_worker_id'];
     }
 
     protected function dbexec($sql)
@@ -103,9 +89,6 @@ class DefaultFactFinder extends AbstractMockupCacheWorker implements WorkerInter
         $primaryIdColumnType = $this->tenantConfig->getIdColumnType(true);
         $idColumnType = $this->tenantConfig->getIdColumnType(false);
 
-        /**
-         * @TODO Pimcore 7 - remove worker columns
-         */
         $this->db->query('CREATE TABLE IF NOT EXISTS `' . $this->getStoreTableName() . "` (
           `o_id` $primaryIdColumnType,
           `o_virtualProductId` $idColumnType,
@@ -189,10 +172,8 @@ class DefaultFactFinder extends AbstractMockupCacheWorker implements WorkerInter
      * prepare data for index creation and store is in store table
      *
      * @param IndexableInterface $object
-     *
-     * @return array returns the processed sub-objects that can be used for the index update.
      */
-    public function prepareDataForIndex(IndexableInterface $object): array
+    public function prepareDataForIndex(IndexableInterface $object)
     {
         $subObjectIds = $this->tenantConfig->createSubIdsForObject($object);
 
@@ -211,6 +192,8 @@ class DefaultFactFinder extends AbstractMockupCacheWorker implements WorkerInter
                 $data = $this->getDefaultDataForIndex($object, $subObjectId);
                 $data['categoryPaths'] = implode('|', (array)$data['categoryPaths']);
                 $data['crc_current'] = '';
+                $data['preparation_worker_timestamp'] = 0;
+                $data['preparation_worker_id'] = $this->db->quote(null);
                 $data['in_preparation_queue'] = 0;
 
                 foreach ($this->tenantConfig->getAttributes() as $attribute) {
@@ -248,8 +231,6 @@ class DefaultFactFinder extends AbstractMockupCacheWorker implements WorkerInter
 
         //cleans up all old zombie data
         $this->doCleanupOldZombieData($object, $subObjectIds);
-
-        return $subObjectIds;
     }
 
     /**
@@ -272,8 +253,6 @@ class DefaultFactFinder extends AbstractMockupCacheWorker implements WorkerInter
     }
 
     /**
-     * @deprecated
-     *
      * first run processUpdateIndexQueue of trait and then commit updated entries if there are some
      *
      * @param int $limit
@@ -305,17 +284,18 @@ class DefaultFactFinder extends AbstractMockupCacheWorker implements WorkerInter
     /**
      * only prepare data for updating index
      *
-     * @param int $objectId
-     * @param array|null $data
-     * @param array|null $metadata
+     * @param $objectId
+     * @param null $data
      */
-    protected function doUpdateIndex($objectId, $data = null, $metadata = null)
+    protected function doUpdateIndex($objectId, $data = null)
     {
     }
 
     /**
-     * @param int $subObjectId
+     * @param $subObjectId
      * @param IndexableInterface|null $object
+     *
+     * @return mixed|void
      */
     protected function doDeleteFromIndex($subObjectId, IndexableInterface $object = null)
     {

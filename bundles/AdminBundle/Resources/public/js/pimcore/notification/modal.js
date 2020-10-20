@@ -28,7 +28,7 @@ pimcore.notification.modal = Class.create({
             var recipientStore = Ext.create("Ext.data.JsonStore", {
                 proxy: {
                     type: "ajax",
-                    url: Routing.generate('pimcore_admin_notification_recipients')
+                    url: "/admin/notification/recipients"
                 }
             });
             recipientStore.load();
@@ -120,7 +120,7 @@ pimcore.notification.modal = Class.create({
                 border: false,
                 frame: false,
                 bodyStyle: "padding:10px",
-                url: Routing.generate('pimcore_admin_notification_send'),
+                url: "/admin/notification/send",
                 items: items,
                 defaults: {labelWidth: 100},
                 collapsible: false,
@@ -243,6 +243,7 @@ pimcore.notification.modal = Class.create({
         var allowedTypes = ['object', 'asset', 'document'];
         var allowedSpecific = {};
         var allowedSubtypes = {};
+        var i;
 
         allowedSubtypes.object = ["object", "variant"];
 

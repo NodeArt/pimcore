@@ -22,32 +22,26 @@ use Pimcore\Model;
 /**
  * @method Model\Element\Note\Listing\Dao getDao()
  * @method Model\Element\Note[] load()
- * @method Model\Element\Note current()
  * @method int[] loadIdList()
  * @method int getTotalCount()
  */
 class Listing extends Model\Listing\AbstractListing
 {
     /**
-     * @var Model\Element\Note[]|null
-     *
-     * @deprecated use getter/setter methods or $this->data
+     * @var array|null
      */
     protected $notes = null;
 
-    public function __construct()
-    {
-        $this->notes = & $this->data;
-    }
-
     /**
-     * @param Model\Element\Note[]|null $notes
+     * @param $notes
      *
-     * @return static
+     * @return $this
      */
     public function setNotes($notes)
     {
-        return $this->setData($notes);
+        $this->notes = $notes;
+
+        return $this;
     }
 
     /**
@@ -55,6 +49,10 @@ class Listing extends Model\Listing\AbstractListing
      */
     public function getNotes()
     {
-        return $this->getData();
+        if ($this->notes === null) {
+            $this->getDao()->load();
+        }
+
+        return $this->notes;
     }
 }

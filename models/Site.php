@@ -22,8 +22,7 @@ use Pimcore\Logger;
 
 /**
  * @method \Pimcore\Model\Site\Dao getDao()
- * @method void delete()
- * @method void save()
+ * @method delete()
  */
 class Site extends AbstractModel
 {
@@ -133,7 +132,7 @@ class Site extends AbstractModel
     }
 
     /**
-     * @param string $domain
+     * @param $domain
      *
      * @return Site|null
      */
@@ -165,14 +164,12 @@ class Site extends AbstractModel
     }
 
     /**
-     * @param mixed $mixed
+     * @param $mixed
      *
-     * @return Site|null
+     * @return Site
      */
     public static function getBy($mixed)
     {
-        $site = null;
-
         if (is_numeric($mixed)) {
             $site = self::getById($mixed);
         } elseif (is_string($mixed)) {
@@ -324,7 +321,7 @@ class Site extends AbstractModel
     }
 
     /**
-     * @param string $path
+     * @param $path
      *
      * @return $this
      */
@@ -407,7 +404,7 @@ class Site extends AbstractModel
     }
 
     /**
-     * @param int $modificationDate
+     * @param $modificationDate
      *
      * @return $this
      */
@@ -427,7 +424,7 @@ class Site extends AbstractModel
     }
 
     /**
-     * @param int $creationDate
+     * @param $creationDate
      *
      * @return $this
      */

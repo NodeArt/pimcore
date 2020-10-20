@@ -46,8 +46,6 @@ use Pimcore\Templating\Helper\Placeholder\ContainerService;
  * @method $this offsetSetStyle($index, $content, array $attributes = array())
  * @method $this prependStyle($content, array $attributes = array())
  * @method $this setStyle($content, array $attributes = array())
- *
- * @deprecated
  */
 class HeadStyle extends AbstractHelper
 {
@@ -72,13 +70,13 @@ class HeadStyle extends AbstractHelper
      */
     protected $_mediaTypes = [
         'all', 'aural', 'braille', 'handheld', 'print',
-        'projection', 'screen', 'tty', 'tv',
+        'projection', 'screen', 'tty', 'tv'
     ];
 
     /**
      * Capture type and/or attributes (used for hinting during capture)
      *
-     * @var string|null
+     * @var string
      */
     protected $_captureAttrs = null;
 
@@ -161,7 +159,7 @@ class HeadStyle extends AbstractHelper
      * @param  string $method
      * @param  array $args
      *
-     * @return mixed
+     * @return void
      *
      * @throws Exception When no $content provided or invalid method
      */
@@ -206,7 +204,8 @@ class HeadStyle extends AbstractHelper
     /**
      * Determine if a value is a valid style tag
      *
-     * @param mixed $value
+     * @param  mixed $value
+     * @param  string $method
      *
      * @return bool
      */
@@ -234,7 +233,7 @@ class HeadStyle extends AbstractHelper
             throw new Exception('Invalid value passed to append; please use appendStyle()');
         }
 
-        $this->getContainer()->append($value);
+        return $this->getContainer()->append($value);
     }
 
     /**
@@ -251,7 +250,7 @@ class HeadStyle extends AbstractHelper
             throw new Exception('Invalid value passed to offsetSet; please use offsetSetStyle()');
         }
 
-        $this->getContainer()->offsetSet($index, $value);
+        return $this->getContainer()->offsetSet($index, $value);
     }
 
     /**
@@ -267,7 +266,7 @@ class HeadStyle extends AbstractHelper
             throw new Exception('Invalid value passed to prepend; please use prependStyle()');
         }
 
-        $this->getContainer()->prepend($value);
+        return $this->getContainer()->prepend($value);
     }
 
     /**
@@ -283,14 +282,14 @@ class HeadStyle extends AbstractHelper
             throw new Exception('Invalid value passed to set; please use setStyle()');
         }
 
-        $this->getContainer()->set($value);
+        return $this->getContainer()->set($value);
     }
 
     /**
      * Start capture action
      *
-     * @param string $type
-     * @param string|null $attrs
+     * @param  mixed $captureType
+     * @param  string $typeOrAttrs
      *
      * @return void
      */

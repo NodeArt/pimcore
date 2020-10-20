@@ -166,8 +166,6 @@ class DocumentTargetingConfigurator
         if (isset($this->targetGroupMapping[$document->getId()])) {
             return $this->targetGroupMapping[$document->getId()];
         }
-
-        return null;
     }
 
     public function getResolvedTargetGroupMapping(): array
@@ -210,7 +208,7 @@ class DocumentTargetingConfigurator
      * Resolves valid target groups for a document. A target group is seen as valid
      * if it has at least one element configured for that target group.
      *
-     * @param Document $document
+     * @param Document|Document\TargetingDocument|TargetingDocumentInterface $document
      *
      * @return array
      */
@@ -219,7 +217,7 @@ class DocumentTargetingConfigurator
         if (!$document instanceof TargetingDocumentInterface) {
             return [];
         }
-        /** @var Document\TargetingDocument $document */
+
         $cacheKey = sprintf('document_target_groups_%d', $document->getId());
 
         if ($targetGroups = $this->cache->load($cacheKey)) {
@@ -227,8 +225,8 @@ class DocumentTargetingConfigurator
         }
 
         $targetGroups = [];
-        foreach ($document->getEditables() as $key => $tag) {
-            $pattern = '/^' . preg_quote(TargetingDocumentInterface::TARGET_GROUP_EDITABLE_PREFIX, '/') . '([0-9]+)' . preg_quote(TargetingDocumentInterface::TARGET_GROUP_EDITABLE_SUFFIX, '/') . '/';
+        foreach ($document->getElements() as $key => $tag) {
+            $pattern = '/^' . preg_quote(TargetingDocumentInterface::TARGET_GROUP_ELEMENT_PREFIX, '/') . '([0-9]+)' . preg_quote(TargetingDocumentInterface::TARGET_GROUP_ELEMENT_SUFFIX, '/') . '/';
             if (preg_match($pattern, (string) $key, $matches)) {
                 $targetGroups[] = (int)$matches[1];
             }

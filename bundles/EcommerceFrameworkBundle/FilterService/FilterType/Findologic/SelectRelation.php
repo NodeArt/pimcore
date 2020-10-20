@@ -19,7 +19,6 @@ use Pimcore\Bundle\EcommerceFrameworkBundle\IndexService\ProductList\ProductList
 use Pimcore\Bundle\EcommerceFrameworkBundle\Model\AbstractFilterDefinitionType;
 use Pimcore\Logger;
 use Pimcore\Model\DataObject\AbstractObject;
-use Pimcore\Model\DataObject\Fieldcollection\Data\FilterRelation;
 
 class SelectRelation extends \Pimcore\Bundle\EcommerceFrameworkBundle\FilterService\FilterType\SelectRelation
 {
@@ -28,15 +27,6 @@ class SelectRelation extends \Pimcore\Bundle\EcommerceFrameworkBundle\FilterServ
         //$productList->prepareGroupByValues($this->getField($filterDefinition), true);
     }
 
-    /**
-     * @param FilterRelation $filterDefinition
-     * @param ProductListInterface $productList
-     * @param array $currentFilter
-     *
-     * @return string
-     *
-     * @throws \Exception
-     */
     public function getFilterFrontend(AbstractFilterDefinitionType $filterDefinition, ProductListInterface $productList, $currentFilter)
     {
         $field = $this->getField($filterDefinition);
@@ -65,30 +55,20 @@ class SelectRelation extends \Pimcore\Bundle\EcommerceFrameworkBundle\FilterServ
             'values' => $values,
             'objects' => $objects,
             'fieldname' => $field,
-            'resultCount' => $productList->count(),
+            'resultCount' => $productList->count()
         ]);
     }
 
-    /**
-     * @param FilterRelation $filterDefinition
-     * @param ProductListInterface $productList
-     * @param array $currentFilter
-     * @param array $params
-     * @param bool $isPrecondition
-     *
-     * @return array
-     */
     public function addCondition(AbstractFilterDefinitionType $filterDefinition, ProductListInterface $productList, $currentFilter, $params, $isPrecondition = false)
     {
         $field = $this->getField($filterDefinition);
         $preSelect = $this->getPreSelect($filterDefinition);
 
-        $value = $params[$field] ?? null;
-        $isReload = $params['is_reload'] ?? null;
+        $value = $params[$field];
 
         if ($value == AbstractFilterType::EMPTY_STRING) {
             $value = null;
-        } elseif (empty($value) && !$isReload) {
+        } elseif (empty($value) && !$params['is_reload']) {
             $value = $preSelect;
         }
 

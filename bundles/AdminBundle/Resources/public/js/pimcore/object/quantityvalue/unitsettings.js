@@ -15,6 +15,8 @@
 pimcore.registerNS("pimcore.object.quantityValue.unitsettings");
 pimcore.object.quantityValue.unitsettings = Class.create({
 
+    dataUrl: '/admin/quantity-value/unit-proxy?',
+
     initialize: function () {
         this.getTabPanel();
     },
@@ -62,24 +64,42 @@ pimcore.object.quantityValue.unitsettings = Class.create({
 
     getRowEditor: function () {
 
+        var languages = this.languages;
+
+        var readerFields = [
+            {name: 'id', allowBlank: false},
+            {name: 'abbreviation', allowBlank: false},
+            {name: 'longname'},
+            {name: 'group'},
+            {name: 'baseunit'},
+            {name: 'factor'},
+            {name: 'conversionOffset'},
+            {name: 'reference'},
+            {name: 'converter'}
+        ];
+
+
+        var configuredFilters = [
+            {type: "string", dataIndex: "abbreviation"},
+            {type: "string", dataIndex: "longname"},
+            {type: "string", dataIndex: "group"},
+            {type: "string", dataIndex: "baseunit"},
+            {type: "numeric", dataIndex: "factor"},
+            {type: "string", dataIndex: "reference"},
+            {type: "string", dataIndex: "converter"}
+        ];
+
         var baseUnitStore = Ext.create('Ext.data.JsonStore', {
-            fields: [{
-                name: 'id',
-                type: 'string'
-            }, 'abbreviation', 'longname', 'group', 'baseunit', 'factor', 'conversionOffset', 'reference', 'converter'],
             proxy: {
                 type: 'ajax',
-                async: true,
-                batchActions: false,
-                url: Routing.generate('pimcore_admin_dataobject_quantityvalue_unitproxyget'),
+                async: false,
+                url: this.dataUrl,
                 reader: {
                     type: 'json',
                     rootProperty: 'data'
                 }
 
             },
-            // disable client pagination, default: 25
-            pageSize: 0,
             listeners: {
                 load: function (store, records) {
                     var storeData = records;
@@ -104,7 +124,7 @@ pimcore.object.quantityValue.unitsettings = Class.create({
         };
 
         var typesColumns = [
-            {flex: 1, dataIndex: 'id', text: t("id"), filter: 'string'},
+            {flex: 1, dataIndex: 'id', text: t("id"), hidden: true, editor: new Ext.form.TextField({}), filter: 'string'},
             {flex: 1, dataIndex: 'abbreviation', text: t("abbreviation"), editor: new Ext.form.TextField({}), filter: 'string'},
             {flex: 2, dataIndex: 'longname', text: t("longname"), editor: new Ext.form.TextField({}), filter: 'string'},
             {flex: 1, dataIndex: 'group', text: t("group"), editor: new Ext.form.TextField({}), filter: 'string', hidden: true},
@@ -144,7 +164,7 @@ pimcore.object.quantityValue.unitsettings = Class.create({
         this.store = new Ext.data.Store({
             proxy: {
                 type: 'ajax',
-                url: Routing.generate('pimcore_admin_dataobject_quantityvalue_unitproxyget'),
+                url: this.dataUrl,
                 reader: {
                     type: 'json',
                     rootProperty: 'data',
@@ -158,10 +178,10 @@ pimcore.object.quantityValue.unitsettings = Class.create({
                     encode: 'true'
                 },
                 api: {
-                    create  : Routing.generate('pimcore_admin_dataobject_quantityvalue_unitproxyget', {xaction: 'create'}),
-                    read    : Routing.generate('pimcore_admin_dataobject_quantityvalue_unitproxyget', {xaction: 'read'}),
-                    update  : Routing.generate('pimcore_admin_dataobject_quantityvalue_unitproxyget', {xaction: 'update'}),
-                    destroy : Routing.generate('pimcore_admin_dataobject_quantityvalue_unitproxyget', {xaction: 'destroy'})
+                    create  : this.dataUrl + "xaction=create",
+                    read    : this.dataUrl + "xaction=read",
+                    update  : this.dataUrl + "xaction=update",
+                    destroy : this.dataUrl + "xaction=destroy"
                 },
                 pageSize: itemsPerPage
             },
@@ -234,43 +254,14 @@ pimcore.object.quantityValue.unitsettings = Class.create({
     },
 
     onAdd: function (btn, ev) {
-        Ext.MessageBox.prompt(' ', t('unique_identifier'),
-            function (button, value, object) {
-                var regresult = value.match(/[a-zA-Z0-9_\-]+/);
-                if (button == "ok") {
-                    if (value.length >= 1 && regresult == value) {
-
-                        // this is rather a workaround, Ext doesn't sync if the id field is already filled.
-                        Ext.Ajax.request({
-                            url: Routing.generate('pimcore_admin_dataobject_quantityvalue_unitproxyget', {xaction: 'create'}),
-                            method: 'POST',
-                            params: {
-                                data: Ext.encode({
-                                    id: value
-                                })
-                            },
-                            success: function () {
-                                var u = {
-                                    id: value
-                                };
-                                this.cellEditing.completeEdit();
-                                let recs = this.grid.store.insert(0, [u]);
-
-                                this.cellEditing.startEditByPosition({
-                                    row: 0,
-                                    column: 0
-                                });
-
-                            }.bind(this)
-                        });
-
-                    } else {
-                        Ext.Msg.alert(' ', t('failed_to_create_new_item'));
-                    }
-                }
-            }.bind(this)
-        );
-
+        var u = {};
+        //id = -1;
+        this.cellEditing.completeEdit();
+        this.grid.store.insert(0, u);
+        this.cellEditing.startEditByPosition({
+            row: 0,
+            column: 0
+        });
     },
 
     onDelete: function () {
@@ -282,3 +273,4 @@ pimcore.object.quantityValue.unitsettings = Class.create({
         this.grid.store.remove(rec);
     }
 });
+

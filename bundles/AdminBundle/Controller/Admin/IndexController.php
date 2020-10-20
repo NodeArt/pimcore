@@ -23,7 +23,6 @@ use Pimcore\Config;
 use Pimcore\Controller\Configuration\TemplatePhp;
 use Pimcore\Controller\EventedControllerInterface;
 use Pimcore\Db\ConnectionInterface;
-use Pimcore\Event\Admin\IndexActionSettingsEvent;
 use Pimcore\Event\Admin\IndexSettingsEvent;
 use Pimcore\Event\AdminEvents;
 use Pimcore\Google;
@@ -68,7 +67,6 @@ class IndexController extends AdminController implements EventedControllerInterf
      * @param KernelInterface $kernel
      * @param Executor $maintenanceExecutor
      * @param CsrfProtectionListener $csrfProtectionListener
-     * @param Config $config
      *
      * @return ViewModel
      *
@@ -79,12 +77,11 @@ class IndexController extends AdminController implements EventedControllerInterf
         SiteConfigProvider $siteConfigProvider,
         KernelInterface $kernel,
         Executor $maintenanceExecutor,
-        CsrfProtectionListener $csrfProtectionListener,
-        Config $config
+        CsrfProtectionListener $csrfProtectionListener
     ) {
         $user = $this->getAdminUser();
         $view = new ViewModel([
-            'config' => $config,
+            'config' => Config::getSystemConfig()
         ]);
 
         $this
@@ -105,15 +102,11 @@ class IndexController extends AdminController implements EventedControllerInterf
 
             $user->save();
             $settings->getParameters()->add([
-                'twoFactorSetupRequired' => true,
+                'twoFactorSetupRequired' => true
             ]);
         }
 
         // allow to alter settings via an event
-        $settingsEvent = new IndexActionSettingsEvent($settings->getAllParameters());
-        $this->eventDispatcher->dispatch(AdminEvents::INDEX_ACTION_SETTINGS, $settingsEvent);
-        $settings->initialize($settingsEvent->getSettings());
-
         $this->eventDispatcher->dispatch(AdminEvents::INDEX_SETTINGS, new IndexSettingsEvent($settings));
 
         $view->settings = $settings;
@@ -126,7 +119,7 @@ class IndexController extends AdminController implements EventedControllerInterf
      *
      * @param Request $request
      * @param ConnectionInterface $db
-     * @param KernelInterface $kernel
+     * @param KernelInterface $db
      *
      * @return JsonResponse
      *
@@ -134,10 +127,10 @@ class IndexController extends AdminController implements EventedControllerInterf
      */
     public function statisticsAction(Request $request, ConnectionInterface $db, KernelInterface $kernel)
     {
+
         // DB
-        $mysqlVersion = null;
         try {
-            $tables = $db->fetchAll('SELECT TABLE_NAME as name,TABLE_ROWS as rows from information_schema.TABLES
+            $tables = $db->fetchAll('SELECT TABLE_NAME as name,TABLE_ROWS as rows from information_schema.TABLES 
                 WHERE TABLE_ROWS IS NOT NULL AND TABLE_SCHEMA = ?', [$db->getDatabase()]);
 
             $mysqlVersion = $db->fetchOne('SELECT VERSION()');
@@ -154,7 +147,7 @@ class IndexController extends AdminController implements EventedControllerInterf
                     'cpu' => true,
                     'virtualization' => true,
                     'distro' => true,
-                ],
+                ]
             ]);
             $linfo->scan();
             $systemData = $linfo->getInfo();
@@ -253,7 +246,6 @@ class IndexController extends AdminController implements EventedControllerInterf
             'devmode' => \Pimcore::inDevMode(),
             'disableMinifyJs' => \Pimcore::disableMinifyJs(),
             'environment' => $kernel->getEnvironment(),
-            'cached_environments' => Tool::getCachedSymfonyEnvironments(),
             'sessionId' => htmlentities(Session::getSessionId(), ENT_QUOTES, 'UTF-8'),
         ]);
 
@@ -262,32 +254,34 @@ class IndexController extends AdminController implements EventedControllerInterf
             'language' => $request->getLocale(),
             'websiteLanguages' => Admin::reorderWebsiteLanguages(
                 $this->getAdminUser(),
-                $config['general']['valid_languages'],
+                $config->general->validLanguages,
                 true
-            ),
+            )
         ]);
 
         // flags
         $namingStrategy = $this->get('pimcore.document.tag.naming.strategy');
 
+        // config
+        $pimcoreSymfonyConfig = $this->getParameter('pimcore.config');
+
         $settings->getParameters()->add([
             'showCloseConfirmation' => true,
-            'debug_admin_translations' => (bool)$config['general']['debug_admin_translations'],
-            'document_generatepreviews' => (bool)$config['documents']['generate_preview'],
+            'debug_admin_translations' => (bool)$config->general->debug_admin_translations,
+            'document_generatepreviews' => (bool)$config->documents->generate_preview,
             'document_naming_strategy' => $namingStrategy->getName(),
-            'asset_disable_tree_preview' => (bool)$config['assets']['disable_tree_preview'],
+            'asset_disable_tree_preview' => (bool)$config->assets->disable_tree_preview,
             'htmltoimage' => \Pimcore\Image\HtmlToImage::isSupported(),
             'videoconverter' => \Pimcore\Video::isAvailable(),
-            'asset_hide_edit' => (bool)$config['assets']['hide_edit_image'],
-            'main_domain' => $config['general']['domain'],
-            'timezone' => $config['general']['timezone'],
-            'tile_layer_url_template' => $config['maps']['tile_layer_url_template'],
-            'geocoding_url_template' => $config['maps']['geocoding_url_template'],
-            'reverse_geocoding_url_template' => $config['maps']['reverse_geocoding_url_template'],
-            'asset_tree_paging_limit' => $config['assets']['tree_paging_limit'],
-            'document_tree_paging_limit' => $config['documents']['tree_paging_limit'],
-            'object_tree_paging_limit' => $config['objects']['tree_paging_limit'],
-            'maxmind_geoip_installed' => (bool) $this->getParameter('pimcore.geoip.db_file'),
+            'asset_hide_edit' => (bool)$config->assets->hide_edit_image,
+            'main_domain' => $config->general->domain,
+            'timezone' => $config->general->timezone,
+            'tile_layer_url_template' => $pimcoreSymfonyConfig['maps']['tile_layer_url_template'],
+            'geocoding_url_template' => $pimcoreSymfonyConfig['maps']['geocoding_url_template'],
+            'reverse_geocoding_url_template' => $pimcoreSymfonyConfig['maps']['reverse_geocoding_url_template'],
+            'asset_tree_paging_limit' => $pimcoreSymfonyConfig['assets']['tree_paging_limit'],
+            'document_tree_paging_limit' => $pimcoreSymfonyConfig['documents']['tree_paging_limit'],
+            'object_tree_paging_limit' => $pimcoreSymfonyConfig['objects']['tree_paging_limit'],
         ]);
 
         $dashboardHelper = new \Pimcore\Helper\Dashboard($user);
@@ -316,11 +310,13 @@ class IndexController extends AdminController implements EventedControllerInterf
     private function getInstanceId()
     {
         $instanceId = 'not-set';
-        try {
+        if ($this->container->hasParameter('secret')) {
             $instanceId = $this->getParameter('secret');
-            $instanceId = sha1(substr($instanceId, 3, -3));
-        } catch (\Exception $e) {
-            // nothing to do
+            try {
+                $instanceId = sha1(substr($instanceId, 3, -3));
+            } catch (\Exception $e) {
+                // noting to do
+            }
         }
 
         return $instanceId;
@@ -335,7 +331,7 @@ class IndexController extends AdminController implements EventedControllerInterf
 
         $settings->getParameters()->add([
             'google_analytics_enabled' => (bool)$siteConfigProvider->isSiteReportingConfigured(),
-            'google_webmastertools_enabled' => (bool)Google\Webmastertools::isConfigured(),
+            'google_webmastertools_enabled' => (bool)Google\Webmastertools::isConfigured()
         ]);
     }
 
@@ -388,7 +384,7 @@ class IndexController extends AdminController implements EventedControllerInterf
 
     /**
      * @param ViewModel $settings
-     * @param Config $config
+     * @param \stdClass $config
      *
      * @return $this
      */
@@ -396,20 +392,20 @@ class IndexController extends AdminController implements EventedControllerInterf
     {
         //mail settings
         $mailIncomplete = false;
-        if (isset($config['email'])) {
-            if (empty($config['email']['debug']['email_addresses'])) {
+        if ($config->email) {
+            if (!$config->email->debug->emailaddresses) {
                 $mailIncomplete = true;
             }
-            if (empty($config['email']['sender']['email'])) {
+            if (!$config->email->sender->email) {
                 $mailIncomplete = true;
             }
-            if (($config['email']['method'] ?? '') == 'smtp' && empty($config['email']['smtp']['host'])) {
+            if ($config->email->method == 'smtp' && !$config->email->smtp->host) {
                 $mailIncomplete = true;
             }
         }
 
         $settings->mail = !$mailIncomplete;
-        $settings->mailDefaultAddress = $config['email']['sender']['email'] ?? null;
+        $settings->mailDefaultAddress = $config->email->sender->email ?: null;
 
         return $this;
     }
@@ -435,7 +431,7 @@ class IndexController extends AdminController implements EventedControllerInterf
 
                 if ($rootNode) {
                     $tmpData['rootId'] = $rootNode->getId();
-                    $tmpData['allowedClasses'] = isset($tmpData['classes']) && $tmpData['classes'] ? explode(',', $tmpData['classes']) : null;
+                    $tmpData['allowedClasses'] = $tmpData['classes'] ? explode(',', $tmpData['classes']) : null;
                     $tmpData['showroot'] = (bool)$tmpData['showroot'];
 
                     // Check if a user has privileges to that node

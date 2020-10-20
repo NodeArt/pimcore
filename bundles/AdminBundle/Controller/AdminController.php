@@ -65,7 +65,7 @@ abstract class AdminController extends Controller implements AdminControllerInte
     /**
      * Check user permission
      *
-     * @param string $permission
+     * @param $permission
      *
      * @throws AccessDeniedHttpException
      */
@@ -76,7 +76,7 @@ abstract class AdminController extends Controller implements AdminControllerInte
                 'User {user} attempted to access {permission}, but has no permission to do so',
                 [
                     'user' => $this->getAdminUser()->getName(),
-                    'permission' => $permission,
+                    'permission' => $permission
                 ]
             );
 
@@ -104,7 +104,6 @@ abstract class AdminController extends Controller implements AdminControllerInte
     protected function checkPermissionsHasOneOf(array $permissions)
     {
         $allowed = false;
-        $permission = null;
         foreach ($permissions as $permission) {
             if ($this->getAdminUser()->isAllowed($permission)) {
                 $allowed = true;
@@ -117,7 +116,7 @@ abstract class AdminController extends Controller implements AdminControllerInte
                 'User {user} attempted to access {permission}, but has no permission to do so',
                 [
                     'user' => $this->getAdminUser()->getName(),
-                    'permission' => $permission,
+                    'permission' => $permission
                 ]
             );
 
@@ -168,7 +167,7 @@ abstract class AdminController extends Controller implements AdminControllerInte
         }
 
         return $serializer->serialize($data, 'json', array_merge([
-            'json_encode_options' => $options,
+            'json_encode_options' => $options
         ], $context));
     }
 
@@ -180,7 +179,7 @@ abstract class AdminController extends Controller implements AdminControllerInte
      * @param array $context    Context to pass to serializer when using serializer component
      * @param bool $useAdminSerializer
      *
-     * @return mixed
+     * @return array|\stdClass
      */
     protected function decodeJson($json, $associative = true, array $context = [], bool $useAdminSerializer = true)
     {

@@ -14,17 +14,60 @@
 
 namespace Pimcore\Document\Tag;
 
-use Pimcore\Document\Editable\EditableHandlerInterface;
+use Pimcore\Model\Document\Tag;
+use Pimcore\Model\Document\Tag\Area\Info;
+use Pimcore\Templating\Model\ViewModelInterface;
 
-@trigger_error(sprintf('Class "%s" is deprecated since v6.8 and will be removed in 7. Use "%s" instead.', TagHandlerInterface::class, EditableHandlerInterface::class), E_USER_DEPRECATED);
-
-class_exists(EditableHandlerInterface::class);
-
-if (false) {
+interface TagHandlerInterface
+{
     /**
-     * @deprecated use \Pimcore\Document\Editable\EditableHandlerInterface instead.
+     * Determine if handler supports the tag
+     *
+     * @param ViewModelInterface $view
+     *
+     * @return bool
      */
-    interface TagHandlerInterface extends EditableHandlerInterface
-    {
-    }
+    public function supports($view);
+
+    /**
+     * Determines if a brick is enabled
+     *
+     * @param Tag $tag
+     * @param string $brick
+     *
+     * @return bool
+     */
+    public function isBrickEnabled(Tag $tag, $brick);
+
+    /**
+     * Get available areas for an areablock
+     *
+     * @param Tag\Areablock $tag
+     * @param array $options
+     *
+     * @return array
+     */
+    public function getAvailableAreablockAreas(Tag\Areablock $tag, array $options);
+
+    /**
+     * Render the area frontend
+     *
+     * @param Info $info
+     */
+    public function renderAreaFrontend(Info $info);
+
+    /**
+     * Render a sub-action (snippet, renderlet)
+     *
+     * @param ViewModelInterface $view
+     * @param string $controller
+     * @param string $action
+     * @param string|null $parent Bundle
+     * @param array $attributes
+     * @param array $query
+     * @param array $options
+     *
+     * @return string
+     */
+    public function renderAction($view, $controller, $action, $parent = null, array $attributes = [], array $query = [], array $options = []);
 }

@@ -45,7 +45,7 @@ class Fieldcontainer extends Model\DataObject\ClassDefinition\Layout
     public $fieldLabel;
 
     /**
-     * @param int $labelWidth
+     * @param $labelWidth
      *
      * @return $this
      */
@@ -67,7 +67,7 @@ class Fieldcontainer extends Model\DataObject\ClassDefinition\Layout
     }
 
     /**
-     * @param string $layout
+     * @param $layout
      *
      * @return $this
      */
@@ -87,7 +87,7 @@ class Fieldcontainer extends Model\DataObject\ClassDefinition\Layout
     }
 
     /**
-     * @param string $fieldLabel
+     * @param $fieldLabel
      *
      * @return $this
      */

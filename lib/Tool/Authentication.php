@@ -24,8 +24,8 @@ use Symfony\Component\HttpFoundation\Request;
 class Authentication
 {
     /**
-     * @param string $username
-     * @param string $password
+     * @param $username
+     * @param $password
      *
      * @return null|User
      */
@@ -50,7 +50,7 @@ class Authentication
      *
      * @param Request $request
      *
-     * @return User|null
+     * @return User
      */
     public static function authenticateSession(Request $request = null)
     {
@@ -114,7 +114,7 @@ class Authentication
     }
 
     /**
-     * @param string $token
+     * @param $token
      * @param bool $adminRequired
      *
      * @return null|User
@@ -152,7 +152,7 @@ class Authentication
 
     /**
      * @param User $user
-     * @param string $password
+     * @param $password
      *
      * @return bool
      */
@@ -175,7 +175,7 @@ class Authentication
     }
 
     /**
-     * @param User|null $user
+     * @param $user
      *
      * @return bool
      */
@@ -189,8 +189,8 @@ class Authentication
     }
 
     /**
-     * @param string $username
-     * @param string $plainTextPassword
+     * @param $username
+     * @param $plainTextPassword
      *
      * @return bool|false|string
      *
@@ -207,8 +207,8 @@ class Authentication
     }
 
     /**
-     * @param string $username
-     * @param string $plainTextPassword
+     * @param $username
+     * @param $plainTextPassword
      *
      * @return string
      */
@@ -220,7 +220,7 @@ class Authentication
     }
 
     /**
-     * @param string $username
+     * @param $username
      *
      * @return string
      */
@@ -235,7 +235,7 @@ class Authentication
     }
 
     /**
-     * @param string $token
+     * @param $token
      *
      * @return array
      */

@@ -15,34 +15,14 @@
 namespace Pimcore\Bundle\EcommerceFrameworkBundle\Command\IndexService;
 
 use Pimcore\Bundle\EcommerceFrameworkBundle\IndexService\Tool\IndexUpdater;
+use Pimcore\Model\Tool\Lock;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Lock\Factory as LockFactory;
-use Symfony\Component\Lock\LockInterface;
 
-/**
- * @deprecated
- */
 class ProcessQueueCommand extends AbstractIndexServiceCommand
 {
-    /**
-     * @var LockInterface|null
-     */
-    protected $lock = null;
-
-    /**
-     * @var LockFactory|null
-     */
-    protected $lockFactory = null;
-
-    public function __construct(LockFactory $lockFactory, string $name = null)
-    {
-        parent::__construct($name);
-        $this->lockFactory = $lockFactory;
-    }
-
     /**
      * @inheritDoc
      */
@@ -52,7 +32,7 @@ class ProcessQueueCommand extends AbstractIndexServiceCommand
 
         $this
             ->setName('ecommerce:indexservice:process-queue')
-            ->setDescription('Processes the preparation and/or update-index queue. DEPRECATED since version 6.7.0, use ecommerce:indexservice:process-preparation-queue or ecommerce:indexservice:process-update-queue instead.')
+            ->setDescription('Processes the preparation and/or update-index queue')
             ->addArgument('queue', InputArgument::REQUIRED | InputArgument::IS_ARRAY, 'Queues to process (preparation|update-index)')
             ->addOption('tenant', null, InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Tenant to perform action on (defaults to all)')
             ->addOption('max-rounds', null, InputOption::VALUE_REQUIRED, 'Maximum rounds to process', null)
@@ -68,28 +48,21 @@ class ProcessQueueCommand extends AbstractIndexServiceCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        @trigger_error(
-            'Command ProcessQueueCommand is deprecated since version 6.7.0 and will be removed in 7.0.0. ' .
-            'Use ecommerce:indexservice:process-preparation-queue or ecommerce:indexservice:process-update-queue instead.',
-            E_USER_DEPRECATED
-        );
-
         $tenants = count($input->getOption('tenant')) ? $input->getOption('tenant') : null;
 
         $queues = $input->getArgument('queue');
         $processPreparationQueue = in_array('preparation', $queues);
         $processUpdateIndexQueue = in_array('update-index', $queues);
-        $timeoutInSeconds = null;
 
         if ($timeoutInMinutes = (int)$input->getOption('timeout')) {
             $timeoutInSeconds = $timeoutInMinutes * 60;
         }
 
         if ($input->getOption('unlock')) {
-            $this->getLock($input)->release();
+            Lock::release($this->getLockName($input));
             $output->writeln(sprintf('<info>UNLOCKED "%s". Please start over again.</info>', $this->getLockname($input)));
 
-            return 1;
+            return;
         }
 
         $this->checkLock($input);
@@ -107,10 +80,8 @@ class ProcessQueueCommand extends AbstractIndexServiceCommand
         }
 
         if (!filter_var($input->getOption('ignore-lock'), FILTER_VALIDATE_BOOLEAN)) {
-            $this->getLock($input)->release();
+            Lock::release($this->getLockname($input));
         }
-
-        return 0;
     }
 
     /**
@@ -122,22 +93,8 @@ class ProcessQueueCommand extends AbstractIndexServiceCommand
     {
         return $this->getName() . '_' . md5(implode('', [
                 implode('', $input->getOption('tenant')),
-                implode('', $input->getArgument('queue')),
+                implode('', $input->getArgument('queue'))
             ]));
-    }
-
-    protected function getLock(InputInterface $input): LockInterface
-    {
-        if (!$this->lock) {
-            $lockTimeoutInSeconds = null;
-            if ($lockTimeoutInMinutes = (int) $input->getOption('lock-timeout')) {
-                $lockTimeoutInSeconds = $lockTimeoutInMinutes * 60;
-            }
-
-            $this->lock = $this->lockFactory->createLock($this->getLockname($input), $lockTimeoutInSeconds);
-        }
-
-        return $this->lock;
     }
 
     /**
@@ -149,11 +106,15 @@ class ProcessQueueCommand extends AbstractIndexServiceCommand
     {
         $lockName = $this->getLockName($input);
         $ignoreLock = filter_var($input->getOption('ignore-lock'), FILTER_VALIDATE_BOOLEAN);
+        if ($lockTimeoutInMinutes = (int)$input->getOption('lock-timeout')) {
+            $lockTimeoutInSeconds = $lockTimeoutInMinutes * 60;
+        }
 
         if (!$ignoreLock) {
-            if (!$this->getLock($input)->acquire()) {
+            if (Lock::isLocked($lockName, $lockTimeoutInSeconds)) {
                 throw new \Exception(sprintf('Could not lock command "%s" as another process is running.', $lockName));
             }
+            Lock::lock($lockName);
         }
     }
 }

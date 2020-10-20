@@ -22,7 +22,6 @@ use Pimcore\Model;
 
 /**
  * @method \Pimcore\Model\User\Permission\Definition\Dao getDao()
- * @method void save()
  */
 class Definition extends Model\AbstractModel
 {
@@ -37,7 +36,7 @@ class Definition extends Model\AbstractModel
     public $category;
 
     /**
-     * @param array $data
+     * @param array
      */
     public function __construct($data = [])
     {
@@ -55,7 +54,7 @@ class Definition extends Model\AbstractModel
     }
 
     /**
-     * @param string $key
+     * @param $key
      *
      * @return $this
      */
@@ -87,7 +86,7 @@ class Definition extends Model\AbstractModel
     }
 
     /**
-     * @param string $permission
+     * @param $permission
      *
      * @return mixed
      *
@@ -109,7 +108,7 @@ class Definition extends Model\AbstractModel
     }
 
     /**
-     * @param string $permission
+     * @param $permission
      *
      * @return mixed|static
      *

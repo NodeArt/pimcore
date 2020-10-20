@@ -15,7 +15,6 @@ use Symfony\Component\Console\Question\Question;
 use Symfony\Component\HttpKernel\KernelInterface;
 
 /**
- * @deprecated
  * Generates bundles.
  *
  * The following class is copied from \Sensio\Bundle\GeneratorBundle\Command\GenerateBundleCommand
@@ -65,8 +64,6 @@ EOT
      *
      * @throws \InvalidArgumentException When namespace doesn't end with Bundle
      * @throws \RuntimeException         When bundle can't be executed
-     *
-     * @return int
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -102,8 +99,6 @@ EOT
         }
 
         $questionHelper->writeGeneratorSummary($output, $errors);
-
-        return 0;
     }
 
     protected function interact(InputInterface $input, OutputInterface $output)
@@ -410,6 +405,6 @@ EOT
 
     protected function createGenerator()
     {
-        return new BundleGenerator();
+        return new BundleGenerator($this->getContainer()->get('filesystem'));
     }
 }

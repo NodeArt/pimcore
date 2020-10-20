@@ -31,7 +31,7 @@ class Dao extends Model\Dao\PhpArrayTable
     }
 
     /**
-     * @param string|null $id
+     * @param null $id
      *
      * @throws \Exception
      */
@@ -65,7 +65,7 @@ class Dao extends Model\Dao\PhpArrayTable
         $dataRaw = $this->model->getObjectVars();
         $data = [];
         $allowedProperties = ['name', 'description', 'group', 'items',
-            'videoBitrate', 'audioBitrate', 'creationDate', 'modificationDate', ];
+            'videoBitrate', 'audioBitrate', 'creationDate', 'modificationDate'];
 
         foreach ($dataRaw as $key => $value) {
             if (in_array($key, $allowedProperties)) {

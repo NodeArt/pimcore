@@ -223,7 +223,7 @@ This is a special functionality to allow embedding high resolution (ppi/dpi) ima
 The following is only necessary in special use-cases like Web-to-Print, in typical web-based cases, Pimcore 
 automatically adds the `srcset` attribute to `<img>` and `<picture>` tags automatically, so no manual work is necessary. 
 
-#### Use in the Thumbnail Configuration: 
+####Use in the Thumbnail Configuration: 
 ![High Resolution](../../img/thumbnails3.png)
 The above configuration will generate a thumbnail with 500px width. 
 
@@ -326,17 +326,6 @@ If you prefer not using WebP, you can disable the support by adding the followin
                 webp_auto_support: false
 ```
 
-## Clipping Support 
-Images with an embedded clipping path (8BIM / Adobe profile meta data) are automatically clipped when generating thumbnails of them. 
-    
-If you do not want to use thumbnail auto clipping, you can disable the support by adding the following config option: 
-```yml
-    assets:
-        image:
-            thumbnails:
-                clip_auto_support: false
-```
-
 #### Note on using WebP with Imagick using delegates
 Please ensure that your delegate definition for WebP encoding includes the `-q` flag, otherwise the quality 
 setting on thumbnails will not be considered and the default value of `75` is being used by `cwebp`.
@@ -370,8 +359,3 @@ $asset->clearThumbnails(true);
 $thumb = $asset->getThumbnail($thumbnailConfig);
 $file = $thumb->getFileSystemPath();
 ```
-
-## Downloading Asset Thumbnails
-
-Besides embedding thumbnails into CMS pages and distributing them via other channels, backend users can download a thumbnail of an asset. 
-In order to make a thumbnail downloadable, mark "List as option in download section on image detail view" option in Image Thumbnail Advanced settings. All thumbnails with this option enabled are listed in the "Download Thumbnail" dropdown on the detail view of an Asset. To download the thumbnail of the asset choose the thumbnail from the list and hit the "Download" button.

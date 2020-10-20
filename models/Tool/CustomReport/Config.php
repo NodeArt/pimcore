@@ -21,8 +21,6 @@ use Pimcore\Model;
 
 /**
  * @method \Pimcore\Model\Tool\CustomReport\Config\Dao getDao()
- * @method void delete()
- * @method void save()
  */
 class Config extends Model\AbstractModel implements \JsonSerializable
 {
@@ -37,7 +35,7 @@ class Config extends Model\AbstractModel implements \JsonSerializable
     public $sql = '';
 
     /**
-     * @var array
+     * @var string[]
      */
     public $dataSourceConfig = [];
 
@@ -127,7 +125,7 @@ class Config extends Model\AbstractModel implements \JsonSerializable
     public $sharedRoleNames;
 
     /**
-     * @param string $name
+     * @param $name
      *
      * @return null|Config
      */
@@ -162,7 +160,7 @@ class Config extends Model\AbstractModel implements \JsonSerializable
         foreach ($items as $item) {
             $reports[] = [
                 'id' => $item->getName(),
-                'text' => $item->getName(),
+                'text' => $item->getName()
             ];
         }
 
@@ -170,8 +168,8 @@ class Config extends Model\AbstractModel implements \JsonSerializable
     }
 
     /**
-     * @param \stdClass $configuration
-     * @param Config|null $fullConfig
+     * @param $configuration
+     * @param null $fullConfig
      *
      * @deprecated Use ServiceLocator with id 'pimcore.custom_report.adapter.factories' to determine the factory for the adapter instead
      *
@@ -186,7 +184,9 @@ class Config extends Model\AbstractModel implements \JsonSerializable
             throw new \RuntimeException(sprintf('Could not find Custom Report Adapter with type %s', $type));
         }
 
-        /** @var Model\Tool\CustomReport\Adapter\CustomReportAdapterFactoryInterface $factory */
+        /**
+         * @var $factory Model\Tool\CustomReport\Adapter\CustomReportAdapterFactoryInterface
+         */
         $factory = $serviceLocator->get($type);
 
         return $factory->create($configuration, $fullConfig);
@@ -321,7 +321,7 @@ class Config extends Model\AbstractModel implements \JsonSerializable
     }
 
     /**
-     * @param array $dataSourceConfig
+     * @param string[] $dataSourceConfig
      */
     public function setDataSourceConfig($dataSourceConfig)
     {
@@ -329,7 +329,7 @@ class Config extends Model\AbstractModel implements \JsonSerializable
     }
 
     /**
-     * @return \stdClass|null
+     * @return string[]
      */
     public function getDataSourceConfig()
     {

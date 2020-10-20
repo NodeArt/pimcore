@@ -22,38 +22,35 @@ use Pimcore\Model;
 /**
  * @method \Pimcore\Model\DataObject\Classificationstore\StoreConfig\Listing\Dao getDao()
  * @method Model\DataObject\Classificationstore\StoreConfig[] load()
- * @method Model\DataObject\Classificationstore\StoreConfig current()
- * @method int getTotalCount()
  */
 class Listing extends Model\Listing\AbstractListing
 {
     /**
-     * @var Model\DataObject\Classificationstore\StoreConfig[]|null
-     *
-     * @deprecated use getter/setter methods or $this->data
+     * @var array
      */
     protected $list = null;
-
-    public function __construct()
-    {
-        $this->list = & $this->data;
-    }
 
     /**
      * @return Model\DataObject\Classificationstore\StoreConfig[]
      */
     public function getList()
     {
-        return $this->getData();
+        if ($this->list === null) {
+            $this->getDao()->load();
+        }
+
+        return $this->list;
     }
 
     /**
-     * @param Model\DataObject\Classificationstore\StoreConfig[]|null $theList
+     * @param array
      *
-     * @return static
+     * @return $this
      */
     public function setList($theList)
     {
-        return $this->setData($theList);
+        $this->list = $theList;
+
+        return $this;
     }
 }

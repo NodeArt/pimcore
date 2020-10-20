@@ -1,5 +1,5 @@
 <?php
-/** @var \Pimcore\Templating\PhpEngine $view */
+/** @var $view \Pimcore\Templating\PhpEngine */
 $view->extend('PimcoreAdminBundle:Admin/Login:layout.html.php');
 
 $this->get("translate")->setDomain("admin");
@@ -27,7 +27,7 @@ if ($browser->getBrowser() == \Pimcore\Browser::BROWSER_OPERA && $browserVersion
 
 
 <div id="loginform">
-    <form id="form-element" method="post" action="<?= $view->router()->path('pimcore_admin_login_check', ['perspective' => strip_tags($view->request()->getParameter('perspective'))]) ?>">
+    <form method="post" action="<?= $view->router()->path('pimcore_admin_login_check', ['perspective' => strip_tags($view->request()->getParameter('perspective'))]) ?>" autocomplete="off">
 
         <?php if ($this->error) { ?>
             <div class="text error">
@@ -35,9 +35,9 @@ if ($browser->getBrowser() == \Pimcore\Browser::BROWSER_OPERA && $browserVersion
             </div>
         <?php } ?>
 
-        <input type="text" name="username" autocomplete="username" placeholder="<?= $this->translate("Username"); ?>" required autofocus>
-        <input type="password" name="password" autocomplete="current-password" placeholder="<?= $this->translate("Password"); ?>" required>
-        <input type="hidden" name="csrfToken" id="csrfToken" value="<?= $this->csrfToken ?>">
+        <input type="text" name="username" placeholder="<?= $this->translate("Username"); ?>" required autofocus/>
+        <input type="password" name="password" placeholder="<?= $this->translate("Password"); ?>" required/>
+        <input type="hidden" name="csrfToken" value="<?= $this->csrfToken ?>">
 
         <button type="submit"><?= $this->translate("Login"); ?></button>
     </form>
@@ -82,50 +82,6 @@ if ($browser->getBrowser() == \Pimcore\Browser::BROWSER_OPERA && $browserVersion
     // clear opened tabs store
     localStorage.removeItem("pimcore_opentabs");
     <?php } ?>
-
-    // hide symfony toolbar by default
-    var symfonyToolbarKey = 'symfony/profiler/toolbar/displayState';
-    if(!window.localStorage.getItem(symfonyToolbarKey)) {
-        window.localStorage.setItem(symfonyToolbarKey, 'none');
-    }
-
-    var formElement = document.getElementById('form-element');
-    var csrfRefreshInProgress = false;
-
-    function refreshCsrfToken() {
-        csrfRefreshInProgress = true;
-        formElement.style.opacity = '0.3';
-
-        var request = new XMLHttpRequest();
-        request.open('GET', '<?= $view->router()->path('pimcore_admin_login_csrf_token') ?>');
-        request.onload = function () {
-            if (this.status >= 200 && this.status < 400) {
-                var res = JSON.parse(this.response);
-                document.getElementById('csrfToken').setAttribute('value', res['csrfToken']);
-
-                formElement.style.opacity = '1';
-                csrfRefreshInProgress = false;
-            }
-        };
-        request.send();
-    }
-
-    document.addEventListener('visibilitychange', function(ev) {
-        if(document.visibilityState === 'visible') {
-            refreshCsrfToken();
-        }
-    });
-
-    window.setInterval(refreshCsrfToken, <?= $this->csrfTokenRefreshInterval ?>);
-
-    formElement.addEventListener("submit", function(evt) {
-        if(csrfRefreshInProgress) {
-            evt.preventDefault();
-        }
-    }, true);
-
 </script>
 
 <?php $view->slots()->stop() ?>
-
-<?= $this->breachAttackRandomContent(); ?>

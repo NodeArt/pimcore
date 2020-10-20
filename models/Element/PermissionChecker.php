@@ -48,7 +48,7 @@ class PermissionChecker
         $tableDesc = $db->fetchAll('describe '.$tableName);
 
         $result = [
-            'columns' => [],
+            'columns' => []
         ];
 
         foreach ($tableDesc as $column) {
@@ -63,12 +63,8 @@ class PermissionChecker
         $permissions = [];
         $details = [];
 
-        /** @var User $user */
+        /** @var $user User */
         foreach ($users as $user) {
-            if (!$user instanceof User) {
-                continue;
-            }
-
             $userPermission = [];
             $userPermission['userId'] = $user->getId();
             $userPermission['userName'] = $user->getName();
@@ -95,7 +91,7 @@ class PermissionChecker
                         ).') AND userId IN ('.implode(
                             ',',
                             $userIds
-                        ).') ORDER BY LENGTH(cpath) DESC, FIELD(userId,'.$user->getId().') DESC, `' . $columnName . '` DESC  LIMIT 1'
+                        ).') ORDER BY LENGTH(cpath) DESC, ABS(userId-'.$user->getId().') ASC LIMIT 1'
                     );
 
                     if ($permissionsParent) {
@@ -119,11 +115,11 @@ class PermissionChecker
                                 ',',
                                 $userIds
                             ).') AND list = 1 LIMIT 1',
-                            $db->escapeLike($path) .'%'
+                            $path.'%'
                         );
                         if ($permissionsChilds) {
                             $result[$columnName] = $permissionsChilds[$columnName] ? true : false;
-                            $details[] = self::createDetail($user, $columnName, $result[$columnName], $permissionsChilds['type'], $permissionsChilds['name'], $permissionsChilds['cpath']);
+                            $details[] = self::createDetail($user, $columnName, result[$columnName], $permissionsChilds['type'], $permissionsChilds['name'], $permissionsChilds['cpath']);
                             continue;
                         }
                     }
@@ -172,7 +168,7 @@ class PermissionChecker
             'c' => $c,
             'd' => $d,
             'e' => $e,
-            'f' => $f,
+            'f' => $f
 
         ];
 
@@ -196,7 +192,6 @@ class PermissionChecker
             if (!$user->getPermission($permissionKey)) {
                 // check roles
                 foreach ($user->getRoles() as $roleId) {
-                    /** @var User\UserRole $role */
                     $role = User\Role::getById($roleId);
                     if ($role->getPermission($permissionKey)) {
                         $entry = self::createDetail($user, $permissionKey, true, $role->getType(), $role->getName());
@@ -215,9 +210,9 @@ class PermissionChecker
     }
 
     /**
-     * @param User $user
-     * @param ElementInterface $element
-     * @param array $details
+     * @param $user User\
+     * @param $element
+     * @param $details
      */
     protected static function getLanguagePermissions($user, $element, &$details)
     {

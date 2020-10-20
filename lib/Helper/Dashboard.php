@@ -82,8 +82,8 @@ class Dashboard
 
             if (empty($this->dashboards)) {
                 $perspectiveCfg = Config::getRuntimePerspective();
-                $dasboardCfg = $perspectiveCfg['dashboards'] ?? [];
-                $this->dashboards = $dasboardCfg['predefined'] ?? [];
+                $dasboardCfg = $perspectiveCfg['dashboards'] ? $perspectiveCfg['dashboards'] : [];
+                $this->dashboards = $dasboardCfg['predefined'] ? $dasboardCfg['predefined'] : [];
             }
         }
 
@@ -106,7 +106,7 @@ class Dashboard
     public function getDashboard($key = 'welcome')
     {
         $dashboards = $this->loadFile();
-        $dashboard = $dashboards[$key] ?? null;
+        $dashboard = $dashboards[$key];
 
         if ($dashboard) {
             $disabledPortlets = array_keys($this->getDisabledPortlets());
@@ -129,8 +129,8 @@ class Dashboard
     }
 
     /**
-     * @param string $key
-     * @param array|null $configuration
+     * @param $key
+     * @param null $configuration
      */
     public function saveDashboard($key, $configuration = null)
     {
@@ -145,7 +145,7 @@ class Dashboard
     }
 
     /**
-     * @param string $key
+     * @param $key
      */
     public function deleteDashboard($key)
     {
@@ -160,8 +160,8 @@ class Dashboard
     public function getDisabledPortlets()
     {
         $perspectiveCfg = Config::getRuntimePerspective($this->user);
-        $dasboardCfg = $perspectiveCfg['dashboards'] ?? [];
+        $dasboardCfg = $perspectiveCfg['dashboards'] ? $perspectiveCfg['dashboards'] : [];
 
-        return $dasboardCfg['disabledPortlets'] ?? [];
+        return isset($dasboardCfg['disabledPortlets']) ? $dasboardCfg['disabledPortlets'] : [];
     }
 }

@@ -19,18 +19,16 @@ namespace Pimcore\DataObject\GridColumnConfig\Operator;
 
 class Arithmetic extends AbstractOperator
 {
-    /** @var bool */
     private $skipNull;
 
-    /** @var string */
     private $operator;
 
     public function __construct(\stdClass $config, $context = null)
     {
         parent::__construct($config, $context);
 
-        $this->skipNull = $config->skipNull ?? false;
-        $this->operator = $config->operator ?? '';
+        $this->skipNull = $config->skipNull;
+        $this->operator = $config->operator;
     }
 
     public function getLabeledValue($element)
@@ -102,7 +100,7 @@ class Arithmetic extends AbstractOperator
     }
 
     /**
-     * @return bool
+     * @return mixed
      */
     public function getSkipNull()
     {
@@ -110,7 +108,7 @@ class Arithmetic extends AbstractOperator
     }
 
     /**
-     * @param bool $skipNull
+     * @param mixed $skipNull
      */
     public function setSkipNull($skipNull)
     {
@@ -118,7 +116,7 @@ class Arithmetic extends AbstractOperator
     }
 
     /**
-     * @return string
+     * @return mixed
      */
     public function getOperator()
     {
@@ -126,7 +124,7 @@ class Arithmetic extends AbstractOperator
     }
 
     /**
-     * @param string $operator
+     * @param mixed $operator
      */
     public function setOperator($operator)
     {

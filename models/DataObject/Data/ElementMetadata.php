@@ -27,7 +27,6 @@ use Pimcore\Model\DataObject;
 class ElementMetadata extends Model\AbstractModel implements DataObject\OwnerAwareFieldInterface
 {
     use DataObject\Traits\OwnerAwareFieldTrait;
-
     /**
      * @var string
      */
@@ -54,7 +53,7 @@ class ElementMetadata extends Model\AbstractModel implements DataObject\OwnerAwa
     protected $data = [];
 
     /**
-     * @param string $fieldname
+     * @param $fieldname
      * @param array $columns
      * @param null $element
      *
@@ -79,8 +78,8 @@ class ElementMetadata extends Model\AbstractModel implements DataObject\OwnerAwa
     }
 
     /**
-     * @param string $name
-     * @param array $arguments
+     * @param $name
+     * @param $arguments
      *
      * @return mixed|void
      *
@@ -89,25 +88,19 @@ class ElementMetadata extends Model\AbstractModel implements DataObject\OwnerAwa
     public function __call($name, $arguments)
     {
         if (substr($name, 0, 3) == 'get') {
-            $key = substr($name, 3, strlen($name) - 3);
-            $idx = array_searchi($key, $this->columns);
+            $key = strtolower(substr($name, 3, strlen($name) - 3));
 
-            if ($idx !== false) {
-                $correctedKey = $this->columns[$idx];
-
-                return isset($this->data[$correctedKey]) ? $this->data[$correctedKey] : null;
+            if (in_array($key, $this->columns)) {
+                return $this->data[$key];
             }
 
             throw new \Exception("Requested data $key not available");
         }
 
         if (substr($name, 0, 3) == 'set') {
-            $key = substr($name, 3, strlen($name) - 3);
-            $idx = array_searchi($key, $this->columns);
-
-            if ($idx !== false) {
-                $correctedKey = $this->columns[$idx];
-                $this->data[$correctedKey] = $arguments[0];
+            $key = strtolower(substr($name, 3, strlen($name) - 3));
+            if (in_array($key, $this->columns)) {
+                $this->data[$key] = $arguments[0];
                 $this->markMeDirty();
             } else {
                 throw new \Exception("Requested data $key not available");
@@ -116,11 +109,11 @@ class ElementMetadata extends Model\AbstractModel implements DataObject\OwnerAwa
     }
 
     /**
-     * @param DataObject\Concrete $object
+     * @param $object
      * @param string $ownertype
-     * @param string $ownername
-     * @param string $position
-     * @param int $index
+     * @param $ownername
+     * @param $position
+     * @param $index
      */
     public function save($object, $ownertype = 'object', $ownername, $position, $index)
     {
@@ -131,15 +124,15 @@ class ElementMetadata extends Model\AbstractModel implements DataObject\OwnerAwa
 
     /**
      * @param DataObject\Concrete $source
-     * @param int $destinationId
-     * @param string $fieldname
-     * @param string $ownertype
-     * @param string $ownername
-     * @param string $position
-     * @param int $index
-     * @param string $destinationType
+     * @param $destinationId
+     * @param $fieldname
+     * @param $ownertype
+     * @param $ownername
+     * @param $position
+     * @param $index
+     * @param $destinationType
      *
-     * @return DataObject\Data\ElementMetadata|null
+     * @return mixed
      */
     public function load(DataObject\Concrete $source, $destinationId, $fieldname, $ownertype, $ownername, $position, $index, $destinationType)
     {
@@ -147,7 +140,7 @@ class ElementMetadata extends Model\AbstractModel implements DataObject\OwnerAwa
     }
 
     /**
-     * @param string $fieldname
+     * @param $fieldname
      *
      * @return $this
      */
@@ -178,7 +171,7 @@ class ElementMetadata extends Model\AbstractModel implements DataObject\OwnerAwa
         if (!$element) {
             $this->setElementTypeAndId(null, null);
 
-            return $this;
+            return;
         }
 
         $elementType = Model\Element\Service::getType($element);
@@ -189,7 +182,7 @@ class ElementMetadata extends Model\AbstractModel implements DataObject\OwnerAwa
     }
 
     /**
-     * @return Model\Element\AbstractElement|null
+     * @return Model\Element\ElementInterface|null
      */
     public function getElement()
     {
@@ -201,8 +194,6 @@ class ElementMetadata extends Model\AbstractModel implements DataObject\OwnerAwa
 
             return $element;
         }
-
-        return null;
     }
 
     /**
@@ -222,7 +213,7 @@ class ElementMetadata extends Model\AbstractModel implements DataObject\OwnerAwa
     }
 
     /**
-     * @param array $columns
+     * @param $columns
      *
      * @return $this
      */
@@ -260,7 +251,7 @@ class ElementMetadata extends Model\AbstractModel implements DataObject\OwnerAwa
     }
 
     /**
-     * @return string
+     * @return mixed
      */
     public function __toString()
     {

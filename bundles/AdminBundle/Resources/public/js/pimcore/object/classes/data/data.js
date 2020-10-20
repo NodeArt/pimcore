@@ -16,13 +16,13 @@ pimcore.object.classes.data.data = Class.create({
 
     invalidFieldNames: false,
     forbiddenNames: [
-        "id", "key", "path", "type", "index", "classname", "creationdate", "userowner", "value", "class", "list",
-        "fullpath", "childs", "values", "cachetag", "cachetags", "parent", "published", "valuefromparent",
-        "userpermissions", "dependencies", "modificationdate", "usermodification", "byid", "bypath", "data",
-        "versions", "properties", "permissions", "permissionsforuser", "childamount", "apipluginbroker", "resource",
-        "parentClass", "definition", "locked", "language", "omitmandatorycheck", "idpath", "object", "fieldname",
-        "property", "localizedfields", "parentid", "children", "scheduledtasks"
-    ],
+                "id","key","path","type","index","classname","creationdate","userowner","value","class","list",
+                "fullpath","childs","values","cachetag","cachetags","parent","published","valuefromparent",
+                "userpermissions","dependencies","modificationdate","usermodification","byid","bypath","data",
+                "versions","properties","permissions","permissionsforuser","childamount","apipluginbroker","resource",
+                "parentClass","definition","locked","language","omitmandatorycheck", "idpath", "object", "fieldname",
+                "property","localizedfields","parentId", "children"
+            ],
 
     /**
      * define where this datatype is allowed
@@ -53,8 +53,8 @@ pimcore.object.classes.data.data = Class.create({
         }
 
         // per default all settings are available
-        this.availableSettingsFields = ["name", "title", "tooltip", "mandatory", "noteditable", "index", "invisible",
-            "visibleGridView", "visibleSearch", "style"];
+        this.availableSettingsFields = ["name","title","tooltip","mandatory","noteditable","index", "unique", "invisible",
+                                        "visibleGridView","visibleSearch", "style"];
     },
 
     getGroup: function () {
@@ -79,12 +79,25 @@ pimcore.object.classes.data.data = Class.create({
             }
         });
 
-        this.indexCheckbox = new Ext.form.field.Checkbox({
+        var indexCheckbox = new Ext.form.field.Checkbox({
             fieldLabel: t("index"),
             name: "index",
             itemId: "index",
             checked: this.datax.index,
             disabled: !in_array("index",this.availableSettingsFields),
+            hidden: true
+        });
+
+        var uniqueCheckbox = new Ext.form.field.Checkbox({
+            fieldLabel: t("unique"),
+            name: "unique",
+            itemId: "unique",
+            checked: this.datax.unique,
+            disabled: !in_array("unique",this.availableSettingsFields),
+            autoEl: {
+                tag: 'div',
+                'data-qtip': t('unique_qtip')
+            },
             hidden: true
         });
 
@@ -148,42 +161,25 @@ pimcore.object.classes.data.data = Class.create({
                 disabled: !in_array("tooltip",this.availableSettingsFields)
             },
             this.mandatoryCheckbox,
-            this.indexCheckbox,
+            indexCheckbox,
+            uniqueCheckbox,
+            {
+                xtype: "checkbox",
+                fieldLabel: t("not_editable"),
+                name: "noteditable",
+                itemId: "noteditable",
+                checked: this.datax.noteditable,
+                disabled: !in_array("noteditable",this.availableSettingsFields)
+            },
+            {
+                xtype: "checkbox",
+                fieldLabel: t("invisible"),
+                name: "invisible",
+                itemId: "invisible",
+                checked: this.datax.invisible,
+                disabled: !in_array("invisible",this.availableSettingsFields)
+            }
         ];
-
-        if (this.supportsUnique()) {
-            this.uniqueCheckbox = new Ext.form.field.Checkbox({
-                fieldLabel: t("unique"),
-                name: "unique",
-                itemId: "unique",
-                checked: this.datax.unique,
-                autoEl: {
-                    tag: 'div',
-                    'data-qtip': t('unique_qtip')
-                },
-                disabled: this.isInCustomLayoutEditor()
-            });
-            standardSettings.push(this.uniqueCheckbox);
-        }
-
-        standardSettings.push({
-            xtype: "checkbox",
-            fieldLabel: t("not_editable"),
-            name: "noteditable",
-            itemId: "noteditable",
-            checked: this.datax.noteditable,
-            disabled: !in_array("noteditable", this.availableSettingsFields)
-        });
-
-        standardSettings.push({
-            xtype: "checkbox",
-            fieldLabel: t("invisible"),
-            name: "invisible",
-            itemId: "invisible",
-            checked: this.datax.invisible,
-            disabled: !in_array("invisible", this.availableSettingsFields)
-        });
-
 
         if (!this.inCustomLayoutEditor) {
             standardSettings.push(            {
@@ -204,7 +200,10 @@ pimcore.object.classes.data.data = Class.create({
                 disabled: !in_array("visibleSearch",this.availableSettingsFields)
             });
 
-            this.indexCheckbox.setHidden(false);
+            indexCheckbox.setHidden(false);
+            if (in_array("unique",this.availableSettingsFields)) {
+                uniqueCheckbox.setHidden(false);
+            }
         }
 
         var layoutSettings = [
@@ -295,20 +294,19 @@ pimcore.object.classes.data.data = Class.create({
 
     isValid: function () {
 
+
         var data = this.getData();
         data.name = trim(data.name);
+        var regresult = data.name.match(/[a-zA-Z][a-zA-Z0-9_]*/);
 
-        var isValidName = /^[a-zA-Z][a-zA-Z0-9_]*$/;
-        var isForbiddenName = in_arrayi(data.name, this.forbiddenNames);
-
-        if (data.name.length > 1 && isValidName.test(data.name) && !isForbiddenName) {
+        if (data.name.length > 1 && regresult == data.name
+                            && in_array(data.name.toLowerCase(), this.forbiddenNames) == false) {
             return true;
         }
 
-        if (isForbiddenName) {
+        if(in_array(data.name.toLowerCase(), this.forbiddenNames)==true){
             this.invalidFieldNames = true;
         }
-
         return false;
     },
 
@@ -340,6 +338,10 @@ pimcore.object.classes.data.data = Class.create({
         return this.inCustomLayoutEditor;
     },
 
+    lazyLoadingNotPossible: function() {
+        return false;
+    },
+
     setInClassificationStoreEditor: function(inClassificationStoreEditor) {
         this.inClassificationStoreEditor = inClassificationStoreEditor;
     },
@@ -356,11 +358,7 @@ pimcore.object.classes.data.data = Class.create({
         this.context = context;
     },
 
-    getContext: function () {
+    getContext: function() {
         return this.context;
-    },
-
-    supportsUnique: function () {
-        return false;
     }
 });

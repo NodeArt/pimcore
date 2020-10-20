@@ -19,7 +19,6 @@ namespace Pimcore\Model;
 
 /**
  * @method Dependency\Dao getDao()
- * @method void save()
  */
 class Dependency extends AbstractModel
 {
@@ -70,15 +69,12 @@ class Dependency extends AbstractModel
     {
         $this->requires[] = [
             'type' => $type,
-            'id' => $id,
+            'id' => $id
         ];
     }
 
     /**
-     * Used when element gets deleted. Removes entries (by source = element) and
-     * schedules a sanity check for the affected targets.
-     *
-     * @param Element\ElementInterface $element
+     * @param  Element\ELementInterface $element
      */
     public function cleanAllForElement($element)
     {
@@ -86,8 +82,7 @@ class Dependency extends AbstractModel
     }
 
     /**
-     * Cleanup the dependencies for current source id.
-     * Can be used for updating the dependencies.
+     * Cleanup the dependencies for current source id
      */
     public function clean()
     {
@@ -104,8 +99,8 @@ class Dependency extends AbstractModel
     }
 
     /**
-     * @param int|null $offset
-     * @param int|null $limit
+     * @param null $offset
+     * @param null $limit
      *
      * @return array
      */
@@ -115,27 +110,14 @@ class Dependency extends AbstractModel
     }
 
     /**
-     * @param int|null $offset
-     * @param int|null $limit
+     * @param null $offset
+     * @param null $limit
      *
      * @return array
      */
     public function getRequiredBy($offset = null, $limit = null)
     {
         return $this->getDao()->getRequiredBy($offset, $limit);
-    }
-
-    /**
-     * @param string|null $orderBy
-     * @param string|null $orderDirection
-     * @param int|null $offset
-     * @param int|null $limit
-     *
-     * @return array
-     */
-    public function getRequiredByWithPath($offset = null, $limit = null, $orderBy = null, $orderDirection = null)
-    {
-        return $this->getDao()->getRequiredByWithPath($offset, $limit, $orderBy, $orderDirection);
     }
 
     /**

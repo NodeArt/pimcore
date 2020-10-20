@@ -22,8 +22,8 @@ class MultiSelectFromMultiSelect extends \Pimcore\Bundle\EcommerceFrameworkBundl
 {
     /**
      * @param AbstractFilterDefinitionType $filterDefinition
-     * @param ProductListInterface $productList
-     * @param array $currentFilter
+     * @param ProductListInterface                  $productList
+     * @param                                                   $currentFilter
      *
      * @return string
      */
@@ -37,7 +37,7 @@ class MultiSelectFromMultiSelect extends \Pimcore\Bundle\EcommerceFrameworkBundl
             $explode = explode(WorkerInterface::MULTISELECT_DELIMITER, $v['value']);
             foreach ($explode as $e) {
                 if (!empty($e)) {
-                    if (!empty($values[$e])) {
+                    if ($values[$e]) {
                         $values[$e]['count'] += $v['count'];
                     } else {
                         $values[$e] = ['value' => $e, 'count' => $v['count']];
@@ -53,16 +53,16 @@ class MultiSelectFromMultiSelect extends \Pimcore\Bundle\EcommerceFrameworkBundl
             'values' => array_values($values),
             'fieldname' => $field,
             'metaData' => $filterDefinition->getMetaData(),
-            'resultCount' => $productList->count(),
+            'resultCount' => $productList->count()
         ]);
     }
 
     /**
      * @param AbstractFilterDefinitionType $filterDefinition
-     * @param ProductListInterface $productList
-     * @param array $currentFilter
-     * @param array $params
-     * @param bool $isPrecondition
+     * @param ProductListInterface                  $productList
+     * @param array                                             $currentFilter
+     * @param                                                   $params
+     * @param bool                                              $isPrecondition
      *
      * @return string[]
      */
@@ -71,10 +71,9 @@ class MultiSelectFromMultiSelect extends \Pimcore\Bundle\EcommerceFrameworkBundl
         $field = $this->getField($filterDefinition);
         $preSelect = $this->getPreSelect($filterDefinition);
 
-        $value = $params[$field] ?? null;
-        $isReload = $params['is_reload'] ?? null;
+        $value = $params[$field];
 
-        if (empty($value) && !$isReload) {
+        if (empty($value) && !$params['is_reload']) {
             if (is_array($preSelect)) {
                 $value = $preSelect;
             } else {

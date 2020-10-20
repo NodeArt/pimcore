@@ -1,5 +1,5 @@
 <?php
-/** @var \Pimcore\Templating\PhpEngine $view */
+/** @var $view \Pimcore\Templating\PhpEngine */
 $view->extend('PimcoreAdminBundle:Admin/Login:layout.html.php');
 
 $this->get("translate")->setDomain("admin");
@@ -20,7 +20,7 @@ $this->get("translate")->setDomain("admin");
     </div>
 
     <form method="post" action="<?= $view->router()->path('pimcore_admin_login_lostpassword') ?>">
-        <input type="text" name="username" autocomplete="username" placeholder="<?= $this->translate("Username"); ?>" required autofocus>
+        <input type="text" name="username" placeholder="<?= $this->translate("Username"); ?>" required autofocus>
         <input type="hidden" name="csrfToken" value="<?= $this->csrfToken ?>">
 
         <button type="submit" name="submit"><?= $this->translate("Submit"); ?></button>
@@ -28,7 +28,3 @@ $this->get("translate")->setDomain("admin");
 <?php } ?>
 
 <a href="<?= $view->router()->path('pimcore_admin_login') ?>"><?= $this->translate("Back to Login"); ?></a>
-
-<?= $this->breachAttackRandomContent(); ?>
-
-

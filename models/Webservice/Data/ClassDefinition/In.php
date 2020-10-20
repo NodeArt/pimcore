@@ -19,9 +19,6 @@ namespace Pimcore\Model\Webservice\Data\ClassDefinition;
 
 use Pimcore\Model;
 
-/**
- * @deprecated
- */
 class In extends Model\Webservice\Data\ClassDefinition
 {
 }

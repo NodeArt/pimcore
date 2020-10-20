@@ -78,8 +78,7 @@ pimcore.report.piwik.settings = Class.create({
                             xtype: "displayfield",
                             width: 670,
                             hideLabel: true,
-                            value: t("piwik_api_client_options_description", null,
-                                { guzzleLink: 'http://docs.guzzlephp.org/en/stable/request-options.html'}),
+                            value: t("piwik_api_client_options_description"),
                             cls: "pimcore_extra_label"
                         }
                     ]
@@ -137,8 +136,7 @@ pimcore.report.piwik.settings = Class.create({
                             xtype: "displayfield",
                             width: 670,
                             hideLabel: true,
-                            value: t("piwik_iframe_integration_info", null ,
-                                { matomoLink: 'https://matomo.org/faq/troubleshooting/#faq_147'}),
+                            value: t("piwik_iframe_integration_info"),
                             cls: "pimcore_extra_label"
                         }, {
                             xtype: "textfield",
@@ -201,6 +199,8 @@ pimcore.report.piwik.settings = Class.create({
     },
 
     getConfiguration: function (key, name, id) {
+        var that = this;
+
         return {
             xtype: "fieldset",
             defaults: {
@@ -358,14 +358,14 @@ pimcore.report.piwik.settings = Class.create({
         buttonStateHandler(); // trigger initial state
 
         createButton.setHandler(createHandler(
-            Routing.generate('pimcore_admin_reports_piwik_apisiteupdate', {configKey: key}),
+            '/admin/reports/piwik/api/site/' + key,
             'POST',
             t("piwik_api_create_site_success"),
             t("piwik_api_create_site_failure")
         ));
 
         updateButton.setHandler(createHandler(
-            Routing.generate('pimcore_admin_reports_piwik_apisiteupdate', {configKey: key}),
+            '/admin/reports/piwik/api/site/' + key,
             'PUT',
             t("piwik_api_update_site_success"),
             t("piwik_api_update_site_failure")

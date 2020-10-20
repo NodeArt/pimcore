@@ -19,9 +19,6 @@ namespace Pimcore\Model\Webservice\Data\Document\Email;
 
 use Pimcore\Model;
 
-/**
- * @deprecated
- */
 class In extends Model\Webservice\Data\Document\Snippet\Out
 {
 }

@@ -18,7 +18,6 @@ use Pimcore\Bundle\EcommerceFrameworkBundle\CartManager\CartInterface;
 use Pimcore\Bundle\EcommerceFrameworkBundle\CartManager\CartItemInterface;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Factory;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Type\Decimal;
-use Pimcore\Model\DataObject\AbstractObject;
 use Pimcore\Model\DataObject\Folder;
 use Pimcore\Model\DataObject\Service;
 
@@ -125,14 +124,15 @@ class DefaultService implements ServiceInterface
     }
 
     /**
-     * @param string $tempOfferNumber
-     *
      * @return AbstractOffer
      */
     protected function getNewOfferObject($tempOfferNumber)
     {
-        /** @var AbstractOffer $offer */
         $offer = new $this->offerClass();
+
+        /**
+         * @var $offer AbstractOffer
+         */
         $offer->setParent($this->getParentFolder());
         $offer->setCreationDate(time());
         $offer->setKey($tempOfferNumber);
@@ -152,7 +152,7 @@ class DefaultService implements ServiceInterface
 
     /**
      * @param CartItemInterface $item
-     * @param AbstractObject $parent
+     * @param $parent
      *
      * @return AbstractOfferItem
      */

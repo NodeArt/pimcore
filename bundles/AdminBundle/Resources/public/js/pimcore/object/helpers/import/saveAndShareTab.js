@@ -23,6 +23,8 @@ pimcore.object.helpers.import.saveAndShareTab = Class.create({
 
     getPanel: function () {
 
+        var data = this.config;
+
         var user = pimcore.globalmanager.get("user");
 
         if (!this.saveAndShareForm) {
@@ -55,7 +57,7 @@ pimcore.object.helpers.import.saveAndShareTab = Class.create({
                 autoLoad: true,
                 proxy: {
                     type: 'ajax',
-                    url: Routing.generate('pimcore_admin_user_getusersforsharing'),
+                    url: '/admin/user/get-users-for-sharing',
                     reader: {
                         rootProperty: 'data',
                         idProperty: 'id'
@@ -69,7 +71,7 @@ pimcore.object.helpers.import.saveAndShareTab = Class.create({
                 autoLoad: true,
                 proxy: {
                     type: 'ajax',
-                    url: Routing.generate('pimcore_admin_user_getrolesforsharing'),
+                    url: '/admin/user/get-roles-for-sharing',
                     reader: {
                         rootProperty: 'data',
                         idProperty: 'id'

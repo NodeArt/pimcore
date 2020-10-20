@@ -17,9 +17,6 @@ namespace Pimcore\Bundle\EcommerceFrameworkBundle\Controller;
 use Pimcore\Bundle\AdminBundle\Controller\AdminController;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Factory;
 use Pimcore\Bundle\EcommerceFrameworkBundle\IndexService\ProductList\ProductListInterface;
-use Pimcore\Event\Ecommerce\AdminEvents;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\EventDispatcher\GenericEvent;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -31,7 +28,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class IndexController extends AdminController
 {
     /**
-     * @Route("/get-filter-groups", name="pimcore_ecommerceframework_index_getfiltergroups", methods={"GET"})
+     * @Route("/get-filter-groups", methods={"GET"})
      *
      * @return \Pimcore\Bundle\AdminBundle\HttpFoundation\JsonResponse
      */
@@ -59,9 +56,11 @@ class IndexController extends AdminController
     }
 
     /**
-     * @Route("/get-values-for-filter-field", name="pimcore_ecommerceframework_index_getvaluesforfilterfield", methods={"GET"})
+     * @Route("/get-values-for-filter-field", methods={"GET"})
+     *
+     * @return \Pimcore\Bundle\AdminBundle\HttpFoundation\JsonResponse
      */
-    public function getValuesForFilterFieldAction(Request $request, EventDispatcherInterface $eventDispatcher)
+    public function getValuesForFilterFieldAction(Request $request)
     {
         try {
             $data = [];
@@ -93,10 +92,6 @@ class IndexController extends AdminController
                 $data = $helper->getGroupByValuesForFilterGroup($columnGroup, $productList, $request->get('field'));
             }
 
-            $event = new GenericEvent(null, ['data' => $data, 'field' => $request->get('field')]);
-            $eventDispatcher->dispatch(AdminEvents::GET_VALUES_FOR_FILTER_FIELD_PRE_SEND_DATA, $event);
-            $data = $event->getArgument('data');
-
             return $this->adminJson(['data' => array_values($data)]);
         } catch (\Exception $e) {
             return $this->adminJson(['message' => $e->getMessage()]);
@@ -104,7 +99,7 @@ class IndexController extends AdminController
     }
 
     /**
-     * @Route("/get-fields", name="pimcore_ecommerceframework_index_getfields", methods={"GET"})
+     * @Route("/get-fields", methods={"GET"})
      *
      * @param Request $request
      *
@@ -146,7 +141,7 @@ class IndexController extends AdminController
         if ($request->get('specific_price_field') == 'true') {
             $fields[ProductListInterface::ORDERKEY_PRICE] = [
                 'key' => ProductListInterface::ORDERKEY_PRICE,
-                'name' => $this->trans(ProductListInterface::ORDERKEY_PRICE),
+                'name' => $this->trans(ProductListInterface::ORDERKEY_PRICE)
             ];
         }
 
@@ -156,7 +151,7 @@ class IndexController extends AdminController
     }
 
     /**
-     * @Route("/get-all-tenants", name="pimcore_ecommerceframework_index_getalltenants", methods={"GET"})
+     * @Route("/get-all-tenants", methods={"GET"})
      *
      * @return \Pimcore\Bundle\AdminBundle\HttpFoundation\JsonResponse
      */

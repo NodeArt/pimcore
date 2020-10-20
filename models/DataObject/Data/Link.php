@@ -38,12 +38,12 @@ class Link implements OwnerAwareFieldInterface
     protected $text;
 
     /**
-     * @var string|null
+     * @var string
      */
     protected $internalType;
 
     /**
-     * @var int
+     * @var string
      */
     protected $internal;
 
@@ -111,7 +111,7 @@ class Link implements OwnerAwareFieldInterface
     }
 
     /**
-     * @param string $text
+     * @param $text
      *
      * @return $this
      */
@@ -132,7 +132,7 @@ class Link implements OwnerAwareFieldInterface
     }
 
     /**
-     * @param string $internalType
+     * @param $internalType
      *
      * @return $this
      */
@@ -145,7 +145,7 @@ class Link implements OwnerAwareFieldInterface
     }
 
     /**
-     * @return int
+     * @return string
      */
     public function getInternal()
     {
@@ -153,7 +153,7 @@ class Link implements OwnerAwareFieldInterface
     }
 
     /**
-     * @param int $internal
+     * @param $internal
      *
      * @return $this
      */
@@ -174,7 +174,7 @@ class Link implements OwnerAwareFieldInterface
     }
 
     /**
-     * @param string $direct
+     * @param $direct
      *
      * @return $this
      */
@@ -195,7 +195,7 @@ class Link implements OwnerAwareFieldInterface
     }
 
     /**
-     * @param string $linktype
+     * @param $linktype
      *
      * @return $this
      */
@@ -216,7 +216,7 @@ class Link implements OwnerAwareFieldInterface
     }
 
     /**
-     * @param string $target
+     * @param $target
      *
      * @return $this
      */
@@ -237,7 +237,7 @@ class Link implements OwnerAwareFieldInterface
     }
 
     /**
-     * @param string $parameters
+     * @param $parameters
      *
      * @return $this
      */
@@ -258,7 +258,7 @@ class Link implements OwnerAwareFieldInterface
     }
 
     /**
-     * @param string $anchor
+     * @param $anchor
      *
      * @return $this
      */
@@ -279,7 +279,7 @@ class Link implements OwnerAwareFieldInterface
     }
 
     /**
-     * @param string $title
+     * @param $title
      *
      * @return $this
      */
@@ -300,7 +300,7 @@ class Link implements OwnerAwareFieldInterface
     }
 
     /**
-     * @param string $accesskey
+     * @param $accesskey
      *
      * @return $this
      */
@@ -321,7 +321,7 @@ class Link implements OwnerAwareFieldInterface
     }
 
     /**
-     * @param string $rel
+     * @param $rel
      *
      * @return $this
      */
@@ -342,7 +342,7 @@ class Link implements OwnerAwareFieldInterface
     }
 
     /**
-     * @param string $tabindex
+     * @param $tabindex
      *
      * @return $this
      */
@@ -389,14 +389,13 @@ class Link implements OwnerAwareFieldInterface
     }
 
     /**
-     * @param string $path
+     * @param $path
      *
      * @return $this
      */
     public function setPath($path)
     {
         if (!empty($path)) {
-            $matchedElement = null;
             if ($this->getLinktype() == 'internal' && $this->getInternalType()) {
                 $matchedElement = Service::getElementByPath($this->getInternalType(), $path);
                 if ($matchedElement) {
@@ -462,7 +461,7 @@ class Link implements OwnerAwareFieldInterface
             } elseif ($this->getObject() instanceof Concrete) {
                 if ($linkGenerator = $this->getObject()->getClass()->getLinkGenerator()) {
                     $path = $linkGenerator->generate($this->getObject(), [
-                        'context' => $this,
+                        'context' => $this
                     ]);
                 }
             }
@@ -499,7 +498,7 @@ class Link implements OwnerAwareFieldInterface
     }
 
     /**
-     * @param ElementInterface $object
+     * @param $object
      *
      * @return $this
      */

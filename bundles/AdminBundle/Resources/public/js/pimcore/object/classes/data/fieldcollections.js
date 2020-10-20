@@ -55,11 +55,11 @@ pimcore.object.classes.data.fieldcollections = Class.create(pimcore.object.class
 
     getLayout: function ($super) {
         $super();
-
+        
         this.store = new Ext.data.Store({
             proxy: {
                 type: 'ajax',
-                url: Routing.generate('pimcore_admin_dataobject_class_fieldcollectionlist'),
+                url: "/admin/class/fieldcollection-list",
                 reader: {
                     type: 'json',
                     rootProperty: 'fieldcollections',
@@ -73,12 +73,12 @@ pimcore.object.classes.data.fieldcollections = Class.create(pimcore.object.class
             }
         });
         this.store.load();
-
+        
         this.specificPanel.removeAll();
 
         return this.layout;
     },
-
+    
     initSelection: function () {
         this.specificPanel.add([
             new Ext.ux.form.MultiSelect({
@@ -158,10 +158,7 @@ pimcore.object.classes.data.fieldcollections = Class.create(pimcore.object.class
                     lazyLoading: source.datax.lazyLoading,
                     maxItems: source.datax.maxItems,
                     disallowAddRemove: source.datax.disallowAddRemove,
-                    disallowReorder: source.datax.disallowReorder,
-                    collapsible: source.datax.collapsible,
-                    collapsed: source.datax.collapsed,
-                    border: source.datax.border
+                    disallowReorder: source.datax.disallowReorder
                 });
         }
     }

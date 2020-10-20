@@ -186,6 +186,7 @@ pimcore.object.classes.data.multiselect = Class.create(pimcore.object.classes.da
                                     var rec = grid.getStore().getAt(rowIndex);
                                     grid.getStore().removeAt(rowIndex);
                                     grid.getStore().insert(--rowIndex, [rec]);
+                                    var sm = valueGrid.getSelectionModel();
                                     selectionModel.select(rowIndex);
                                 }
                             }.bind(this)
@@ -205,6 +206,7 @@ pimcore.object.classes.data.multiselect = Class.create(pimcore.object.classes.da
                                     var rec = grid.getStore().getAt(rowIndex);
                                     grid.getStore().removeAt(rowIndex);
                                     grid.getStore().insert(++rowIndex, [rec]);
+                                    var sm = valueGrid.getSelectionModel();
                                     selectionModel.select(rowIndex);
                                 }
                             }.bind(this)
@@ -318,9 +320,7 @@ pimcore.object.classes.data.multiselect = Class.create(pimcore.object.classes.da
                     width: source.datax.width,
                     height: source.datax.height,
                     maxItems: source.datax.maxItems,
-                    renderType: source.datax.renderType,
-                    optionsProviderClass: source.datax.optionsProviderClass,
-                    optionsProviderData: source.datax.optionsProviderData
+                    renderType: source.datax.renderType
                 });
         }
     },

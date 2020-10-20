@@ -161,7 +161,5 @@ class User implements UserInterface, EquatableInterface, GoogleTwoFactorInterfac
 
             return $secret;
         }
-
-        return '';
     }
 }

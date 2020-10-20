@@ -36,7 +36,7 @@ class Serialize
     /**
      * @static
      *
-     * @param string $data
+     * @param $data
      *
      * @return mixed
      */
@@ -63,7 +63,7 @@ class Serialize
      * this is a special json encoder that avoids recursion errors
      * especially for pimcore models that contain massive self referencing objects
      *
-     * @param mixed $data
+     * @param $data
      *
      * @return string
      */
@@ -74,7 +74,7 @@ class Serialize
     }
 
     /**
-     * @param mixed $element
+     * @param $element
      *
      * @return mixed
      */

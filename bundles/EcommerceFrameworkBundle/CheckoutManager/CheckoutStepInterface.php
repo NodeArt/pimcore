@@ -40,7 +40,7 @@ interface CheckoutStepInterface
     /**
      * Sets delivered data and commits step
      *
-     * @param mixed $data
+     * @param $data
      *
      * @return bool
      */

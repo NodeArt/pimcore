@@ -6,7 +6,6 @@ use Pimcore\Bundle\GeneratorBundle\Generator\Generator;
 use Symfony\Component\HttpKernel\KernelInterface;
 
 /**
- * @deprecated
  * Changes the PHP code of a Kernel.
  *
  * The following class is copied from \Sensio\Bundle\GeneratorBundle\Manipulator\KernelManipulator
@@ -108,8 +107,6 @@ class KernelManipulator extends Manipulator
                 return true;
             }
         }
-
-        return false;
     }
 
     public function getFilename()

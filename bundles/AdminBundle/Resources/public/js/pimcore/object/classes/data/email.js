@@ -96,18 +96,5 @@ pimcore.object.classes.data.email = Class.create(pimcore.object.classes.data.dat
         }
 
         return specificItems;
-    },
-    
-    applySpecialData: function (source) {
-        if (source.datax) {
-            if (!this.datax) {
-                this.datax = {};
-            }
-            Ext.apply(this.datax,
-                {
-                    width: source.datax.width,
-                    columnLength: source.datax.columnLength
-                });
-        }
     }
 });

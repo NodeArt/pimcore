@@ -16,8 +16,8 @@ namespace Pimcore\Document\Adapter;
 
 use Pimcore\File;
 use Pimcore\Logger;
+use Pimcore\Model;
 use Pimcore\Tool\Console;
-use Symfony\Component\Lock\Factory as LockFactory;
 
 class LibreOffice extends Ghostscript
 {
@@ -70,7 +70,7 @@ class LibreOffice extends Ghostscript
     }
 
     /**
-     * @param string $path
+     * @param $path
      *
      * @return $this
      *
@@ -108,9 +108,9 @@ class LibreOffice extends Ghostscript
     }
 
     /**
-     * @param string|null $path
+     * @param null $path
      *
-     * @return null|string
+     * @return null|string|void
      *
      * @throws \Exception
      */
@@ -139,16 +139,17 @@ class LibreOffice extends Ghostscript
             File::mkdir(dirname($pdfFile));
         }
 
-        $lock = \Pimcore::getContainer()->get(LockFactory::class)->createLock('soffice');
+        $lockKey = 'soffice';
+
         if (!file_exists($pdfFile)) {
 
             // a list of all available filters is here:
             // http://cgit.freedesktop.org/libreoffice/core/tree/filter/source/config/fragments/filters
             $cmd = self::getLibreOfficeCli() . ' --headless --nologo --nofirststartwizard --norestore --convert-to pdf:writer_web_pdf_Export --outdir ' . escapeshellarg(PIMCORE_SYSTEM_TEMP_DIRECTORY) . ' ' . escapeshellarg($path);
 
-            $lock->acquire(true);
+            Model\Tool\Lock::acquire($lockKey); // avoid parallel conversions
             $out = Console::exec($cmd, PIMCORE_LOG_DIRECTORY . '/libreoffice-pdf-convert.log', 240);
-            $lock->release();
+            Model\Tool\Lock::release($lockKey);
 
             Logger::debug('LibreOffice Output was: ' . $out);
 
@@ -169,10 +170,10 @@ class LibreOffice extends Ghostscript
     }
 
     /**
-     * @param int|null $page
-     * @param string|null $path
+     * @param null $page
+     * @param null $path
      *
-     * @return string
+     * @return bool|string
      *
      * @throws \Exception
      */
@@ -198,7 +199,7 @@ class LibreOffice extends Ghostscript
 
                 return $text;
             } else {
-                $message = "Couldn't convert document to Text: " . $path . " with the command: '" . $cmd . "' - now trying to get the text out of the PDF with ghostscript...";
+                $message = "Couldn't convert document to PDF: " . $path . " with the command: '" . $cmd . "' - now trying to get the text out of the PDF ...";
                 Logger::error($message);
 
                 return parent::getText(null, $this->getPdf($path));

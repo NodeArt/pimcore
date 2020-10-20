@@ -50,23 +50,16 @@ class SitesManager
      */
     private $translator;
 
-    /**
-     * @var Config
-     */
-    private $pimcoreConfig;
-
     public function __construct(
         ConfigProvider $configProvider,
         ApiClient $apiClient,
         ReportConfigWriter $configWriter,
-        TranslatorInterface $translator,
-        PimcoreConfig $pimcoreConfig
+        TranslatorInterface $translator
     ) {
         $this->config = $configProvider->getConfig();
         $this->apiClient = $apiClient;
         $this->configWriter = $configWriter;
         $this->translator = $translator;
-        $this->pimcoreConfig = $pimcoreConfig;
     }
 
     public function addSite(SiteId $siteId, array $params = []): int
@@ -82,11 +75,11 @@ class SitesManager
         $params = array_merge($this->buildParameters([
             'method' => 'SitesManager.addSite',
             'siteName' => $siteId->getTitle($this->translator),
-            'urls' => $this->buildSiteUrls($siteId),
+            'urls' => $this->buildSiteUrls($siteId)
         ]), $params);
 
         $response = $this->apiClient->request('POST', [
-            'query' => $params,
+            'query' => $params
         ]);
 
         $piwikSiteId = $response['value'] ?? null;
@@ -121,11 +114,11 @@ class SitesManager
         $params = array_merge($this->buildParameters([
             'method' => 'SitesManager.updateSite',
             'idSite' => $piwikSiteId,
-            'urls' => $this->buildSiteUrls($siteId, $currentUrls),
+            'urls' => $this->buildSiteUrls($siteId, $currentUrls)
         ]), $params);
 
         $response = $this->apiClient->request('POST', [
-            'query' => $params,
+            'query' => $params
         ]);
 
         if ('success' === $response['result'] && 'ok' === $response['message']) {
@@ -139,7 +132,7 @@ class SitesManager
     {
         $params = array_merge($this->buildParameters([
             'method' => 'SitesManager.getSiteFromId',
-            'idSite' => $piwikSiteId,
+            'idSite' => $piwikSiteId
         ]), $params);
 
         $response = $this->apiClient->get($params);
@@ -158,7 +151,7 @@ class SitesManager
     {
         $params = array_merge($this->buildParameters([
             'method' => 'SitesManager.getSiteUrlsFromId',
-            'idSite' => $piwikSiteId,
+            'idSite' => $piwikSiteId
         ]), $params);
 
         return $this->apiClient->get($params);
@@ -187,8 +180,11 @@ class SitesManager
                 }
             }
         } elseif (SiteId::CONFIG_KEY_MAIN_DOMAIN === $siteId->getConfigKey()) {
-            if (!empty($this->pimcoreConfig['general']['domain'])) {
-                $siteUrls[] = $this->pimcoreConfig['general']['domain'];
+            $systemConfig = PimcoreConfig::getSystemConfig();
+
+            $mainDomain = $systemConfig->general->domain;
+            if (!empty($mainDomain)) {
+                $siteUrls[] = $mainDomain;
             }
         }
 
@@ -233,10 +229,10 @@ class SitesManager
             'piwik' => [
                 'sites' => [
                     $configKey => [
-                        'site_id' => $piwikSiteId,
-                    ],
-                ],
-            ],
+                        'site_id' => $piwikSiteId
+                    ]
+                ]
+            ]
         ]);
     }
 }

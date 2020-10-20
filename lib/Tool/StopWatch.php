@@ -30,7 +30,7 @@ class StopWatch
     protected static $laps = [];
 
     /**
-     * @param string $component
+     * @param $component string
      * @static
      */
     public static function start($component = 'default')
@@ -42,7 +42,7 @@ class StopWatch
     /**
      * @static
      *
-     * @param string $label
+     * @param $label
      * @param string $component
      */
     public static function lap($label, $component = 'default')

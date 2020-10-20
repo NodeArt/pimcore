@@ -23,7 +23,7 @@ use Pimcore\Model\DataObject\ClassDefinition\Data;
 use Pimcore\Model\Element;
 use Pimcore\Tool\Serialize;
 
-class ImageGallery extends Data implements ResourcePersistenceAwareInterface, QueryResourcePersistenceAwareInterface, TypeDeclarationSupportInterface, EqualComparisonInterface
+class ImageGallery extends Data implements ResourcePersistenceAwareInterface, QueryResourcePersistenceAwareInterface
 {
     use Extension\ColumnType;
     use Extension\QueryColumnType;
@@ -38,14 +38,14 @@ class ImageGallery extends Data implements ResourcePersistenceAwareInterface, Qu
     /**
      * Type for the column to query
      *
-     * @var array
+     * @var string
      */
     public $queryColumnType = ['images' => 'text', 'hotspots' => 'text'];
 
     /**
      * Type for the column
      *
-     * @var array
+     * @var string
      */
     public $columnType = ['images' => 'text', 'hotspots' => 'text'];
 
@@ -188,7 +188,7 @@ class ImageGallery extends Data implements ResourcePersistenceAwareInterface, Qu
      * @see ResourcePersistenceAwareInterface::getDataForResource
      *
      * @param DataObject\Data\ImageGallery $data
-     * @param null|DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return array
@@ -214,13 +214,13 @@ class ImageGallery extends Data implements ResourcePersistenceAwareInterface, Qu
 
             return [
                 $this->getName() . '__images' => $ids,
-                $this->getName() . '__hotspots' => Serialize::serialize($hotspots),
+                $this->getName() . '__hotspots' => Serialize::serialize($hotspots)
             ];
         }
 
         return [
             $this->getName() . '__images' => null,
-            $this->getName() . '__hotspots' => null,
+            $this->getName() . '__hotspots' => null
         ];
     }
 
@@ -228,7 +228,7 @@ class ImageGallery extends Data implements ResourcePersistenceAwareInterface, Qu
      * @see ResourcePersistenceAwareInterface::getDataFromResource
      *
      * @param array $data
-     * @param null|DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return DataObject\Data\ImageGallery
@@ -258,7 +258,7 @@ class ImageGallery extends Data implements ResourcePersistenceAwareInterface, Qu
 
             $itemData = [
                 $fd->getName() . '__image' => $imageId,
-                $fd->getName() . '__hotspots' => $hotspotData,
+                $fd->getName() . '__hotspots' => $hotspotData
             ];
 
             $itemResult = $fd->getDataFromResource($itemData, $object, $params);
@@ -268,7 +268,7 @@ class ImageGallery extends Data implements ResourcePersistenceAwareInterface, Qu
         $imageGallery = new DataObject\Data\ImageGallery($resultItems);
 
         if (isset($params['owner'])) {
-            $imageGallery->setOwner($params['owner'], $params['fieldname'], $params['language'] ?? null);
+            $imageGallery->setOwner($params['owner'], $params['fieldname'], $params['language']);
         }
 
         return $imageGallery;
@@ -284,7 +284,7 @@ class ImageGallery extends Data implements ResourcePersistenceAwareInterface, Qu
         $imageGallery = new DataObject\Data\ImageGallery(null);
 
         if (isset($params['owner'])) {
-            $imageGallery->setOwner($params['owner'], $params['fieldname'], $params['language'] ?? null);
+            $imageGallery->setOwner($params['owner'], $params['fieldname'], $params['language']);
         }
 
         return $imageGallery;
@@ -294,7 +294,7 @@ class ImageGallery extends Data implements ResourcePersistenceAwareInterface, Qu
      * @see QueryResourcePersistenceAwareInterface::getDataForQueryResource
      *
      * @param DataObject\Data\ImageGallery $data
-     * @param null|DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return array
@@ -308,7 +308,7 @@ class ImageGallery extends Data implements ResourcePersistenceAwareInterface, Qu
      * @see Data::getDataForEditmode
      *
      * @param DataObject\Data\ImageGallery $data
-     * @param null|DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return array
@@ -331,7 +331,7 @@ class ImageGallery extends Data implements ResourcePersistenceAwareInterface, Qu
      * @see Data::getDataFromEditmode
      *
      * @param DataObject\Data\ImageGallery $data
-     * @param null|DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return DataObject\Data\ImageGallery
@@ -355,7 +355,7 @@ class ImageGallery extends Data implements ResourcePersistenceAwareInterface, Qu
 
     /**
      * @param DataObject\Data\ImageGallery $data
-     * @param null|DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return DataObject\Data\ImageGallery
@@ -368,19 +368,17 @@ class ImageGallery extends Data implements ResourcePersistenceAwareInterface, Qu
     /**
      * @see Data::getVersionPreview
      *
-     * @param DataObject\Data\ImageGallery|null $data
-     * @param null|DataObject\Concrete $object
+     * @param Asset\Image $data
+     * @param null|DataObject\AbstractObject $object
      * @param mixed $params
      *
-     * @return string|null
+     * @return string
      */
     public function getVersionPreview($data, $object = null, $params = [])
     {
         if ($data instanceof DataObject\Data\ImageGallery) {
             return count($data->getItems()) . ' items';
         }
-
-        return null;
     }
 
     /**
@@ -388,7 +386,7 @@ class ImageGallery extends Data implements ResourcePersistenceAwareInterface, Qu
      *
      * @abstract
      *
-     * @param DataObject\Concrete $object
+     * @param DataObject\AbstractObject $object
      * @param array $params
      *
      * @return string
@@ -398,14 +396,14 @@ class ImageGallery extends Data implements ResourcePersistenceAwareInterface, Qu
         $data = $this->getDataFromObjectParam($object, $params);
         if ($data instanceof DataObject\Data\ImageGallery) {
             return base64_encode(Serialize::serialize($data));
+        } else {
+            return null;
         }
-
-        return '';
     }
 
     /**
      * @param string $importValue
-     * @param null|DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return mixed|null|DataObject\ClassDefinition\Data
@@ -422,7 +420,7 @@ class ImageGallery extends Data implements ResourcePersistenceAwareInterface, Qu
     }
 
     /**
-     * @param DataObject\Concrete|DataObject\Objectbrick\Data\AbstractData|DataObject\Fieldcollection\Data\AbstractData $object
+     * @param $object
      * @param mixed $params
      *
      * @return string
@@ -456,7 +454,7 @@ class ImageGallery extends Data implements ResourcePersistenceAwareInterface, Qu
     }
 
     /**
-     * @param DataObject\Data\ImageGallery|null $data
+     * @param mixed $data
      *
      * @return array
      */
@@ -478,10 +476,8 @@ class ImageGallery extends Data implements ResourcePersistenceAwareInterface, Qu
     /**
      * converts data to be exposed via webservices
      *
-     * @deprecated
-     *
-     * @param DataObject\Concrete $object
-     * @param array $params
+     * @param string $object
+     * @param mixed $params
      *
      * @return array
      */
@@ -509,12 +505,10 @@ class ImageGallery extends Data implements ResourcePersistenceAwareInterface, Qu
     }
 
     /**
-     * @deprecated
-     *
      * @param mixed $value
-     * @param DataObject\Concrete|null $object
+     * @param null $object
      * @param array $params
-     * @param Model\Webservice\IdMapperInterface|null $idMapper
+     * @param null $idMapper
      *
      * @return null|Asset|DataObject\Data\ImageGallery
      *
@@ -536,11 +530,11 @@ class ImageGallery extends Data implements ResourcePersistenceAwareInterface, Qu
     }
 
     /**
-     * @param DataObject\Data\ImageGallery|null $data
-     * @param DataObject\Concrete|null $object
-     * @param array $params
+     * @param $data
+     * @param null $object
+     * @param mixed $params
      *
-     * @return array
+     * @return null
      */
     public function getDataForGrid($data, $object = null, $params = [])
     {
@@ -579,7 +573,7 @@ class ImageGallery extends Data implements ResourcePersistenceAwareInterface, Qu
 
     /** Encode value for packing it into a single column.
      * @param mixed $value
-     * @param DataObject\Concrete $object
+     * @param Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return mixed
@@ -587,7 +581,7 @@ class ImageGallery extends Data implements ResourcePersistenceAwareInterface, Qu
     public function marshal($value, $object = null, $params = [])
     {
         if ($value) {
-            if (($params['blockmode'] ?? false) && $value instanceof Model\DataObject\Data\ImageGallery) {
+            if ($params['blockmode'] && $value instanceof Model\DataObject\Data\ImageGallery) {
                 $list = [];
                 $items = $value->getItems();
                 $def = new Hotspotimage();
@@ -604,7 +598,7 @@ class ImageGallery extends Data implements ResourcePersistenceAwareInterface, Qu
 
             return [
                     'value' => $value[$this->getName() . '__images'],
-                    'value2' => $value[$this->getName() . '__hotspots'],
+                    'value2' => $value[$this->getName() . '__hotspots']
                 ];
         }
 
@@ -613,14 +607,14 @@ class ImageGallery extends Data implements ResourcePersistenceAwareInterface, Qu
 
     /** See marshal
      * @param mixed $value
-     * @param DataObject\Concrete $object
+     * @param Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return mixed
      */
     public function unmarshal($value, $object = null, $params = [])
     {
-        if (($params['blockmode'] ?? false) && is_array($value)) {
+        if ($params['blockmode'] && is_array($value)) {
             $items = [];
             $def = new Hotspotimage();
             foreach ($value as $rawValue) {
@@ -639,12 +633,10 @@ class ImageGallery extends Data implements ResourcePersistenceAwareInterface, Qu
 
             return $result;
         }
-
-        return null;
     }
 
     /**
-     * @param DataObject\Data\ImageGallery|null $data
+     * @param DataObject\Concrete $data
      *
      * @return bool
      */
@@ -662,31 +654,5 @@ class ImageGallery extends Data implements ResourcePersistenceAwareInterface, Qu
         }
 
         return false;
-    }
-
-    /**
-     * @param DataObject\Data\ImageGallery|null $oldValue
-     * @param DataObject\Data\ImageGallery|null $newValue
-     *
-     * @return bool
-     */
-    public function isEqual($oldValue, $newValue): bool
-    {
-        $oldValue = $oldValue instanceof DataObject\Data\ImageGallery ? $oldValue->getItems() : [];
-        $newValue = $newValue instanceof DataObject\Data\ImageGallery ? $newValue->getItems() : [];
-
-        if (count($oldValue) != count($newValue)) {
-            return false;
-        }
-
-        $fd = new Hotspotimage();
-
-        foreach ($oldValue as $i => $item) {
-            if (!$fd->isEqual($oldValue[$i], $newValue[$i])) {
-                return false;
-            }
-        }
-
-        return true;
     }
 }

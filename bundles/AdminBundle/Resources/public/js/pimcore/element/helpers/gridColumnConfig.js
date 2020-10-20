@@ -15,8 +15,6 @@
 pimcore.registerNS("pimcore.element.helpers.gridColumnConfig");
 pimcore.element.helpers.gridColumnConfig = {
 
-    batchJobDelay: 50,
-
     getSaveAsDialog: function () {
         var defaultName = new Date();
 
@@ -79,21 +77,9 @@ pimcore.element.helpers.gridColumnConfig = {
     },
 
     deleteGridConfigConfirmed: function (btn) {
-        var route = null;
-
-        if (this.gridType === 'asset') {
-            route = 'pimcore_admin_asset_assethelper_griddeletecolumnconfig';
-        }
-        else if(this.gridType === 'object') {
-            route = 'pimcore_admin_dataobject_dataobjecthelper_griddeletecolumnconfig';
-        }
-        else {
-            throw new Error('Type unknown');
-        }
-
-        if (btn === 'ok') {
+        if (btn == 'ok') {
             Ext.Ajax.request({
-                url: Routing.generate(route),
+                url: "/admin/" + this.gridType + "-helper/grid-delete-column-config",
                 method: "DELETE",
                 params: {
                     id: this.classId,
@@ -120,6 +106,12 @@ pimcore.element.helpers.gridColumnConfig = {
         var gridConfig = menuItem.gridConfig;
         this.settings.gridConfigId = gridConfig.id;
         this.getTableDescription();
+    },
+
+    columnConfigurationSavedHandler: function (rdata) {
+        this.settings = rdata.settings;
+        this.availableConfigs = rdata.availableConfigs;
+        this.buildColumnConfigMenu();
     },
 
     addGridConfigMenuItems: function(menu, list, onlyConfigs) {
@@ -202,12 +194,12 @@ pimcore.element.helpers.gridColumnConfig = {
         }
     },
 
-    saveConfig: function (asCopy, context) {
+    saveConfig: function (asCopy) {
         if (asCopy) {
             this.getSaveAsDialog();
         } else {
             pimcore.helpers.saveColumnConfig(this.object.id, this.classId, this.getGridConfig(), this.searchType, this.saveColumnConfigButton,
-                this.columnConfigurationSavedHandler.bind(this), this.settings, this.gridType, this.context);
+                this.columnConfigurationSavedHandler.bind(this), this.settings, this.gridType);
         }
     },
 
@@ -267,9 +259,9 @@ pimcore.element.helpers.gridColumnConfig = {
             text: t("batch_change"),
             iconCls: "pimcore_icon_table pimcore_icon_overlay_go",
             handler: function (grid) {
-                var menu = grid.headerCt.getMenu();
-                var column = menu.activeHeader;
-                this.batchPrepare(column, false, false, false);
+                menu = grid.headerCt.getMenu();
+                var columnDataIndex = menu.activeHeader;
+                this.batchPrepare(columnDataIndex.fullColumnIndex, false, false);
             }.bind(this, grid)
         });
         menu.add(batchAllMenu);
@@ -278,9 +270,9 @@ pimcore.element.helpers.gridColumnConfig = {
             text: t("batch_change_selected"),
             iconCls: "pimcore_icon_structuredTable pimcore_icon_overlay_go",
             handler: function (grid) {
-                var menu = grid.headerCt.getMenu();
-                var column = menu.activeHeader;
-                this.batchPrepare(column, true, false, false);
+                menu = grid.headerCt.getMenu();
+                var columnDataIndex = menu.activeHeader;
+                this.batchPrepare(columnDataIndex.fullColumnIndex, true, false);
             }.bind(this, grid)
         });
         menu.add(batchSelectedMenu);
@@ -289,9 +281,9 @@ pimcore.element.helpers.gridColumnConfig = {
             text: t("batch_append_all"),
             iconCls: "pimcore_icon_table pimcore_icon_overlay_go",
             handler: function (grid) {
-                var menu = grid.headerCt.getMenu();
-                var column = menu.activeHeader;
-                this.batchPrepare(column, false, true, false);
+                menu = grid.headerCt.getMenu();
+                var columnDataIndex = menu.activeHeader;
+                this.batchPrepare(columnDataIndex.fullColumnIndex, false, true);
             }.bind(this, grid)
         });
         menu.add(batchAppendAllMenu);
@@ -300,41 +292,18 @@ pimcore.element.helpers.gridColumnConfig = {
             text: t("batch_append_selected"),
             iconCls: "pimcore_icon_structuredTable pimcore_icon_overlay_go",
             handler: function (grid) {
-                var menu = grid.headerCt.getMenu();
-                var column = menu.activeHeader;
-                this.batchPrepare(column, true, true, false);
+                menu = grid.headerCt.getMenu();
+                var columnDataIndex = menu.activeHeader;
+                this.batchPrepare(columnDataIndex.fullColumnIndex, true, true);
             }.bind(this, grid)
         });
         menu.add(batchAppendSelectedMenu);
-
-
-        var batchRemoveAllMenu = new Ext.menu.Item({
-            text: t("batch_remove_all"),
-            iconCls: "pimcore_icon_table pimcore_icon_overlay_go",
-            handler: function (grid) {
-                var menu = grid.headerCt.getMenu();
-                var column = menu.activeHeader;
-                this.batchPrepare(column, false, false, true);
-            }.bind(this, grid)
-        });
-        menu.add(batchRemoveAllMenu);
-
-        var batchRemoveSelectedMenu = new Ext.menu.Item({
-            text: t("batch_remove_selected"),
-            iconCls: "pimcore_icon_structuredTable pimcore_icon_overlay_go",
-            handler: function (grid) {
-                var menu = grid.headerCt.getMenu();
-                var column = menu.activeHeader;
-                this.batchPrepare(column, true, false, true);
-            }.bind(this, grid)
-        });
-        menu.add(batchRemoveSelectedMenu);
-
         //
         menu.on('beforeshow', function (batchAllMenu, batchSelectedMenu, grid) {
             var menu = grid.headerCt.getMenu();
             var columnDataIndex = menu.activeHeader.dataIndex;
 
+            var view = grid.getView();
             // no batch for system properties
             if (Ext.Array.contains(this.systemColumns, columnDataIndex) || Ext.Array.contains(this.noBatchColumns, columnDataIndex)) {
                 batchAllMenu.hide();
@@ -351,35 +320,12 @@ pimcore.element.helpers.gridColumnConfig = {
                 batchAppendAllMenu.hide();
                 batchAppendSelectedMenu.hide();
             }
-
-            if (!Ext.Array.contains(this.systemColumns,columnDataIndex) && Ext.Array.contains(this.batchRemoveColumns ? this.batchRemoveColumns : [], columnDataIndex)) {
-                batchRemoveAllMenu.show();
-                batchRemoveSelectedMenu.show();
-            } else {
-                batchRemoveAllMenu.hide();
-                batchRemoveSelectedMenu.hide();
-            }
         }.bind(this, batchAllMenu, batchSelectedMenu, grid));
     },
 
-    batchPrepare: function (column, onlySelected, append, remove) {
-        var dataIndexName = column.dataIndex
-        var gridColumns = this.grid.getColumns();
-        var columnIndex = -1;
-        for (let i = 0; i < gridColumns.length; i++) {
-            let dataIndex = gridColumns[i].dataIndex;
-            if (dataIndex == dataIndexName) {
-                columnIndex = i;
-                break;
-            }
-        }
-        if (columnIndex < 0) {
-            return;
-        }
-
+    batchPrepare: function (columnIndex, onlySelected, append) {
         // no batch for system properties
-
-        if (this.systemColumns.indexOf(gridColumns[columnIndex].dataIndex) > -1) {
+        if (this.systemColumns.indexOf(this.grid.getColumns()[columnIndex].dataIndex) > -1) {
             return;
         }
 
@@ -389,17 +335,43 @@ pimcore.element.helpers.gridColumnConfig = {
             for (var i = 0; i < selectedRows.length; i++) {
                 jobs.push(selectedRows[i].get("id"));
             }
-            this.batchOpen(columnIndex, jobs, append, remove, onlySelected);
+            this.batchOpen(columnIndex, jobs, append, true);
 
         } else {
-            let params = this.getGridParams(onlySelected);
+
+            var filters = "";
+            var condition = "";
+
+            if (this.sqlButton && this.sqlButton.pressed) {
+                condition = this.sqlEditor.getValue();
+            } else {
+                var filterData = this.store.getFilters().items;
+                if (filterData.length > 0) {
+                    filters = this.store.getProxy().encodeFilters(filterData);
+                }
+            }
+
+            var fields = this.getGridConfig().columns;
+            var fieldKeys = Object.keys(fields);
+
+            var params = {
+                filter: filters,
+                condition: condition,
+                classId: this.classId,
+                folderId: this.element.id,
+                objecttype: this.objecttype,
+                "fields[]": fieldKeys,
+                language: this.gridLanguage,
+                batch: true //to avoid limit on batch edit/append all
+            };
+
             Ext.Ajax.request({
                 url: this.batchPrepareUrl,
                 params: params,
                 success: function (columnIndex, response) {
                     var rdata = Ext.decode(response.responseText);
                     if (rdata.success && rdata.jobs) {
-                        this.batchOpen(columnIndex, rdata.jobs, append, remove, onlySelected);
+                        this.batchOpen(columnIndex, rdata.jobs, append, false);
                     }
 
                 }.bind(this, columnIndex)
@@ -408,7 +380,7 @@ pimcore.element.helpers.gridColumnConfig = {
 
     },
 
-    batchOpen: function (columnIndex, jobs, append, remove, onlySelected) {
+    batchOpen: function (columnIndex, jobs, append, onlySelected) {
 
         columnIndex = columnIndex - 1;
 
@@ -428,7 +400,7 @@ pimcore.element.helpers.gridColumnConfig = {
         }
         // HACK END
 
-        if((this.objecttype === "object") || (this.objecttype === "variant")) {
+        if(this.objecttype == "object") {
             if (!fieldInfo.layout || !fieldInfo.layout.layout) {
                 return;
             }
@@ -442,17 +414,10 @@ pimcore.element.helpers.gridColumnConfig = {
             var editor = new pimcore.object.tags[tagType](null, fieldInfo.layout.layout);
             editor.setObject(this.object);
         } else {
-            var tagType = this.fieldObject[fieldInfo.dataIndex].layout.fieldtype;
-            let layoutInfo = this.fieldObject[fieldInfo.dataIndex].layout
-            try {
-                if (typeof pimcore.asset.metadata.tags[tagType].prototype.prepareBatchEditLayout == "function") {
-                    layoutInfo = pimcore.asset.metadata.tags[tagType].prototype.prepareBatchEditLayout(layoutInfo);
-                }
-            } catch (e) {
-                console.log(e);
-            }
-
-            var editor = new pimcore.asset.metadata.tags[tagType](null, layoutInfo);
+            fieldInfo = this.fieldObject[fieldInfo.dataIndex];
+            var tagType = fieldInfo.layout.fieldtype;
+            var editor = new pimcore.asset.tags[tagType](null, fieldInfo.layout);
+            fieldInfo.dataIndex = fieldInfo.key;
             editor.setAsset(this.asset);
         }
 
@@ -470,7 +435,7 @@ pimcore.element.helpers.gridColumnConfig = {
                     text: t("save"),
                     handler: function () {
                         if (formPanel.isValid()) {
-                            this.batchProcess(jobs, append, remove, editor, fieldInfo, true);
+                            this.batchProcess(jobs, append, editor, fieldInfo, true);
                         }
                     }.bind(this)
                 }
@@ -478,8 +443,7 @@ pimcore.element.helpers.gridColumnConfig = {
         });
         var batchTitle = onlySelected ? "batch_edit_field_selected" : "batch_edit_field";
         var appendTitle = onlySelected ? "batch_append_selected_to" : "batch_append_to";
-        var removeTitle = onlySelected ? "batch_remove_selected_from" : "batch_remove_from";
-        var title = remove ? t(removeTitle) + " " + fieldInfo.text : (append ? t(appendTitle) + " " + fieldInfo.text : t(batchTitle) + " " + fieldInfo.text);
+        var title = append ? t(appendTitle) + " " + fieldInfo.text : t(batchTitle) + " " + fieldInfo.text;
         this.batchWin = new Ext.Window({
             autoScroll: true,
             modal: false,
@@ -493,7 +457,7 @@ pimcore.element.helpers.gridColumnConfig = {
         this.batchWin.updateLayout();
     },
 
-    batchProcess: function (jobs, append,  remove, editor, fieldInfo, initial) {
+    batchProcess: function (jobs, append, editor, fieldInfo, initial) {
         if (initial) {
             this.batchErrors = [];
             this.batchJobCurrent = 0;
@@ -523,16 +487,11 @@ pimcore.element.helpers.gridColumnConfig = {
             });
 
             this.batchProgressWin = new Ext.Window({
-                title: t('batch_operation'),
                 items: [this.batchProgressBar],
-                layout: 'fit',
-                width: 400,
-                bodyStyle: "padding: 10px;",
-                closable: false,
-                plain: true,
-                modal: true
+                modal: true,
+                bodyStyle: "background: #fff;",
+                closable: false
             });
-
             this.batchProgressWin.show();
 
         }
@@ -569,9 +528,6 @@ pimcore.element.helpers.gridColumnConfig = {
         if (append) {
             this.batchParameters.append = 1;
         }
-        if (remove) {
-            this.batchParameters.remove = 1;
-        }
 
         Ext.Ajax.request({
             url: this.batchProcessUrl,
@@ -598,24 +554,53 @@ pimcore.element.helpers.gridColumnConfig = {
 
                 window.setTimeout(function () {
                     this.batchJobCurrent++;
-                    this.batchProcess(jobs, append, remove);
-                }.bind(this), this.batchJobDelay);
+                    this.batchProcess(jobs, append);
+                }.bind(this), 400);
             }.bind(this, jobs, this.batchParameters.job)
         });
     },
 
     exportPrepare: function (settings, exportType) {
-        let params = this.getGridParams();
+        var jobs = [];
+        var filters = "";
+        var condition = "";
+        var searchQuery = this.searchField ? this.searchField.getValue() : "";
+
+        if (this.sqlButton && this.sqlButton.pressed) {
+            condition = this.sqlEditor.getValue();
+        } else {
+            var filterData = this.store.getFilters().items;
+            if (filterData.length > 0) {
+                filters = this.store.getProxy().encodeFilters(filterData);
+            }
+        }
 
         var fields = this.getGridConfig().columns;
         var fieldKeys = Object.keys(fields);
-        params["fields[]"] = fieldKeys;
-        if (this.context) {
-            params["context"] = Ext.encode(this.context);
+
+        //create the ids array which contains chosen rows to export
+        ids = [];
+        var selectedRows = this.grid.getSelectionModel().getSelection();
+        for (var i = 0; i < selectedRows.length; i++) {
+            ids.push(selectedRows[i].data.id);
         }
 
         settings = Ext.encode(settings);
-        params["settings"] = settings;
+
+        var params = {
+            filter: filters,
+            condition: condition,
+            classId: this.classId,
+            folderId: this.element.id,
+            objecttype: this.objecttype,
+            language: this.gridLanguage,
+            "ids[]": ids,
+            "fields[]": fieldKeys,
+            settings: settings,
+            query: searchQuery,
+            batch: true // to avoid limit for export
+        };
+
         Ext.Ajax.request({
             url: this.exportPrepareUrl,
             params: params,
@@ -646,14 +631,10 @@ pimcore.element.helpers.gridColumnConfig = {
             });
 
             this.exportProgressWin = new Ext.Window({
-                title: t("export"),
                 items: [this.exportProgressBar],
-                layout: 'fit',
-                width: 200,
-                bodyStyle: "padding: 10px;",
-                closable: false,
-                plain: true,
-                listeners: pimcore.helpers.getProgressWindowListeners()
+                modal: true,
+                bodyStyle: "background: #fff;",
+                closable: false
             });
             this.exportProgressWin.show();
         }
@@ -669,7 +650,7 @@ pimcore.element.helpers.gridColumnConfig = {
                 }
                 Ext.Msg.alert(t("error"), t("error_jobs") + ": " + jobErrors.join(","));
             } else {
-                pimcore.helpers.download(exportType.getDownloadUrl(fileHandle));
+                pimcore.helpers.download(exportType.downloadUrl + "?fileHandle=" + fileHandle);
             }
 
             return;
@@ -684,7 +665,6 @@ pimcore.element.helpers.gridColumnConfig = {
         this.exportParameters.classId = this.classId;
         this.exportParameters.initial = initial ? 1 : 0;
         this.exportParameters.language = this.gridLanguage;
-        this.exportParameters.context = Ext.encode(this.context);
 
         Ext.Ajax.request({
             url: this.exportProcessUrl,
@@ -708,7 +688,7 @@ pimcore.element.helpers.gridColumnConfig = {
                 window.setTimeout(function () {
                     this.exportJobCurrent++;
                     this.exportProcess(jobs, fileHandle, fields, false, settings, exportType);
-                }.bind(this), this.batchJobDelay);
+                }.bind(this), 400);
             }.bind(this, jobs, jobs[this.exportJobCurrent])
         });
     },
@@ -717,69 +697,7 @@ pimcore.element.helpers.gridColumnConfig = {
         this.settings = rdata.settings;
         this.availableConfigs = rdata.availableConfigs;
         this.buildColumnConfigMenu();
-    },
-
-    getGridParams: function (onlySelected) {
-        var filters = "";
-        var condition = "";
-        var searchQuery = this.searchField ? this.searchField.getValue() : "";
-
-        if (this.sqlButton && this.sqlButton.pressed) {
-            condition = this.sqlEditor.getValue();
-        } else {
-            var filterData = this.store.getFilters().items;
-            if (filterData.length > 0) {
-                filters = this.store.getProxy().encodeFilters(filterData);
-            }
-        }
-
-        var params = {
-            filter: filters,
-            condition: condition,
-            classId: this.classId,
-            folderId: this.element.id,
-            objecttype: this.objecttype,
-            language: this.gridLanguage,
-            batch: true, // to avoid limit for export
-        };
-
-        if (searchQuery) {
-            params["query"] = searchQuery;
-        }
-
-        if (onlySelected !== false) {
-            //create the ids array which contains chosen rows to export
-            ids = [];
-            var selectedRows = this.grid.getSelectionModel().getSelection();
-            for (var i = 0; i < selectedRows.length; i++) {
-                ids.push(selectedRows[i].data.id);
-            }
-
-            if (ids.length > 0) {
-                params["ids[]"] = ids;
-            }
-        }
-
-        //tags filter
-        if(this.tagsTree) {
-            params["tagIds[]"] = this.tagsTree.getCheckedTagIds();
-
-            if(this.tagsPanel) {
-                params["considerChildTags"] = this.tagsPanel.considerChildTags;
-            }
-        }
-
-        //only direct children filter
-        if (this.checkboxOnlyDirectChildren) {
-            params["only_direct_children"] = this.checkboxOnlyDirectChildren.getValue();
-        }
-
-        //only unreferenced filter
-        if (this.checkboxOnlyUnreferenced) {
-            params["only_unreferenced"] = this.checkboxOnlyUnreferenced.getValue();
-        }
-
-        return params;
-
     }
+
+
 };

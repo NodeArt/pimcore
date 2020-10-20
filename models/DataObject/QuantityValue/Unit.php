@@ -28,7 +28,7 @@ class Unit extends Model\AbstractModel
     const CACHE_KEY = 'quantityvalue_units_table';
 
     /**
-     * @var string
+     * @var int
      */
     public $id;
 
@@ -112,7 +112,6 @@ class Unit extends Model\AbstractModel
     public static function getById($id)
     {
         try {
-            $table = null;
             if (Cache\Runtime::isRegistered(self::CACHE_KEY)) {
                 $table = Cache\Runtime::get(self::CACHE_KEY);
             }
@@ -128,7 +127,7 @@ class Unit extends Model\AbstractModel
                 $table = [];
                 $list = new Model\DataObject\QuantityValue\Unit\Listing();
                 $list = $list->load();
-                /** @var Model\DataObject\QuantityValue\Unit $item */
+                /** @var $item Model\DataObject\QuantityValue\Unit */
                 foreach ($list as $item) {
                     $table[$item->getId()] = $item;
                 }
@@ -229,20 +228,14 @@ class Unit extends Model\AbstractModel
         return $this->group;
     }
 
-    /**
-     * @param string $id
-     */
     public function setId($id)
     {
-        $this->id = (string) $id;
+        $this->id = $id;
     }
 
-    /**
-     * @return string
-     */
     public function getId()
     {
-        return (string) $this->id;
+        return $this->id;
     }
 
     public function setLongname($longname)

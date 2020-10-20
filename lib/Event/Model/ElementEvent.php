@@ -48,7 +48,7 @@ class ElementEvent extends Event implements ElementEventInterface
     }
 
     /**
-     * @param AbstractModel $element
+     * @param AbstractModel $asset
      */
     public function setElement($element)
     {

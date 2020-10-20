@@ -73,16 +73,6 @@ class Breadcrumbs extends AbstractRenderer
     // Accessors:
 
     /**
-     * Returns breadcrumb separator
-     *
-     * @return string  breadcrumb separator
-     */
-    public function getSeparator()
-    {
-        return $this->_separator;
-    }
-
-    /**
      * @param string $separator
      *
      * @return $this
@@ -94,6 +84,16 @@ class Breadcrumbs extends AbstractRenderer
         }
 
         return $this;
+    }
+
+    /**
+     * Returns breadcrumb separator
+     *
+     * @return string  breadcrumb separator
+     */
+    public function getSeparator()
+    {
+        return $this->_separator;
     }
 
     /**
@@ -128,24 +128,10 @@ class Breadcrumbs extends AbstractRenderer
 
     /**
      * @param array|string $template
-     *
-     * @return $this
      */
     public function setTemplate($template)
     {
         $this->_template = $template;
-
-        return $this;
-    }
-
-    /**
-     * Alias of getTemplate()
-     *
-     * @return string|array|null
-     */
-    public function getPartial()
-    {
-        return $this->getTemplate();
     }
 
     /**
@@ -157,46 +143,22 @@ class Breadcrumbs extends AbstractRenderer
      */
     public function setPartial($partial)
     {
-        return $this->setTemplate($partial);
+        $this->_template = $partial;
+
+        return $this;
+    }
+
+    /**
+     * Alias of getTemplate()
+     *
+     * @return string|array|null
+     */
+    public function getPartial()
+    {
+        return $this->_template;
     }
 
     // Render methods:
-
-    /**
-     * Get all pages between the currently active page and the container's root page.
-     *
-     * @param Container $container
-     *
-     * @return array
-     */
-    public function getPages(Container $container)
-    {
-        $pages = [];
-        if (! $active = $this->findActive($container)) {
-            return [];
-        }
-
-        /** @var \Pimcore\Navigation\Page $active */
-        $active = $active['page'];
-        $pages[] = $active;
-
-        while ($parent = $active->getParent()) {
-            if ($parent instanceof Page) {
-                $pages[] = $parent;
-            } else {
-                break;
-            }
-
-            if ($parent === $container) {
-                // break if at the root of the given container
-                break;
-            }
-
-            $active = $parent;
-        }
-
-        return array_reverse($pages);
-    }
 
     /**
      * Renders breadcrumbs by chaining 'a' elements with the separator
@@ -248,7 +210,7 @@ class Breadcrumbs extends AbstractRenderer
      * @param Container $container
      * @param string|null $partial
      *
-     * @return string
+     * @return mixed
      *
      * @throws \Exception
      */
@@ -262,18 +224,40 @@ class Breadcrumbs extends AbstractRenderer
             throw new \Exception('Unable to render menu: No partial view script provided');
         }
 
-        $pages = $this->getPages($container);
+        // put breadcrumb pages in model
+        $model = ['pages' => []];
+        if ($active = $this->findActive($container)) {
+            /** @var Page $active */
+            $active = $active['page'];
+            $model['pages'][] = $active;
 
-        return $this->templatingEngine->render($partial, compact('pages'));
+            while ($parent = $active->getParent()) {
+                if ($parent instanceof Page) {
+                    $model['pages'][] = $parent;
+                } else {
+                    break;
+                }
+
+                if ($parent === $container) {
+                    // break if at the root of the given container
+                    break;
+                }
+
+                $active = $parent;
+            }
+            $model['pages'] = array_reverse($model['pages']);
+        }
+
+        return $this->templatingEngine->render($partial, $model);
     }
 
     /**
      * Alias of renderTemplate() for ZF1 backward compatibility
      *
-     * @param Container $container
+     * @param Container|null $container
      * @param string|null $partial
      *
-     * @return string
+     * @return mixed
      */
     public function renderPartial(Container $container, string $partial = null)
     {

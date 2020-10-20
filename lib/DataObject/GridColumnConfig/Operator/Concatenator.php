@@ -19,18 +19,15 @@ namespace Pimcore\DataObject\GridColumnConfig\Operator;
 
 class Concatenator extends AbstractOperator
 {
-    /** @var string */
     private $glue;
-
-    /** @var bool */
     private $forceValue;
 
     public function __construct(\stdClass $config, $context = null)
     {
         parent::__construct($config, $context);
 
-        $this->glue = $config->glue ?? '';
-        $this->forceValue = $config->forceValue ?? false;
+        $this->glue = $config->glue;
+        $this->forceValue = $config->forceValue;
     }
 
     public function getLabeledValue($element)

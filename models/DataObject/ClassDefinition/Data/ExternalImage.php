@@ -20,11 +20,10 @@ use Pimcore\Model;
 use Pimcore\Model\DataObject;
 use Pimcore\Model\DataObject\ClassDefinition\Data;
 
-class ExternalImage extends Data implements ResourcePersistenceAwareInterface, QueryResourcePersistenceAwareInterface, TypeDeclarationSupportInterface, EqualComparisonInterface
+class ExternalImage extends Data implements ResourcePersistenceAwareInterface, QueryResourcePersistenceAwareInterface
 {
     use Extension\ColumnType;
     use Extension\QueryColumnType;
-    use DataObject\ClassDefinition\NullablePhpdocReturnTypeTrait;
 
     /**
      * Static type of this element
@@ -121,10 +120,10 @@ class ExternalImage extends Data implements ResourcePersistenceAwareInterface, Q
      * @see ResourcePersistenceAwareInterface::getDataForResource
      *
      * @param string $data
-     * @param null|DataObject\Concrete $object
-     * @param array $params
+     * @param null|Model\DataObject\AbstractObject $object
+     * @param mixed $params
      *
-     * @return string|null
+     * @return string
      */
     public function getDataForResource($data, $object = null, $params = [])
     {
@@ -139,17 +138,17 @@ class ExternalImage extends Data implements ResourcePersistenceAwareInterface, Q
      * @see ResourcePersistenceAwareInterface::getDataFromResource
      *
      * @param string $data
-     * @param null|DataObject\Concrete $object
-     * @param array $params
+     * @param null|Model\DataObject\AbstractObject $object
+     * @param mixed $params
      *
-     * @return Model\DataObject\Data\ExternalImage
+     * @return string
      */
     public function getDataFromResource($data, $object = null, $params = [])
     {
         $externalImage = new Model\DataObject\Data\ExternalImage($data);
 
         if (isset($params['owner'])) {
-            $externalImage->setOwner($params['owner'], $params['fieldname'], $params['language'] ?? null);
+            $externalImage->setOwner($params['owner'], $params['fieldname'], $params['language']);
         }
 
         return $externalImage;
@@ -159,7 +158,7 @@ class ExternalImage extends Data implements ResourcePersistenceAwareInterface, Q
      * @see QueryResourcePersistenceAwareInterface::getDataForQueryResource
      *
      * @param string $data
-     * @param null|DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return string
@@ -173,10 +172,10 @@ class ExternalImage extends Data implements ResourcePersistenceAwareInterface, Q
      * @see Data::getDataForEditmode
      *
      * @param string $data
-     * @param null|DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
-     * @return string|null
+     * @return string
      */
     public function getDataForEditmode($data, $object = null, $params = [])
     {
@@ -189,10 +188,10 @@ class ExternalImage extends Data implements ResourcePersistenceAwareInterface, Q
 
     /**
      * @param string $data
-     * @param null|DataObject\Concrete $object
-     * @param array $params
+     * @param null|Model\DataObject\AbstractObject $object
+     * @param mixed $params
      *
-     * @return string|null
+     * @return string
      */
     public function getDataForGrid($data, $object = null, $params = [])
     {
@@ -203,10 +202,10 @@ class ExternalImage extends Data implements ResourcePersistenceAwareInterface, Q
      * @see Data::getDataFromEditmode
      *
      * @param string $data
-     * @param null|DataObject\Concrete $object
-     * @param array $params
+     * @param null|Model\DataObject\AbstractObject $object
+     * @param mixed $params
      *
-     * @return Model\DataObject\Data\ExternalImage
+     * @return string
      */
     public function getDataFromEditmode($data, $object = null, $params = [])
     {
@@ -215,10 +214,10 @@ class ExternalImage extends Data implements ResourcePersistenceAwareInterface, Q
 
     /**
      * @param string $data
-     * @param null|DataObject\Concrete $object
-     * @param array $params
+     * @param null|Model\DataObject\AbstractObject $object
+     * @param mixed $params
      *
-     * @return Model\DataObject\Data\ExternalImage
+     * @return string
      */
     public function getDataFromGridEditor($data, $object = null, $params = [])
     {
@@ -228,9 +227,9 @@ class ExternalImage extends Data implements ResourcePersistenceAwareInterface, Q
     /**
      * @see Data::getVersionPreview
      *
-     * @param DataObject\Data\ExternalImage|null $data
-     * @param DataObject\Concrete|null $object
-     * @param array $params
+     * @param string $data
+     * @param null|DataObject\AbstractObject $object
+     * @param mixed $params
      *
      * @return string
      */
@@ -248,7 +247,7 @@ class ExternalImage extends Data implements ResourcePersistenceAwareInterface, Q
      *
      * @abstract
      *
-     * @param DataObject\Concrete $object
+     * @param DataObject\AbstractObject $object
      * @param array $params
      *
      * @return string
@@ -260,12 +259,12 @@ class ExternalImage extends Data implements ResourcePersistenceAwareInterface, Q
             return $data->getUrl();
         }
 
-        return '';
+        return null;
     }
 
     /**
-     * @param string $importValue
-     * @param null|DataObject\Concrete $object
+     * @param $importValue
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return string
@@ -278,12 +277,10 @@ class ExternalImage extends Data implements ResourcePersistenceAwareInterface, Q
     /**
      * converts data to be exposed via webservices
      *
-     * @deprecated
-     *
-     * @param DataObject\Concrete $object
+     * @param string $object
      * @param mixed $params
      *
-     * @return string|null
+     * @return mixed
      */
     public function getForWebserviceExport($object, $params = [])
     {
@@ -291,12 +288,10 @@ class ExternalImage extends Data implements ResourcePersistenceAwareInterface, Q
     }
 
     /**
-     * @deprecated
-     *
      * @param mixed $value
-     * @param Model\Element\AbstractElement $relatedObject
+     * @param null $relatedObject
      * @param mixed $params
-     * @param Model\Webservice\IdMapperInterface|null $idMapper
+     * @param null $idMapper
      *
      * @return mixed|void
      *
@@ -308,7 +303,7 @@ class ExternalImage extends Data implements ResourcePersistenceAwareInterface, Q
     }
 
     /** True if change is allowed in edit mode.
-     * @param DataObject\Concrete $object
+     * @param string $object
      * @param mixed $params
      *
      * @return bool
@@ -319,10 +314,10 @@ class ExternalImage extends Data implements ResourcePersistenceAwareInterface, Q
     }
 
     /** Generates a pretty version preview (similar to getVersionPreview) can be either html or
-     * a image URL. See the https://github.com/pimcore/object-merger bundle documentation for details
+     * a image URL. See the ObjectMerger plugin documentation for details
      *
-     * @param string $data
-     * @param DataObject\Concrete|null $object
+     * @param $data
+     * @param null $object
      * @param mixed $params
      *
      * @return array|string
@@ -337,7 +332,7 @@ class ExternalImage extends Data implements ResourcePersistenceAwareInterface, Q
     }
 
     /**
-     * @param Model\DataObject\ClassDefinition\Data\ExternalImage $masterDefinition
+     * @param Model\DataObject\ClassDefinition\Data $masterDefinition
      */
     public function synchronizeWithMasterDefinition(Model\DataObject\ClassDefinition\Data $masterDefinition)
     {
@@ -347,26 +342,16 @@ class ExternalImage extends Data implements ResourcePersistenceAwareInterface, Q
     }
 
     /**
-     * @param DataObject\Data\ExternalImage|null $data
+     * @param DataObject\Data\ExternalImage $data
      *
      * @return bool
      */
     public function isEmpty($data)
     {
-        return !($data instanceof DataObject\Data\ExternalImage && $data->getUrl());
-    }
+        if ($data instanceof DataObject\Data\ExternalImage and $data->getUrl()) {
+            return false;
+        }
 
-    /**
-     * @param DataObject\Data\ExternalImage|null $oldValue
-     * @param DataObject\Data\ExternalImage|null $newValue
-     *
-     * @return bool
-     */
-    public function isEqual($oldValue, $newValue): bool
-    {
-        $oldValue = $oldValue instanceof DataObject\Data\ExternalImage ? $oldValue->getUrl() : null;
-        $newValue = $newValue instanceof DataObject\Data\ExternalImage ? $newValue->getUrl() : null;
-
-        return $oldValue == $newValue;
+        return true;
     }
 }

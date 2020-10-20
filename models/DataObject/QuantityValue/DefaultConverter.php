@@ -17,13 +17,7 @@ class DefaultConverter implements QuantityValueConverterInterface
         if ($fromBaseUnit === null) {
             $fromUnit = clone $fromUnit;
             $fromBaseUnit = $fromUnit;
-        }
-
-        if ($fromUnit->getFactor() === null) {
             $fromUnit->setFactor(1);
-        }
-
-        if ($fromUnit->getConversionOffset() === null) {
             $fromUnit->setConversionOffset(0);
         }
 
@@ -31,13 +25,7 @@ class DefaultConverter implements QuantityValueConverterInterface
         if ($toBaseUnit === null) {
             $toUnit = clone $toUnit;
             $toBaseUnit = $toUnit;
-        }
-
-        if ($toUnit->getFactor() === null) {
             $toUnit->setFactor(1);
-        }
-
-        if ($toUnit->getConversionOffset() === null) {
             $toUnit->setConversionOffset(0);
         }
 

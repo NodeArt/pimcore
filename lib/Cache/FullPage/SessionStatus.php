@@ -34,7 +34,7 @@ class SessionStatus
     private $symfonyMetadataStorageKey;
 
     /**
-     * @var EventDispatcherInterface
+     * @var string
      */
     private $eventDispatcher;
 

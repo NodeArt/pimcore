@@ -74,7 +74,7 @@ interface ConfigInterface
      * Possible hook to filter categories for specific tenants.
      *
      * @param IndexableInterface $object
-     * @param int|null $subObjectId
+     * @param null $subObjectId
      *
      * @return \Pimcore\Bundle\EcommerceFrameworkBundle\Model\AbstractCategory[]
      */
@@ -84,7 +84,7 @@ interface ConfigInterface
      * in case of subtenants returns a data structure containing all sub tenants
      *
      * @param IndexableInterface $object
-     * @param int|null $subObjectId
+     * @param null $subObjectId
      *
      * @return mixed $subTenantData
      */
@@ -145,7 +145,7 @@ interface ConfigInterface
      * default is getOSParentId
      *
      * @param IndexableInterface $object
-     * @param int $subId
+     * @param $subId
      *
      * @return mixed
      */
@@ -155,8 +155,8 @@ interface ConfigInterface
      * Gets object by id, can consider subIds and therefore return e.g. an array of values
      * always returns object itself - see also getObjectMockupById
      *
-     * @param int $objectId
-     * @param bool $onlyMainObject - only returns main object
+     * @param $objectId
+     * @param $onlyMainObject - only returns main object
      *
      * @return mixed
      */
@@ -166,7 +166,7 @@ interface ConfigInterface
      * Gets object mockup by id, can consider subIds and therefore return e.g. an array of values
      * always returns a object mockup if available
      *
-     * @param int $objectId
+     * @param $objectId
      *
      * @return IndexableInterface | array
      */

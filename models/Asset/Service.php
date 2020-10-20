@@ -19,10 +19,8 @@ namespace Pimcore\Model\Asset;
 
 use Pimcore\Event\AssetEvents;
 use Pimcore\Event\Model\AssetEvent;
-use Pimcore\Loader\ImplementationLoader\Exception\UnsupportedException;
 use Pimcore\Model;
 use Pimcore\Model\Asset;
-use Pimcore\Model\Asset\MetaData\ClassDefinition\Data\Data;
 use Pimcore\Model\Element;
 
 /**
@@ -53,12 +51,10 @@ class Service extends Model\Element\Service
     }
 
     /**
-     * @param Asset $target
-     * @param Asset $source
+     * @param  Asset|Asset\Folder $target
+     * @param  Asset|Asset\Folder $source
      *
-     * @return Asset|null copied asset
-     *
-     * @throws \Exception
+     * @return Asset copied asset
      */
     public function copyRecursive($target, $source)
     {
@@ -68,14 +64,13 @@ class Service extends Model\Element\Service
             $this->_copyRecursiveIds = [];
         }
         if (in_array($source->getId(), $this->_copyRecursiveIds)) {
-            return null;
+            return;
         }
 
         $source->getProperties();
 
-        /** @var Asset $new */
         $new = Element\Service::cloneMe($source);
-        $new->setObjectVar('id', null);
+        $new->id = null;
         if ($new instanceof Asset\Folder) {
             $new->setChildren(null);
         }
@@ -103,7 +98,7 @@ class Service extends Model\Element\Service
 
         // triggers actions after the complete asset cloning
         \Pimcore::getEventDispatcher()->dispatch(AssetEvents::POST_COPY, new AssetEvent($new, [
-            'base_element' => $source, // the element used to make a copy
+            'base_element' => $source // the element used to make a copy
         ]));
 
         return $new;
@@ -114,14 +109,11 @@ class Service extends Model\Element\Service
      * @param  Asset $source
      *
      * @return Asset copied asset
-     *
-     * @throws \Exception
      */
     public function copyAsChild($target, $source)
     {
         $source->getProperties();
 
-        /** @var Asset $new */
         $new = Element\Service::cloneMe($source);
         $new->setId(null);
 
@@ -144,15 +136,15 @@ class Service extends Model\Element\Service
 
         // triggers actions after the complete asset cloning
         \Pimcore::getEventDispatcher()->dispatch(AssetEvents::POST_COPY, new AssetEvent($new, [
-            'base_element' => $source, // the element used to make a copy
+            'base_element' => $source // the element used to make a copy
         ]));
 
         return $new;
     }
 
     /**
-     * @param Asset $target
-     * @param Asset $source
+     * @param $target
+     * @param $source
      *
      * @return mixed
      *
@@ -180,9 +172,9 @@ class Service extends Model\Element\Service
     }
 
     /**
-     * @param Asset $asset
-     * @param array|null $fields
-     * @param string|null $requestedLanguage
+     * @param $asset
+     * @param null $fields
+     * @param null $requestedLanguage
      * @param array $params
      *
      * @return array
@@ -190,7 +182,6 @@ class Service extends Model\Element\Service
     public static function gridAssetData($asset, $fields = null, $requestedLanguage = null, $params = [])
     {
         $data = Element\Service::gridElementData($asset);
-        $loader = null;
 
         if ($asset instanceof Asset && !empty($fields)) {
             $data = [
@@ -208,38 +199,25 @@ class Service extends Model\Element\Service
 
             foreach ($fields as $field) {
                 $fieldDef = explode('~', $field);
-                if (isset($fieldDef[1]) && $fieldDef[1] === 'system') {
-                    if ($fieldDef[0] === 'preview') {
-                        $data[$field] = self::getPreviewThumbnail($asset, ['treepreview' => true, 'width' => 108, 'height' => 70, 'frame' => true]);
-                    } elseif ($fieldDef[0] === 'size') {
-                        /** @var Asset $asset */
+                if ($fieldDef[1] == 'system') {
+                    if ($fieldDef[0] == 'preview') {
+                        $data[$field] = self::getPreviewThumbnail($asset, ['width' => 108, 'height' => 70, 'frame' => true]);
+                    } elseif ($fieldDef[0] == 'size') {
+                        /** @var $asset Asset */
                         $filename = PIMCORE_ASSET_DIRECTORY . '/' . $asset->getRealFullPath();
                         $size = @filesize($filename);
                         $data[$field] = formatBytes($size);
                     }
                 } else {
                     if (isset($fieldDef[1])) {
-                        $language = ($fieldDef[1] === 'none' ? '' : $fieldDef[1]);
-                        $rawMetaData = $asset->getMetadata($fieldDef[0], $language, true, true);
+                        $language = ($fieldDef[1] == 'none' ? '' : $fieldDef[1]);
+                        $metaData = $asset->getMetadata($fieldDef[0], $language, true);
                     } else {
-                        $rawMetaData = $asset->getMetadata($field, $requestedLanguage, true, true);
+                        $metaData = $asset->getMetadata($field, $requestedLanguage, true);
                     }
 
-                    $metaData = $rawMetaData['data'] ?? null;
-
-                    if ($rawMetaData) {
-                        $type = $rawMetaData['type'];
-                        if (!$loader) {
-                            $loader = \Pimcore::getContainer()->get('pimcore.implementation_loader.asset.metadata.data');
-                        }
-
-                        $metaData = $rawMetaData['data'] ?? null;
-                        try {
-                            /** @var Data $instance */
-                            $instance = $loader->build($type);
-                            $metaData = $instance->getDataForListfolderGrid($rawMetaData['data'] ?? null, $rawMetaData);
-                        } catch (UnsupportedException $e) {
-                        }
+                    if ($metaData instanceof Model\Element\AbstractElement) {
+                        $metaData = $metaData->getFullPath();
                     }
 
                     $data[$field] = $metaData;
@@ -251,7 +229,7 @@ class Service extends Model\Element\Service
     }
 
     /**
-     * @param Asset $asset
+     * @param $asset
      * @param array $params
      * @param bool $onlyMethod
      *
@@ -287,8 +265,8 @@ class Service extends Model\Element\Service
     /**
      * @static
      *
-     * @param string $path
-     * @param string|null $type
+     * @param $path
+     * @param null $type
      *
      * @return bool
      */
@@ -335,13 +313,14 @@ class Service extends Model\Element\Service
      *  "asset" => array(...)
      * )
      *
-     * @param Asset $asset
-     * @param array $rewriteConfig
+     * @param $asset
+     * @param $rewriteConfig
      *
      * @return Asset
      */
     public static function rewriteIds($asset, $rewriteConfig)
     {
+
         // rewriting properties
         $properties = $asset->getProperties();
         foreach ($properties as &$property) {
@@ -353,14 +332,11 @@ class Service extends Model\Element\Service
     }
 
     /**
-     * @internal
-     *
-     * @param array $metadata
-     * @param string $mode
+     * @param $metadata
      *
      * @return array
      */
-    public static function minimizeMetadata($metadata, string $mode)
+    public static function minimizeMetadata($metadata)
     {
         if (!is_array($metadata)) {
             return $metadata;
@@ -368,21 +344,24 @@ class Service extends Model\Element\Service
 
         $result = [];
         foreach ($metadata as $item) {
-            $loader = \Pimcore::getContainer()->get('pimcore.implementation_loader.asset.metadata.data');
-            try {
-                /** @var Data $instance */
-                $instance = $loader->build($item['type']);
+            $type = $item['type'];
+            switch ($type) {
+                case 'document':
+                case 'asset':
+                case 'object':
+                    {
+                        $element = Element\Service::getElementByPath($type, $item['data']);
+                        if ($element) {
+                            $item['data'] = $element->getId();
+                        } else {
+                            $item['data'] = '';
+                        }
+                    }
 
-                if ($mode == 'grid') {
-                    $transformedData = $instance->getDataFromListfolderGrid($item['data'], $item);
-                } else {
-                    $transformedData = $instance->getDataFromEditMode($item['data'], $item);
-                }
-
-                $item['data'] = $transformedData;
-            } catch (UnsupportedException $e) {
+                    break;
+                default:
+                    //nothing to do
             }
-
             $result[] = $item;
         }
 
@@ -390,7 +369,7 @@ class Service extends Model\Element\Service
     }
 
     /**
-     * @param array $metadata
+     * @param $metadata
      *
      * @return array
      */
@@ -402,32 +381,42 @@ class Service extends Model\Element\Service
 
         $result = [];
         foreach ($metadata as $item) {
-            $loader = \Pimcore::getContainer()->get('pimcore.implementation_loader.asset.metadata.data');
-            $transformedData = $item['data'];
+            $type = $item['type'];
+            switch ($type) {
+                case 'document':
+                case 'asset':
+                case 'object':
+                {
+                    $element = $item['data'];
+                    if (is_numeric($item['data'])) {
+                        $element = Element\Service::getElementById($type, $item['data']);
+                    }
+                    if ($element instanceof Element\ElementInterface) {
+                        $item['data'] = $element->getRealFullPath();
+                    } else {
+                        $item['data'] = '';
+                    }
+                }
 
-            try {
-                /** @var Data $instance */
-                $instance = $loader->build($item['type']);
-                $transformedData = $instance->getDataForEditMode($item['data'], $item);
-            } catch (UnsupportedException $e) {
+                    break;
+                default:
+                    //nothing to do
             }
 
-            $item['data'] = $transformedData;
             //get the config from an predefined property-set (eg. select)
             $predefined = Model\Metadata\Predefined::getByName($item['name']);
             if ($predefined && $predefined->getType() == $item['type'] && $predefined->getConfig()) {
                 $item['config'] = $predefined->getConfig();
             }
 
-            $key = $item['name'] . '~' . $item['language'];
-            $result[$key] = $item;
+            $result[] = $item;
         }
 
         return $result;
     }
 
     /**
-     * @param Model\Asset $item
+     * @param $item \Pimcore\Model\Asset
      * @param int $nr
      *
      * @return string

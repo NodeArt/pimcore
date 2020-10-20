@@ -60,7 +60,7 @@ pimcore.object.classes.data.countrymultiselect = Class.create(pimcore.object.cla
 
         var countryProxy = {
             type: 'ajax',
-            url: Routing.generate('pimcore_admin_settings_getavailablecountries'),
+            url: '/admin/settings/get-available-countries',
             reader: {
                 type: 'json',
                 rootProperty: 'data'
@@ -150,11 +150,7 @@ pimcore.object.classes.data.countrymultiselect = Class.create(pimcore.object.cla
             }
             Ext.apply(this.datax,
                 {
-                    restrictTo: source.datax.restrictTo,
-                    width: source.datax.width,
-                    height: source.datax.height,
-                    renderType : source.datax.renderType
-                    
+                    restrictTo: source.datax.restrictTo
                 });
         }
     }

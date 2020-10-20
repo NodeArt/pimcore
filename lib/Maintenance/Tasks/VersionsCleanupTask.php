@@ -31,18 +31,11 @@ final class VersionsCleanupTask implements TaskInterface
     private $logger;
 
     /**
-     * @var Config
-     */
-    private $config;
-
-    /**
      * @param LoggerInterface $logger
-     * @param Config $config
      */
-    public function __construct(LoggerInterface $logger, Config $config)
+    public function __construct(LoggerInterface $logger)
     {
         $this->logger = $logger;
-        $this->config = $config;
     }
 
     /**
@@ -50,25 +43,25 @@ final class VersionsCleanupTask implements TaskInterface
      */
     public function execute()
     {
-        $conf['document'] = $this->config['documents']['versions'] ?? null;
-        $conf['asset'] = $this->config['assets']['versions'] ?? null;
-        $conf['object'] = $this->config['objects']['versions'] ?? null;
+        $conf['document'] = Config::getSystemConfig()->documents->versions;
+        $conf['asset'] = Config::getSystemConfig()->assets->versions;
+        $conf['object'] = Config::getSystemConfig()->objects->versions;
 
         $elementTypes = [];
 
         foreach ($conf as $elementType => $tConf) {
-            $versioningType = 'steps';
-            $value = $tConf['steps'] ?? 0;
-
-            if (isset($tConf['days']) && (int)$tConf['days'] > 0) {
+            if (((int)$tConf->days) > 0) {
                 $versioningType = 'days';
-                $value = (int)$tConf['days'];
+                $value = (int)$tConf->days;
+            } else {
+                $versioningType = 'steps';
+                $value = (int)$tConf->steps;
             }
 
             if ($versioningType) {
                 $elementTypes[] = [
                     'elementType' => $elementType,
-                    $versioningType => $value,
+                    $versioningType => $value
                 ];
             }
         }

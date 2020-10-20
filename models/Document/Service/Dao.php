@@ -38,8 +38,21 @@ class Dao extends Model\Dao\AbstractDao
             'SELECT documents.id FROM documents
             LEFT JOIN documents_page ON documents.id = documents_page.id
             WHERE documents.path LIKE ? AND documents_page.prettyUrl = ?',
-        [$this->db->escapeLike($site->getRootPath()) . '/%', rtrim($path, '/')]
+        [$site->getRootPath() . '/%', rtrim($path, '/')]
         );
+    }
+
+    /**
+     * @param Site $site
+     * @param Document $document
+     *
+     * @return int
+     */
+    public function getDocumentIdFromHardlinkInSameSite(Site $site, Document $document)
+    {
+        return $this->db->fetchOne('SELECT documents.id FROM documents
+            LEFT JOIN documents_hardlink ON documents.id = documents_hardlink.id
+            WHERE documents_hardlink.sourceId = ? AND documents.path LIKE ?', [$document->getId(), $site->getRootPath() . '/%']);
     }
 
     /**
@@ -59,7 +72,6 @@ class Dao extends Model\Dao\AbstractDao
 
     /**
      * @param Document $document
-     * @param string $task
      *
      * @return array
      */
@@ -101,7 +113,7 @@ class Dao extends Model\Dao\AbstractDao
     /**
      * @param Document $document
      * @param Document $translation
-     * @param string|null $language
+     * @param $language
      */
     public function addTranslation(Document $document, Document $translation, $language = null)
     {
@@ -114,7 +126,7 @@ class Dao extends Model\Dao\AbstractDao
         $this->db->insertOrUpdate('documents_translations', [
             'id' => $translation->getId(),
             'sourceId' => $sourceId,
-            'language' => $language,
+            'language' => $language
         ]);
     }
 
@@ -134,7 +146,7 @@ class Dao extends Model\Dao\AbstractDao
     }
 
     /**
-     * @param Document $document
+     * @param Document $sourceDocument
      * @param Document $targetDocument
      */
     public function removeTranslationLink(Document $document, Document $targetDocument)

@@ -16,9 +16,6 @@ namespace Pimcore\Templating\Model;
 
 use Symfony\Component\HttpFoundation\ParameterBag;
 
-/**
- * @deprecated
- */
 class ViewModel implements ViewModelInterface
 {
     /**
@@ -79,7 +76,7 @@ class ViewModel implements ViewModelInterface
     }
 
     /**
-     * @param string $name
+     * @param $name
      *
      * @return mixed
      */
@@ -89,8 +86,8 @@ class ViewModel implements ViewModelInterface
     }
 
     /**
-     * @param string $name
-     * @param mixed $value
+     * @param $name
+     * @param $value
      */
     public function __set($name, $value)
     {
@@ -98,7 +95,7 @@ class ViewModel implements ViewModelInterface
     }
 
     /**
-     * @param string $name
+     * @param $name
      *
      * @return bool
      */

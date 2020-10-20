@@ -27,8 +27,8 @@ class Dao extends Model\Dao\AbstractDao
     const TABLE_NAME_RELATIONS = 'classificationstore_collectionrelations';
 
     /**
-     * @param int|null $colId
-     * @param int|null $groupId
+     * @param null $colId
+     * @param null $groupId
      */
     public function getById($colId = null, $groupId = null)
     {
@@ -63,7 +63,7 @@ class Dao extends Model\Dao\AbstractDao
     {
         $this->db->delete(self::TABLE_NAME_RELATIONS, [
             'colId' => $this->model->getColId(),
-            'groupId' => $this->model->getGroupId(),
+            'groupId' => $this->model->getGroupId()
         ]);
     }
 
@@ -73,7 +73,6 @@ class Dao extends Model\Dao\AbstractDao
     public function update()
     {
         $type = $this->model->getObjectVars();
-        $data = [];
 
         foreach ($type as $key => $value) {
             if (in_array($key, $this->getValidTableColumns(self::TABLE_NAME_RELATIONS))) {

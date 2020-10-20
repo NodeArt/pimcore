@@ -19,9 +19,6 @@ namespace Pimcore\Model\Webservice\Data;
 
 use Pimcore\Model;
 
-/**
- * @deprecated
- */
 class Property extends Model\Webservice\Data
 {
     /**

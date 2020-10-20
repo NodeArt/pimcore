@@ -83,8 +83,6 @@ class ImplementationLoader implements LoaderInterface, ClassNameLoaderInterface
                 return $loader;
             }
         }
-
-        return null;
     }
 
     /**

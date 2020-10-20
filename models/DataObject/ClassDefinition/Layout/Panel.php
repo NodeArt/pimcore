@@ -17,12 +17,9 @@
 namespace Pimcore\Model\DataObject\ClassDefinition\Layout;
 
 use Pimcore\Model;
-use Pimcore\Model\DataObject\ClassDefinition\Layout\Traits\IconTrait;
 
 class Panel extends Model\DataObject\ClassDefinition\Layout
 {
-    use IconTrait;
-
     /**
      * Static type of this element
      *
@@ -48,7 +45,12 @@ class Panel extends Model\DataObject\ClassDefinition\Layout
     public $border = false;
 
     /**
-     * @param int $labelWidth
+     * @var string|null
+     */
+    public $icon;
+
+    /**
+     * @param $labelWidth
      *
      * @return $this
      */
@@ -70,7 +72,7 @@ class Panel extends Model\DataObject\ClassDefinition\Layout
     }
 
     /**
-     * @param string $layout
+     * @param $layout
      *
      * @return $this
      */
@@ -103,5 +105,21 @@ class Panel extends Model\DataObject\ClassDefinition\Layout
     public function setBorder(bool $border): void
     {
         $this->border = $border;
+    }
+
+    /**
+     * @return string
+     */
+    public function getIcon(): ?string
+    {
+        return $this->icon;
+    }
+
+    /**
+     * @param string $icon
+     */
+    public function setIcon(?string $icon): void
+    {
+        $this->icon = $icon;
     }
 }

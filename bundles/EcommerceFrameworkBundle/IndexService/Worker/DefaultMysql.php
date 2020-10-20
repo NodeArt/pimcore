@@ -21,7 +21,6 @@ use Pimcore\Bundle\EcommerceFrameworkBundle\Model\IndexableInterface;
 use Pimcore\Db\ConnectionInterface;
 use Pimcore\Logger;
 use Pimcore\Model\DataObject\AbstractObject;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * @property MysqlConfigInterface $tenantConfig
@@ -38,9 +37,9 @@ class DefaultMysql extends AbstractWorker implements WorkerInterface
      */
     protected $mySqlHelper;
 
-    public function __construct(MysqlConfigInterface $tenantConfig, ConnectionInterface $db, EventDispatcherInterface $eventDispatcher)
+    public function __construct(MysqlConfigInterface $tenantConfig, ConnectionInterface $db)
     {
-        parent::__construct($tenantConfig, $db, $eventDispatcher);
+        parent::__construct($tenantConfig, $db);
 
         $this->mySqlHelper = new Helper\MySql($tenantConfig, $db);
     }
@@ -141,7 +140,7 @@ class DefaultMysql extends AbstractWorker implements WorkerInterface
                     'parentCategoryIds' => ',' . implode(',', $parentCategoryIds) . ',',
                     'priceSystemName' => $object->getPriceSystemName(),
                     'active' => $object->isActive(),
-                    'inProductList' => $object->isActive(true),
+                    'inProductList' => $object->isActive(true)
                 ];
 
                 $relationData = [];
@@ -170,7 +169,7 @@ class DefaultMysql extends AbstractWorker implements WorkerInterface
                             $data[$attribute->getName()] = $value;
                         }
 
-                        if (isset($data[$attribute->getName()]) && is_array($data[$attribute->getName()])) {
+                        if (is_array($data[$attribute->getName()])) {
                             $data[$attribute->getName()] = $this->convertArray($data[$attribute->getName()]);
                         }
                     } catch (\Exception $e) {

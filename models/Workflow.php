@@ -18,7 +18,6 @@ namespace Pimcore\Model;
  * Class Workflow
  *
  * @method Workflow\Dao getDao()
- * @method void save()
  *
  * @package Pimcore\Model
  */
@@ -74,7 +73,7 @@ class Workflow extends AbstractModel
     /**
      * The default status of the element
      *
-     * @var string
+     * @var
      */
     public $defaultStatus;
 
@@ -109,7 +108,7 @@ class Workflow extends AbstractModel
     /**
      * @param int $id
      *
-     * @return Workflow|null
+     * @return Workflow
      */
     public static function getById($id)
     {
@@ -257,7 +256,7 @@ class Workflow extends AbstractModel
     /**
      * Returns whether or not a state name is valid within the workflow
      *
-     * @param string $stateName
+     * @param $stateName
      *
      * @return bool
      */
@@ -300,7 +299,7 @@ class Workflow extends AbstractModel
     /**
      * Returns whether or not a status name is valid within the workflow
      *
-     * @param string $statusName
+     * @param $statusName
      *
      * @return bool
      */
@@ -326,7 +325,7 @@ class Workflow extends AbstractModel
     /**
      * Returns whether or not an action is valid in this workflow
      *
-     * @param string $actionName
+     * @param $actionName
      *
      * @return bool
      */
@@ -338,7 +337,7 @@ class Workflow extends AbstractModel
     /**
      * Returns whether or not an action name is a global action
      *
-     * @param string $actionName
+     * @param $actionName
      *
      * @return bool
      */
@@ -348,7 +347,7 @@ class Workflow extends AbstractModel
     }
 
     /**
-     * @param string $stateName
+     * @param $stateName
      *
      * @return bool|mixed
      */
@@ -364,7 +363,7 @@ class Workflow extends AbstractModel
     }
 
     /**
-     * @param string $statusName
+     * @param $statusName
      *
      * @return bool|mixed
      */
@@ -396,7 +395,7 @@ class Workflow extends AbstractModel
     }
 
     /**
-     * @param string $statusName
+     * @param $statusName
      *
      * @return array
      */
@@ -444,7 +443,7 @@ class Workflow extends AbstractModel
     }
 
     /**
-     * @return string
+     * @return mixed
      */
     public function getDefaultStatus()
     {
@@ -452,7 +451,7 @@ class Workflow extends AbstractModel
     }
 
     /**
-     * @param string $defaultStatus
+     * @param mixed $defaultStatus
      */
     public function setDefaultStatus($defaultStatus)
     {
@@ -463,8 +462,8 @@ class Workflow extends AbstractModel
      * Returns a configuration for an action
      * If a status is given then the configuration for the status will be applied too
      *
-     * @param string $actionName
-     * @param string|null $statusName
+     * @param $actionName
+     * @param $statusName
      *
      * @return array|null
      *
@@ -501,8 +500,8 @@ class Workflow extends AbstractModel
      * Returns all of the valid users for an action
      * if a status is given it will be taken into consideration.
      *
-     * @param string $actionName
-     * @param string|null $statusName
+     * @param $actionName
+     * @param $statusName
      *
      * @return array|null
      */
@@ -519,10 +518,10 @@ class Workflow extends AbstractModel
     /**
      * Returns additional fields for an action.
      *
-     * @param string $actionName
-     * @param string|null $statusName
+     * @param $actionName
+     * @param $statusName
      *
-     * @return array|null
+     * @return array
      */
     public function getAdditionalFieldsForAction($actionName, $statusName = null)
     {

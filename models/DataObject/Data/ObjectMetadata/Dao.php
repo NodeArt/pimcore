@@ -28,17 +28,17 @@ class Dao extends Model\Dao\AbstractDao
     use DataObject\ClassDefinition\Helper\Dao;
 
     /**
-     * @var array|null
+     * @var null
      */
     protected $tableDefinitions = null;
 
     /**
      * @param DataObject\Concrete $object
-     * @param string $ownertype
-     * @param string $ownername
-     * @param string $position
-     * @param int $index
-     * @param string $type
+     * @param $ownertype
+     * @param $ownername
+     * @param $position
+     * @param $index
+     * @param $type
      *
      * @throws \Exception
      */
@@ -53,7 +53,7 @@ class Dao extends Model\Dao\AbstractDao
             'ownername' => $ownername ? $ownername : '',
             'index' => $index ? $index : '0',
             'position' => $position ? $position : '0',
-            'type' => $type ? $type : 'object', ];
+            'type' => $type ? $type : 'object'];
 
         foreach ($this->model->getColumns() as $column) {
             $getter = 'get' . ucfirst($column);
@@ -65,7 +65,7 @@ class Dao extends Model\Dao\AbstractDao
     }
 
     /**
-     * @param DataObject\Concrete $object
+     * @param $object
      *
      * @return string
      */
@@ -76,12 +76,12 @@ class Dao extends Model\Dao\AbstractDao
 
     /**
      * @param DataObject\Concrete $source
-     * @param int $destinationId
-     * @param string $fieldname
-     * @param string $ownertype
-     * @param string $ownername
-     * @param string $position
-     * @param int $index
+     * @param $destinationId
+     * @param $fieldname
+     * @param $ownertype
+     * @param $ownername
+     * @param $position
+     * @param $index
      *
      * @return null|DataObject\Data\ObjectMetadata
      */
@@ -128,6 +128,7 @@ class Dao extends Model\Dao\AbstractDao
               `position` VARCHAR(70) NOT NULL DEFAULT '0',
               `index` int(11) unsigned NOT NULL DEFAULT '0',
               PRIMARY KEY (`o_id`, `dest_id`, `type`, `fieldname`, `column`, `ownertype`, `ownername`, `position`, `index`),
+              INDEX `o_id` (`o_id`),
               INDEX `dest_id` (`dest_id`),
               INDEX `fieldname` (`fieldname`),
               INDEX `column` (`column`),

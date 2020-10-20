@@ -28,7 +28,7 @@ class Input extends AbstractFilterType
             'label' => $filterDefinition->getLabel(),
             'currentValue' => $currentFilter[$field],
             'fieldname' => $field,
-            'metaData' => $filterDefinition->getMetaData(),
+            'metaData' => $filterDefinition->getMetaData()
         ]);
     }
 
@@ -37,12 +37,11 @@ class Input extends AbstractFilterType
         $field = $this->getField($filterDefinition);
         $preSelect = $this->getPreSelect($filterDefinition);
 
-        $value = $params[$field] ?? null;
-        $isReload = $params['is_reload'] ?? null;
+        $value = $params[$field];
 
         if ($value == AbstractFilterType::EMPTY_STRING) {
             $value = null;
-        } elseif (empty($value) && !$isReload) {
+        } elseif (empty($value) && !$params['is_reload']) {
             $value = $preSelect;
         }
 

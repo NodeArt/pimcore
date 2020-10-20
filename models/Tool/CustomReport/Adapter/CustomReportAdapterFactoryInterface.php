@@ -17,15 +17,13 @@
 
 namespace Pimcore\Model\Tool\CustomReport\Adapter;
 
-use Pimcore\Model\Tool\CustomReport\Config;
-
 interface CustomReportAdapterFactoryInterface
 {
     /**
      * Create a CustomReport Adapter
      *
-     * @param \stdClass $config
-     * @param Config|null $fullConfig
+     * @param $config
+     * @param $fullConfig
      *
      * @return CustomReportAdapterInterface
      */

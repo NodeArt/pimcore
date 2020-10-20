@@ -14,8 +14,7 @@
 
 namespace Pimcore\Console;
 
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Output\StreamOutput;
+use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\VarDumper\Cloner\VarCloner;
 use Symfony\Component\VarDumper\Dumper\CliDumper;
 
@@ -28,7 +27,7 @@ class Dumper
     const NEWLINE_AFTER = 2;
 
     /**
-     * @var OutputInterface
+     * @var ConsoleOutput
      */
     protected $output;
 
@@ -43,11 +42,11 @@ class Dumper
     protected $varCloner;
 
     /**
-     * @param OutputInterface $output
+     * @param ConsoleOutput $output
      * @param CliDumper $cliDumper
      * @param VarCloner $varCloner
      */
-    public function __construct(OutputInterface $output, CliDumper $cliDumper = null, VarCloner $varCloner = null)
+    public function __construct(ConsoleOutput $output, CliDumper $cliDumper = null, VarCloner $varCloner = null)
     {
         $this->output = $output;
         $this->setCliDumper($cliDumper);
@@ -63,13 +62,7 @@ class Dumper
             $this->cliDumper = new CliDumper();
         }
 
-        $output = $this->output instanceof StreamOutput ? $this->output->getStream() : function ($line, $depth, $indentPad) {
-            if (-1 !== $depth) {
-                $this->output->writeln(str_repeat($indentPad, $depth) . $line);
-            }
-        };
-
-        $this->cliDumper->setOutput($output);
+        $this->cliDumper->setOutput($this->output->getStream());
     }
 
     /**
@@ -83,7 +76,7 @@ class Dumper
     }
 
     /**
-     * @param mixed $data
+     * @param $data
      * @param null|int $flags
      */
     public function dump($data, $flags = null)

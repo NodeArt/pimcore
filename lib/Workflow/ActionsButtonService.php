@@ -52,8 +52,7 @@ class ActionsButtonService
                 'name' => $transition->getName(),
                 'label' => $transition->getLabel(),
                 'iconCls' => $transition->getIconClass(),
-                'objectLayout' => $transition->getObjectLayout(),
-                'notes' => $notes,
+                'notes' => $notes
             ];
         }
 
@@ -79,8 +78,7 @@ class ActionsButtonService
                     'name' => $globalAction->getName(),
                     'label' => $globalAction->getLabel(),
                     'iconCls' => $globalAction->getIconClass(),
-                    'objectLayout' => $globalAction->getObjectLayout(),
-                    'notes' => $notes,
+                    'notes' => $notes
                 ];
             }
         }

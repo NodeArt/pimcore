@@ -64,16 +64,4 @@ class Dao extends Model\Listing\Dao\AbstractDao
 
         return $condition;
     }
-
-    /**
-     * @return int
-     */
-    public function getTotalCount()
-    {
-        try {
-            return (int) $this->db->fetchOne('SELECT COUNT(*) FROM users ' . $this->getCondition(), $this->model->getConditionVariables());
-        } catch (\Exception $e) {
-            return 0;
-        }
-    }
 }

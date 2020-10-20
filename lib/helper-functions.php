@@ -27,11 +27,11 @@ function xmlToArray($file)
 }
 
 /**
- * @param string $source
- * @param int|null $level
- * @param string|null $target
+ * @param $source
+ * @param null $level
+ * @param null $target
  *
- * @return bool|string
+ * @return bool|null|string
  */
 function gzcompressfile($source, $level = null, $target = null)
 {
@@ -42,35 +42,32 @@ function gzcompressfile($source, $level = null, $target = null)
         $dest = $source.'.gz';
     }
 
+    $mode = 'wb'.$level;
     $error = false;
 
+    $fp_out = gzopen($dest, $mode);
     $fp_in = fopen($source, 'rb');
-
-    $fp_out = fopen($dest, 'wb');
-    $deflateContext = deflate_init(ZLIB_ENCODING_GZIP, ['level' => $level]);
 
     if ($fp_out && $fp_in) {
         while (!feof($fp_in)) {
-            fwrite($fp_out, deflate_add($deflateContext, fread($fp_in, 1024 * 512), ZLIB_NO_FLUSH));
+            gzwrite($fp_out, fread($fp_in, 1024 * 512));
         }
 
         fclose($fp_in);
-
-        fwrite($fp_out, deflate_add($deflateContext, '', ZLIB_FINISH));
-        fclose($fp_out);
+        gzclose($fp_out);
     } else {
         $error = true;
     }
 
     if ($error) {
         return false;
+    } else {
+        return $dest;
     }
-
-    return $dest;
 }
 
 /**
- * @param string $string
+ * @param $string
  *
  * @return bool
  */
@@ -86,7 +83,7 @@ function is_json($string)
 }
 
 /**
- * @param string $path
+ * @param $path
  *
  * @return int
  */
@@ -113,8 +110,8 @@ function foldersize($path)
 }
 
 /**
- * @param string $string
- * @param string[] $values
+ * @param $string
+ * @param $values
  *
  * @return mixed
  */
@@ -133,7 +130,7 @@ function replace_pcre_backreferences($string, $values)
 }
 
 /**
- * @param array $array
+ * @param  $array
  *
  * @return array
  */
@@ -164,18 +161,7 @@ function in_arrayi(string $needle, array $haystack)
 }
 
 /**
- * @param string $needle
- * @param array $haystack
- *
- * @return false|int|string the key for needle if it is found in the array, false otherwise.
- */
-function array_searchi(string $needle, array $haystack)
-{
-    return array_search(strtolower($needle), array_map('strtolower', $haystack));
-}
-
-/**
- * @param object $node
+ * @param  $node
  *
  * @return array
  */
@@ -192,7 +178,7 @@ function object2array($node)
 }
 
 /**
- * @param array $args
+ * @param  $args
  *
  * @return false|string
  */
@@ -208,7 +194,7 @@ function array_urlencode($args)
 /**
  * same as  array_urlencode but no urlencode()
  *
- * @param array $args
+ * @param  $args
  *
  * @return false|string
  */
@@ -222,7 +208,7 @@ function array_toquerystring($args)
 }
 
 /**
- * @param array $array
+ * @param $array
  *
  * @return string
  */
@@ -243,8 +229,6 @@ function array_to_html_attribute_string($array)
 
 /**
  * @param string $var
- *
- * @return string
  */
 function urlencode_ignore_slash($var)
 {
@@ -270,31 +254,30 @@ function urlencode_ignore_slash($var)
 }
 
 /**
- * @param string $val
+ * @param  $val
  *
- * @return int
+ * @return int|string
  */
 function return_bytes($val)
 {
     $val = trim($val);
     $last = strtolower($val[strlen($val) - 1]);
-    $bytes = (int)$val;
     switch ($last) {
         case 'g':
-            $bytes *= 1024;
+            $val *= 1024;
             // no break
         case 'm':
-            $bytes *= 1024;
+            $val *= 1024;
             // no break
         case 'k':
-            $bytes *= 1024;
+            $val *= 1024;
     }
 
-    return $bytes;
+    return $val;
 }
 
 /**
- * @param int $bytes
+ * @param  $bytes
  * @param int $precision
  *
  * @return string
@@ -313,7 +296,7 @@ function formatBytes($bytes, $precision = 2)
 }
 
 /**
- * @param string $str
+ * @param  $str
  *
  * @return float|int
  */
@@ -393,7 +376,7 @@ function explode_and_trim($delimiter, $string = '', $limit = '', $useArrayFilter
 }
 
 /**
- * @param string $directory
+ * @param $directory
  * @param bool $empty
  *
  * @return bool
@@ -437,13 +420,11 @@ function recursiveDelete($directory, $empty = true)
     } elseif (is_file($directory)) {
         return unlink($directory);
     }
-
-    return false;
 }
 
 /**
- * @param string $source
- * @param string $destination
+ * @param $source
+ * @param $destination
  *
  * @return bool
  */
@@ -486,11 +467,29 @@ function p_r()
 }
 
 /**
- * @param array $array
+ * @param  $errno
+ * @param  $errstr
+ * @param  $errfile
+ * @param  $errline
+ * @param  $errcontext
+ *
+ * @return bool
+ */
+function pimcore_error_handler($errno, $errstr, $errfile, $errline, $errcontext)
+{
+
+    //Log::info($errno . " | " . $errstr . " in " . $errfile . " on line: " .$errline );
+
+    // enable php internal error handling
+    return false;
+}
+
+/**
+ * @param $array
  * @param string $prefix
  * @param string $suffix
  *
- * @return array
+ * @return mixed
  */
 function wrapArrayElements($array, $prefix = "'", $suffix = "'")
 {
@@ -516,7 +515,7 @@ function isAssocArray(array $arr)
 /**
  * this is an alternative for realpath() which isn't able to handle symlinks correctly
  *
- * @param string $filename
+ * @param $filename
  *
  * @return string
  */
@@ -565,16 +564,14 @@ function closureHash(Closure $closure)
 
     $hash = md5(json_encode([
         $content,
-        $ref->getStaticVariables(),
+        $ref->getStaticVariables()
     ]));
 
     return $hash;
 }
 
-/**
- * Checks if the given directory is empty
- *
- * @param string $dir
+/** Checks if the given directory is empty
+ * @param $dir
  *
  * @return bool|null
  */
@@ -594,10 +591,10 @@ function is_dir_empty($dir)
 }
 
 /**
- * @param mixed $var
+ * @param $var
  * @param string $indent
  *
- * @return string
+ * @return mixed|string
  */
 function var_export_pretty($var, $indent = '')
 {
@@ -622,7 +619,7 @@ function var_export_pretty($var, $indent = '')
 }
 
 /**
- * @param mixed $contents
+ * @param $contents
  *
  * @return string
  */

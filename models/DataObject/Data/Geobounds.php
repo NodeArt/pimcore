@@ -35,8 +35,8 @@ class Geobounds implements OwnerAwareFieldInterface
     protected $southWest;
 
     /**
-     * @param Geopoint|null $northEast
-     * @param Geopoint|null $southWest
+     * @param null $northEast
+     * @param null $southWest
      */
     public function __construct($northEast = null, $southWest = null)
     {
@@ -58,7 +58,7 @@ class Geobounds implements OwnerAwareFieldInterface
     }
 
     /**
-     * @param Geopoint $northEast
+     * @param $northEast
      *
      * @return $this
      */
@@ -79,7 +79,7 @@ class Geobounds implements OwnerAwareFieldInterface
     }
 
     /**
-     * @param Geopoint $southWest
+     * @param $southWest
      *
      * @return $this
      */

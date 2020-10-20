@@ -36,7 +36,7 @@ class FilterGroupHelper
      *
      * might be overwritten, if new column groups are necessary
      *
-     * @param string $columnGroup
+     * @param $columnGroup
      *
      * @return string
      */
@@ -48,7 +48,7 @@ class FilterGroupHelper
     /**
      * returns all possible group by values for given column group, product list and field combination
      *
-     * @param string $columnGroup
+     * @param $columnGroup
      * @param ProductListInterface $productList
      * @param string $field
      *

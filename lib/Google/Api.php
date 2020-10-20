@@ -36,7 +36,7 @@ class Api
      */
     public static function getConfig()
     {
-        return Config::getSystemConfiguration('services')['google'] ?? [];
+        return Config::getSystemConfig()->services->google;
     }
 
     /**
@@ -60,7 +60,7 @@ class Api
     {
         $config = self::getConfig();
 
-        if (!empty($config['client_id']) && !empty($config['email']) && file_exists(self::getPrivateKeyPath())) {
+        if ($config->client_id && $config->email && file_exists(self::getPrivateKeyPath())) {
             return true;
         }
 
@@ -74,7 +74,7 @@ class Api
     {
         $config = self::getConfig();
 
-        if (!empty($config['simple_api_key'])) {
+        if ($config->simpleapikey) {
             return true;
         }
 
@@ -96,7 +96,7 @@ class Api
     }
 
     /**
-     * @param array|null $scope
+     * @param null $scope
      *
      * @return bool|\Google_Client
      */
@@ -124,12 +124,11 @@ class Api
 
         $client->setScopes($scope);
 
-        $client->setClientId($config['client_id'] ?? '');
+        $client->setClientId($config->client_id);
 
         // token cache
         $hash = crc32(serialize([$scope]));
         $tokenId = 'google-api.token.' . $hash;
-        $token = null;
         if ($tokenData = TmpStore::get($tokenId)) {
             $tokenInfo = json_decode($tokenData->getData(), true);
             if (($tokenInfo['created'] + $tokenInfo['expires_in']) > (time() - 900)) {
@@ -165,7 +164,7 @@ class Api
         $client->setCache($cache);
 
         $client->setApplicationName('pimcore CMF');
-        $client->setDeveloperKey(Config::getSystemConfiguration('services')['google']['simple_api_key']);
+        $client->setDeveloperKey(Config::getSystemConfig()->services->google->simpleapikey);
 
         return $client;
     }
@@ -201,7 +200,7 @@ class Api
     }
 
     /**
-     * @param string $type
+     * @param $type
      *
      * @return array
      *
@@ -224,13 +223,13 @@ class Api
                         }
                         $result[] = [
                             'id' => str_replace('XX', $i, $item['id']),
-                            'name' => $name,
+                            'name' => $name
                         ];
                     }
                 } else {
                     $result[] = [
                         'id' => $item['id'],
-                        'name' => $translator->trans($item['attributes']['uiName'], [], 'admin'),
+                        'name' => $translator->trans($item['attributes']['uiName'], [], 'admin')
                     ];
                 }
             }

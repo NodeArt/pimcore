@@ -46,8 +46,7 @@ pimcore.settings.thumbnail.item = Class.create({
 
 
         this.mediaPanel = new Ext.TabPanel({
-            autoHeight: true,
-            plugins: [Ext.create('Ext.ux.TabReorderer', {})]
+            autoHeight: true
         });
 
         var addViewPortButton = {
@@ -59,16 +58,13 @@ pimcore.settings.thumbnail.item = Class.create({
                 text: t("add_media_query"),
                 iconCls: "pimcore_icon_add",
                 handler: function () {
-                    Ext.MessageBox.prompt("", t("enter_media_query"), function (button, value) {
-                        if (button == "ok") {
+                    Ext.MessageBox.prompt("", t("please_enter_the_maximum_viewport_width_in_pixels_allowed_for_this_thumbnail"), function (button, value) {
+                        if (button == "ok" && is_numeric(value)) {
+                            value = value + "w"; // add the width indicator here, to be future-proof
                             this.addMediaPanel(value, null, true, true);
                         }
-                    }.bind(this), null, false, '(min-width: 576px)');
+                    }.bind(this));
                 }.bind(this)
-            }, {
-                xtype: 'component',
-                style: "float: right; padding: 8px 40px 0 0;",
-                html: t('you_can_drag_the_tabs_to_reorder_the_media_queries')
             }]
         };
 
@@ -82,15 +78,12 @@ pimcore.settings.thumbnail.item = Class.create({
         this.settings = new Ext.form.FormPanel({
             border: false,
             labelWidth: 150,
-            defaults: {
-                renderer: Ext.util.Format.htmlEncode
-            },
             items: [{
                 xtype: "panel",
                 autoHeight: true,
                 border: false,
                 loader: {
-                    url: Routing.generate('pimcore_admin_settings_thumbnailadaptercheck'),
+                    url: "/admin/settings/thumbnail-adapter-check",
                     autoLoad: true
                 }
             }, {
@@ -99,7 +92,7 @@ pimcore.settings.thumbnail.item = Class.create({
                 value: this.data.name,
                 fieldLabel: t("name"),
                 width: 450,
-                readOnly: true
+                disabled: true
             },
                 {
                     xtype: "textarea",
@@ -141,11 +134,6 @@ pimcore.settings.thumbnail.item = Class.create({
                         xtype: "container",
                         html: "<small>(" + t("high_resolution_info_text") + ")</small>",
                         style: "margin-bottom: 20px"
-                    }, {
-                        xtype: "checkbox",
-                        name: "forcePictureTag",
-                        boxLabel: t("force_picture_html_tag"),
-                        checked: this.data.forcePictureTag
                     }, {
                         xtype: "checkbox",
                         name: "preserveColor",
@@ -201,11 +189,6 @@ pimcore.settings.thumbnail.item = Class.create({
 
     addMediaPanel: function (name, items, closable, activate) {
 
-        if(name.match(/^\d+w$/)) {
-            // convert legacy syntax to new syntax/name
-            name = '(max-width: ' + name.replace("w", "") + 'px)';
-        }
-
         if (this.medias[name]) {
             return;
         }
@@ -226,7 +209,9 @@ pimcore.settings.thumbnail.item = Class.create({
         if (name == "default") {
             title = t("default");
         } else {
-            title = name;
+            // remove the width indicator (maybe there will be more complex syntax in the future)
+            var tmpName = name.replace("w", "");
+            title = "max. width: " + tmpName + "px";
         }
 
         var itemContainer = new Ext.Panel({
@@ -278,22 +263,18 @@ pimcore.settings.thumbnail.item = Class.create({
     getData: function () {
 
         var mediaData = {};
-        var mediaOrder = {};
 
         Ext.iterate(this.medias, function (key, value) {
             mediaData[key] = [];
-            mediaOrder[key] = this.mediaPanel.tabBar.items.indexOf(value.tab);
-
             var items = value.items.getRange();
             for (var i = 0; i < items.length; i++) {
                 mediaData[key].push(items[i].getForm().getFieldValues());
             }
-        }.bind(this));
+        });
 
         return {
             settings: Ext.encode(this.settings.getForm().getFieldValues()),
             medias: Ext.encode(mediaData),
-            mediaOrder: Ext.encode(mediaOrder),
             name: this.data.name
         }
     },
@@ -307,7 +288,7 @@ pimcore.settings.thumbnail.item = Class.create({
         }
 
         Ext.Ajax.request({
-            url: Routing.generate('pimcore_admin_settings_thumbnailupdate'),
+            url: "/admin/settings/thumbnail-update",
             method: "PUT", params: this.getData(),
             success: this.saveOnComplete.bind(this, reload)
 
@@ -1357,35 +1338,6 @@ pimcore.settings.thumbnail.items = {
                 xtype: "hidden",
                 name: "type",
                 value: "tifforiginal"
-            }]
-        });
-
-        return item;
-    },
-
-    item1x1_pixel: function (panel, data, getName) {
-
-        var niceName = t("1x1_pixel_placeholder");
-        if (typeof getName != "undefined" && getName) {
-            return niceName;
-        }
-
-        if (typeof data == "undefined") {
-            data = {};
-        }
-        var myId = Ext.id();
-
-        var item = new Ext.form.FormPanel({
-            id: myId,
-            style: "margin-top: 10px",
-            border: true,
-            bodyStyle: "padding: 10px;",
-            tbar: this.getTopBar(niceName, myId, panel),
-            html: t("1x1_pixel_placeholder_description"),
-            items: [{
-                xtype: "hidden",
-                name: "type",
-                value: "1x1_pixel"
             }]
         });
 

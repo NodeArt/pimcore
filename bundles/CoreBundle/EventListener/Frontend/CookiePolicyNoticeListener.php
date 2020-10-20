@@ -16,15 +16,11 @@ namespace Pimcore\Bundle\CoreBundle\EventListener\Frontend;
 
 use Pimcore\Bundle\CoreBundle\EventListener\Traits\PimcoreContextAwareTrait;
 use Pimcore\Bundle\CoreBundle\EventListener\Traits\ResponseInjectionTrait;
-use Pimcore\Config;
 use Pimcore\Http\Request\Resolver\PimcoreContextResolver;
 use Symfony\Bundle\FrameworkBundle\Translation\Translator;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\HttpKernel\KernelInterface;
 
-/**
- * @deprecated
- */
 class CookiePolicyNoticeListener
 {
     use ResponseInjectionTrait;
@@ -51,17 +47,11 @@ class CookiePolicyNoticeListener
     protected $translator;
 
     /**
-     * @var Config
-     */
-    protected $config;
-
-    /**
      * @param KernelInterface $kernel
      */
-    public function __construct(KernelInterface $kernel, Config $config)
+    public function __construct(KernelInterface $kernel)
     {
         $this->kernel = $kernel;
-        $this->config = $config;
     }
 
     /**
@@ -93,7 +83,7 @@ class CookiePolicyNoticeListener
     }
 
     /**
-     * @param string $code
+     * @param $code
      */
     public function setTemplateCode($code)
     {
@@ -151,9 +141,10 @@ class CookiePolicyNoticeListener
         }
 
         $response = $event->getResponse();
+        $config = \Pimcore\Config::getSystemConfig();
         $locale = $request->getLocale();
 
-        if ($this->enabled && $this->config['general']['show_cookie_notice'] && \Pimcore\Tool::useFrontendOutputFilters()) {
+        if ($this->enabled && $config->general->show_cookie_notice && \Pimcore\Tool::useFrontendOutputFilters()) {
             if ($event->isMasterRequest() && $this->isHtmlResponse($response)) {
                 $template = $this->getTemplateCode();
 
@@ -182,13 +173,13 @@ class CookiePolicyNoticeListener
                             (function () {
                                 var ls = window["localStorage"];
                                 if(ls && !ls.getItem("pc-cookie-accepted")) {
-
+            
                                     var code = ' . $templateCode . ';
                                     var ci = window.setInterval(function () {
                                         if(document.body) {
                                             clearInterval(ci);
                                             document.body.insertAdjacentHTML("beforeend", code);
-
+            
                                             document.getElementById("pc-button").onclick = function () {
                                                 document.getElementById("pc-cookie-notice").style.display = "none";
                                                 ls.setItem("pc-cookie-accepted", "true");
@@ -307,7 +298,7 @@ class CookiePolicyNoticeListener
                 'lv' => 'Sapratu',
                 'lt' => 'Supratau',
                 'ro' => 'Am înțeles',
-            ],
+            ]
         ];
 
         $translations = [];

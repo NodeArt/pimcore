@@ -27,23 +27,20 @@ pimcore.object.tags.calculatedValue = Class.create(pimcore.object.tags.abstract,
 
         var input = {
             fieldLabel: '<img src="/bundles/pimcoreadmin/img/flat-color-icons/calculator.svg" style="height: 1.8em; display: inline-block; vertical-align: middle;"/>' + this.fieldConfig.title,
-            componentCls: "object_field object_field_type_" + this.type,
+            componentCls: "object_field",
             labelWidth: 100,
-            readOnly: true,
-            width: 100
+            readOnly: true
         };
 
         if (this.data) {
             input.value = this.data.value;
         }
 
-        if (isNaN(this.fieldConfig.width)) {
-            input.width = 100;
-        } else if (this.fieldConfig.width) {
+        if (this.fieldConfig.width) {
             input.width = this.fieldConfig.width;
         }
 
-        if (!isNaN(this.fieldConfig.labelWidth)) {
+        if (this.fieldConfig.labelWidth) {
             input.labelWidth = this.fieldConfig.labelWidth;
         }
 
@@ -78,6 +75,10 @@ pimcore.object.tags.calculatedValue = Class.create(pimcore.object.tags.abstract,
         return this.fieldConfig.name;
     },
 
+    isInvalidMandatory: function () {
+        return true;
+    },
+
     getGridColumnFilter: function (field) {
         return {type: 'string', dataIndex: field.key};
     },
@@ -101,7 +102,7 @@ pimcore.object.tags.calculatedValue = Class.create(pimcore.object.tags.abstract,
             return value;
         }.bind(this, field.key);
 
-        return {text: t(field.label), sortable:true, dataIndex:field.key, renderer:renderer,
+        return {text:ts(field.label), sortable:true, dataIndex:field.key, renderer:renderer,
             editor:this.getGridColumnEditor(field)};
     }
 });

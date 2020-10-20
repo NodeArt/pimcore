@@ -20,9 +20,6 @@ namespace Pimcore\Document\Tag\NamingStrategy;
 use Pimcore\Document\Tag\Block\BlockName;
 use Pimcore\Document\Tag\NamingStrategy\Exception\TagNameException;
 
-/**
- * @deprecated
- */
 final class NestedNamingStrategy extends AbstractNamingStrategy
 {
     const STRATEGY_NAME = 'nested';

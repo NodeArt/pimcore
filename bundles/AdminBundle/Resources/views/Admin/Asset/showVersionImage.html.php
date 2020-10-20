@@ -39,8 +39,7 @@
     $dataUri = "data:image/png;base64," . base64_encode(file_get_contents($thumbnail));
     unlink($thumbnail);
     unlink($tempFile);
-
-use Pimcore\Model\Asset\MetaData\ClassDefinition\Data\Data; ?>
+?>
 
 <table id="wrapper" cellpadding="0" cellspacing="0" border="0">
     <tr>
@@ -85,26 +84,17 @@ use Pimcore\Model\Asset\MetaData\ClassDefinition\Data\Data; ?>
                                 ?>
                                 <?php
                                 $metaData = $this->asset->getMetadata();
-
-                                $loader = \Pimcore::getContainer()->get('pimcore.implementation_loader.asset.metadata.data');
-
-
                                 if (is_array($metaData) && count($metaData) > 0) {
                                     foreach ($metaData as $data) {
-                                        $preview = $data["data"];
-                                        try {
-                                            /** @var Data $instance */
-                                            $instance = $loader->build($data['type']);
-                                            $preview = $instance->getVersionPreview($preview, $data);
-                                        } catch (\Pimcore\Loader\ImplementationLoader\Exception\UnsupportedException $e) {
-
-                                        }
                                         ?>
                                         <tr>
                                             <td><?php echo $data['name']; ?>
                                                 (<?php echo $data['type']; ?>)
                                             </td>
-                                            <td><?php echo $preview; ?>
+                                            <td><?php if($data['type'] == 'date') {
+                                            echo date('m/d/Y H:i:s', $data['data']); ?>
+                                            <?php } else {
+                                            echo $data['data']; } ?>
                                             </td>
                                             <?php ?>
                                         </tr>

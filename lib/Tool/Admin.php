@@ -51,27 +51,18 @@ class Admin
         $baseResource = \Pimcore::getContainer()->getParameter('pimcore.admin.translations.path');
         $languageDir = \Pimcore::getKernel()->locateResource($baseResource);
         $adminLang = \Pimcore::getContainer()->getParameter('pimcore_admin.admin_languages');
-        $appDefaultPath = \Pimcore::getContainer()->getParameter('translator.default_path');
-
         $languages = [];
-        $languageDirs = [$languageDir, $appDefaultPath];
+        $languageDirs = [$languageDir];
         foreach ($languageDirs as $filesDir) {
             if (is_dir($filesDir)) {
                 $files = scandir($filesDir);
                 foreach ($files as $file) {
                     if (is_file($filesDir . '/' . $file)) {
                         $parts = explode('.', $file);
-
-                        $languageCode = $parts[0];
-                        if ($parts[0] === 'admin') {
-                            // this is for the app specific translations
-                            $languageCode = $parts[1];
-                        }
-
-                        if (($adminLang != null && in_array($languageCode, array_values($adminLang))) || $adminLang == null) {
-                            if ($parts[1] === 'json' || $parts[0] === 'admin') {
-                                if (\Pimcore::getContainer()->get('pimcore.locale')->isLocale($languageCode)) {
-                                    $languages[] = $languageCode;
+                        if (($adminLang != null && in_array($parts[0], array_values($adminLang))) || $adminLang == null) {
+                            if ($parts[1] == 'json') {
+                                if (\Pimcore::getContainer()->get('pimcore.locale')->isLocale($parts[0])) {
+                                    $languages[] = $parts[0];
                                 }
                             }
                         }
@@ -86,12 +77,11 @@ class Admin
     /**
      * @static
      *
-     * @param string $scriptContent
-     * @param bool $asUrl
+     * @param  $scriptContent
      *
      * @return mixed
      */
-    public static function getMinimizedScriptPath($scriptContent, bool $asUrl = true)
+    public static function getMinimizedScriptPath($scriptContent)
     {
         $scriptPath = PIMCORE_SYSTEM_TEMP_DIRECTORY . '/minified_javascript_core_'.md5($scriptContent).'.js';
 
@@ -101,23 +91,14 @@ class Admin
 
         $params = [
             'scripts' => basename($scriptPath),
-            '_dc' => \Pimcore\Version::getRevision(),
+            '_dc' => \Pimcore\Version::getRevision()
         ];
 
-        if ($asUrl) {
-            @trigger_error(
-                'Calling Pimcore\Tool::getMinimizedScriptPath with $asUrl true is deprecated and will be removed with Pimcore 7.0',
-                E_USER_DEPRECATED
-            );
-
-            return '/admin/misc/script-proxy?'.array_toquerystring($params);
-        }
-
-        return $params;
+        return '/admin/misc/script-proxy?' . array_toquerystring($params);
     }
 
     /**
-     * @param string $file
+     * @param $file
      *
      * @return \stdClass
      */
@@ -165,7 +146,7 @@ class Admin
     }
 
     /**
-     * @param string|null $sessionId
+     * @param null $sessionId
      *
      * @throws \Exception
      */
@@ -180,10 +161,10 @@ class Admin
         }
 
         File::putPhpFile(self::getMaintenanceModeFile(), to_php_data_file_format([
-            'sessionId' => $sessionId,
+            'sessionId' => $sessionId
         ]));
 
-        @chmod(self::getMaintenanceModeFile(), 0666); // so it can be removed also via FTP, ...
+        @chmod(self::getMaintenanceModeFile(), 0777); // so it can be removed also via FTP, ...
 
         \Pimcore::getEventDispatcher()->dispatch(SystemEvents::MAINTENANCE_MODE_ACTIVATE);
     }
@@ -238,10 +219,10 @@ class Admin
     public static function scheduleMaintenanceModeOnLogin()
     {
         File::putPhpFile(self::getMaintenanceModeScheduleLoginFile(), to_php_data_file_format([
-            'schedule' => true,
+            'schedule' => true
         ]));
 
-        @chmod(self::getMaintenanceModeScheduleLoginFile(), 0666); // so it can be removed also via FTP, ...
+        @chmod(self::getMaintenanceModeScheduleLoginFile(), 0777); // so it can be removed also via FTP, ...
 
         \Pimcore::getEventDispatcher()->dispatch(SystemEvents::MAINTENANCE_MODE_SCHEDULE_LOGIN);
     }
@@ -256,7 +237,7 @@ class Admin
     /**
      * @static
      *
-     * @return \Pimcore\Model\User|null
+     * @return \Pimcore\Model\User
      */
     public static function getCurrentUser()
     {
@@ -278,7 +259,7 @@ class Admin
      * @param string|array $languages
      * @param bool $returnLanguageArray
      *
-     * @return string|array
+     * @return string
      */
     public static function reorderWebsiteLanguages($user, $languages, $returnLanguageArray = false)
     {

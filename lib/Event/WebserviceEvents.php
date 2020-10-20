@@ -14,9 +14,6 @@
 
 namespace Pimcore\Event;
 
-/**
- * @deprecated
- */
 final class WebserviceEvents
 {
     /**

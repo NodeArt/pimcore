@@ -124,7 +124,7 @@ pimcore.document.newsletters.sendingPanel = Class.create({
                     iconCls: "pimcore_icon_stop",
                     handler: function() {
                         Ext.Ajax.request({
-                            url: Routing.generate('pimcore_admin_document_newsletter_stopsend'),
+                            url: "/admin/newsletter/stop-send",
                             method: "POST",
                             params: {id: this.document.id}
                         });
@@ -171,6 +171,8 @@ pimcore.document.newsletters.sendingPanel = Class.create({
 
     send: function() {
 
+        var fieldValues = this.layout.getForm().getFieldValues();
+
         var params = {
             id: this.document.id,
             adapterParams: Ext.encode(this.currentSourceAdapter.getValues()),
@@ -178,7 +180,7 @@ pimcore.document.newsletters.sendingPanel = Class.create({
         };
 
         Ext.Ajax.request({
-            url: Routing.generate('pimcore_admin_document_newsletter_calculate'),
+            url: "/admin/newsletter/calculate",
             method: "post",
             params: params,
             success: function(response) {
@@ -190,7 +192,7 @@ pimcore.document.newsletters.sendingPanel = Class.create({
 
                         if (buttonValue == "yes") {
                             Ext.Ajax.request({
-                                url: Routing.generate('pimcore_admin_document_newsletter_send'),
+                                url: "/admin/newsletter/send",
                                 method: "post",
                                 params: params,
                                 success: function (response) {
@@ -235,7 +237,7 @@ pimcore.document.newsletters.sendingPanel = Class.create({
         };
 
         Ext.Ajax.request({
-            url: Routing.generate('pimcore_admin_document_newsletter_sendtest'),
+            url: "/admin/newsletter/send-test",
             method: "post",
             params: params,
             success: function(response) {
@@ -254,7 +256,7 @@ pimcore.document.newsletters.sendingPanel = Class.create({
 
     checkForActiveSendingProcess: function() {
         Ext.Ajax.request({
-            url: Routing.generate('pimcore_admin_document_newsletter_getsendstatus'),
+            url: "/admin/newsletter/get-send-status",
             params: {id: this.document.id},
             success: function(response) {
                 var result = Ext.decode(response.responseText);

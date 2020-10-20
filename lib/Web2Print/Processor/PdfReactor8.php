@@ -26,7 +26,7 @@ class PdfReactor8 extends Processor
     /**
      * returns the default web2print config
      *
-     * @param object $config
+     * @param $config
      *
      * @return array
      */
@@ -36,25 +36,25 @@ class PdfReactor8 extends Processor
         $web2PrintConfig = Config::getWeb2PrintConfig();
         $reactorConfig = [
             'document' => '',
-            'baseURL' => (string)$web2PrintConfig->get('pdfreactorBaseUrl'),
-            'author' => $config->author ?? '',
-            'title' => $config->title ?? '',
-            'addLinks' => isset($config->links) && $config->links === true,
-            'addBookmarks' => isset($config->bookmarks) && $config->bookmarks === true,
+            'baseURL' => (string)$web2PrintConfig->pdfreactorBaseUrl,
+            'author' => $config->author ? $config->author : '',
+            'title' => $config->title ? $config->title : '',
+            'addLinks' => $config->links == 'true',
+            'addBookmarks' => $config->bookmarks == 'true',
             'javaScriptMode' => $config->javaScriptMode,
-            'defaultColorSpace' => $config->colorspace ?? \ColorSpace::CMYK,
-            'encryption' => $config->encryption ?? \Encryption::NONE,
-            'addTags' => isset($config->tags) && $config->tags === true,
-            'logLevel' => $config->loglevel ?? \LogLevel::FATAL,
-            'enableDebugMode' => $web2PrintConfig->get('pdfreactorEnableDebugMode') || $config->enableDebugMode === true,
-            'addOverprint' => isset($config->addOverprint) && $config->addOverprint === true,
-            'httpsMode' => $web2PrintConfig->get('pdfreactorEnableLenientHttpsMode') ? \HttpsMode::LENIENT : \HttpsMode::STRICT,
+            'defaultColorSpace' => $config->colorspace,
+            'encryption' => $config->encryption,
+            'addTags' => $config->tags == 'true',
+            'logLevel' => $config->loglevel,
+            'enableDebugMode' => $web2PrintConfig->pdfreactorEnableDebugMode || $config->enableDebugMode == 'true',
+            'addOverprint' => $config->addOverprint == 'true',
+            'httpsMode' => $web2PrintConfig->pdfreactorEnableLenientHttpsMode ? \HttpsMode::LENIENT : \HttpsMode::STRICT
         ];
-        if (!empty($config->viewerPreference)) {
+        if ($config->viewerPreference) {
             $reactorConfig['viewerPreferences'] = [$config->viewerPreference];
         }
-        if (trim($web2PrintConfig->get('pdfreactorLicence'))) {
-            $reactorConfig['licenseKey'] = trim($web2PrintConfig->get('pdfreactorLicence'));
+        if (trim($web2PrintConfig->pdfreactorLicence)) {
+            $reactorConfig['licenseKey'] = trim($web2PrintConfig->pdfreactorLicence);
         }
 
         return $reactorConfig;
@@ -69,13 +69,13 @@ class PdfReactor8 extends Processor
 
         include_once(__DIR__ . '/api/v' . $web2PrintConfig->get('pdfreactorVersion', '8.0') . '/PDFreactor.class.php');
 
-        $port = ((string)$web2PrintConfig->get('pdfreactorServerPort')) ? (string)$web2PrintConfig->get('pdfreactorServerPort') : '9423';
-        $protocol = ((string)$web2PrintConfig->get('pdfreactorProtocol')) ? (string)$web2PrintConfig->get('pdfreactorProtocol') : 'http';
+        $port = ((string)$web2PrintConfig->pdfreactorServerPort) ? (string)$web2PrintConfig->pdfreactorServerPort : '9423';
+        $protocol = ((string)$web2PrintConfig->pdfreactorProtocol) ? (string)$web2PrintConfig->pdfreactorProtocol : 'http';
 
-        $pdfreactor = new \PDFreactor($protocol . '://' . $web2PrintConfig->get('pdfreactorServer') . ':' . $port . '/service/rest');
+        $pdfreactor = new \PDFreactor($protocol . '://' . $web2PrintConfig->pdfreactorServer . ':' . $port . '/service/rest');
 
-        if (trim($web2PrintConfig->get('pdfreactorApiKey'))) {
-            $pdfreactor->apiKey = trim($web2PrintConfig->get('pdfreactorApiKey'));
+        if (trim($web2PrintConfig->pdfreactorApiKey)) {
+            $pdfreactor->apiKey = trim($web2PrintConfig->pdfreactorApiKey);
         }
 
         return $pdfreactor;
@@ -116,20 +116,12 @@ class PdfReactor8 extends Processor
         }
     }
 
-    /**
-     * @param Document\PrintAbstract $document
-     * @param object $config
-     *
-     * @return string
-     *
-     * @throws \Exception
-     */
     protected function buildPdf(Document\PrintAbstract $document, $config)
     {
         $params = [];
-        $params['printermarks'] = isset($config->printermarks) && $config->printermarks === true;
-        $params['screenResolutionImages'] = isset($config->screenResolutionImages) && $config->screenResolutionImages === true;
-        $params['colorspace'] = $config->colorspace ?? \ColorSpace::CMYK;
+        $params['printermarks'] = $config->printermarks == 'true';
+        $params['screenResolutionImages'] = $config->screenResolutionImages == 'true';
+        $params['colorspace'] = $config->colorspace;
 
         $this->updateStatus($document->getId(), 10, 'start_html_rendering');
         $html = $document->renderDocument($params);
@@ -141,6 +133,7 @@ class PdfReactor8 extends Processor
         $pdfreactor = $this->getClient();
 
         $reactorConfig = $this->getConfig($config);
+        $web2PrintConfig = Config::getWeb2PrintConfig();
         $reactorConfig['document'] = $html;
 
         $event = new PrintConfigEvent($this, ['config' => $config, 'reactorConfig' => $reactorConfig, 'document' => $document]);
@@ -148,22 +141,30 @@ class PdfReactor8 extends Processor
 
         $reactorConfig = $event->getArguments()['reactorConfig'];
 
-        $progress = new \stdClass();
-        $progress->finished = false;
+        try {
+            $progress = new \stdClass();
+            $progress->finished = false;
 
-        $processId = $pdfreactor->convertAsync($reactorConfig);
+            $processId = $pdfreactor->convertAsync($reactorConfig);
 
-        while (!$progress->finished) {
-            $progress = $pdfreactor->getProgress($processId);
-            $this->updateStatus($document->getId(), 50 + ($progress->progress / 2), 'pdf_conversion');
+            while (!$progress->finished) {
+                $progress = $pdfreactor->getProgress($processId);
+                $this->updateStatus($document->getId(), 50 + ($progress->progress / 2), 'pdf_conversion');
 
-            Logger::info('PDF converting progress: ' . $progress->progress . '%');
-            sleep(2);
+                Logger::info('PDF converting progress: ' . $progress->progress . '%');
+                sleep(2);
+            }
+
+            $this->updateStatus($document->getId(), 100, 'saving_pdf_document');
+            $result = $pdfreactor->getDocument($processId);
+            $pdf = base64_decode($result->document);
+        } catch (\Exception $e) {
+            Logger::error($e);
+            $document->setLastGenerateMessage($e->getMessage());
+            throw new \Exception('Error during REST-Request:' . $e->getMessage());
         }
 
-        $this->updateStatus($document->getId(), 100, 'saving_pdf_document');
-        $result = $pdfreactor->getDocument($processId);
-        $pdf = base64_decode($result->document);
+        $document->setLastGenerateMessage('');
 
         return $pdf;
     }
@@ -176,8 +177,8 @@ class PdfReactor8 extends Processor
 
         $options[] = ['name' => 'author', 'type' => 'text', 'default' => ''];
         $options[] = ['name' => 'title', 'type' => 'text', 'default' => ''];
-        $options[] = ['name' => 'printermarks', 'type' => 'bool', 'default' => false];
-        $options[] = ['name' => 'addOverprint', 'type' => 'bool', 'default' => false];
+        $options[] = ['name' => 'printermarks', 'type' => 'bool', 'default' => ''];
+        $options[] = ['name' => 'addOverprint', 'type' => 'bool', 'default' => ''];
         $options[] = ['name' => 'links', 'type' => 'bool', 'default' => true];
         $options[] = ['name' => 'bookmarks', 'type' => 'bool', 'default' => true];
         $options[] = ['name' => 'tags', 'type' => 'bool', 'default' => true];
@@ -185,41 +186,41 @@ class PdfReactor8 extends Processor
             'name' => 'javaScriptMode',
             'type' => 'select',
             'values' => [\JavaScriptMode::ENABLED, \JavaScriptMode::DISABLED, \JavaScriptMode::ENABLED_NO_LAYOUT],
-            'default' => \JavaScriptMode::ENABLED,
+            'default' => \JavaScriptMode::ENABLED
         ];
 
         $options[] = [
             'name' => 'viewerPreference',
             'type' => 'select',
             'values' => [\ViewerPreferences::PAGE_LAYOUT_SINGLE_PAGE, \ViewerPreferences::PAGE_LAYOUT_TWO_COLUMN_LEFT, \ViewerPreferences::PAGE_LAYOUT_TWO_COLUMN_RIGHT],
-            'default' => \ViewerPreferences::PAGE_LAYOUT_SINGLE_PAGE,
+            'default' => \ViewerPreferences::PAGE_LAYOUT_SINGLE_PAGE
         ];
 
         $options[] = [
             'name' => 'colorspace',
             'type' => 'select',
             'values' => [\ColorSpace::CMYK, \ColorSpace::RGB],
-            'default' => \ColorSpace::CMYK,
+            'default' => \ColorSpace::CMYK
         ];
 
         $options[] = [
             'name' => 'encryption',
             'type' => 'select',
             'values' => [\Encryption::NONE, \Encryption::TYPE_40, \Encryption::TYPE_128],
-            'default' => \Encryption::NONE,
+            'default' => \Encryption::NONE
         ];
 
         $options[] = [
             'name' => 'loglevel',
             'type' => 'select',
             'values' => [\LogLevel::FATAL, \LogLevel::WARN, \LogLevel::INFO, \LogLevel::DEBUG, \LogLevel::PERFORMANCE],
-            'default' => \LogLevel::FATAL,
+            'default' => \LogLevel::FATAL
         ];
 
         $options[] = ['name' => 'enableDebugMode', 'type' => 'bool', 'default' => false];
 
         $event = new PrintConfigEvent($this, [
-            'options' => $options,
+            'options' => $options
         ]);
 
         \Pimcore::getEventDispatcher()->dispatch(DocumentEvents::PRINT_MODIFY_PROCESSING_OPTIONS, $event);

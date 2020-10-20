@@ -17,19 +17,20 @@ namespace Pimcore\Model\Tool\CustomReport\Adapter;
 class Analytics extends AbstractAdapter
 {
     /**
-     * @param array|null $filters
-     * @param string|null $sort
-     * @param string|null $dir
-     * @param int|null $offset
-     * @param int|null $limit
-     * @param array|null $fields
-     * @param array|null $drillDownFilters
+     * @param $filters
+     * @param $sort
+     * @param $dir
+     * @param $offset
+     * @param $limit
+     * @param null $fields
+     * @param null $drillDownFilters
+     * @param null $fullConfig
      *
      * @return array
      *
      * @throws \Exception
      */
-    public function getData($filters, $sort, $dir, $offset, $limit, $fields = null, $drillDownFilters = null)
+    public function getData($filters, $sort, $dir, $offset, $limit, $fields = null, $drillDownFilters = null, $fullConfig = null)
     {
         $this->setFilters($filters, $drillDownFilters);
 
@@ -53,9 +54,9 @@ class Analytics extends AbstractAdapter
     }
 
     /**
-     * @param \stdClass $configuration
+     * @param $configuration
      *
-     * @return array
+     * @return array|mixed
      *
      * @throws \Exception
      */
@@ -72,13 +73,13 @@ class Analytics extends AbstractAdapter
     }
 
     /**
-     * @param array $filters
+     * @param $filters
      * @param array $drillDownFilters
      */
     protected function setFilters($filters, $drillDownFilters = [])
     {
         $gaFilters = [ $this->config->filters ];
-        if (count($filters)) {
+        if (sizeof($filters)) {
             foreach ($filters as $filter) {
                 if ($filter['type'] == 'string') {
                     $value = str_replace(';', '', addslashes($filter['value']));
@@ -88,7 +89,7 @@ class Analytics extends AbstractAdapter
                     $compMapping = [
                         'lt' => '<',
                         'gt' => '>',
-                        'eq' => '==',
+                        'eq' => '=='
                     ];
                     if ($compMapping[$filter['comparison']]) {
                         $gaFilters[] = "{$filter['field']}{$compMapping[$filter['comparison']]}{$value}";
@@ -100,7 +101,7 @@ class Analytics extends AbstractAdapter
             }
         }
 
-        if (count($drillDownFilters)) {
+        if (sizeof($drillDownFilters)) {
             foreach ($drillDownFilters as $key => $value) {
                 $gaFilters[] = "{$key}=={$value}";
             }
@@ -116,8 +117,8 @@ class Analytics extends AbstractAdapter
     }
 
     /**
-     * @param array|null $fields
-     * @param array|null $drillDownFilters
+     * @param null $fields
+     * @param null $drillDownFilters
      * @param bool $useDimensionHandling
      *
      * @return mixed
@@ -128,7 +129,7 @@ class Analytics extends AbstractAdapter
     {
         $configuration = clone $this->config;
 
-        if (is_array($fields) && count($fields)) {
+        if (is_array($fields) && sizeof($fields)) {
             $configuration = $this->handleFields($configuration, $fields);
         }
 
@@ -187,7 +188,7 @@ class Analytics extends AbstractAdapter
     }
 
     /**
-     * @param array $results
+     * @param $results
      *
      * @return array
      */
@@ -209,8 +210,8 @@ class Analytics extends AbstractAdapter
     }
 
     /**
-     * @param \stdClass $configuration
-     * @param array $fields
+     * @param $configuration
+     * @param $fields
      *
      * @return mixed
      */
@@ -236,14 +237,14 @@ class Analytics extends AbstractAdapter
     }
 
     /**
-     * @param \stdClass $configuration
+     * @param $configuration
      *
-     * @return \stdClass
+     * @return mixed
      */
     protected function handleDimensions($configuration)
     {
         $dimension = $configuration->dimension;
-        if (count($dimension)) {
+        if (sizeof($dimension)) {
             foreach ($this->fullConfig->columnConfiguration as $column) {
                 if ($column['filter_drilldown'] == 'only_filter') {
                     foreach ($dimension as $key => $dim) {
@@ -260,10 +261,10 @@ class Analytics extends AbstractAdapter
     }
 
     /**
-     * @param int $date
-     * @param string $relativeDate
+     * @param $date
+     * @param $relativeDate
      *
-     * @return int
+     * @return float|int|string
      */
     protected function calcDate($date, $relativeDate)
     {
@@ -278,12 +279,12 @@ class Analytics extends AbstractAdapter
                         && in_array($matches[3], ['d', 'm', 'y'])
                     ) {
                         $applyModifiers[] = ['sign' => $matches[1], 'number' => $matches[2],
-                            'type' => $matches[3], ];
+                            'type' => $matches[3]];
                     }
                 }
             }
 
-            if (count($applyModifiers)) {
+            if (sizeof($applyModifiers)) {
                 $date = new \DateTime();
 
                 foreach ($applyModifiers as $modifier) {
@@ -302,11 +303,11 @@ class Analytics extends AbstractAdapter
     }
 
     /**
-     * @param array $filters
-     * @param string $field
-     * @param array $drillDownFilters
+     * @param $filters
+     * @param $field
+     * @param $drillDownFilters
      *
-     * @return array
+     * @return array|mixed
      *
      * @throws \Exception
      */

@@ -50,18 +50,14 @@ final class ImageOptimizeTask implements TaskInterface
 
         // id = path of image relative to PIMCORE_TEMPORARY_DIRECTORY
         foreach ($ids as $id) {
-            $tmpStore = TmpStore::get($id);
+            $file = PIMCORE_TEMPORARY_DIRECTORY.'/'.$id;
+            if (file_exists($file)) {
+                $originalFilesize = filesize($file);
+                $this->optimizer->optimizeImage($file);
 
-            if ($tmpStore && $tmpStore->getData()) {
-                $file = PIMCORE_TEMPORARY_DIRECTORY.'/'.$tmpStore->getData();
-                if (file_exists($file)) {
-                    $originalFilesize = filesize($file);
-                    $this->optimizer->optimizeImage($file);
-
-                    $this->logger->debug('Optimized image: '.$file.' saved '.formatBytes($originalFilesize - filesize($file)));
-                } else {
-                    $this->logger->debug('Skip optimizing of '.$file." because it doesn't exist anymore");
-                }
+                $this->logger->debug('Optimized image: '.$file.' saved '.formatBytes($originalFilesize - filesize($file)));
+            } else {
+                $this->logger->debug('Skip optimizing of '.$file." because it doesn't exist anymore");
             }
 
             TmpStore::delete($id);

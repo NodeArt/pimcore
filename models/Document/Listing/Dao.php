@@ -58,14 +58,17 @@ class Dao extends Model\Listing\Dao\AbstractDao
     }
 
     /**
-     * @param array|string|Expression $columns
+     * @param $columns
      *
      * @return \Pimcore\Db\ZendCompatibility\QueryBuilder
      */
-    public function getQuery($columns = '*')
+    public function getQuery($columns)
     {
         $select = $this->db->select();
-        $select->from([ 'documents' ], $columns);
+        $select->from(
+            [ 'documents' ],
+            $columns
+        );
         $this->addConditions($select);
         $this->addOrder($select);
         $this->addLimit($select);
@@ -97,7 +100,7 @@ class Dao extends Model\Listing\Dao\AbstractDao
      */
     public function loadIdPathList()
     {
-        $select = $this->getQuery(['id', 'CONCAT(path,`key`) as path']);
+        $select = $this->getQuery(['id', 'CONCAT(path,`key`)']);
         $documentIds = $this->db->fetchAll($select, $this->model->getConditionVariables(), $this->model->getConditionVariableTypes());
 
         return $documentIds;
@@ -108,13 +111,10 @@ class Dao extends Model\Listing\Dao\AbstractDao
      */
     public function getCount()
     {
-        if ($this->model->isLoaded()) {
-            return count($this->model->getDocuments());
-        } else {
-            $idList = $this->loadIdList();
+        $select = $this->getQuery([new Expression('COUNT(*)')]);
+        $amount = (int)$this->db->fetchOne($select, $this->model->getConditionVariables(), $this->model->getConditionVariableTypes());
 
-            return count($idList);
-        }
+        return $amount;
     }
 
     /**
@@ -124,9 +124,6 @@ class Dao extends Model\Listing\Dao\AbstractDao
     {
         $select = $this->getQuery([new Expression('COUNT(*)')]);
         $select->reset(QueryBuilder::LIMIT_COUNT);
-        $select->reset(QueryBuilder::LIMIT_OFFSET);
-        $select->reset(QueryBuilder::ORDER);
-
         $amount = (int) $this->db->fetchOne($select, $this->model->getConditionVariables(), $this->model->getConditionVariableTypes());
 
         return $amount;

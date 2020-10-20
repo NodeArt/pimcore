@@ -16,9 +16,6 @@ namespace Pimcore\Templating\Helper\Traits;
 
 use Pimcore\Templating\PhpEngine;
 
-/**
- * @deprecated
- */
 trait TemplatingEngineAwareHelperTrait
 {
     /**

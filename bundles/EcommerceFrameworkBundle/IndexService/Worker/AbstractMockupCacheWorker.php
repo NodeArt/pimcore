@@ -23,7 +23,7 @@ use Pimcore\Logger;
 /**
  * provides worker functionality for mockup cache and central store table
  */
-abstract class AbstractMockupCacheWorker extends ProductCentricBatchProcessingWorker
+abstract class AbstractMockupCacheWorker extends AbstractBatchProcessingWorker
 {
     /**
      * returns prefix for cache key
@@ -35,7 +35,7 @@ abstract class AbstractMockupCacheWorker extends ProductCentricBatchProcessingWo
     /**
      * creates mockup cache key
      *
-     * @param int $objectId
+     * @param $objectId
      *
      * @return string
      */
@@ -47,7 +47,7 @@ abstract class AbstractMockupCacheWorker extends ProductCentricBatchProcessingWo
     /**
      * deletes element from mockup cache
      *
-     * @param int $objectId
+     * @param $objectId
      */
     protected function deleteFromMockupCache($objectId)
     {
@@ -58,8 +58,8 @@ abstract class AbstractMockupCacheWorker extends ProductCentricBatchProcessingWo
     /**
      * updates mockup cache, delegates creation of mockup object to tenant config
      *
-     * @param int $objectId
-     * @param array|null $data
+     * @param $objectId
+     * @param null $data
      *
      * @return DefaultMockup
      *
@@ -105,7 +105,7 @@ abstract class AbstractMockupCacheWorker extends ProductCentricBatchProcessingWo
     /**
      * gets mockup from cache and if not in cache, adds it to cache
      *
-     * @param int $objectId
+     * @param $objectId
      *
      * @return DefaultMockup
      */

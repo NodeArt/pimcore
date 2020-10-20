@@ -27,38 +27,37 @@ use Pimcore\Model\Version;
 abstract class Dao extends Model\Document\Dao
 {
     /**
-     * Delete all editables containing the content (tags) from the database
+     * Delete all elements containing the content (tags) from the database
      */
-    public function deleteAllEditables()
+    public function deleteAllElements()
     {
         $this->db->delete('documents_elements', ['documentId' => $this->model->getId()]);
     }
 
     /**
-     * Get all editables containing the content (tags) from the database
+     * Get all elements containing the content (tags) from the database
      *
-     * @return Document\Editable[]
+     * @return Document\Tag[]
      */
-    public function getEditables()
+    public function getElements()
     {
-        $editablesRaw = $this->db->fetchAll('SELECT * FROM documents_elements WHERE documentId = ?', [$this->model->getId()]);
+        $elementsRaw = $this->db->fetchAll('SELECT * FROM documents_elements WHERE documentId = ?', [$this->model->getId()]);
 
-        $editables = [];
-        $loader = \Pimcore::getContainer()->get(Document\Editable\Loader\EditableLoader::class);
+        $elements = [];
+        $loader = \Pimcore::getContainer()->get('pimcore.implementation_loader.document.tag');
 
-        foreach ($editablesRaw as $editableRaw) {
-            /** @var Document\Editable $editable */
-            $editable = $loader->build($editableRaw['type']);
-            $editable->setName($editableRaw['name']);
-            $editable->setDocument($this->model);
-            $editable->setDataFromResource($editableRaw['data']);
+        foreach ($elementsRaw as $elementRaw) {
+            /** @var Document\Tag $element */
+            $element = $loader->build($elementRaw['type']);
+            $element->setName($elementRaw['name']);
+            $element->setDocument($this->model);
+            $element->setDataFromResource($elementRaw['data']);
 
-            $editables[$editableRaw['name']] = $editable;
+            $elements[$elementRaw['name']] = $element;
+            $this->model->setElement($elementRaw['name'], $element);
         }
 
-        $this->model->setEditables($editables);
-
-        return $editables;
+        return $elements;
     }
 
     /**
@@ -85,7 +84,7 @@ abstract class Dao extends Model\Document\Dao
      *
      * @param bool $force
      *
-     * @return Version|null
+     * @return array
      */
     public function getLatestVersion($force = false)
     {
@@ -97,7 +96,7 @@ abstract class Dao extends Model\Document\Dao
             return $version;
         }
 
-        return null;
+        return;
     }
 
     /**

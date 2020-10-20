@@ -19,8 +19,8 @@ use Pimcore\Model\DataObject\Classificationstore;
 class DefaultClassificationStore implements InterpreterInterface
 {
     /**
-     * @param Classificationstore|null $value
-     * @param array|null $config
+     * @param $value
+     * @param null $config
      *
      * @return array|void
      *
@@ -60,7 +60,6 @@ class DefaultClassificationStore implements InterpreterInterface
             $items = [];
 
             //TODO eventually cache that information
-            /** @var \Pimcore\Model\DataObject\ClassDefinition\Data\Classificationstore $fieldDefinition */
             $fieldDefinition = $store->getClass()->getFieldDefinition($store->getFieldname());
             $activeGroupIds = $fieldDefinition->recursiveGetActiveGroupsIds($store->getObject());
 

@@ -49,7 +49,7 @@ class AbstractUser extends Model\AbstractModel
     /**
      * @param int $id
      *
-     * @return static|null
+     * @return AbstractUser|null
      */
     public static function getById($id)
     {
@@ -78,7 +78,7 @@ class AbstractUser extends Model\AbstractModel
     /**
      * @param array $values
      *
-     * @return static
+     * @return self
      */
     public static function create($values = [])
     {
@@ -92,7 +92,7 @@ class AbstractUser extends Model\AbstractModel
     /**
      * @param string $name
      *
-     * @return static|null
+     * @return self|null
      */
     public static function getByName($name)
     {
@@ -141,7 +141,7 @@ class AbstractUser extends Model\AbstractModel
      */
     public function setParentId($parentId)
     {
-        $this->parentId = (int)$parentId;
+        $this->parentId = $parentId;
 
         return $this;
     }
@@ -216,9 +216,6 @@ class AbstractUser extends Model\AbstractModel
         return $this;
     }
 
-    /**
-     * @throws \Exception
-     */
     public function delete()
     {
         if ($this->getId() < 1) {
@@ -227,18 +224,15 @@ class AbstractUser extends Model\AbstractModel
 
         \Pimcore::getEventDispatcher()->dispatch(UserRoleEvents::PRE_DELETE, new UserRoleEvent($this));
 
-        $type = $this->getType();
-
-        // delete all children
-        $list = ($type === 'role' || $type === 'rolefolder') ? new Model\User\Role\Listing() : new Listing();
+        // delete all childs
+        $list = new Listing();
         $list->setCondition('parentId = ?', $this->getId());
-        foreach ($list as $user) {
-            $user->delete();
-        }
+        $list->load();
 
-        // remove user-role relations
-        if ($type === 'role') {
-            $this->cleanupUserRoleRelations();
+        if (is_array($list->getUsers())) {
+            foreach ($list->getUsers() as $user) {
+                $user->delete();
+            }
         }
 
         // now delete the current user
@@ -249,33 +243,7 @@ class AbstractUser extends Model\AbstractModel
     }
 
     /**
-     * https://github.com/pimcore/pimcore/issues/7085
-     *
-     * @throws \Exception
-     */
-    private function cleanupUserRoleRelations()
-    {
-        $userRoleListing = new Listing();
-        $userRoleListing->setCondition('FIND_IN_SET(' . $this->getId() . ',roles)');
-        $userRoleListing = $userRoleListing->load();
-        if (count($userRoleListing)) {
-            /** @var Model\User $relatedUser */
-            foreach ($userRoleListing as $relatedUser) {
-                $userRoles = $relatedUser->getRoles();
-                if (is_array($userRoles)) {
-                    $key = array_search($this->getId(), $userRoles);
-                    if (false !== $key) {
-                        unset($userRoles[$key]);
-                        $relatedUser->setRoles($userRoles);
-                        $relatedUser->save();
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * @param string $type
+     * @param $type
      *
      * @return $this
      */
@@ -284,10 +252,5 @@ class AbstractUser extends Model\AbstractModel
         $this->type = $type;
 
         return $this;
-    }
-
-    public function update()
-    {
-        $this->getDao()->update();
     }
 }

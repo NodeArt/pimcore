@@ -20,9 +20,6 @@ namespace Pimcore\Document\Tag\NamingStrategy;
 use Pimcore\Document\Tag\Block\BlockName;
 use Pimcore\Document\Tag\Block\BlockState;
 
-/**
- * @deprecated
- */
 abstract class AbstractNamingStrategy implements NamingStrategyInterface
 {
     /**

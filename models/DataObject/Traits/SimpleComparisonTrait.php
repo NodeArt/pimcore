@@ -20,31 +20,13 @@ namespace Pimcore\Model\DataObject\Traits;
 trait SimpleComparisonTrait
 {
     /**
-     * @param mixed $oldValue
-     * @param mixed $newValue
+     * @param $oldValue
+     * @param $newValue
      *
      * @return bool
      */
-    public function isEqual($oldValue, $newValue): bool
+    public function isEqual($oldValue, $newValue)
     {
         return $oldValue == $newValue;
-    }
-
-    /**
-     * @param array|null $array1
-     * @param array|null $array2
-     *
-     * @return bool
-     */
-    protected function isEqualArray($array1, $array2): bool
-    {
-        $array1 = array_filter(is_array($array1) ? $array1 : []);
-        $array2 = array_filter(is_array($array2) ? $array2 : []);
-
-        if (count($array1) != count($array2)) {
-            return false;
-        }
-
-        return $array1 == $array2;
     }
 }

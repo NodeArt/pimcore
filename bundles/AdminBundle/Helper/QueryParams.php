@@ -19,7 +19,7 @@ use Carbon\Carbon;
 class QueryParams
 {
     /**
-     * @param array $params
+     * @param $params
      *
      * @return array  [orderKey => null|string, order => null|string]
      */
@@ -57,7 +57,7 @@ class QueryParams
     }
 
     /**
-     * @param string $param
+     * @param $param
      *
      * @return int
      */
@@ -71,7 +71,7 @@ class QueryParams
     /**
      * Creates a condition string from the passed ExtJs filter definitions
      *
-     * @param string $filterString
+     * @param $filterString
      * @param array $matchExact
      * @param bool $returnString
      * @param array $callbacks
@@ -97,7 +97,6 @@ class QueryParams
                     $conditions[$f->property][] = ' ' . $db->quoteIdentifier($f->property) . ' LIKE ' . $db->quote('%' . $f->value . '%') . ' ';
                 }
             } elseif ($f->type == 'numeric') {
-                $symbol = null;
                 if ($f->operator == 'eq') {
                     $symbol = ' = ';
                 } elseif ($f->operator == 'lt') {
@@ -116,11 +115,11 @@ class QueryParams
 
                 if ($f->operator == 'eq') {
                     $conditions[$f->property][] = ' ' . $f->property . ' >= ' . $db->quote($date->getTimestamp());
-                    $conditions[$f->property][] = ' ' . $f->property . ' <= ' . $db->quote($date->addDay()->subSecond()->getTimestamp());
+                    $conditions[$f->property][] = ' ' . $f->property . ' <= ' . $db->quote($date->addDay(1)->subSecond(1)->getTimestamp());
                 } elseif ($f->operator == 'lt') {
                     $conditions[$f->property][] = ' ' . $f->property . ' < ' . $db->quote($date->getTimestamp());
                 } elseif ($f->operator == 'gt') {
-                    $conditions[$f->property][] = ' ' . $f->property . ' > ' . $db->quote($date->addDay()->subSecond()->getTimestamp());
+                    $conditions[$f->property][] = ' ' . $f->property . ' > ' . $db->quote($date->addDay(1)->subSecond(1)->getTimestamp());
                 }
             } else {
                 throw new \Exception('Filer of type ' . $f->type . ' not jet supported.');

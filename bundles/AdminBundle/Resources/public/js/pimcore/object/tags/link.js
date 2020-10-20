@@ -56,12 +56,16 @@ pimcore.object.tags.link = Class.create(pimcore.object.tags.abstract, {
         }.bind(this, field.key);
 
         return {
-            text: t(field.label), sortable: true, dataIndex: field.key, renderer: renderer,
+            text: ts(field.label), sortable: true, dataIndex: field.key, renderer: renderer,
             getEditor: this.getWindowCellEditor.bind(this, field)
         };
     },
 
     getLayoutEdit: function () {
+
+        var input = {
+            name: this.fieldConfig.name
+        };
 
         this.editButton = new Ext.Button({
             iconCls: "pimcore_icon_link pimcore_icon_overlay_edit",
@@ -95,20 +99,14 @@ pimcore.object.tags.link = Class.create(pimcore.object.tags.abstract, {
             value: text
         });
 
-        var componentCfg = {
+        this.component = new Ext.form.FieldContainer({
             fieldLabel: this.fieldConfig.title,
             layout: 'hbox',
             border: false,
             combineErrors: false,
             items: [this.displayField, this.openButton, this.editButton],
-            componentCls: "object_field object_field_type_" + this.type
-        };
-
-        if (this.fieldConfig.labelWidth) {
-            componentCfg.labelWidth = this.fieldConfig.labelWidth;
-        }
-
-        this.component = Ext.create('Ext.form.FieldContainer', componentCfg);
+            componentCls: "object_field"
+        });
 
         return this.component;
     },

@@ -55,8 +55,6 @@ use Pimcore\Templating\Helper\Traits\TextUtilsTrait;
  * @method $this setHttpEquiv($keyValue, $content, $modifiers=[])
  * @method $this setName($keyValue, $content, $modifiers=[])
  * @method $this setProperty($property, $content, $modifiers=[])
- *
- * @deprecated
  */
 class HeadMeta extends AbstractHelper
 {
@@ -243,7 +241,7 @@ class HeadMeta extends AbstractHelper
             throw new Exception('Invalid value passed to append; please use appendMeta()');
         }
 
-        $this->getContainer()->append($value);
+        return $this->getContainer()->append($value);
     }
 
     /**
@@ -280,7 +278,7 @@ class HeadMeta extends AbstractHelper
             throw new Exception('Invalid index passed to offsetUnset()');
         }
 
-        $this->getContainer()->offsetUnset($index);
+        return $this->getContainer()->offsetUnset($index);
     }
 
     /**
@@ -298,7 +296,7 @@ class HeadMeta extends AbstractHelper
             throw new Exception('Invalid value passed to prepend; please use prependMeta()');
         }
 
-        $this->getContainer()->prepend($value);
+        return $this->getContainer()->prepend($value);
     }
 
     /**
@@ -329,7 +327,10 @@ class HeadMeta extends AbstractHelper
     /**
      * Build meta HTML string
      *
-     * @param \stdClass $item
+     * @param  string $type
+     * @param  string $typeValue
+     * @param  string $content
+     * @param  array $modifiers
      *
      * @return string
      */
@@ -342,6 +343,11 @@ class HeadMeta extends AbstractHelper
 
         $modifiersString = '';
         foreach ($item->modifiers as $key => $value) {
+            if (!is_null($this->view) && $this->view->doctype()->isHtml5()
+                && $key == 'scheme') {
+                throw new Exception('Invalid modifier '
+                    . '"scheme" provided; not supported by HTML5');
+            }
             if (!in_array($key, $this->_modifierKeys)) {
                 continue;
             }

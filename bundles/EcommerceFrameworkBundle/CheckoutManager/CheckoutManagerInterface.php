@@ -137,7 +137,7 @@ interface CheckoutManagerInterface
      *
      * Delegates to commit order processor
      *
-     * @param array|StatusInterface $paymentResponseParams
+     * @param $paymentResponseParams
      *
      * @return AbstractOrder
      */

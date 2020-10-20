@@ -20,7 +20,6 @@ use Pimcore\Bundle\EcommerceFrameworkBundle\Exception\VoucherServiceException;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Factory;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Model\AbstractOrder;
 use Pimcore\Bundle\EcommerceFrameworkBundle\PricingManager\Condition\VoucherToken;
-use Pimcore\Bundle\EcommerceFrameworkBundle\PricingManager\PricingManager;
 use Pimcore\Bundle\EcommerceFrameworkBundle\VoucherService\Token as VoucherServiceToken;
 use Pimcore\Localization\LocaleServiceInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -62,12 +61,12 @@ class DefaultService implements VoucherServiceInterface
     {
         $resolver->setRequired([
             'reservation_minutes_threshold',
-            'statistics_days_threshold',
+            'statistics_days_threshold'
         ]);
 
         $resolver->setDefaults([
             'reservation_minutes_threshold' => 5,
-            'statistics_days_threshold' => 30,
+            'statistics_days_threshold' => 30
         ]);
 
         $resolver->setAllowedTypes('reservation_minutes_threshold', 'int');
@@ -82,7 +81,7 @@ class DefaultService implements VoucherServiceInterface
      *
      * @throws VoucherServiceException
      */
-    public function checkToken($code, CartInterface $cart)
+    public function checkToken($code, CartInterface  $cart)
     {
         if ($tokenManager = $this->getTokenManager($code)) {
             return $tokenManager->checkToken($code, $cart);
@@ -96,7 +95,7 @@ class DefaultService implements VoucherServiceInterface
      *
      * @return bool
      */
-    public function reserveToken($code, CartInterface $cart)
+    public function reserveToken($code, CartInterface  $cart)
     {
         if ($tokenManager = $this->getTokenManager($code)) {
             return $tokenManager->reserveToken($code, $cart);
@@ -111,7 +110,7 @@ class DefaultService implements VoucherServiceInterface
      *
      * @return bool
      */
-    public function releaseToken($code, CartInterface $cart)
+    public function releaseToken($code, CartInterface  $cart)
     {
         if ($tokenManager = $this->getTokenManager($code)) {
             return $tokenManager->releaseToken($code, $cart);
@@ -127,7 +126,7 @@ class DefaultService implements VoucherServiceInterface
      *
      * @return bool
      */
-    public function applyToken($code, CartInterface $cart, AbstractOrder $order)
+    public function applyToken($code, CartInterface  $cart, AbstractOrder $order)
     {
         if ($tokenManager = $this->getTokenManager($code)) {
             if ($orderToken = $tokenManager->applyToken($code, $cart, $order)) {
@@ -194,9 +193,7 @@ class DefaultService implements VoucherServiceInterface
         }
 
         // get all valid rules configured in system
-        /** @var PricingManager $pricingManager */
-        $pricingManager = Factory::getInstance()->getPricingManager();
-        $validRules = $pricingManager->getValidRules();
+        $validRules = Factory::getInstance()->getPricingManager()->getValidRules();
         $validRulesAssoc = [];
         foreach ($validRules as $rule) {
             $validRulesAssoc[$rule->getId()] = $rule;
@@ -239,7 +236,9 @@ class DefaultService implements VoucherServiceInterface
 
             foreach ($notAppliedRulesWithVoucherCondition as $ruleId => $conditions) {
                 foreach ($conditions as $condition) {
-                    /** @var VoucherToken $condition */
+                    /**
+                     * @var $condition VoucherToken
+                     */
                     if ($condition->checkVoucherCode($tokenCode)) {
                         $errorMessages[] = $condition->getErrorMessage($locale);
                         $notAppliedPricingRules[] = $validRulesAssoc[$ruleId];
@@ -251,7 +250,9 @@ class DefaultService implements VoucherServiceInterface
                 $hasRule = false;
                 foreach ($appliedRulesWithVoucherCondition as $ruleId => $conditions) {
                     foreach ($conditions as $condition) {
-                        /** @var VoucherToken $condition */
+                        /**
+                         * @var $condition VoucherToken
+                         */
                         if ($condition->checkVoucherCode($tokenCode)) {
                             $hasRule = true;
                             $appliedPricingRules[] = $validRulesAssoc[$ruleId];
@@ -274,7 +275,7 @@ class DefaultService implements VoucherServiceInterface
     }
 
     /**
-     * @param string|null $seriesId
+     * @param null $seriesId
      *
      * @return bool
      */
@@ -312,7 +313,7 @@ class DefaultService implements VoucherServiceInterface
     }
 
     /**
-     * @param string $code
+     * @param $code
      *
      * @return bool|TokenManager\TokenManagerInterface
      */

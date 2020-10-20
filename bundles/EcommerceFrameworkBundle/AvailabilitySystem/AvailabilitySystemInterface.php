@@ -23,7 +23,7 @@ interface AvailabilitySystemInterface
      *
      * @param CheckoutableInterface $product
      * @param int $quantityScale
-     * @param array|null $products
+     * @param null $products
      *
      * @return AvailabilityInterface
      */

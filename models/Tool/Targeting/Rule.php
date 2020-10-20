@@ -18,12 +18,10 @@
 namespace Pimcore\Model\Tool\Targeting;
 
 use Pimcore\Model;
+use Pimcore\Model\Tool;
 
 /**
  * @method Rule\Dao getDao()
- * @method void save()
- * @method void update()
- * @method void delete()
  */
 class Rule extends Model\AbstractModel
 {
@@ -73,7 +71,7 @@ class Rule extends Model\AbstractModel
     public $actions = [];
 
     /**
-     * @param mixed $target
+     * @param $target
      *
      * @return bool
      */
@@ -104,7 +102,7 @@ class Rule extends Model\AbstractModel
      *
      * @param int $id
      *
-     * @return self|null
+     * @return Tool\Targeting\Rule
      */
     public static function getById($id)
     {
@@ -119,9 +117,9 @@ class Rule extends Model\AbstractModel
     }
 
     /**
-     * @param string $name
+     * @param $name
      *
-     * @return self|null
+     * @return null|Rule
      */
     public static function getByName($name)
     {
@@ -136,7 +134,7 @@ class Rule extends Model\AbstractModel
     }
 
     /**
-     * @param string $description
+     * @param $description
      *
      * @return $this
      */
@@ -156,7 +154,7 @@ class Rule extends Model\AbstractModel
     }
 
     /**
-     * @param int $id
+     * @param $id
      *
      * @return $this
      */
@@ -176,7 +174,7 @@ class Rule extends Model\AbstractModel
     }
 
     /**
-     * @param string $name
+     * @param $name
      *
      * @return $this
      */
@@ -220,7 +218,7 @@ class Rule extends Model\AbstractModel
     }
 
     /**
-     * @param array $conditions
+     * @param $conditions
      *
      * @return $this
      */

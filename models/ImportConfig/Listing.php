@@ -22,37 +22,31 @@ use Pimcore\Model;
 /**
  * @method \Pimcore\Model\ImportConfig\Listing\Dao getDao()
  * @method Model\ImportConfig[] load()
- * @method Model\ImportConfig current()
  */
 class Listing extends Model\Listing\AbstractListing
 {
     /**
      * @var array|null
-     *
-     * @deprecated use getter/setter methods or $this->data
      */
     protected $importconfigs = null;
-
-    public function __construct()
-    {
-        $this->importconfigs = & $this->data;
-    }
 
     /**
      * @return Model\ImportConfig[]
      */
     public function getImportconfigs(): array
     {
-        return $this->getData();
+        if ($this->importconfigs === null) {
+            $this->getDao()->load();
+        }
+
+        return $this->importconfigs;
     }
 
     /**
      * @param array $importconfigs
-     *
-     * @return static
      */
     public function setImportconfigs(array $importconfigs)
     {
-        return $this->setData($importconfigs);
+        $this->importconfigs = $importconfigs;
     }
 }

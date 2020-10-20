@@ -38,7 +38,5 @@ class MarkAllDoneCommand extends AbstractCommand
         } else {
             $output->writeln('Nothing to do ...');
         }
-
-        return 0;
     }
 }

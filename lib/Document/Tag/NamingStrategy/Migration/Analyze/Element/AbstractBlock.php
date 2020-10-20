@@ -18,7 +18,6 @@ declare(strict_types=1);
 namespace Pimcore\Document\Tag\NamingStrategy\Migration\Analyze\Element;
 
 /**
- * @deprecated
  * Represents a block element (block, areablock)
  */
 abstract class AbstractBlock extends AbstractElement
@@ -38,7 +37,7 @@ abstract class AbstractBlock extends AbstractElement
     /**
      * Get a list of available child indexes from block data
      *
-     * @param string|null $data
+     * @param null $data
      *
      * @return array
      */

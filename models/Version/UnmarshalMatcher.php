@@ -17,19 +17,28 @@
 
 namespace Pimcore\Model\Version;
 
-@trigger_error(
-    'Pimcore\Model\Version\UnmarshalMatcher is deprecated since version 6.8.0 and will be removed in 7.0.0. ' .
-    ' Use ' . \Pimcore\Model\Element\DeepCopy\UnmarshalMatcher::class . ' instead.',
-    E_USER_DEPRECATED
-);
+use DeepCopy\TypeMatcher\TypeMatcher;
 
-class_exists(\Pimcore\Model\Element\DeepCopy\UnmarshalMatcher::class);
-
-if (false) {
+class UnmarshalMatcher extends TypeMatcher
+{
     /**
-     * @deprecated use \Pimcore\Model\Element\DeepCopy\UnmarshalMatcher instead.
+     * UnmarshalMatcher constructor.
      */
-    class UnmarshalMatcher extends \Pimcore\Model\Element\DeepCopy\UnmarshalMatcher
+    public function __construct()
     {
+    }
+
+    /**
+     * @param mixed $element
+     *
+     * @return bool
+     */
+    public function matches($element)
+    {
+        if ($element instanceof ElementDescriptor) {
+            return true;
+        }
+
+        return false;
     }
 }

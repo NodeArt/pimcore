@@ -60,7 +60,7 @@ Ext.define('pimcore.settings.translationEditor', {
         } else {
             this.editableDivId = "translationeditor_" + uniqid();
 
-            var html = '<div class="pimcore_tag_wysiwyg pimcore_editable_wysiwyg" id="' + this.editableDivId + '" contenteditable="true">' + this.oldValue + '</div>';
+            var html = '<div class="pimcore_tag_wysiwyg" id="' + this.editableDivId + '" contenteditable="true">' + this.oldValue + '</div>';
             var pConf = {
                 title: innerTitle,
                 html: html,
@@ -167,6 +167,8 @@ Ext.define('pimcore.settings.translationEditor', {
 
     completeEdit: function (remainVisible) {
         var me = this,
+            field = me.field,
+            fieldInfo = me.config.fieldInfo,
             startValue = me.startValue,
             value;
 
@@ -334,7 +336,7 @@ Ext.define('pimcore.settings.translationEditor', {
                 // converted by the pimcore thumbnailing service so that they can be displayed in the editor
                 var defaultWidth = 600;
                 var additionalAttributes = "";
-                uri = Routing.generate('pimcore_admin_asset_getimagethumbnail') + "?id=" + id + "&width=" + defaultWidth + "&aspectratio=true";
+                uri = "/admin/asset/get-image-thumbnail?id=" + id + "&width=" + defaultWidth + "&aspectratio=true";
 
                 if(typeof node.data.imageWidth != "undefined") {
                     if(node.data.imageWidth < defaultWidth

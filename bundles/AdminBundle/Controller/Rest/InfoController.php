@@ -14,22 +14,19 @@
 
 namespace Pimcore\Bundle\AdminBundle\Controller\Rest;
 
-use Pimcore\Config;
 use Pimcore\Tool\Console;
 use Pimcore\Version;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * @deprecated
- *
  * Contains actions to gather information about the API. The /user endpoint
  * is used in tests.
  */
 class InfoController extends AbstractRestController
 {
     /**
-     * @Route("/system-clock", name="pimcore_api_rest_info_systemclock", methods={"GET"})
+     * @Route("/system-clock", methods={"GET"})
      */
     public function systemClockAction()
     {
@@ -37,7 +34,7 @@ class InfoController extends AbstractRestController
     }
 
     /**
-     * @Route("/user", name="pimcore_api_rest_info_user", methods={"GET"})
+     * @Route("/user", methods={"GET"})
      */
     public function userAction()
     {
@@ -52,14 +49,15 @@ class InfoController extends AbstractRestController
     }
 
     /**
-     * @Route("/server-info", name="pimcore_api_rest_info_serverinfo", methods={"GET"})
+     * @Route("/server-info", methods={"GET"})
      *
      * Returns a list of all class definitions.
      */
-    public function serverInfoAction(Config $config)
+    public function serverInfoAction()
     {
         $this->checkPermission('system_settings');
 
+        $systemSettings = \Pimcore\Config::getSystemConfig()->toArray();
         $system = [
             'currentTime' => time(),
             'phpCli' => Console::getPhpCli(),
@@ -75,7 +73,7 @@ class InfoController extends AbstractRestController
         $pimcore = [
             'version' => Version::getVersion(),
             'revision' => Version::getRevision(),
-            'instanceIdentifier' => $config['general']['instance_identifier'],
+            'instanceIdentifier' => $systemSettings['general']['instanceIdentifier'],
             'constants' => $pimcoreConstants,
         ];
 
@@ -88,7 +86,7 @@ class InfoController extends AbstractRestController
     }
 
     /**
-     * @Route("/translations", name="pimcore_api_rest_info_translations", methods={"GET"})
+     * @Route("/translations", methods={"GET"})
      */
     public function translationsAction(Request $request)
     {

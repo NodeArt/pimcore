@@ -14,7 +14,7 @@
 
 namespace Pimcore\Bundle\EcommerceFrameworkBundle\PaymentManager\V7\Payment\StartPaymentRequest;
 
-class DatatransRequest extends AbstractRequest
+class DatatransRequest
 {
     protected $reqtype;
     protected $refno;

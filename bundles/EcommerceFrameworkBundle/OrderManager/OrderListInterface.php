@@ -32,8 +32,6 @@ interface OrderListInterface extends SeekableIterator, Countable, ArrayAccess, A
     const LIST_TYPE_ORDER_ITEM = 'item';
 
     /**
-     * @deprecated
-     *
      * @return QueryBuilder
      */
     public function getQuery();
@@ -124,7 +122,7 @@ interface OrderListInterface extends SeekableIterator, Countable, ArrayAccess, A
      * enable product query
      * table alias: product
      *
-     * @param string $classId
+     * @param int $classId
      *
      * @return $this
      */
@@ -157,7 +155,7 @@ interface OrderListInterface extends SeekableIterator, Countable, ArrayAccess, A
     public function addCondition($condition, $value = null);
 
     /**
-     * @param string $field
+     * @param $field
      *
      * @return $this
      */

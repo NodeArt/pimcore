@@ -10,7 +10,7 @@ Contains general settings about timezone, view suffix, additional path variables
 
  
 ## Localization & Internationalization (i18n/l10n) 
-These settings are used in documents to specify the content language (in properties tab), for objects in localized-fields, 
+This settings are used in documents to specify the content language (in properties tab), for objects in localized-fields, 
 for shared translations, ... simply everywhere the editor can choose or use a language for the content.
 Fallback languages are currently used in object's localized fields and shared translations.
 
@@ -103,7 +103,7 @@ Only use a *Service Account* from the Google Cloud Console.
 Google API Key (Simple API Access for CSE, ...) is e.g. required for correct display of geo data types in Pimcore ojbects. 
  
  
-## Output-Cache
+## Ouput-Cache
 Settings for Pimcore [output cache](../19_Development_Tools_and_Details/09_Cache/README.md).
 
 
@@ -123,28 +123,3 @@ Settings for outbound HTTP connectivity of Pimcore - needed e.g. for Pimcore Upd
 Possibility for configuring different newsletter delivery settings from the default e-mail settings.
  
  
-## Access system config in PHP Controller
-Using `\Pimcore\Config::getSystemConfig()` is deprecated. You can choose one of the following options to access the system configuration:
-
-```php 
-<?php
-
-namespace AppBundle\Controller;
-
-use Pimcore\Controller\FrontendController;
-use Symfony\Component\HttpFoundation\Request;
-use Pimcore\Config;
-
-class DefaultController extends FrontendController
-{
-    public function defaultAction(Request $request, Config $config)
-    {
-        // option 1 - use type-hinting to inject the config service
-        $bar = $config['general']['valid_languages'];
-        
-        // option 2 - use the container parameter 
-        $foo = $this->getParameter('pimcore.config')['general']['valid_languages'];    
-    }
-
-}
-```

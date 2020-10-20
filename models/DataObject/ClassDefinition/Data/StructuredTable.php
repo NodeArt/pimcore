@@ -20,9 +20,8 @@ use Pimcore\Model;
 use Pimcore\Model\DataObject;
 use Pimcore\Model\DataObject\ClassDefinition\Data;
 
-class StructuredTable extends Data implements ResourcePersistenceAwareInterface, QueryResourcePersistenceAwareInterface, TypeDeclarationSupportInterface, EqualComparisonInterface
+class StructuredTable extends Data implements ResourcePersistenceAwareInterface, QueryResourcePersistenceAwareInterface
 {
-    use DataObject\Traits\SimpleComparisonTrait;
     use Extension\ColumnType;
     use Extension\QueryColumnType;
 
@@ -54,14 +53,14 @@ class StructuredTable extends Data implements ResourcePersistenceAwareInterface,
     public $labelFirstCell;
 
     /**
-     * @var array
+     * @var object
      */
-    public $cols = [];
+    public $cols;
 
     /**
-     * @var array
+     * @var object
      */
-    public $rows = [];
+    public $rows;
 
     /**
      * Type for the generated phpdoc
@@ -131,7 +130,7 @@ class StructuredTable extends Data implements ResourcePersistenceAwareInterface,
     }
 
     /**
-     * @param string $labelFirstCell
+     * @param $labelFirstCell
      *
      * @return $this
      */
@@ -151,7 +150,7 @@ class StructuredTable extends Data implements ResourcePersistenceAwareInterface,
     }
 
     /**
-     * @return array
+     * @return object
      */
     public function getCols()
     {
@@ -159,7 +158,7 @@ class StructuredTable extends Data implements ResourcePersistenceAwareInterface,
     }
 
     /**
-     * @param array $cols
+     * @param object $cols
      *
      * @return $this
      */
@@ -181,7 +180,7 @@ class StructuredTable extends Data implements ResourcePersistenceAwareInterface,
     }
 
     /**
-     * @return array
+     * @return object
      */
     public function getRows()
     {
@@ -189,7 +188,7 @@ class StructuredTable extends Data implements ResourcePersistenceAwareInterface,
     }
 
     /**
-     * @param array $rows
+     * @param $rows
      *
      * @return $this
      */
@@ -212,8 +211,8 @@ class StructuredTable extends Data implements ResourcePersistenceAwareInterface,
     }
 
     /**
-     * @param array|null $a
-     * @param array|null $b
+     * @param $a
+     * @param $b
      *
      * @return int|mixed
      */
@@ -230,7 +229,7 @@ class StructuredTable extends Data implements ResourcePersistenceAwareInterface,
      * @see ResourcePersistenceAwareInterface::getDataForResource
      *
      * @param DataObject\Data\StructuredTable $data
-     * @param null|DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return array
@@ -255,8 +254,8 @@ class StructuredTable extends Data implements ResourcePersistenceAwareInterface,
     /**
      * @see ResourcePersistenceAwareInterface::getDataFromResource
      *
-     * @param array $data
-     * @param null|DataObject\Concrete $object
+     * @param string $data
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return DataObject\Data\StructuredTable
@@ -274,7 +273,7 @@ class StructuredTable extends Data implements ResourcePersistenceAwareInterface,
         $structuredTable = new DataObject\Data\StructuredTable($structuredData);
 
         if (isset($params['owner'])) {
-            $structuredTable->setOwner($params['owner'], $params['fieldname'], $params['language'] ?? null);
+            $structuredTable->setOwner($params['owner'], $params['fieldname'], $params['language']);
         }
 
         return $structuredTable;
@@ -284,7 +283,7 @@ class StructuredTable extends Data implements ResourcePersistenceAwareInterface,
      * @see QueryResourcePersistenceAwareInterface::getDataForQueryResource
      *
      * @param DataObject\Data\StructuredTable $data
-     * @param null|DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return array
@@ -298,7 +297,7 @@ class StructuredTable extends Data implements ResourcePersistenceAwareInterface,
      * @see Data::getDataForEditmode
      *
      * @param string $data
-     * @param null|DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return array
@@ -330,7 +329,7 @@ class StructuredTable extends Data implements ResourcePersistenceAwareInterface,
      * @see Data::getDataFromEditmode
      *
      * @param array $data
-     * @param null|DataObject\Concrete $object
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return DataObject\Data\StructuredTable
@@ -350,8 +349,8 @@ class StructuredTable extends Data implements ResourcePersistenceAwareInterface,
     }
 
     /**
-     * @param DataObject\Data\StructuredTable|null $data
-     * @param DataObject\Concrete|null $object
+     * @param $data
+     * @param null $object
      * @param mixed $params
      *
      * @return array|null
@@ -371,7 +370,7 @@ class StructuredTable extends Data implements ResourcePersistenceAwareInterface,
      * @see Data::getVersionPreview
      *
      * @param DataObject\Data\StructuredTable $data
-     * @param null|DataObject\Concrete $object
+     * @param null|DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return string|null
@@ -422,7 +421,7 @@ class StructuredTable extends Data implements ResourcePersistenceAwareInterface,
      *
      * @abstract
      *
-     * @param DataObject\Concrete $object
+     * @param DataObject\AbstractObject $object
      * @param array $params
      *
      * @return string
@@ -430,23 +429,25 @@ class StructuredTable extends Data implements ResourcePersistenceAwareInterface,
     public function getForCsvExport($object, $params = [])
     {
         $value = $this->getDataFromObjectParam($object, $params);
-        $string = '';
 
         if ($value instanceof DataObject\Data\StructuredTable) {
+            $string = '';
             $dataArray = $value->getData();
             foreach ($this->getRows() as $r) {
                 foreach ($this->getCols() as $c) {
                     $string .= $dataArray[$r['key']][$c['key']] . '##';
                 }
             }
-        }
 
-        return $string;
+            return $string;
+        } else {
+            return null;
+        }
     }
 
     /**
-     * @param string $importValue
-     * @param null|DataObject\Concrete $object
+     * @param $importValue
+     * @param null|Model\DataObject\AbstractObject $object
      * @param mixed $params
      *
      * @return mixed|DataObject\Data\StructuredTable
@@ -472,12 +473,10 @@ class StructuredTable extends Data implements ResourcePersistenceAwareInterface,
     /**
      * converts data to be exposed via webservices
      *
-     * @deprecated
+     * @param string $object
+     * @param mixed $params
      *
-     * @param DataObject\Concrete $object
-     * @param array $params
-     *
-     * @return array|null
+     * @return mixed
      */
     public function getForWebserviceExport($object, $params = [])
     {
@@ -494,18 +493,16 @@ class StructuredTable extends Data implements ResourcePersistenceAwareInterface,
             }
 
             return $webserviceArray;
+        } else {
+            return null;
         }
-
-        return null;
     }
 
     /**
-     * @deprecated
-     *
      * @param mixed $value
-     * @param DataObject\Concrete|null $object
+     * @param null $object
      * @param mixed $params
-     * @param Model\Webservice\IdMapperInterface|null $idMapper
+     * @param null $idMapper
      *
      * @return mixed|void
      *
@@ -590,8 +587,8 @@ class StructuredTable extends Data implements ResourcePersistenceAwareInterface,
     }
 
     /**
-     * @param string $type text|number|bool
-     * @param int $length The length of the column, default is 255 for text
+     * @param $type string text|number|bool
+     * @param $length int The length of the column, default is 255 for text
      *
      * @return string|null
      */
@@ -600,14 +597,14 @@ class StructuredTable extends Data implements ResourcePersistenceAwareInterface,
         $mapper = [
             'text' => 'varchar('.($length > 0 ? $length : '190').')',
             'number' => 'double',
-            'bool' => 'tinyint(1)',
+            'bool' => 'tinyint(1)'
         ];
 
         return $mapper[$type];
     }
 
     /**
-     * @param DataObject\Data\StructuredTable|null $data
+     * @param $data
      *
      * @return bool
      */
@@ -615,13 +612,13 @@ class StructuredTable extends Data implements ResourcePersistenceAwareInterface,
     {
         if ($data instanceof DataObject\Data\StructuredTable) {
             return $data->isEmpty();
+        } else {
+            return true;
         }
-
-        return true;
     }
 
     /** True if change is allowed in edit mode.
-     * @param DataObject\Concrete $object
+     * @param string $object
      * @param mixed $params
      *
      * @return bool
@@ -633,7 +630,7 @@ class StructuredTable extends Data implements ResourcePersistenceAwareInterface,
 
     /** See parent class.
      * @param mixed $data
-     * @param DataObject\Concrete|null $object
+     * @param null $object
      * @param mixed $params
      *
      * @return array|null
@@ -651,7 +648,7 @@ class StructuredTable extends Data implements ResourcePersistenceAwareInterface,
     }
 
     /**
-     * @param DataObject\ClassDefinition\Data\StructuredTable $masterDefinition
+     * @param DataObject\ClassDefinition\Data $masterDefinition
      */
     public function synchronizeWithMasterDefinition(DataObject\ClassDefinition\Data $masterDefinition)
     {
@@ -659,20 +656,5 @@ class StructuredTable extends Data implements ResourcePersistenceAwareInterface,
         $this->labelFirstCell = $masterDefinition->labelFirstCell;
         $this->cols = $masterDefinition->cols;
         $this->rows = $masterDefinition->rows;
-    }
-
-    /**
-     *
-     * @param DataObject\Data\StructuredTable|null $oldValue
-     * @param DataObject\Data\StructuredTable|null $newValue
-     *
-     * @return bool
-     */
-    public function isEqual($oldValue, $newValue): bool
-    {
-        $oldData = $oldValue instanceof DataObject\Data\StructuredTable ? $oldValue->getData() : [];
-        $newData = $newValue instanceof DataObject\Data\StructuredTable ? $newValue->getData() : [];
-
-        return $this->isEqualArray($oldData, $newData);
     }
 }

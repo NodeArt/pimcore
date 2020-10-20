@@ -48,7 +48,9 @@ class ReportAddressSourceAdapterFactory implements AddressSourceAdapterFactoryIn
             throw new \RuntimeException(sprintf('Could not find Custom Report Adapter with type %s', $reportAdapterType));
         }
 
-        /** @var CustomReportAdapterFactoryInterface $adapterFactory */
+        /**
+         * @var $adapterFactory CustomReportAdapterFactoryInterface
+         */
         $adapterFactory = $this->reportAdapterServiceLocator->get($reportAdapterType);
         $adapter = $adapterFactory->create($configuration, $config);
 

@@ -35,7 +35,7 @@ class Dao extends Model\Dao\AbstractDao
     /**
      * Get the data for the object from database for the given id, or from the ID which is set in the object
      *
-     * @param int|null $id
+     * @param int $id
      */
     public function getById($id = null)
     {
@@ -109,7 +109,7 @@ class Dao extends Model\Dao\AbstractDao
     }
 
     /**
-     * @param array|string $data
+     * @param $data
      *
      * @return array|string
      */
@@ -131,8 +131,8 @@ class Dao extends Model\Dao\AbstractDao
      * Creates the basic logging for the treeGrid in the backend
      * Data will be enhanced with live-data in the backend
      *
-     * @param string $key
-     * @param mixed $value
+     * @param $key
+     * @param $value
      *
      * @return \stdClass
      */
@@ -143,14 +143,14 @@ class Dao extends Model\Dao\AbstractDao
 
         if (is_string($value) || is_int($value) || is_null($value)) {
             $class->data = ['type' => 'simple',
-                'value' => $value, ];
+                'value' => $value];
         } elseif ($value instanceof \DateTimeInterface) {
             $class->data = ['type' => 'simple',
-                'value' => $value->format('Y-m-d H:i'), ];
+                'value' => $value->format('Y-m-d H:i')];
         } elseif (is_object($value) && method_exists($value, 'getId')) {
             $class->data = ['type' => 'object',
                 'objectId' => $value->getId(),
-                'objectClass' => get_class($value), ];
+                'objectClass' => get_class($value)];
         } elseif (is_array($value)) {
             foreach ($value as $entryKey => $entryValue) {
                 $class->children[] = self::prepareLoggingData($entryKey, $entryValue);

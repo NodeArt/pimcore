@@ -8,7 +8,6 @@ use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\HttpKernel\Bundle\BundleInterface;
 
 /**
- * @deprecated
  * Base class for generator commands.
  *
  * The following class is copied from \Sensio\Bundle\GeneratorBundle\Command\GeneratorCommand
@@ -19,6 +18,12 @@ abstract class BaseGeneratorCommand extends ContainerAwareCommand
      * @var Generator
      */
     private $generator;
+
+    // only useful for unit tests
+    public function setGenerator(Generator $generator)
+    {
+        $this->generator = $generator;
+    }
 
     abstract protected function createGenerator();
 
@@ -53,7 +58,7 @@ abstract class BaseGeneratorCommand extends ContainerAwareCommand
     protected function getQuestionHelper()
     {
         $question = $this->getHelperSet()->get('question');
-        if (!$question || get_class($question) !== QuestionHelper::class) {
+        if (!$question || get_class($question) !== 'Pimcore\Bundle\GeneratorBundle\Command\Helper\QuestionHelper') {
             $this->getHelperSet()->set($question = new QuestionHelper());
         }
 

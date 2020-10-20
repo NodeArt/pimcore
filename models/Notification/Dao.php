@@ -22,7 +22,7 @@ use Pimcore\Model\Notification;
 use Pimcore\Model\User;
 
 /**
- * @property \Pimcore\Model\Notification $model
+ * @package Pimcore\Model\Notification
  */
 class Dao extends AbstractDao
 {

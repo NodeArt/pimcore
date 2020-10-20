@@ -20,14 +20,13 @@ namespace Pimcore\Model\DataObject;
 use Pimcore\Logger;
 use Pimcore\Model;
 use Pimcore\Model\DataObject\Exception\InheritanceParentNotFoundException;
-use Pimcore\Model\Element\DirtyIndicatorInterface;
 
 /**
  * @method \Pimcore\Model\DataObject\Objectbrick\Dao getDao()
  */
 class Objectbrick extends Model\AbstractModel implements DirtyIndicatorInterface
 {
-    use Model\Element\Traits\DirtyIndicatorTrait;
+    use Model\DataObject\Traits\DirtyIndicatorTrait;
 
     /**
      * @var array
@@ -98,7 +97,7 @@ class Objectbrick extends Model\AbstractModel implements DirtyIndicatorInterface
     }
 
     /**
-     * @param array $items
+     * @param $items
      *
      * @return $this
      */
@@ -119,7 +118,7 @@ class Objectbrick extends Model\AbstractModel implements DirtyIndicatorInterface
     }
 
     /**
-     * @param string $fieldname
+     * @param $fieldname
      *
      * @return $this
      */
@@ -253,7 +252,7 @@ class Objectbrick extends Model\AbstractModel implements DirtyIndicatorInterface
     }
 
     /**
-     * @param Concrete $object
+     * @param AbstractObject $object
      *
      * @return $this
      */
@@ -310,7 +309,6 @@ class Objectbrick extends Model\AbstractModel implements DirtyIndicatorInterface
 
     public function __wakeup()
     {
-        $brickGetter = null;
 
         // for backwards compatibility
         if (isset($this->object) && $this->object) {
@@ -350,7 +348,7 @@ class Objectbrick extends Model\AbstractModel implements DirtyIndicatorInterface
 
     /**
      * @param string $fieldName
-     * @param mixed $value
+     * @param $value
      *
      * @return mixed
      */
@@ -359,12 +357,10 @@ class Objectbrick extends Model\AbstractModel implements DirtyIndicatorInterface
         return $this->{'set'.ucfirst($fieldName)}($value);
     }
 
-    /**
-     * @internal
-     *
-     * @param string $brick
-     * @param string $brickField
-     * @param string $field
+    /** @internal
+     * @param $brick
+     * @param $brickField
+     * @param $field
      *
      * @throws \Exception
      */
@@ -373,7 +369,7 @@ class Objectbrick extends Model\AbstractModel implements DirtyIndicatorInterface
         $item = $this->get($brick);
         if ($item && !$item->isLazyKeyLoaded($field)) {
             $brickDef = Model\DataObject\Objectbrick\Definition::getByKey($brick);
-            /** @var Model\DataObject\ClassDefinition\Data\CustomResourcePersistingInterface $fieldDef */
+            /** @var $fieldDef Model\DataObject\ClassDefinition\Data\CustomResourcePersistingInterface */
             $fieldDef = $brickDef->getFieldDefinition($field);
             $context = [];
             $context['object'] = $this->getObject();
@@ -406,6 +402,7 @@ class Objectbrick extends Model\AbstractModel implements DirtyIndicatorInterface
                 if ($brickData) {
                     $brickDef = Model\DataObject\Objectbrick\Definition::getByKey($allowedBrickType);
                     $fds = $brickDef->getFieldDefinitions();
+                    /** @var $fd Model\DataObject\ClassDefinition\Data */
                     foreach ($fds as $fd) {
                         $fieldGetter = 'get' . ucfirst($fd->getName());
                         $fieldValue = $brickData->$fieldGetter();

@@ -18,7 +18,7 @@ pimcore.bundle.EcommerceFramework.VoucherSeriesTab = Class.create({
 
     title: t('bundle_ecommerce_vouchertoolkit_tab'),
     iconCls: 'plugin_voucherservice_icon',
-    src: null,
+    src: '/admin/ecommerceframework/voucher/voucher-code-tab',
     id: null,
 
     initialize: function(object, type) {
@@ -26,7 +26,6 @@ pimcore.bundle.EcommerceFramework.VoucherSeriesTab = Class.create({
         this.id = object.id;
         this.src = this.src + "?id=" + this.id;
         this.type = type;
-        this.src = Routing.generate('pimcore_ecommerce_backend_voucher_voucher-code-tab', {id: this.id});
     },
 
     getLayout: function () {
@@ -76,6 +75,7 @@ pimcore.bundle.EcommerceFramework.VoucherSeriesTab = Class.create({
 
     reload: function () {
         try {
+            var d = new Date();
             Ext.get("bundle_ecommerce_vouchertoolkit_tab_frame_" + this.id).dom.src = this.src;
         }
         catch (e) {

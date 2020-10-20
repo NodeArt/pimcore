@@ -27,7 +27,7 @@ class CsvList implements AddressSourceAdapterInterface
     /**
      * IAddressSourceAdapter constructor.
      *
-     * @param array $params
+     * @param $params
      */
     public function __construct($params)
     {
@@ -59,7 +59,7 @@ class CsvList implements AddressSourceAdapterInterface
     public function getParamsForTestSending($emailAddress)
     {
         return new SendingParamContainer($emailAddress, [
-            'emailAddress' => current($this->emailAddresses),
+            'emailAddress' => current($this->emailAddresses)
         ]);
     }
 
@@ -76,8 +76,8 @@ class CsvList implements AddressSourceAdapterInterface
     /**
      * returns array of params to be set on mail for single sending
      *
-     * @param int $limit
-     * @param int $offset
+     * @param $limit
+     * @param $offset
      *
      * @return array
      */

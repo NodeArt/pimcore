@@ -17,19 +17,15 @@
 
 namespace Pimcore\Model\Version;
 
-@trigger_error(
-    'Pimcore\Model\Version\PimcoreClassDefinitionMatcher is deprecated since version 6.8.0 and will be removed in 7.0.0. ' .
-    ' Use ' . \Pimcore\Model\Element\DeepCopy\PimcoreClassDefinitionMatcher::class . ' instead.',
-    E_USER_DEPRECATED
-);
+use DeepCopy\Matcher\Matcher;
+use Pimcore\Model\DataObject\ClassDefinition;
+use Pimcore\Model\DataObject\Concrete;
 
-class_exists(\Pimcore\Model\Element\DeepCopy\PimcoreClassDefinitionMatcher::class);
-
-if (false) {
-    /**
-     * @deprecated use \Pimcore\Model\Element\DeepCopy\PimcoreClassDefinitionMatcher instead.
-     */
-    class PimcoreClassDefinitionMatcher extends \Pimcore\Model\Element\DeepCopy\PimcoreClassDefinitionMatcher
+class PimcoreClassDefinitionMatcher implements Matcher
+{
+    public function matches($object, $property)
     {
+        return $object instanceof Concrete &&
+            $object->getClass()->getFieldDefinition($property) instanceof ClassDefinition\Data\CustomVersionMarshalInterface;
     }
 }

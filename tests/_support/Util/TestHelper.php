@@ -151,19 +151,19 @@ class TestHelper
             $d = [];
 
             if ($document instanceof Document\PageSnippet) {
-                $editables = $document->getEditables();
+                $elements = $document->getElements();
 
-                ksort($editables);
+                ksort($elements);
 
                 /** @var Document\Tag $value */
-                foreach ($editables as $key => $value) {
+                foreach ($elements as $key => $value) {
                     if ($value instanceof Document\Tag\Video) {
                         // with video can't use frontend(), it includes random id
-                        $d['editable_' . $key] = $value->getName() . ':' . $value->type . '_' . $value->id;
+                        $d['element_' . $key] = $value->getName() . ':' . $value->type . '_' . $value->id;
                     } elseif (!$value instanceof Document\Tag\Block) {
-                        $d['editable_' . $key] = $value->getName() . ':' . $value->frontend();
+                        $d['element_' . $key] = $value->getName() . ':' . $value->frontend();
                     } else {
-                        $d['editable_' . $key] = $value->getName();
+                        $d['element_' . $key] = $value->getName();
                     }
                 }
 
@@ -246,8 +246,13 @@ class TestHelper
 
                     /** @var ObjectModel\Fieldcollection\Data\AbstractData $item */
                     foreach ($items as $item) {
+                        /** @var ObjectModel\Fieldcollection\Definition $def */
                         $def = $item->getDefinition();
 
+                        /**
+                         * @var string $k
+                         * @var ObjectModel\ClassDefinition\Data $v
+                         */
                         foreach ($def->getFieldDefinitions() as $k => $v) {
                             $getter = 'get' . ucfirst($v->getName());
                             $fieldValue = $item->$getter();
@@ -363,9 +368,9 @@ class TestHelper
 
     /**
      * @param string $keyPrefix
-     * @param bool $save
-     * @param bool $publish
-     * @param string|null $type
+     * @param bool   $save
+     * @param bool   $publish
+     * @param null   $type
      *
      * @return Concrete|Unittest
      */
@@ -486,7 +491,6 @@ class TestHelper
         $testDataHelper->fillMultiSelect($object, 'multiselect', $seed);
         $testDataHelper->fillUser($object, 'user', $seed);
         $testDataHelper->fillCheckbox($object, 'checkbox', $seed);
-        $testDataHelper->fillBooleanSelect($object, 'booleanSelect', $seed);
         $testDataHelper->fillWysiwyg($object, 'wysiwyg', $seed);
         $testDataHelper->fillPassword($object, 'password', $seed);
         $testDataHelper->fillMultiSelect($object, 'countries', $seed);
@@ -576,13 +580,16 @@ class TestHelper
 
     /**
      * @param string $keyPrefix
-     * @param string|null $data
      * @param bool $save
      *
      * @return Asset\Image
      */
-    public static function createImageAsset($keyPrefix = '', $data = null, $save = true)
+    public static function createImageAsset($keyPrefix = '', $data, $save = true)
     {
+        if (null === $keyPrefix) {
+            $keyPrefix = '';
+        }
+
         if (!$data) {
             $path = static::resolveFilePath('assets/images/image5.jpg');
             if (!file_exists($path)) {
@@ -609,92 +616,6 @@ class TestHelper
         $asset->setProperties($properties);
 
         $asset->setFilename($keyPrefix . uniqid() . rand(10, 99) . '.jpg');
-
-        if ($save) {
-            $asset->save();
-        }
-
-        return $asset;
-    }
-
-    /**
-     * @param string $keyPrefix
-     * @param string|null $data
-     * @param bool $save
-     *
-     * @return Asset\Document
-     */
-    public static function createDocumentAsset($keyPrefix = '', $data = null, $save = true)
-    {
-        if (!$data) {
-            $path = static::resolveFilePath('assets/document/sonnenblume.pdf');
-            if (!file_exists($path)) {
-                throw new \RuntimeException(sprintf('Path %s was not found', $path));
-            }
-
-            $data = file_get_contents($path);
-        }
-
-        $asset = new Asset\Document();
-        $asset->setParentId(1);
-        $asset->setUserOwner(1);
-        $asset->setUserModification(1);
-        $asset->setCreationDate(time());
-        $asset->setData($data);
-        $asset->setType('document');
-
-        $property = new Property();
-        $property->setName('propname');
-        $property->setType('text');
-        $property->setData('bla');
-
-        $properties = [$property];
-        $asset->setProperties($properties);
-
-        $asset->setFilename($keyPrefix . uniqid() . rand(10, 99) . '.pdf');
-
-        if ($save) {
-            $asset->save();
-        }
-
-        return $asset;
-    }
-
-    /**
-     * @param string $keyPrefix
-     * @param string|null $data
-     * @param bool $save
-     *
-     * @return Asset\Video
-     */
-    public static function createVideoAsset($keyPrefix = '', $data = null, $save = true)
-    {
-        if (!$data) {
-            $path = static::resolveFilePath('assets/video/example.mp4');
-            if (!file_exists($path)) {
-                throw new \RuntimeException(sprintf('Path %s was not found', $path));
-            }
-
-            $data = file_get_contents($path);
-        }
-
-        $asset = new Asset\Video();
-        $asset->setParentId(1);
-        $asset->setUserOwner(1);
-        $asset->setUserModification(1);
-        $asset->setCreationDate(time());
-        $asset->setData($data);
-        $asset->setType('video');
-
-        $property = new Property();
-        $property->setName('propname');
-        $property->setType('text');
-        $property->setData('bla');
-
-        $properties = [$property];
-        $asset->setProperties($properties);
-
-        $asset->setFilename($keyPrefix . uniqid() . rand(10, 99) . '.mp4');
 
         if ($save) {
             $asset->save();
@@ -783,27 +704,27 @@ class TestHelper
     }
 
     /**
-     * @param AbstractElement $root
+     * @param AbstractElement|null $root
      * @param string $type
      */
-    public static function cleanUpTree(AbstractElement $root, $type)
+    public static function cleanUpTree(AbstractElement $root = null, $type)
     {
+        if (!$root) {
+            return;
+        }
+
         if (!($root instanceof AbstractObject || $root instanceof Document || $root instanceof Asset)) {
             throw new \InvalidArgumentException(sprintf('Cleanup root type for %s needs to be one of: AbstractObject, Document, Asset', $type));
         }
 
-        if ($root instanceof AbstractObject) {
-            $children = $root->getChildren([], true);
-        } elseif ($root instanceof Document) {
-            $children = $root->getChildren(true);
-        } else {
-            $children = $root->getChildren();
-        }
+        if ($root and $root->hasChildren()) {
+            $childs = $root->getChildren();
 
-        /** @var AbstractElement|AbstractObject|Document|Asset $child */
-        foreach ($children as $child) {
-            codecept_debug(sprintf('Deleting %s %s (%d)', $type, $child->getFullPath(), $child->getId()));
-            $child->delete();
+            /** @var AbstractElement|AbstractObject|Document|Asset $child */
+            foreach ($childs as $child) {
+                codecept_debug(sprintf('Deleting %s %s (%d)', $type, $child->getFullPath(), $child->getId()));
+                $child->delete();
+            }
         }
     }
 
