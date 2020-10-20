@@ -108,8 +108,15 @@ class Document extends Model\Asset
      */
     public function getImageThumbnail($thumbnailName, $page = 1, $deferred = false)
     {
-        if (!\Pimcore\Document::isAvailable() || !$this->getCustomSetting('document_page_count')) {
+        if (!\Pimcore\Document::isAvailable()) {
             Logger::error("Couldn't create image-thumbnail of document " . $this->getRealFullPath() . ' no document adapter is available');
+
+            return new Document\ImageThumbnail(null);
+        }
+
+        if (!$this->getCustomSetting('document_page_count')) {
+            Logger::info('Image thumbnail not yet available, processing is done asynchronously.');
+            TmpStore::add(sprintf('asset_document_conversion_%d', $this->getId()), $this->getId(), 'asset-document-conversion');
 
             return new Document\ImageThumbnail(null);
         }

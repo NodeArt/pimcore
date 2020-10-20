@@ -163,11 +163,10 @@ class Objectbricks extends Data implements CustomResourcePersistingInterface
             if (!$fd instanceof CalculatedValue) {
                 $fieldData = $this->getDataForField($item, $fd->getName(), $fd, $level, $data->getObject(), $getter, $params);
                 $brickData[$fd->getName()] = $fieldData->objectData;
-            }
-
-            $brickMetaData[$fd->getName()] = $fieldData->metaData;
-            if ($fieldData->metaData['inherited'] == true) {
-                $inherited = true;
+                $brickMetaData[$fd->getName()] = $fieldData->metaData;
+                if ($fieldData->metaData['inherited'] == true) {
+                    $inherited = true;
+                }
             }
         }
 
@@ -220,7 +219,7 @@ class Objectbricks extends Data implements CustomResourcePersistingInterface
         // relations but not for objectsMetadata, because they have additional data which cannot be loaded directly from the DB
         if (!$params['objectFromVersion'] && method_exists($fielddefinition, 'getLazyLoading')
             && $fielddefinition->getLazyLoading()
-            && !$fielddefinition instanceof DataObject\ClassDefinition\Data\AdvancedManyToManyObjectRelation
+            && !$fielddefinition instanceof DataObject\ClassDefinition\Data\ManyToManyObjectRelation
             && !$fielddefinition instanceof DataObject\ClassDefinition\Data\AdvancedManyToManyRelation
             && !$fielddefinition instanceof DataObject\ClassDefinition\Data\Block) {
 
@@ -230,6 +229,7 @@ class Objectbricks extends Data implements CustomResourcePersistingInterface
                 $refId = $fielddefinition->getOwnerClassId();
             } else {
                 $refKey = $key;
+                $refId = null;
             }
 
             $relations = $item->getRelationData($refKey, !$fielddefinition->isRemoteOwner(), $refId);
@@ -248,17 +248,14 @@ class Objectbricks extends Data implements CustomResourcePersistingInterface
                 $data = $relations[0];
             } else {
                 foreach ($relations as $rel) {
-                    if ($fielddefinition instanceof DataObject\ClassDefinition\Data\ManyToManyObjectRelation) {
-                        $data[] = ['id' => $rel['id'], 'fullpath' => $rel['path'], 'subtype' => $rel['subtype'], 'published' => ($rel['published'] ? true : false)];
-                    } else {
-                        $data[] = ['id' => $rel['id'], 'fullpath' => $rel['path'],  'type' => $rel['type'], 'subtype' => $rel['subtype'], 'published' => ($rel['published'] ? true : false)];
-                    }
+                    $data[] = ['id' => $rel['id'], 'fullpath' => $rel['path'],  'type' => $rel['type'], 'subtype' => $rel['subtype'], 'published' => ($rel['published'] ? true : false)];
                 }
             }
             $result->objectData = $data;
             $result->metaData['objectid'] = $baseObject->getId();
             $result->metaData['inherited'] = $level != 0;
         } else {
+            $fieldValue = null;
             $editmodeValue = null;
             if (!empty($item)) {
                 $fieldValue = $item->$valueGetter();
@@ -901,10 +898,14 @@ class Objectbricks extends Data implements CustomResourcePersistingInterface
         return $editmodeData;
     }
 
-    /** See parent class.
+    /**
+     * See parent class.
+     *
      * @param $data
      * @param null $object
      * @param mixed $params
+     *
+     * @return mixed
      */
     public function getDiffDataFromEditmode($data, $object = null, $params = [])
     {

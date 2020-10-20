@@ -106,8 +106,6 @@ pimcore.helpers.closeAsset = function (id) {
         var panel = Ext.getCmp(tabId);
         if (panel) {
             panel.close();
-        } else {
-            console.log("to close element not found, doing nothing.");
         }
 
         pimcore.helpers.removeTreeNodeLoadingIndicator("asset", id);
@@ -144,10 +142,7 @@ pimcore.helpers.closeDocument = function (id) {
         var panel = Ext.getCmp(tabId);
         if (panel) {
             panel.close();
-        } else {
-            console.log("to close element not found, doing nothing.");
         }
-
 
         pimcore.helpers.removeTreeNodeLoadingIndicator("document", id);
         pimcore.globalmanager.remove("document_" + id);
@@ -187,8 +182,6 @@ pimcore.helpers.closeObject = function (id) {
         var panel = Ext.getCmp(tabId);
         if (panel) {
             panel.close();
-        } else {
-            console.log("to close element not found, doing nothing.");
         }
 
         pimcore.helpers.removeTreeNodeLoadingIndicator("object", id);
@@ -449,7 +442,9 @@ pimcore.helpers.isValidFilename = function (value) {
 pimcore.helpers.getValidFilenameCache = {};
 
 pimcore.helpers.getValidFilename = function (value, type) {
-
+    
+    value = value.trim();
+    
     if (pimcore.helpers.getValidFilenameCache[value + type]) {
         return pimcore.helpers.getValidFilenameCache[value + type];
     }

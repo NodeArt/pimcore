@@ -232,9 +232,6 @@ pimcore.object.search = Class.create(pimcore.object.helpers.gridTabAbstract, {
 
         var gridColumns = gridHelper.getGridColumns();
 
-        // add filters
-        this.gridfilters = gridHelper.getGridFilters();
-
         this.searchQuery = function(field) {
             this.store.getProxy().setExtraParam("query", field.getValue());
             this.pagingtoolbar.moveFirst();
@@ -315,15 +312,6 @@ pimcore.object.search = Class.create(pimcore.object.helpers.gridTabAbstract, {
             }
         });
 
-        this.searchAndMoveButton = new Ext.Button({
-            text: t("search_and_move"),
-            iconCls: "pimcore_icon_search pimcore_icon_overlay_go",
-            handler: pimcore.helpers.searchAndMove.bind(this, this.object.id,
-                function () {
-                    this.store.reload();
-                }.bind(this), "object")
-        });
-
         var exportButtons = this.getExportButtons();
         var firstButton = exportButtons.pop();
 
@@ -391,7 +379,6 @@ pimcore.object.search = Class.create(pimcore.object.helpers.gridTabAbstract, {
                 this.clearFilterButton, "->",
                 this.checkboxOnlyDirectChildren, "-",
                 this.sqlEditor, this.sqlButton, "-",
-                this.searchAndMoveButton, "-",
                 this.exportButton, "-",
                 this.columnConfigButton,
                 this.saveColumnConfigButton

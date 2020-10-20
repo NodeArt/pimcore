@@ -342,6 +342,8 @@ class AssetController extends ElementControllerBase implements EventedController
             $sourcePath = PIMCORE_SYSTEM_TEMP_DIRECTORY . '/upload-base64' . uniqid() . '.tmp';
             $data = preg_replace('@^data:[^,]+;base64,@', '', $request->get('data'));
             File::put($sourcePath, base64_decode($data));
+        } else {
+            throw new \Exception('The filename of the asset is empty');
         }
 
         $parentId = $request->get('parentId');
@@ -361,6 +363,7 @@ class AssetController extends ElementControllerBase implements EventedController
             }
 
             $maxRetries = 5;
+            $newParent = null;
             for ($retries = 0; $retries < $maxRetries; $retries++) {
                 try {
                     $newParent = Asset\Service::createFolderByPath($newPath);
@@ -375,7 +378,9 @@ class AssetController extends ElementControllerBase implements EventedController
                     }
                 }
             }
-            $parentId = $newParent->getId();
+            if ($newParent) {
+                $parentId = $newParent->getId();
+            }
         } elseif (!$request->get('parentId') && $parentPath) {
             $parent = Asset::getByPath($parentPath);
             if ($parent instanceof Asset\Folder) {
@@ -406,6 +411,7 @@ class AssetController extends ElementControllerBase implements EventedController
 
         // check for duplicate filename
         $filename = $this->getSafeFilename($parentAsset->getRealFullPath(), $filename);
+        $asset = null;
 
         if ($parentAsset->isAllowed('create')) {
             if (is_file($sourcePath) && filesize($sourcePath) < 1) {
@@ -1239,6 +1245,8 @@ class AssetController extends ElementControllerBase implements EventedController
             $video = Asset::getById(intval($request->get('id')));
         } elseif ($request->get('path')) {
             $video = Asset::getByPath($request->get('path'));
+        } else {
+            throw new \Exception('could not load video asset');
         }
 
         if (!$video->isAllowed('view')) {
@@ -1368,20 +1376,23 @@ class AssetController extends ElementControllerBase implements EventedController
 
     /**
      * @param Asset $asset
+     *
+     * @return string|null
      */
     protected function getDocumentPreviewPdf(Asset $asset)
     {
         $pdfFsPath = null;
-        if ($asset->getPageCount()) {
-            if ($asset->getMimetype() == 'application/pdf') {
-                $pdfFsPath = $asset->getFileSystemPath();
-            } elseif (\Pimcore\Document::isAvailable() && \Pimcore\Document::isFileTypeSupported($asset->getFilename())) {
-                try {
-                    $document = \Pimcore\Document::getInstance();
-                    $pdfFsPath = $document->getPdf($asset->getFileSystemPath());
-                } catch (\Exception $e) {
-                    // nothing to do
-                }
+
+        if ($asset->getMimetype() == 'application/pdf') {
+            $pdfFsPath = $asset->getFileSystemPath();
+        }
+
+        if (!$pdfFsPath && $asset->getPageCount() && \Pimcore\Document::isAvailable() && \Pimcore\Document::isFileTypeSupported($asset->getFilename())) {
+            try {
+                $document = \Pimcore\Document::getInstance();
+                $pdfFsPath = $document->getPdf($asset->getFileSystemPath());
+            } catch (\Exception $e) {
+                // nothing to do
             }
         }
 
@@ -1582,7 +1593,7 @@ class AssetController extends ElementControllerBase implements EventedController
                         'type' => $asset->getType(),
                         'filename' => $asset->getFilename(),
                         'filenameDisplay' => htmlspecialchars($filenameDisplay),
-                        'url' => '/admin/asset/get-' . $asset->getType() . '-thumbnail?id=' . $asset->getId() . '&treepreview=true',
+                        'url' => '/admin/asset/get-' . $asset->getType() . '-thumbnail?id=' . $asset->getId() . '&treepreview=true&grid=true',
                         'idPath' => $data['idPath'] = Element\Service::getIdPath($asset)
                     ];
                 }
@@ -2246,7 +2257,7 @@ class AssetController extends ElementControllerBase implements EventedController
                     foreach ($data as $key => $value) {
                         $fieldDef = explode('~', $key);
                         $key = $fieldDef[0];
-                        if ($fieldDef[1]) {
+                        if (isset($fieldDef[1])) {
                             $language = ($fieldDef[1] == 'none' ? '' : $fieldDef[1]);
                         }
 
@@ -2348,6 +2359,7 @@ class AssetController extends ElementControllerBase implements EventedController
         }
 
         $page = $request->get('page');
+        $text = null;
         if ($asset instanceof Asset\Document) {
             $text = $asset->getText($page);
         }

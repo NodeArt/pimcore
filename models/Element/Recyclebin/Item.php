@@ -17,12 +17,14 @@
 
 namespace Pimcore\Model\Element\Recyclebin;
 
+use DeepCopy\DeepCopy;
 use Pimcore\Cache;
 use Pimcore\File;
 use Pimcore\Logger;
 use Pimcore\Model;
 use Pimcore\Model\Asset;
 use Pimcore\Model\DataObject;
+use Pimcore\Model\DataObject\AbstractObject;
 use Pimcore\Model\Document;
 use Pimcore\Model\Element;
 use Pimcore\Tool\Serialize;
@@ -138,7 +140,7 @@ class Item extends Model\AbstractModel
             $className = get_class($element);
             $dummy = \Pimcore::getContainer()->get('pimcore.model.factory')->build($className);
             $dummy->setId($element->getId());
-            $dummy->setPath($element->getPath());
+            $dummy->setParentId($element->getParentId() ?: 1);
             $dummy->setKey($element->getKey());
             if ($element instanceof DataObject\Concrete) {
                 $dummy->setOmitMandatoryCheck(true);
@@ -155,7 +157,12 @@ class Item extends Model\AbstractModel
         }
 
         try {
-            $this->restoreChilds($element);
+            $isDirtyDetectionDisabled = AbstractObject::isDirtyDetectionDisabled();
+            AbstractObject::disableDirtyDetection();
+
+            $this->doRecursiveRestore($element);
+
+            AbstractObject::setDisableDirtyDetection($isDirtyDetectionDisabled);
         } catch (\Exception $e) {
             Logger::error($e);
             if ($dummy) {
@@ -163,6 +170,7 @@ class Item extends Model\AbstractModel
             }
             throw $e;
         }
+
         $this->delete();
     }
 
@@ -187,7 +195,14 @@ class Item extends Model\AbstractModel
 
         // serialize data
         Element\Service::loadAllFields($this->element);
-        $data = Serialize::serialize($this->getElement());
+
+        //for full dump of relation fields in container types
+        //TODO: optimization required for serializing relations
+        $copier = new DeepCopy();
+        $copier->addFilter(new Model\Version\SetDumpStateFilter(true), new \DeepCopy\Matcher\PropertyMatcher(Element\ElementDumpStateInterface::class, Element\ElementDumpStateInterface::DUMP_STATE_PROPERTY_NAME));
+        $copiedData = $copier->copy($this->getElement());
+
+        $data = Serialize::serialize($copiedData);
 
         $this->getDao()->save();
 
@@ -276,7 +291,7 @@ class Item extends Model\AbstractModel
      *
      * @throws \Exception
      */
-    public function restoreChilds(Element\ElementInterface $element)
+    protected function doRecursiveRestore(Element\ElementInterface $element)
     {
         $restoreBinaryData = function ($element, $scope) {
             // assets are kinda special because they can contain massive amount of binary data which isn't serialized, we create separate files for them
@@ -299,15 +314,16 @@ class Item extends Model\AbstractModel
 
         if (method_exists($element, 'getChildren')) {
             if ($element instanceof DataObject\AbstractObject) {
-                $childs = $element->getChildren([], true);
+                $children = $element->getChildren([], true);
             } elseif ($element instanceof Document) {
-                $childs = $element->getChildren(true);
+                $children = $element->getChildren(true);
             } else {
-                $childs = $element->getChildren();
+                $children = $element->getChildren();
             }
-            if (is_array($childs)) {
-                foreach ($childs as $child) {
-                    $this->restoreChilds($child);
+            if (is_array($children)) {
+                foreach ($children as $child) {
+                    $child->setParentId($element->getId());
+                    $this->doRecursiveRestore($child);
                 }
             }
         }
